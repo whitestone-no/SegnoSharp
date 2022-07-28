@@ -43,6 +43,11 @@ namespace BassService
                 _log.LogCritical("Could not load bassmix.dll from {0}", libraryPath);
             }
 
+            if (!_bassWrapper.BassLoadFlac(libraryPath))
+            {
+                _log.LogCritical("Could not load bassflac.dll from {0}", libraryPath);
+            }
+
             if (!_bassWrapper.Initialize(0, 44100, (int) BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
             {
                 _log.LogCritical("Could not initialize BASS.NET: {0}", _bassWrapper.GetLastBassError());

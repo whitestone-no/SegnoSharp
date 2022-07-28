@@ -19,6 +19,9 @@
     <None Include="..\lib\BASS\linux\libbassmix.so" Visible="true" Link="libbassmix.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\lib\BASS\linux\libbassflac.so" Visible="true" Link="libbassflac.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +29,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\lib\BASS\windows\bassmix.dll" Visible="true" Link="basslibwin\bassmix.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\lib\BASS\windows\bassflac.dll" Visible="true" Link="basslibwin\bassflac.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

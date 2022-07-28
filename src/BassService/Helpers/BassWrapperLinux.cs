@@ -30,6 +30,12 @@ namespace BassService.Helpers
             //return BassNetLinux::Un4seen.Bass.AddOn.Mix.BassMix.
         }
 
+        public bool BassLoadFlac(string folder)
+        {
+            return true;
+            //return BassNetLinux::Un4seen.Bass.AddOn.Flac.BassFlac
+        }
+
         public Models.Bass.BASSError GetLastBassError()
         {
             return Enum.TryParse(BassNetLinux::Un4seen.Bass.Bass.BASS_ErrorGetCode().ToString(), out Models.Bass.BASSError outValue) ? outValue : Models.Bass.BASSError.BASS_ERROR_UNKNOWN;

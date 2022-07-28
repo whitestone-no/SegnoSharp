@@ -8,6 +8,7 @@ namespace BassService.Interfaces
         bool Initialize(int device, int frequency, int flags, IntPtr win);
         bool BassLoad(string folder);
         bool BassLoadMixer(string folder);
+        bool BassLoadFlac(string folder);
         Models.Bass.BASSError GetLastBassError();
         Version GetBassVersion();
         Version GetBassMixerVersion();
