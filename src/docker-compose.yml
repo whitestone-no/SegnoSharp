@@ -1,0 +1,14 @@
+services:
+  wasp:
+    build:
+      context: .
+      dockerfile: WASP/Dockerfile
+    image: wasp:latest
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - "../data:/var/wasp"
+    env_file: .env
+    environment:
+      WASP_DataPath: /var/wasp

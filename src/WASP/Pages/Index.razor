@@ -1,0 +1,68 @@
+﻿@page "/"
+@inject IBassWrapper BassWrapper
+@inject IOptions<BassRegistration> BassRegistration
+@using System.Runtime.InteropServices
+@using BassService.Interfaces
+@using BassService.Models.Config
+@using Microsoft.Extensions.Options
+
+<h1>WASP</h1>
+
+<div>
+    Welcome to Whitestone Audio Streaming Project
+</div>
+<div>
+    FrameworkDescription: @RuntimeInformation.FrameworkDescription<br />
+    OSDescription: @RuntimeInformation.OSDescription<br />
+    ProcessArchitecture: @RuntimeInformation.ProcessArchitecture<br />
+    OSArchitecture: @RuntimeInformation.OSArchitecture<br />
+</div>
+<div>
+    @if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+    {
+        <span>FreeBSD</span>
+    }
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+    {
+        <span>Linux</span>
+    }
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+    {
+        <span>OSX</span>
+    }
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    {
+        <span>Windows</span>
+    }
+</div>
+<div>
+    <h2>BASS Information</h2>
+    <div>
+        <h3>Registration</h3>
+        <div>
+            Email: @BassRegistration.Value.Email<br/>
+            Key: @BassRegistration.Value.Key
+        </div>
+    </div>
+    <div>
+        <h3>Components</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Component</th>
+                <th>Version</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>BASS</td>
+                <td>@BassWrapper.GetBassVersion()</td>
+            </tr>
+            <tr>
+                <td>BASS Mixer</td>
+                <td>@BassWrapper.GetBassMixerVersion()</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
