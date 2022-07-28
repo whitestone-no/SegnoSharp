@@ -53,8 +53,8 @@ namespace BassService
                 _log.LogCritical("Could not initialize BASS.NET: {0}", _bassWrapper.GetLastBassError());
             }
 
-            _log.LogInformation("BASS Version: {0:X8}", _bassWrapper.GetBassVersion());
-            _log.LogInformation("BASS Mixer Version: {0:X8}", _bassWrapper.GetBassMixerVersion());
+            _log.LogInformation("BASS Version: {0}", _bassWrapper.GetBassVersion());
+            _log.LogInformation("BASS Mixer Version: {0}", _bassWrapper.GetBassMixerVersion());
 
             return Task.CompletedTask;
         }
