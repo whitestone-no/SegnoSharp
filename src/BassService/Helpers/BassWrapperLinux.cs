@@ -18,6 +18,11 @@ namespace BassService.Helpers
             return BassNetLinux::Un4seen.Bass.Bass.BASS_Init(device, frequency, (BassNetLinux::Un4seen.Bass.BASSInit) flags, win);
         }
 
+        public bool Uninitialize()
+        {
+            return BassNetLinux::Un4seen.Bass.Bass.BASS_Free();
+        }
+
         public bool BassLoad(string folder)
         {
             return true;

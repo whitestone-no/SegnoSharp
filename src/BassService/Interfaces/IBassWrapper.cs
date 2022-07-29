@@ -6,6 +6,7 @@ namespace BassService.Interfaces
     {
         void Registration(string email, string key);
         bool Initialize(int device, int frequency, int flags, IntPtr win);
+        bool Uninitialize();
         bool BassLoad(string folder);
         bool BassLoadMixer(string folder);
         bool BassLoadFlac(string folder);

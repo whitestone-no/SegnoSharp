@@ -14,7 +14,12 @@ namespace BassService.Helpers
 
         public bool Initialize(int device, int frequency, int flags, IntPtr win)
         {
-            return BassNetWindows::Un4seen.Bass.Bass.BASS_Init(device, frequency, (BassNetWindows::Un4seen.Bass.BASSInit) flags, win);
+            return BassNetWindows::Un4seen.Bass.Bass.BASS_Init(device, frequency, (BassNetWindows::Un4seen.Bass.BASSInit)flags, win);
+        }
+
+        public bool Uninitialize()
+        {
+            return BassNetWindows::Un4seen.Bass.Bass.BASS_Free();
         }
 
         public bool BassLoad(string folder)

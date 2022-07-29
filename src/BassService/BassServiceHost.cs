@@ -30,11 +30,21 @@ namespace BassService
         {
             LoadAssemblies();
 
+            if (!_bassWrapper.Initialize(0, 44100, (int)BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
+            {
+                _log.LogCritical("Could not initialize BASS.NET: {0}", _bassWrapper.GetLastBassError());
+            }
+
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            if (!_bassWrapper.Uninitialize())
+            {
+                _log.LogError("Could not free BASS.NET resources: {0}", _bassWrapper.GetLastBassError());
+            }
+
             UnloadAssemblies();
 
             return Task.CompletedTask;
@@ -69,11 +79,6 @@ namespace BassService
             if (!_bassWrapper.BassLoadFlac(libraryPath))
             {
                 _log.LogCritical("Could not load bassflac.dll from {0}", libraryPath);
-            }
-
-            if (!_bassWrapper.Initialize(0, 44100, (int)BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
-            {
-                _log.LogCritical("Could not initialize BASS.NET: {0}", _bassWrapper.GetLastBassError());
             }
 
             _log.LogInformation("BASS Version: {0}", _bassWrapper.GetBassVersion());
