@@ -24,5 +24,7 @@ namespace BassService.Interfaces
         Version GetBassVersion();
         Version GetBassEncVersion();
         Version GetBassMixerVersion();
+        bool Play(int handle, bool restart);
+        bool Stop(int handle);
     }
 }

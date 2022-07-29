@@ -34,11 +34,13 @@ namespace BassService
         {
             LoadAssemblies();
 
+            // Initialize BASS
             if (!_bassWrapper.Initialize(0, 44100, (int)BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
             {
                 _log.LogCritical("Could not initialize BASS.NET: {0}", _bassWrapper.GetLastBassError());
             }
 
+            // Initialize BASS Mixer
             _mixer = _bassWrapper.CreateMixerStream(44100, 2, (int)(BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_MIXER_NONSTOP));
             if (_mixer == 0)
             {
@@ -51,16 +53,30 @@ namespace BassService
                 _log.LogError("Failed to attach 'stall' event handler: {0}", _bassWrapper.GetLastBassError());
             }
 
+            // Start playback of BASS Mixer
+            if (!_bassWrapper.Play(_mixer, false))
+            {
+                _log.LogError("Failed to play mixer: {0}", _bassWrapper.GetLastBassError());
+            }
+
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            // Stop playback of BASS Mixer
+            if (!_bassWrapper.Stop(_mixer))
+            {
+                _log.LogError("Could not stop mixer: {0}", _bassWrapper.GetLastBassError());
+            }
+
+            // Uninitialize BASS Mixer
             if (!_bassWrapper.FreeStream(_mixer))
             {
                 _log.LogError("Failed to free mixer: {0}", _bassWrapper.GetLastBassError());
             }
 
+            // Uninitialize BASS
             if (!_bassWrapper.Uninitialize())
             {
                 _log.LogError("Could not free BASS.NET resources: {0}", _bassWrapper.GetLastBassError());

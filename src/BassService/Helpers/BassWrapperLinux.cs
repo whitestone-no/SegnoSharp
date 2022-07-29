@@ -118,5 +118,15 @@ namespace BassService.Helpers
         {
             return BassNetLinux::Un4seen.Bass.AddOn.Mix.BassMix.BASS_Mixer_GetVersion(4);
         }
+
+        public bool Play(int handle, bool restart)
+        {
+            return BassNetLinux::Un4seen.Bass.Bass.BASS_ChannelPlay(handle, restart);
+        }
+
+        public bool Stop(int handle)
+        {
+            return BassNetLinux::Un4seen.Bass.Bass.BASS_ChannelStop(handle);
+        }
     }
 }
