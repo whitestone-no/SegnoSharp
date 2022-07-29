@@ -53,6 +53,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Playlist\Playlist.csproj" />
   </ItemGroup>
 
   <ItemGroup>

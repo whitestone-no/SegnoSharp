@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using BassNetWindows::Un4seen.Bass;
 using Whitestone.WASP.Common.Events;
 using Whitestone.Cambion.Interfaces;
+using Whitestone.WASP.Playlist.Interfaces;
 using SYNCPROC = Whitestone.WASP.BassService.Models.Bass.SYNCPROC;
 
 namespace Whitestone.WASP.BassService
@@ -20,15 +21,21 @@ namespace Whitestone.WASP.BassService
     {
         private readonly IBassWrapper _bassWrapper;
         private readonly ICambion _cambion;
+        private readonly IPlaylistHandler _playlistHandler;
         private readonly ILogger<BassServiceHost> _log;
 
         private int _mixer;
         private SYNCPROC _mixerStallSync;
 
-        public BassServiceHost(IBassWrapper bassWrapper, IOptions<BassRegistration> bassRegistration, ICambion cambion, ILogger<BassServiceHost> log)
+        public BassServiceHost(IBassWrapper bassWrapper,
+            IOptions<BassRegistration> bassRegistration,
+            ICambion cambion,
+            IPlaylistHandler playlistHandler,
+            ILogger<BassServiceHost> log)
         {
             _bassWrapper = bassWrapper;
             _cambion = cambion;
+            _playlistHandler = playlistHandler;
             _log = log;
 
             _cambion.Register(this);

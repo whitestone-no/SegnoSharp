@@ -2,6 +2,7 @@
 using Serilog;
 using Whitestone.Cambion.Extensions;
 using Whitestone.Cambion.Serializer.MessagePack;
+using Whitestone.WASP.Playlist.Extensions;
 
 namespace Whitestone.WASP
 {
@@ -20,6 +21,7 @@ namespace Whitestone.WASP
             services.AddServerSideBlazor();
             services.AddCambion()
                 .UseMessagePackSerializer();
+            services.AddPlaylistHandler(_configuration);
             services.AddBassService(_configuration);
         }
 
