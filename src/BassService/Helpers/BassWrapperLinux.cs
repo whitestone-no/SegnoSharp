@@ -48,6 +48,36 @@ namespace BassService.Helpers
             //return BassNetLinux::Un4seen.Bass.AddOn.Flac.BassFlac
         }
 
+        public bool BassUnload()
+        {
+            return true;
+            //return BassNetLinux::Un4seen.Bass.Bass.FreeMe();
+        }
+
+        public bool BassUnloadEnc()
+        {
+            return true;
+            //return BassNetLinux::Un4seen.Bass.AddOn.Enc.BassEnc.FreeMe();
+        }
+
+        public bool BassUnloadEncMp3()
+        {
+            return true;
+            //return BassNetLinux::Un4seen.Bass.AddOn.EncMp3.BassEnc_Mp3.FreeMe();
+        }
+
+        public bool BassUnloadMixer()
+        {
+            return true;
+            //return BassNetLinux::Un4seen.Bass.AddOn.Mix.BassMix.FreeMe();
+        }
+
+        public bool BassUnloadFlac()
+        {
+            return true;
+            //return BassNetLinux::Un4seen.Bass.AddOn.Flac.BassFlac.FreeMe();
+        }
+
         public Models.Bass.BASSError GetLastBassError()
         {
             return Enum.TryParse(BassNetLinux::Un4seen.Bass.Bass.BASS_ErrorGetCode().ToString(), out Models.Bass.BASSError outValue) ? outValue : Models.Bass.BASSError.BASS_ERROR_UNKNOWN;

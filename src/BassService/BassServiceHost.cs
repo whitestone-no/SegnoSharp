@@ -35,6 +35,8 @@ namespace BassService
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            UnloadAssemblies();
+
             return Task.CompletedTask;
         }
 
@@ -77,7 +79,17 @@ namespace BassService
             _log.LogInformation("BASS Version: {0}", _bassWrapper.GetBassVersion());
             _log.LogInformation("BASS Enc Version: {0}", _bassWrapper.GetBassEncVersion());
             _log.LogInformation("BASS Mixer Version: {0}", _bassWrapper.GetBassMixerVersion());
+        }
 
+        private void UnloadAssemblies()
+        {
+            // Unload the BASS DLLs in the reverse order than they were loaded in.
+            // No need to ensure unload with an if as they will always be unloaded when the application ends.
+            _bassWrapper.BassUnloadFlac();
+            _bassWrapper.BassUnloadMixer();
+            _bassWrapper.BassUnloadEncMp3();
+            _bassWrapper.BassUnloadEnc();
+            _bassWrapper.BassUnload();
         }
     }
 }

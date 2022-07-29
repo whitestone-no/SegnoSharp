@@ -42,6 +42,31 @@ namespace BassService.Helpers
             return BassNetWindows::Un4seen.Bass.AddOn.Flac.BassFlac.LoadMe(folder);
         }
 
+        public bool BassUnload()
+        {
+            return BassNetWindows::Un4seen.Bass.Bass.FreeMe();
+        }
+
+        public bool BassUnloadEnc()
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.Enc.BassEnc.FreeMe();
+        }
+
+        public bool BassUnloadEncMp3()
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.EncMp3.BassEnc_Mp3.FreeMe();
+        }
+
+        public bool BassUnloadMixer()
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.Mix.BassMix.FreeMe();
+        }
+
+        public bool BassUnloadFlac()
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.Flac.BassFlac.FreeMe();
+        }
+        
         public Models.Bass.BASSError GetLastBassError()
         {
             return Enum.TryParse(BassNetWindows::Un4seen.Bass.Bass.BASS_ErrorGetCode().ToString(), out Models.Bass.BASSError outValue) ? outValue : Models.Bass.BASSError.BASS_ERROR_UNKNOWN;
