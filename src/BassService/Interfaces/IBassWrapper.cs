@@ -9,6 +9,7 @@ namespace BassService.Interfaces
         bool Uninitialize();
         int CreateMixerStream(int frequency, int noOfChannels, int flags);
         bool FreeStream(int handle);
+        int AddSynchronizer(int handle, int type, long param, Models.Bass.SYNCPROC proc, IntPtr user);
         bool BassLoad(string folder);
         bool BassLoadMixer(string folder);
         bool BassLoadFlac(string folder);

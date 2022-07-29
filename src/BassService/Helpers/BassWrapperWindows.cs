@@ -32,6 +32,11 @@ namespace BassService.Helpers
             return BassNetWindows::Un4seen.Bass.Bass.BASS_StreamFree(handle);
         }
 
+        public int AddSynchronizer(int handle, int type, long param, Models.Bass.SYNCPROC proc, IntPtr user)
+        {
+            return BassNetWindows::Un4seen.Bass.Bass.BASS_ChannelSetSync(handle, (BassNetWindows::Un4seen.Bass.BASSSync)type, param, new BassNetWindows::Un4seen.Bass.SYNCPROC(proc), user);
+        }
+
         public bool BassLoad(string folder)
         {
             return BassNetWindows::Un4seen.Bass.Bass.LoadMe(folder);

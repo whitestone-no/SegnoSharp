@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using BassNetWindows::Un4seen.Bass;
+using SYNCPROC = BassService.Models.Bass.SYNCPROC;
 
 namespace BassService
 {
@@ -19,6 +20,7 @@ namespace BassService
         private readonly ILogger<BassServiceHost> _log;
 
         private int _mixer;
+        private SYNCPROC _mixerStallSync;
 
         public BassServiceHost(IBassWrapper bassWrapper, IOptions<BassRegistration> bassRegistration, ILogger<BassServiceHost> log)
         {
@@ -41,6 +43,12 @@ namespace BassService
             if (_mixer == 0)
             {
                 _log.LogError("Failed to create mixer: {0}", _bassWrapper.GetLastBassError());
+            }
+
+            _mixerStallSync = OnMixerStall;
+            if (_bassWrapper.AddSynchronizer(_mixer, (int)BASSSync.BASS_SYNC_STALL, 0L, _mixerStallSync, IntPtr.Zero) == 0)
+            {
+                _log.LogError("Failed to attach 'stall' event handler: {0}", _bassWrapper.GetLastBassError());
             }
 
             return Task.CompletedTask;
@@ -109,5 +117,11 @@ namespace BassService
             _bassWrapper.BassUnloadEnc();
             _bassWrapper.BassUnload();
         }
+
+        private void OnMixerStall(int handle, int channel, int data, IntPtr user)
+        {
+            _log.LogDebug("MIXER STALL CALLED");
+        }
+
     }
 }
