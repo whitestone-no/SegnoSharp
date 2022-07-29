@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using BassNetWindows::Un4seen.Bass;
@@ -28,6 +27,18 @@ namespace BassService
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
+        {
+            LoadAssemblies();
+
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        private void LoadAssemblies()
         {
             string executingFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string libraryPath = Path.Combine(executingFolder ?? Directory.GetCurrentDirectory(), "basslibwin");
@@ -58,7 +69,7 @@ namespace BassService
                 _log.LogCritical("Could not load bassflac.dll from {0}", libraryPath);
             }
 
-            if (!_bassWrapper.Initialize(0, 44100, (int) BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
+            if (!_bassWrapper.Initialize(0, 44100, (int)BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
             {
                 _log.LogCritical("Could not initialize BASS.NET: {0}", _bassWrapper.GetLastBassError());
             }
@@ -67,12 +78,6 @@ namespace BassService
             _log.LogInformation("BASS Enc Version: {0}", _bassWrapper.GetBassEncVersion());
             _log.LogInformation("BASS Mixer Version: {0}", _bassWrapper.GetBassMixerVersion());
 
-            return Task.CompletedTask;
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
         }
     }
 }
