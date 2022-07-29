@@ -16,6 +16,12 @@
     <None Include="..\lib\BASS\linux\libbass.so" Visible="true" Link="libbass.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\lib\BASS\linux\libbassenc.so" Visible="true" Link="libbassenc.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\lib\BASS\linux\libbassenc_mp3.so" Visible="true" Link="libbassenc_mp3.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\lib\BASS\linux\libbassmix.so" Visible="true" Link="libbassmix.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -26,6 +32,12 @@
 
   <ItemGroup>
     <None Include="..\lib\BASS\windows\bass.dll" Visible="true" Link="basslibwin\bass.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\lib\BASS\windows\bassenc.dll" Visible="true" Link="basslibwin\bassenc.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\lib\BASS\windows\bassenc_mp3.dll" Visible="true" Link="basslibwin\bassenc_mp3.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\lib\BASS\windows\bassmix.dll" Visible="true" Link="basslibwin\bassmix.dll">

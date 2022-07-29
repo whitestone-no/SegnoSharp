@@ -38,6 +38,16 @@ namespace BassService
                 _log.LogCritical("Could not load BASS from {0}", libraryPath);
             }
 
+            if (!_bassWrapper.BassLoadEnc(libraryPath))
+            {
+                _log.LogCritical("Could not load bassenc.dll from {0}", libraryPath);
+            }
+
+            if (!_bassWrapper.BassLoadEncMp3(libraryPath))
+            {
+                _log.LogCritical("Could not load bassenc_mp3.dll from {0}", libraryPath);
+            }
+
             if (!_bassWrapper.BassLoadMixer(libraryPath))
             {
                 _log.LogCritical("Could not load bassmix.dll from {0}", libraryPath);
@@ -54,6 +64,7 @@ namespace BassService
             }
 
             _log.LogInformation("BASS Version: {0}", _bassWrapper.GetBassVersion());
+            _log.LogInformation("BASS Enc Version: {0}", _bassWrapper.GetBassEncVersion());
             _log.LogInformation("BASS Mixer Version: {0}", _bassWrapper.GetBassMixerVersion());
 
             return Task.CompletedTask;

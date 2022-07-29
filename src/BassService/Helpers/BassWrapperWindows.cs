@@ -22,6 +22,16 @@ namespace BassService.Helpers
             return BassNetWindows::Un4seen.Bass.Bass.LoadMe(folder);
         }
 
+        public bool BassLoadEnc(string folder)
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.Enc.BassEnc.LoadMe(folder);
+        }
+
+        public bool BassLoadEncMp3(string folder)
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.EncMp3.BassEnc_Mp3.LoadMe(folder);
+        }
+
         public bool BassLoadMixer(string folder)
         {
             return BassNetWindows::Un4seen.Bass.AddOn.Mix.BassMix.LoadMe(folder);
@@ -40,6 +50,11 @@ namespace BassService.Helpers
         public Version GetBassVersion()
         {
             return BassNetWindows::Un4seen.Bass.Bass.BASS_GetVersion(4);
+        }
+
+        public Version GetBassEncVersion()
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.Enc.BassEnc.BASS_Encode_GetVersion(4);
         }
 
         public Version GetBassMixerVersion()

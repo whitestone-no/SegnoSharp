@@ -9,8 +9,11 @@ namespace BassService.Interfaces
         bool BassLoad(string folder);
         bool BassLoadMixer(string folder);
         bool BassLoadFlac(string folder);
+        bool BassLoadEnc(string folder);
+        bool BassLoadEncMp3(string folder);
         Models.Bass.BASSError GetLastBassError();
         Version GetBassVersion();
+        Version GetBassEncVersion();
         Version GetBassMixerVersion();
     }
 }
