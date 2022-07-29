@@ -1,8 +1,5 @@
-﻿using BassService.Models.Config;
-using Serilog;
+﻿using Serilog;
 using Serilog.Events;
-using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace Whitestone.WASP
 {
@@ -35,6 +32,7 @@ namespace Whitestone.WASP
                     {
                         configuration
                             .ReadFrom.Services(services)
+                            .MinimumLevel.Override("Whitestone.WASP", LogEventLevel.Verbose)
                             .Enrich.FromLogContext()
                             .WriteTo.Console()
                             .WriteTo.File(Path.Combine(context.Configuration["DataPath"], "logs", "wasp.log"),

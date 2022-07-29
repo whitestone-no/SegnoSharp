@@ -1,12 +1,12 @@
-﻿using BassService.Helpers;
-using BassService.Interfaces;
-using BassService.Models.Config;
+﻿using Whitestone.WASP.BassService.Helpers;
+using Whitestone.WASP.BassService.Interfaces;
+using Whitestone.WASP.BassService.Models.Config;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Runtime.InteropServices;
 
-namespace BassService.Extensions
+namespace Whitestone.WASP.BassService.Extensions
 {
     public static class ServiceCollectionExtensions
     {

@@ -1,5 +1,7 @@
-﻿using BassService.Extensions;
+﻿using Whitestone.WASP.BassService.Extensions;
 using Serilog;
+using Whitestone.Cambion.Extensions;
+using Whitestone.Cambion.Serializer.MessagePack;
 
 namespace Whitestone.WASP
 {
@@ -16,6 +18,8 @@ namespace Whitestone.WASP
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddCambion()
+                .UseMessagePackSerializer();
             services.AddBassService(_configuration);
         }
 

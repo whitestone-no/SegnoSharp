@@ -1,9 +1,9 @@
 ﻿extern alias BassNetWindows;
 
-using BassService.Interfaces;
+using Whitestone.WASP.BassService.Interfaces;
 using System;
 
-namespace BassService.Helpers
+namespace Whitestone.WASP.BassService.Helpers
 {
     public class BassWrapperWindows : IBassWrapper
     {

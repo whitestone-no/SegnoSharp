@@ -1,7 +1,7 @@
 ﻿extern alias BassNetWindows;
 using System;
-using BassService.Interfaces;
-using BassService.Models.Config;
+using Whitestone.WASP.BassService.Interfaces;
+using Whitestone.WASP.BassService.Models.Config;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,27 +10,33 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using BassNetWindows::Un4seen.Bass;
-using SYNCPROC = BassService.Models.Bass.SYNCPROC;
+using Whitestone.WASP.Common.Events;
+using Whitestone.Cambion.Interfaces;
+using SYNCPROC = Whitestone.WASP.BassService.Models.Bass.SYNCPROC;
 
-namespace BassService
+namespace Whitestone.WASP.BassService
 {
-    public class BassServiceHost : IHostedService
+    public class BassServiceHost : IHostedService, IEventHandler<PlayNextTrack>
     {
         private readonly IBassWrapper _bassWrapper;
+        private readonly ICambion _cambion;
         private readonly ILogger<BassServiceHost> _log;
 
         private int _mixer;
         private SYNCPROC _mixerStallSync;
 
-        public BassServiceHost(IBassWrapper bassWrapper, IOptions<BassRegistration> bassRegistration, ILogger<BassServiceHost> log)
+        public BassServiceHost(IBassWrapper bassWrapper, IOptions<BassRegistration> bassRegistration, ICambion cambion, ILogger<BassServiceHost> log)
         {
             _bassWrapper = bassWrapper;
+            _cambion = cambion;
             _log = log;
+
+            _cambion.Register(this);
 
             _bassWrapper.Registration(bassRegistration.Value.Email, bassRegistration.Value.Key);
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -60,13 +66,14 @@ namespace BassService
                 {
                     _log.LogError("Failed to play mixer: {0}", _bassWrapper.GetLastBassError());
                 }
+
+                // Fire the "Play next track" event to start actual playback
+                await _cambion.PublishEventAsync(new PlayNextTrack());
             }
             catch (Exception e)
             {
                 _log.LogError(e, $"Unknown exception during {nameof(BassServiceHost)} startup");
             }
-
-            return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -153,5 +160,16 @@ namespace BassService
             _log.LogDebug("MIXER STALL CALLED");
         }
 
+        public void HandleEvent(PlayNextTrack input)
+        {
+            try
+            {
+                _log.LogTrace($"{nameof(PlayNextTrack)} event fired.");
+            }
+            catch (Exception e)
+            {
+                _log.LogError(e, $"Unknown error during {nameof(PlayNextTrack)} event in {nameof(BassServiceHost)}");
+            }
+        }
     }
 }

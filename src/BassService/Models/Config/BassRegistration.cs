@@ -1,4 +1,4 @@
-﻿namespace BassService.Models.Config
+﻿namespace Whitestone.WASP.BassService.Models.Config
 {
     public class BassRegistration
     {

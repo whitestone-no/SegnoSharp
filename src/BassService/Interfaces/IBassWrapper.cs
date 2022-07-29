@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BassService.Interfaces
+namespace Whitestone.WASP.BassService.Interfaces
 {
     public interface IBassWrapper
     {

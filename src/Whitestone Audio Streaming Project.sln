@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WASP", "WASP\WASP.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BassService", "BassService\BassService.csproj", "{BDD0E31B-E145-4310-A60F-6252BED6C3FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{500968CD-207E-452A-B4C8-41D20738AC40}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{BDD0E31B-E145-4310-A60F-6252BED6C3FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BDD0E31B-E145-4310-A60F-6252BED6C3FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BDD0E31B-E145-4310-A60F-6252BED6C3FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{500968CD-207E-452A-B4C8-41D20738AC40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{500968CD-207E-452A-B4C8-41D20738AC40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{500968CD-207E-452A-B4C8-41D20738AC40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{500968CD-207E-452A-B4C8-41D20738AC40}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

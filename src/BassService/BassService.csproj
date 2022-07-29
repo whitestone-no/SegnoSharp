@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>disable</Nullable>
+    <AssemblyName>Whitestone.WASP.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>Whitestone.WASP.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+    <PackageReference Include="Whitestone.Cambion" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,6 +49,10 @@
     <None Include="..\lib\BASS\windows\bassflac.dll" Visible="true" Link="basslibwin\bassflac.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
