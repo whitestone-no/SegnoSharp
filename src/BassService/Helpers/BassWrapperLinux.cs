@@ -23,6 +23,16 @@ namespace BassService.Helpers
             return BassNetLinux::Un4seen.Bass.Bass.BASS_Free();
         }
 
+        public int CreateMixerStream(int frequency, int noOfChannels, int flags)
+        {
+            return BassNetLinux::Un4seen.Bass.AddOn.Mix.BassMix.BASS_Mixer_StreamCreate(frequency, noOfChannels, (BassNetLinux::Un4seen.Bass.BASSFlag)flags);
+        }
+
+        public bool FreeStream(int handle)
+        {
+            return BassNetLinux::Un4seen.Bass.Bass.BASS_StreamFree(handle);
+        }
+
         public bool BassLoad(string folder)
         {
             return true;

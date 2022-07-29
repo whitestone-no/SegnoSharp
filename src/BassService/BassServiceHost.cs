@@ -18,6 +18,8 @@ namespace BassService
         private readonly IBassWrapper _bassWrapper;
         private readonly ILogger<BassServiceHost> _log;
 
+        private int _mixer;
+
         public BassServiceHost(IBassWrapper bassWrapper, IOptions<BassRegistration> bassRegistration, ILogger<BassServiceHost> log)
         {
             _bassWrapper = bassWrapper;
@@ -35,11 +37,22 @@ namespace BassService
                 _log.LogCritical("Could not initialize BASS.NET: {0}", _bassWrapper.GetLastBassError());
             }
 
+            _mixer = _bassWrapper.CreateMixerStream(44100, 2, (int)(BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_MIXER_NONSTOP));
+            if (_mixer == 0)
+            {
+                _log.LogError("Failed to create mixer: {0}", _bassWrapper.GetLastBassError());
+            }
+
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            if (!_bassWrapper.FreeStream(_mixer))
+            {
+                _log.LogError("Failed to free mixer: {0}", _bassWrapper.GetLastBassError());
+            }
+
             if (!_bassWrapper.Uninitialize())
             {
                 _log.LogError("Could not free BASS.NET resources: {0}", _bassWrapper.GetLastBassError());

@@ -22,6 +22,16 @@ namespace BassService.Helpers
             return BassNetWindows::Un4seen.Bass.Bass.BASS_Free();
         }
 
+        public int CreateMixerStream(int frequency, int noOfChannels, int flags)
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.Mix.BassMix.BASS_Mixer_StreamCreate(frequency, noOfChannels, (BassNetWindows::Un4seen.Bass.BASSFlag)flags);
+        }
+
+        public bool FreeStream(int handle)
+        {
+            return BassNetWindows::Un4seen.Bass.Bass.BASS_StreamFree(handle);
+        }
+
         public bool BassLoad(string folder)
         {
             return BassNetWindows::Un4seen.Bass.Bass.LoadMe(folder);
