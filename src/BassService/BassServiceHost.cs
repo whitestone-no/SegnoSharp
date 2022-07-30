@@ -175,6 +175,11 @@ namespace Whitestone.WASP.BassService
                 _log.LogTrace($"{nameof(PlayNextTrack)} event fired.");
 
                 Track nextTrack = _playlistHandler.GetNextTrack();
+
+                if (nextTrack == null)
+                {
+                    _log.LogError("No track returned from playlist. Stopping playback.");
+                }
             }
             catch (Exception e)
             {

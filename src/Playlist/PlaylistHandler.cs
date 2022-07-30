@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Whitestone.WASP.Common.Interfaces;
 using Whitestone.WASP.Common.Models;
@@ -40,30 +41,53 @@ namespace Whitestone.WASP.Playlist
                 Title = "Avengers: Age Of Ultron Title",
                 File = "Avengers; Age Of Ultron - Bryan Tyler & Danny Elfman/01 - Avengers; Age Of Ultron Title.flac"
             },
+            new Track
+            {
+                Album = "Non-existing",
+                Artist = "Non-existing",
+                Title = "Non-existing",
+                File = "A file that doesn't exist"
+            }
         };
 
         private readonly ITagReader _tagReader;
+        private readonly ILogger<PlaylistHandler> _log;
         private readonly CommonConfig _commonConfig;
         private readonly Random _randomizer = new Random();
 
-        public PlaylistHandler(ITagReader tagReader, IOptions<CommonConfig> commonConfig)
+        public PlaylistHandler(ITagReader tagReader, IOptions<CommonConfig> commonConfig, ILogger<PlaylistHandler> log)
         {
             _tagReader = tagReader;
+            _log = log;
             _commonConfig = commonConfig.Value;
         }
 
         public Track GetNextTrack()
         {
-            Track track;
+            int noOfAttempts = 3;
+            int attempt = 0;
+
             do
             {
-                int nextIndex = _randomizer.Next(0, 4);
+                int nextIndex = _randomizer.Next(0, _tracks.Count);
 
-                track = _tracks[nextIndex];
+                Track track = _tracks[nextIndex];
                 track.File = Path.Combine(_commonConfig.MusicPath, track.File);
-            } while (!File.Exists(track.File));
 
-            return track;
+                bool fileExists = File.Exists(track.File);
+
+                if (fileExists)
+                {
+                    return track;
+                }
+
+                _log.LogError("File {file} does not exist. Getting another track from playlist.", track.File);
+
+                attempt++;
+
+            } while (attempt < noOfAttempts);
+
+            return null;
         }
     }
 }
