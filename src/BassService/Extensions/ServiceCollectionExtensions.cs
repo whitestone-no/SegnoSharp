@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Runtime.InteropServices;
+using Whitestone.WASP.Common.Interfaces;
 
 namespace Whitestone.WASP.BassService.Extensions
 {
@@ -26,6 +27,8 @@ namespace Whitestone.WASP.BassService.Extensions
             {
                 throw new Exception("Unsupported Operating System");
             }
+
+            services.AddSingleton<ITagReader, TagReader>();
 
             services.AddHostedService<BassServiceHost>();
 

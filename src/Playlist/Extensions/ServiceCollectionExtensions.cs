@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Whitestone.WASP.Playlist.Interfaces;
+using Whitestone.WASP.Common.Interfaces;
 
 namespace Whitestone.WASP.Playlist.Extensions
 {

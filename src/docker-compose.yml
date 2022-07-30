@@ -11,4 +11,4 @@ services:
       - "../data:/var/wasp"
     env_file: .env
     environment:
-      WASP_DataPath: /var/wasp
+      WASP_CommonConfig__DataPath: /var/wasp

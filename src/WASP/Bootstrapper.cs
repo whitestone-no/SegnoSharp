@@ -35,7 +35,7 @@ namespace Whitestone.WASP
                             .MinimumLevel.Override("Whitestone.WASP", LogEventLevel.Verbose)
                             .Enrich.FromLogContext()
                             .WriteTo.Console()
-                            .WriteTo.File(Path.Combine(context.Configuration["DataPath"], "logs", "wasp.log"),
+                            .WriteTo.File(Path.Combine(context.Configuration["CommonConfig:DataPath"], "logs", "wasp.log"),
                                 rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true);
                     });
 

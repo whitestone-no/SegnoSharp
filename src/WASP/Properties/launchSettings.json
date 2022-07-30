@@ -5,7 +5,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "WASP_DataPath": "$(SolutionDir)../data"
+        "WASP_CommonConfig__DataPath": "$(SolutionDir)../data"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
@@ -19,7 +19,7 @@
       "useSSL": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "WASP_DataPath": "/var/wasp"
+        "WASP_CommonConfig__DataPath": "/var/wasp"
       }
     },
     "WSL": {
@@ -28,7 +28,7 @@
       "launchUrl": "https://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "WASP_DataPath": "../../data",
+        "WASP_CommonConfig__DataPath": "../../data",
         "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000"
       },
       "distributionName": ""

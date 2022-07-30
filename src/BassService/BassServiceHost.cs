@@ -12,7 +12,8 @@ using System.Threading.Tasks;
 using BassNetWindows::Un4seen.Bass;
 using Whitestone.WASP.Common.Events;
 using Whitestone.Cambion.Interfaces;
-using Whitestone.WASP.Playlist.Interfaces;
+using Whitestone.WASP.Common.Interfaces;
+using Whitestone.WASP.Common.Models;
 using SYNCPROC = Whitestone.WASP.BassService.Models.Bass.SYNCPROC;
 
 namespace Whitestone.WASP.BassService
@@ -172,6 +173,8 @@ namespace Whitestone.WASP.BassService
             try
             {
                 _log.LogTrace($"{nameof(PlayNextTrack)} event fired.");
+
+                Track nextTrack = _playlistHandler.GetNextTrack();
             }
             catch (Exception e)
             {

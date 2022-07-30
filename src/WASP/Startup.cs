@@ -2,6 +2,7 @@
 using Serilog;
 using Whitestone.Cambion.Extensions;
 using Whitestone.Cambion.Serializer.MessagePack;
+using Whitestone.WASP.Common.Models.Configuration;
 using Whitestone.WASP.Playlist.Extensions;
 
 namespace Whitestone.WASP
@@ -17,6 +18,8 @@ namespace Whitestone.WASP
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<CommonConfig>(_configuration.GetSection(CommonConfig.Section));
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddCambion()
