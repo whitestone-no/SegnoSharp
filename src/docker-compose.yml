@@ -12,3 +12,4 @@ services:
     env_file: .env
     environment:
       WASP_CommonConfig__DataPath: /var/wasp
+      WASP_CommonConfig__MusicPath: /var/music

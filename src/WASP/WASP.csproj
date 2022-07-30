@@ -7,7 +7,7 @@
     <AssemblyName>Whitestone.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>Whitestone.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-	  <DockerfileRunArguments>-v $(SolutionDir)../data:/var/wasp:rw</DockerfileRunArguments>
+	  <DockerfileRunArguments>-v $(SolutionDir)../data:/var/wasp:rw -v $(SolutionDir)../music:/var/music:rw</DockerfileRunArguments>
     <UserSecretsId>ef2b06ee-7634-4a6e-9cce-5ad721a03d65</UserSecretsId>
   </PropertyGroup>
 

@@ -5,7 +5,8 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "WASP_CommonConfig__DataPath": "$(SolutionDir)../data"
+        "WASP_CommonConfig__DataPath": "$(SolutionDir)../data",
+        "WASP_CommonConfig__MusicPath": "$(SolutionDir)../music"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
@@ -19,7 +20,8 @@
       "useSSL": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "WASP_CommonConfig__DataPath": "/var/wasp"
+        "WASP_CommonConfig__DataPath": "/var/wasp",
+        "WASP_CommonConfig__MusicPath": "/var/music"
       }
     },
     "WSL": {
@@ -29,6 +31,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "WASP_CommonConfig__DataPath": "../../data",
+        "WASP_CommonConfig__MusicPath": "../../music",
         "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000"
       },
       "distributionName": ""
