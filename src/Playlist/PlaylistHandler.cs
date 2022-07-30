@@ -18,7 +18,7 @@ namespace Whitestone.WASP.Playlist
                 Album = "Lord of the Rings, The: The Return of the King (The Complete Recordings)",
                 Artist = "Howard Shore",
                 Title = "The Mûmakil",
-                File = "Lord of the Rings, The; The Return of the King (The Complete Recordings) - Howard Shore/CD3/06 - The Mûmakil.flac"
+                File = "Lord of the Rings, The; The Return of the King (The Complete Recordings) - Howard Shore/CD3/06 - The Mumakil.flac"
             },
             new Track
             {
@@ -40,13 +40,6 @@ namespace Whitestone.WASP.Playlist
                 Artist = "Bryan Tyler",
                 Title = "Avengers: Age Of Ultron Title",
                 File = "Avengers; Age Of Ultron - Bryan Tyler & Danny Elfman/01 - Avengers; Age Of Ultron Title.flac"
-            },
-            new Track
-            {
-                Album = "Non-existing",
-                Artist = "Non-existing",
-                Title = "Non-existing",
-                File = "A file that doesn't exist"
             }
         };
 

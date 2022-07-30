@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using BassNetWindows::Un4seen.Bass;
 using Whitestone.WASP.Common.Events;
 using Whitestone.Cambion.Interfaces;
+using Whitestone.WASP.BassService.Models;
 using Whitestone.WASP.Common.Interfaces;
 using Whitestone.WASP.Common.Models;
 using SYNCPROC = Whitestone.WASP.BassService.Models.Bass.SYNCPROC;
@@ -27,6 +28,7 @@ namespace Whitestone.WASP.BassService
 
         private int _mixer;
         private SYNCPROC _mixerStallSync;
+        private TrackExt _currentlyPlayingTrack;
 
         public BassServiceHost(IBassWrapper bassWrapper,
             IOptions<BassRegistration> bassRegistration,
@@ -172,19 +174,69 @@ namespace Whitestone.WASP.BassService
         {
             try
             {
-                _log.LogTrace($"{nameof(PlayNextTrack)} event fired.");
+                _log.LogTrace("{event} event fired.", nameof(PlayNextTrack));
 
                 Track nextTrack = _playlistHandler.GetNextTrack();
 
                 if (nextTrack == null)
                 {
-                    _log.LogError("No track returned from playlist. Stopping playback.");
+                    _log.LogError("No track returned from playlist. Do nothing and let the current track play out.");
+                    return;
                 }
+
+                TrackExt track = new TrackExt(nextTrack);
+
+                track.ChannelHandle = _bassWrapper.CreateFileStream(track.File, 0L, 0L, (int)(BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE));
+
+                if (track.ChannelHandle == 0)
+                {
+                    _log.LogError("Could not create stream from {0}: {1}", track.File, _bassWrapper.GetLastBassError());
+                    return;
+                }
+
+                if (_currentlyPlayingTrack != null)
+                {
+                    // Stop previous track (with 1 second fadeout)
+                    _bassWrapper.SlideAttribute(_currentlyPlayingTrack.ChannelHandle, (int)BASSAttribute.BASS_ATTRIB_VOL, -1f, 1000);
+
+                    if (!_bassWrapper.MixerRemoveSynchronizer(_currentlyPlayingTrack.ChannelHandle, _currentlyPlayingTrack.SyncHandle))
+                    {
+                        _log.LogError("Could not remove sync from channel: {0}", _bassWrapper.GetLastBassError());
+                    }
+                }
+
+                if (!_bassWrapper.MixerAddStream(_mixer, track.ChannelHandle, (int)(BASSFlag.BASS_MIXER_PAUSE | BASSFlag.BASS_MIXER_DOWNMIX | BASSFlag.BASS_STREAM_AUTOFREE)))
+                {
+                    _log.LogError("Failed to add channel to mixer: {0}", _bassWrapper.GetLastBassError());
+                }
+
+                track.Sync = OnTrackSync;
+                track.SyncHandle = _bassWrapper.MixerAddSynchronizer(track.ChannelHandle, (int)BASSSync.BASS_SYNC_END, 0L, track.Sync, new IntPtr(0));
+                if (track.SyncHandle == 0)
+                {
+                    _log.LogError("Could not set sync to channel: {0}", _bassWrapper.GetLastBassError());
+                }
+
+                if (!_bassWrapper.MixerPlay(track.ChannelHandle))
+                {
+                    _log.LogError("Failed to play channel: {0}", _bassWrapper.GetLastBassError());
+                }
+
+                _log.LogDebug("Started playing {0}", track.File);
+
+                _currentlyPlayingTrack = track;
             }
             catch (Exception e)
             {
                 _log.LogError(e, $"Unknown error during {nameof(PlayNextTrack)} event in {nameof(BassServiceHost)}");
             }
+        }
+
+        private void OnTrackSync(int handle, int channel, int data, IntPtr user)
+        {
+            _log.LogDebug("Track complete. Playing next track.");
+
+            _cambion.PublishEventAsync(new PlayNextTrack());
         }
     }
 }

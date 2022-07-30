@@ -27,6 +27,18 @@ namespace Whitestone.WASP.BassService.Helpers
             return BassNetWindows::Un4seen.Bass.AddOn.Mix.BassMix.BASS_Mixer_StreamCreate(frequency, noOfChannels, (BassNetWindows::Un4seen.Bass.BASSFlag)flags);
         }
 
+        public int CreateFileStream(string file, long offset, long length, int flags)
+        {
+            //return BassNetWindows::Un4seen.Bass.Bass.BASS_StreamCreateFile(file, offset, length, (BassNetWindows::Un4seen.Bass.BASSFlag)flags);
+
+            return BassNetWindows::Un4seen.Bass.AddOn.Flac.BassFlac.BASS_FLAC_StreamCreateFile(file, offset, length, (BassNetWindows::Un4seen.Bass.BASSFlag)flags);
+        }
+
+        public bool MixerAddStream(int mixerHandle, int streamHandle, int flags)
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.Mix.BassMix.BASS_Mixer_StreamAddChannel(mixerHandle, streamHandle, (BassNetWindows::Un4seen.Bass.BASSFlag)flags);
+        }
+
         public bool FreeStream(int handle)
         {
             return BassNetWindows::Un4seen.Bass.Bass.BASS_StreamFree(handle);
@@ -35,6 +47,16 @@ namespace Whitestone.WASP.BassService.Helpers
         public int AddSynchronizer(int handle, int type, long param, Models.Bass.SYNCPROC proc, IntPtr user)
         {
             return BassNetWindows::Un4seen.Bass.Bass.BASS_ChannelSetSync(handle, (BassNetWindows::Un4seen.Bass.BASSSync)type, param, new BassNetWindows::Un4seen.Bass.SYNCPROC(proc), user);
+        }
+
+        public int MixerAddSynchronizer(int handle, int type, long param, Models.Bass.SYNCPROC proc, IntPtr user)
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.Mix.BassMix.BASS_Mixer_ChannelSetSync(handle, (BassNetWindows::Un4seen.Bass.BASSSync)type, param, new BassNetWindows::Un4seen.Bass.SYNCPROC(proc), user);
+        }
+
+        public bool MixerRemoveSynchronizer(int handle, int sync)
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.Mix.BassMix.BASS_Mixer_ChannelRemoveSync(handle, sync);
         }
 
         public bool BassLoad(string folder)
@@ -112,9 +134,19 @@ namespace Whitestone.WASP.BassService.Helpers
             return BassNetWindows::Un4seen.Bass.Bass.BASS_ChannelPlay(handle, restart);
         }
 
+        public bool MixerPlay(int streamHandle)
+        {
+            return BassNetWindows::Un4seen.Bass.AddOn.Mix.BassMix.BASS_Mixer_ChannelPlay(streamHandle);
+        }
+
         public bool Stop(int handle)
         {
             return BassNetWindows::Un4seen.Bass.Bass.BASS_ChannelStop(handle);
+        }
+
+        public bool SlideAttribute(int handle, int attribute, float value, int time)
+        {
+            return BassNetWindows::Un4seen.Bass.Bass.BASS_ChannelSlideAttribute(handle, (BassNetWindows::Un4seen.Bass.BASSAttribute)attribute, value, time);
         }
     }
 }
