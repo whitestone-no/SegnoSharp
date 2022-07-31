@@ -19,7 +19,7 @@ using SYNCPROC = Whitestone.WASP.BassService.Models.Bass.SYNCPROC;
 
 namespace Whitestone.WASP.BassService
 {
-    public class BassServiceHost : IHostedService, IEventHandler<PlayNextTrack>
+    public class BassServiceHost : IHostedService, IEventHandler<PlayNextTrack>, IEventHandler<StartStreaming>, IEventHandler<StopStreaming>
     {
         private readonly IBassWrapper _bassWrapper;
         private readonly ICambion _cambion;
@@ -237,6 +237,14 @@ namespace Whitestone.WASP.BassService
             _log.LogDebug("Track complete. Playing next track.");
 
             _cambion.PublishEventAsync(new PlayNextTrack());
+        }
+
+        public void HandleEvent(StartStreaming input)
+        {
+        }
+
+        public void HandleEvent(StopStreaming input)
+        {
         }
     }
 }
