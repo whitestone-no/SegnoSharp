@@ -9,6 +9,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+// Make sure to only use enums from BassNetWindows::Un4seen.Bass;
 using BassNetWindows::Un4seen.Bass;
 using Whitestone.WASP.Common.Events;
 using Whitestone.Cambion.Interfaces;
@@ -59,7 +60,7 @@ namespace Whitestone.WASP.BassService
                 }
 
                 // Initialize BASS Mixer
-                _mixer = _bassWrapper.CreateMixerStream(44100, 2, (int)(BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_MIXER_NONSTOP));
+                _mixer = _bassWrapper.CreateMixerStream(44100, 2, (int)BASSFlag.BASS_MIXER_NONSTOP);
                 if (_mixer == 0)
                 {
                     _log.LogError("Failed to create mixer: {0}", _bassWrapper.GetLastBassError());
@@ -79,6 +80,9 @@ namespace Whitestone.WASP.BassService
 
                 // Fire the "Play next track" event to start actual playback
                 await _cambion.PublishEventAsync(new PlayNextTrack());
+
+                // Start encoding and streaming to server
+                await _cambion.PublishEventAsync(new StartStreaming());
             }
             catch (Exception e)
             {
@@ -90,6 +94,8 @@ namespace Whitestone.WASP.BassService
         {
             try
             {
+                _bassWrapper.StopStreaming();
+
                 // Stop playback of BASS Mixer
                 if (!_bassWrapper.Stop(_mixer))
                 {
@@ -134,11 +140,6 @@ namespace Whitestone.WASP.BassService
                 _log.LogCritical("Could not load bassenc.dll from {0}", libraryPath);
             }
 
-            if (!_bassWrapper.BassLoadEncMp3(libraryPath))
-            {
-                _log.LogCritical("Could not load bassenc_mp3.dll from {0}", libraryPath);
-            }
-
             if (!_bassWrapper.BassLoadMixer(libraryPath))
             {
                 _log.LogCritical("Could not load bassmix.dll from {0}", libraryPath);
@@ -160,7 +161,6 @@ namespace Whitestone.WASP.BassService
             // No need to ensure unload with an if as they will always be unloaded when the application ends.
             _bassWrapper.BassUnloadFlac();
             _bassWrapper.BassUnloadMixer();
-            _bassWrapper.BassUnloadEncMp3();
             _bassWrapper.BassUnloadEnc();
             _bassWrapper.BassUnload();
         }
@@ -241,10 +241,12 @@ namespace Whitestone.WASP.BassService
 
         public void HandleEvent(StartStreaming input)
         {
+            _bassWrapper.StartStreaming(_mixer);
         }
 
         public void HandleEvent(StopStreaming input)
         {
+            _bassWrapper.StopStreaming();
         }
     }
 }

@@ -19,6 +19,7 @@ namespace Whitestone.WASP
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<CommonConfig>(_configuration.GetSection(CommonConfig.Section));
+            services.Configure<StreamingServer>(_configuration.GetSection(StreamingServer.Section));
 
             services.AddRazorPages();
             services.AddServerSideBlazor();

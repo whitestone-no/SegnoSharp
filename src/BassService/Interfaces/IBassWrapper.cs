@@ -18,10 +18,8 @@ namespace Whitestone.WASP.BassService.Interfaces
         bool BassLoadMixer(string folder);
         bool BassLoadFlac(string folder);
         bool BassLoadEnc(string folder);
-        bool BassLoadEncMp3(string folder);
         bool BassUnload();
         bool BassUnloadEnc();
-        bool BassUnloadEncMp3();
         bool BassUnloadMixer();
         bool BassUnloadFlac();
         Models.Bass.BASSError GetLastBassError();
@@ -32,5 +30,7 @@ namespace Whitestone.WASP.BassService.Interfaces
         bool MixerPlay(int streamHandle);
         bool Stop(int handle);
         bool SlideAttribute(int handle, int attribute, float value, int time);
+        void StartStreaming(int channel);
+        void StopStreaming();
     }
 }

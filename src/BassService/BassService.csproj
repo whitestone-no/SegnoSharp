@@ -52,6 +52,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\lib\encoder\ffmpeg.exe" Visible="true" Link="encoder\ffmpeg.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\lib\encoder\ffmpeg" Visible="true" Link="encoder\ffmpeg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
