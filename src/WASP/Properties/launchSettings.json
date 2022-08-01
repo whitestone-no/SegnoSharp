@@ -21,7 +21,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "WASP_CommonConfig__DataPath": "/var/wasp",
-        "WASP_CommonConfig__MusicPath": "/var/music"
+        "WASP_CommonConfig__MusicPath": "/var/music",
+        "WASP_StreamingServer__Address": "host.docker.internal" 
       }
     },
     "WSL": {
