@@ -31,9 +31,9 @@
       "launchUrl": "https://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000",
         "WASP_CommonConfig__DataPath": "../../data",
-        "WASP_CommonConfig__MusicPath": "../../music",
-        "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000"
+        "WASP_CommonConfig__MusicPath": "../../music"
       },
       "distributionName": ""
     }

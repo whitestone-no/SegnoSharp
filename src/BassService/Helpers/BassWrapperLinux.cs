@@ -224,7 +224,11 @@ namespace Whitestone.WASP.BassService.Helpers
 
             if (!_broadCast.AutoConnect())
             {
-                _log.LogError("Could not autoconnect to broadcast server: {0} ({1})", _streamingServer.LastError, _streamingServer.LastErrorMessage);
+                _log.LogError("Could not autoconnect to broadcast server at {address}:{port}{mount}: {lastError} ({lastErrorMessage})", _streamingServerConfig.Address, _streamingServerConfig.Port, _streamingServerConfig.MountPoint, _streamingServer.LastError, _streamingServer.LastErrorMessage);
+            }
+            else
+            {
+                _log.LogDebug("Connected to broadcast server at {address}:{port}{mount}", _streamingServerConfig.Address, _streamingServerConfig.Port, _streamingServerConfig.MountPoint);
             }
         }
 
