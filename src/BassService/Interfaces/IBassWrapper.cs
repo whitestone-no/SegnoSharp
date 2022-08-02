@@ -32,5 +32,6 @@ namespace Whitestone.WASP.BassService.Interfaces
         bool SlideAttribute(int handle, int attribute, float value, int time);
         void StartStreaming(int channel);
         void StopStreaming();
+        void SetStreamingTitle(string title);
     }
 }

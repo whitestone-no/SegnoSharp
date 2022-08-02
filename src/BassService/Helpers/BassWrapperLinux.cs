@@ -17,6 +17,7 @@ namespace Whitestone.WASP.BassService.Helpers
         private BassNetLinux::Un4seen.Bass.Misc.IBaseEncoder _encoder;
         private BassNetLinux::Un4seen.Bass.Misc.BroadCast _broadCast;
         private BassNetLinux::Un4seen.Bass.Misc.IStreamingServer _streamingServer;
+        private string _currentTitle = "WASP";
 
         public BassWrapperLinux(IOptions<StreamingServer> streamingServerConfig, ILogger<BassWrapperWindows> log)
         {
@@ -210,7 +211,8 @@ namespace Whitestone.WASP.BassService.Helpers
                 Password = _streamingServerConfig.Password,
                 StreamGenre = _streamingServerConfig.Genre,
                 StreamName = _streamingServerConfig.Name,
-                StreamDescription = _streamingServerConfig.Description
+                StreamDescription = _streamingServerConfig.Description,
+                SongTitle = _currentTitle
             };
 
             _streamingServer = icecast;
@@ -257,6 +259,19 @@ namespace Whitestone.WASP.BassService.Helpers
                 }
 
                 _encoder = null;
+            }
+        }
+
+        public void SetStreamingTitle(string title)
+        {
+            _currentTitle = title;
+
+            if (_streamingServer != null)
+            {
+                if (!_streamingServer.UpdateTitle(title, null))
+                {
+                    _log.LogWarning("Could not update title on streaming server");
+                }
             }
         }
 

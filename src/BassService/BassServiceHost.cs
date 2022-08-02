@@ -224,6 +224,8 @@ namespace Whitestone.WASP.BassService
 
                 _log.LogDebug("Started playing {0}", track.File);
 
+                _bassWrapper.SetStreamingTitle($"{track.Title} - {track.Artist} ({track.Album})");
+
                 _currentlyPlayingTrack = track;
             }
             catch (Exception e)
