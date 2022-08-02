@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Whitestone.WASP.Common.Interfaces;
@@ -57,6 +58,26 @@ namespace Whitestone.WASP.Playlist
 
         public Track GetNextTrack()
         {
+            IEnumerable<string> files = Directory.EnumerateFiles(_commonConfig.MusicPath, "*.flac", SearchOption.AllDirectories);
+            int fileIndex = _randomizer.Next(0, files.Count());
+            string file = files.ElementAt(fileIndex);
+
+            Tags tags = _tagReader.ReadTagInfo(file);
+            if (tags != null)
+            {
+                Track fileTrack = new Track
+                {
+                    Album = tags.Album,
+                    Artist = tags.Artist,
+                    Title = tags.Title,
+                    File = file
+                };
+
+                return fileTrack;
+            }
+
+            _log.LogWarning("Could not read tags from {file}. Falling back to hardcoded list.", file);
+
             int noOfAttempts = 3;
             int attempt = 0;
 

@@ -1,7 +1,9 @@
-﻿namespace Whitestone.WASP.Common.Interfaces
+﻿using Whitestone.WASP.Common.Models;
+
+namespace Whitestone.WASP.Common.Interfaces
 {
     public interface ITagReader
     {
-        void ReadTagInfo(string file);
+        Tags ReadTagInfo(string file);
     }
 }

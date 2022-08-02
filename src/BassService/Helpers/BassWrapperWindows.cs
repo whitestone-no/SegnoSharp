@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Whitestone.WASP.Common.Models;
 using StreamingServer = Whitestone.WASP.Common.Models.Configuration.StreamingServer;
 
 namespace Whitestone.WASP.BassService.Helpers
@@ -157,6 +158,34 @@ namespace Whitestone.WASP.BassService.Helpers
             return BassNetWindows::Un4seen.Bass.Bass.BASS_ChannelSlideAttribute(handle, (BassNetWindows::Un4seen.Bass.BASSAttribute)attribute, value, time);
         }
 
+        public Tags GetTagFromFile(string file)
+        {
+            int stream = CreateFileStream(file, 0L, 0L, (int)BassNetWindows::Un4seen.Bass.BASSFlag.BASS_DEFAULT);
+
+            BassNetWindows::Un4seen.Bass.AddOn.Tags.TAG_INFO tags = new BassNetWindows::Un4seen.Bass.AddOn.Tags.TAG_INFO(file);
+            if (BassNetWindows::Un4seen.Bass.AddOn.Tags.BassTags.BASS_TAG_GetFromFile(stream, tags))
+            {
+                return new Tags
+                {
+                    Album = tags.album,
+                    AlbumArtist = tags.albumartist,
+                    Artist = tags.artist,
+                    Composer = tags.composer,
+                    Disc = tags.disc,
+                    Duration = tags.duration,
+                    Genre = tags.genre,
+                    Title = tags.title,
+                    TrackNumber = tags.track,
+                    Year = tags.year
+                };
+            }
+            else
+            {
+                _log.LogWarning("Could not read tags from {file}", file);
+                return null;
+            }
+        }
+
         // This method must be duplicated between Windows and Linux implementations of IBassWrapper
         // because they use interfaces defined in two different DLLs. Therefore implementation
         // can't be shared between the two implementations and they must have their own.
@@ -205,6 +234,7 @@ namespace Whitestone.WASP.BassService.Helpers
                 StreamGenre = _streamingServerConfig.Genre,
                 StreamName = _streamingServerConfig.Name,
                 StreamDescription = _streamingServerConfig.Description,
+                StreamUrl = _streamingServerConfig.ServerUrl,
                 SongTitle = _currentTitle
             };
 

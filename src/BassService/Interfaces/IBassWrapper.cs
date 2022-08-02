@@ -1,4 +1,5 @@
 ﻿using System;
+using Whitestone.WASP.Common.Models;
 
 namespace Whitestone.WASP.BassService.Interfaces
 {
@@ -30,6 +31,7 @@ namespace Whitestone.WASP.BassService.Interfaces
         bool MixerPlay(int streamHandle);
         bool Stop(int handle);
         bool SlideAttribute(int handle, int attribute, float value, int time);
+        Tags GetTagFromFile(string file);
         void StartStreaming(int channel);
         void StopStreaming();
         void SetStreamingTitle(string title);
