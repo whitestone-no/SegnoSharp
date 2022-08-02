@@ -13,4 +13,4 @@ RUN dotnet publish "WASP.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "WASP.dll"]
+ENTRYPOINT ["dotnet", "Whitestone.WASP.dll"]

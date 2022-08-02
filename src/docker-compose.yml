@@ -9,6 +9,7 @@ services:
       - "8443:443"
     volumes:
       - "../data:/var/wasp"
+      - "../music:/var/music"
     env_file: .env
     environment:
       WASP_CommonConfig__DataPath: /var/wasp
