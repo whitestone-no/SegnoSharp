@@ -58,13 +58,20 @@ namespace Whitestone.WASP.Playlist
 
         public Track GetNextTrack()
         {
-            IEnumerable<string> files = Directory.EnumerateFiles(_commonConfig.MusicPath, "*.flac", SearchOption.AllDirectories);
-            int fileIndex = _randomizer.Next(0, files.Count());
-            string file = files.ElementAt(fileIndex);
+            const int noOfAttempts = 3;
 
-            Tags tags = _tagReader.ReadTagInfo(file);
-            if (tags != null)
+            IEnumerable<string> files = Directory.EnumerateFiles(_commonConfig.MusicPath, "*.flac", SearchOption.AllDirectories);
+            int noOfFiles = files.Count();
+            int fileAttempt = 0;
+
+            do
             {
+                int fileIndex = _randomizer.Next(0, noOfFiles);
+                string file = files.ElementAt(fileIndex);
+
+                Tags tags = _tagReader.ReadTagInfo(file);
+                if (tags == null) continue;
+
                 Track fileTrack = new Track
                 {
                     Album = tags.Album,
@@ -73,12 +80,22 @@ namespace Whitestone.WASP.Playlist
                     File = file
                 };
 
-                return fileTrack;
-            }
+                bool fileExists = File.Exists(fileTrack.File);
 
-            _log.LogWarning("Could not read tags from {file}. Falling back to hardcoded list.", file);
+                if (fileExists)
+                {
+                    return fileTrack;
+                }
 
-            int noOfAttempts = 3;
+                _log.LogError("File {file} does not exist. Getting another track from playlist.", fileTrack.File);
+
+                fileAttempt++;
+
+            } while (fileAttempt < noOfAttempts);
+
+            _log.LogWarning("Could not find file in recursive file enumeration. Falling back to hardcoded list.");
+
+
             int attempt = 0;
 
             do
