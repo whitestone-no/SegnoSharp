@@ -236,19 +236,40 @@ namespace Whitestone.WASP.BassService
 
         private void OnTrackSync(int handle, int channel, int data, IntPtr user)
         {
-            _log.LogDebug("Track complete. Playing next track.");
+            try
+            {
+                _log.LogDebug("Track complete. Playing next track.");
 
-            _cambion.PublishEventAsync(new PlayNextTrack());
+                _cambion.PublishEventAsync(new PlayNextTrack());
+            }
+            catch (Exception e)
+            {
+                _log.LogError(e, "Unknown exceotion during {event}", nameof(OnTrackSync));
+            }
         }
 
         public void HandleEvent(StartStreaming input)
         {
-            _bassWrapper.StartStreaming(_mixer);
+            try
+            {
+                _bassWrapper.StartStreaming(_mixer);
+            }
+            catch (Exception e)
+            {
+                _log.LogError(e, "Unknown exceotion during {event}", nameof(StartStreaming));
+            }
         }
 
         public void HandleEvent(StopStreaming input)
         {
-            _bassWrapper.StopStreaming();
+            try
+            {
+                _bassWrapper.StopStreaming();
+            }
+            catch (Exception e)
+            {
+                _log.LogError(e, "Unknown exceotion during {event}", nameof(StopStreaming));
+            }
         }
     }
 }
