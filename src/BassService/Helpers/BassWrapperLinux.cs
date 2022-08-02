@@ -210,9 +210,9 @@ namespace Whitestone.WASP.BassService.Helpers
                 {
                     EncoderDirectory = encoderPath,
                     CMDLN_Executable = "ffmpeg",
-                    CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a aac -b:a ${kbps}k -vn -f adts ${output}",
-                    CMDLN_EncoderType = BassNetLinux::Un4seen.Bass.BASSChannelType.BASS_CTYPE_STREAM_AAC,
-                    CMDLN_DefaultOutputExtension = ".aac",
+                    CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a mp3 -b:a ${kbps}k -vn -f mp3 ${output}", // Remember to use "-f adts" for AAC streaming
+                    CMDLN_EncoderType = BassNetLinux::Un4seen.Bass.BASSChannelType.BASS_CTYPE_STREAM_MP3,
+                    CMDLN_DefaultOutputExtension = ".mp3",
                     CMDLN_Bitrate = 320,
                     CMDLN_SupportsSTDOUT = true,
                     CMDLN_ParamSTDIN = "-",
