@@ -66,11 +66,24 @@ namespace Whitestone.WASP.Playlist
 
             do
             {
+                fileAttempt++;
                 int fileIndex = _randomizer.Next(0, noOfFiles);
                 string file = files.ElementAt(fileIndex);
 
+                bool fileExists = File.Exists(file);
+
+                if (!fileExists)
+                {
+                    _log.LogError("File {file} does not exist. Getting another track from playlist.", file);
+                    continue;
+                }
+                
                 Tags tags = _tagReader.ReadTagInfo(file);
-                if (tags == null) continue;
+                if (tags == null)
+                {
+                    _log.LogError("Can't read tags from File {file}. Getting another track from playlist.", file);
+                    continue;
+                }
 
                 Track fileTrack = new Track
                 {
@@ -80,21 +93,11 @@ namespace Whitestone.WASP.Playlist
                     File = file
                 };
 
-                bool fileExists = File.Exists(fileTrack.File);
+                return fileTrack;
 
-                if (fileExists)
-                {
-                    return fileTrack;
-                }
-
-                _log.LogError("File {file} does not exist. Getting another track from playlist.", fileTrack.File);
-
-                fileAttempt++;
-
-            } while (fileAttempt < noOfAttempts);
+            } while (fileAttempt <= noOfAttempts);
 
             _log.LogWarning("Could not find file in recursive file enumeration. Falling back to hardcoded list.");
-
 
             int attempt = 0;
 
