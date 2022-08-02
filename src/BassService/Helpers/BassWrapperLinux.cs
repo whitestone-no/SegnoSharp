@@ -272,14 +272,14 @@ namespace Whitestone.WASP.BassService.Helpers
             if (_broadCast != null && _broadCast.IsConnected)
             {
                 _broadCast.Disconnect();
-                _broadCast = null;
             }
+            _broadCast = null;
 
             if (_streamingServer != null && _streamingServer.IsConnected)
             {
                 _streamingServer.Disconnect();
-                _streamingServer = null;
             }
+            _streamingServer = null;
 
             if (_encoder != null && _encoder.IsActive)
             {
@@ -287,9 +287,8 @@ namespace Whitestone.WASP.BassService.Helpers
                 {
                     _log.LogError("Failed to stop encoder: {0}", GetLastBassError());
                 }
-
-                _encoder = null;
             }
+            _encoder = null;
         }
 
         public void SetStreamingTitle(string title)
