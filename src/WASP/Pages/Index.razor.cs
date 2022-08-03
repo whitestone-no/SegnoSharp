@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Whitestone.Cambion.Interfaces;
 using Whitestone.WASP.Common.Events;
-using Whitestone.WASP.Common.Interfaces;
-using Whitestone.WASP.Common.Models;
 
 namespace Whitestone.WASP.Pages
 {
@@ -11,13 +9,9 @@ namespace Whitestone.WASP.Pages
         [Inject]
         private ICambion Cambion { get; set; } = null!;
 
-        [Inject]
-        private IPlaylistHandler PlaylistHandler { get; set; } = null!;
-
         private async void FireEvent_PlayNextTrack_Click()
         {
-            Track track = PlaylistHandler.GetNextTrack();
-            await Cambion.PublishEventAsync(new PlayTrack(track));
+            await Cambion.PublishEventAsync(new PlayNextTrack());
         }
         private async void FireEvent_StartStreaming_Click()
         {

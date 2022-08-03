@@ -14,7 +14,7 @@ using Whitestone.WASP.Common.Models.Configuration;
 
 namespace Whitestone.WASP.Playlist
 {
-    public class PlaylistHandler : IPlaylistHandler, IEventHandler<PlayerReady>
+    public class PlaylistHandler : IPlaylistHandler, IEventHandler<PlayerReady>, IEventHandler<PlayNextTrack>
     {
         private readonly List<Track> _tracks = new List<Track>
         {
@@ -57,6 +57,7 @@ namespace Whitestone.WASP.Playlist
         private readonly ILogger<PlaylistHandler> _log;
         private readonly CommonConfig _commonConfig;
         private readonly Random _randomizer = new Random();
+        private CancellationTokenSource _playlistTaskCancellationTokenSource;
 
         public PlaylistHandler(ITagReader tagReader, IOptions<CommonConfig> commonConfig, ICambion cambion, ILogger<PlaylistHandler> log)
         {
@@ -77,10 +78,12 @@ namespace Whitestone.WASP.Playlist
         public Task StopAsync(CancellationToken cancellationToken)
         {
             // Stop the existing track countdown timers
+            _playlistTaskCancellationTokenSource?.Cancel();
+
             return Task.CompletedTask;
         }
 
-        public Track GetNextTrack()
+        public Track GetNextTrack(CancellationToken cancellationToken = default)
         {
             const int noOfAttempts = 3;
 
@@ -151,15 +154,60 @@ namespace Whitestone.WASP.Playlist
             return null;
         }
 
-        public async void HandleEvent(PlayerReady input)
+        public void HandleEvent(PlayerReady input)
         {
-            // Get next track
-            Track track = GetNextTrack();
+            // Start timer that counts down from track.Duration and sends a new track to the player when current track reaches zero.
+            // Do not await it as this should run in the background.
 
-            // Start timer that counts down from track.Duration and sends a new track to the player when current track reaches zero
+            if (_playlistTaskCancellationTokenSource != null)
+            {
+                _log.LogWarning("{event} was fired while PlaylistTask was already running. Doing nothing.", nameof(PlayerReady));
+                return;
+            }
 
-            // Send the track to the player
-            await _cambion.PublishEventAsync(new PlayTrack(track));
+            _playlistTaskCancellationTokenSource = new CancellationTokenSource();
+
+            _ = PlaylistTask(_playlistTaskCancellationTokenSource.Token);
+        }
+
+        public async Task PlaylistTask(CancellationToken cancellationToken)
+        {
+            try
+            {
+                _log.LogDebug("{method} is started", nameof(PlaylistTask));
+
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    Track track = GetNextTrack(cancellationToken);
+
+                    await _cambion.PublishEventAsync(new PlayTrack(track));
+
+                    await Task.Delay(track.Duration, cancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Task is cancelled. Ignore this and just pass it on to TPL.
+                _log.LogDebug("{method} is stopped", nameof(PlaylistTask));
+                throw;
+            }
+            catch (Exception e)
+            {
+                _log.LogError(e, "Unknown exception during {method}. Task is stopped.", nameof(PlaylistTask));
+            }
+        }
+
+        public void HandleEvent(PlayNextTrack input)
+        {
+            if (_playlistTaskCancellationTokenSource != null)
+            {
+                // Playlist task is already running. Stop it before starting a new instance.
+                _playlistTaskCancellationTokenSource.Cancel();
+            }
+
+            _playlistTaskCancellationTokenSource = new CancellationTokenSource();
+
+            _ = PlaylistTask(_playlistTaskCancellationTokenSource.Token);
         }
     }
 }

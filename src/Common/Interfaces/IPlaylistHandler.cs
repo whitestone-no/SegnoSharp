@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using System.Threading;
+using Microsoft.Extensions.Hosting;
 using Whitestone.WASP.Common.Models;
 
 namespace Whitestone.WASP.Common.Interfaces
 {
     public interface IPlaylistHandler : IHostedService
     {
-        Track GetNextTrack();
+        Track GetNextTrack(CancellationToken cancellationToken = default);
     }
 }
