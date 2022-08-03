@@ -9,6 +9,7 @@ namespace Whitestone.WASP.Playlist.Extensions
         public static IServiceCollection AddPlaylistHandler(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<IPlaylistHandler, PlaylistHandler>();
+            services.AddHostedService(provider => provider.GetRequiredService<IPlaylistHandler>());
 
             return services;
         }

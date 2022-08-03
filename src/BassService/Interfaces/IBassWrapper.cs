@@ -12,9 +12,6 @@ namespace Whitestone.WASP.BassService.Interfaces
         int CreateFileStream(string file, long offset, long length, int flags);
         bool MixerAddStream(int mixerHandle, int streamHandle, int flags);
         bool FreeStream(int handle);
-        int AddSynchronizer(int handle, int type, long param, Models.Bass.SYNCPROC proc, IntPtr user);
-        int MixerAddSynchronizer(int handle, int type, long param, Models.Bass.SYNCPROC proc, IntPtr user);
-        bool MixerRemoveSynchronizer(int handle, int sync);
         bool BassLoad(string folder);
         bool BassLoadMixer(string folder);
         bool BassLoadFlac(string folder);

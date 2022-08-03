@@ -2,15 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Whitestone.Cambion.Interfaces;
+using Whitestone.WASP.Common.Events;
 using Whitestone.WASP.Common.Interfaces;
 using Whitestone.WASP.Common.Models;
 using Whitestone.WASP.Common.Models.Configuration;
 
 namespace Whitestone.WASP.Playlist
 {
-    public class PlaylistHandler : IPlaylistHandler
+    public class PlaylistHandler : IPlaylistHandler, IEventHandler<PlayerReady>
     {
         private readonly List<Track> _tracks = new List<Track>
         {
@@ -19,41 +23,61 @@ namespace Whitestone.WASP.Playlist
                 Album = "Lord of the Rings, The: The Return of the King (The Complete Recordings)",
                 Artist = "Howard Shore",
                 Title = "The Mûmakil",
-                File = "Lord of the Rings, The; The Return of the King (The Complete Recordings) - Howard Shore/CD3/06 - The Mumakil.flac"
+                File = "Lord of the Rings, The; The Return of the King (The Complete Recordings) - Howard Shore/CD3/06 - The Mumakil.flac",
+                Duration = TimeSpan.FromSeconds(57)
             },
             new Track
             {
                 Album = "Doctor Who - Series 5",
                 Artist = "Murray Gold",
                 Title = "Doctor Who XI",
-                File = "Doctor Who - Series 5 - Murray Gold/CD1/01 - Doctor Who XI.flac"
+                File = "Doctor Who - Series 5 - Murray Gold/CD1/01 - Doctor Who XI.flac",
+                Duration = TimeSpan.FromSeconds(64)
             },
             new Track
             {
                 Album = "Chicken Run",
                 Artist = "Harry Gregson-Williams & John Powell",
                 Title = "Chickens Are Not Organized",
-                File = "Chicken Run - Harry Gregson-Williams & John Powell/05 - Chickens Are Not Organized.flac"
+                File = "Chicken Run - Harry Gregson-Williams & John Powell/05 - Chickens Are Not Organized.flac",
+                Duration = TimeSpan.FromSeconds(61)
             },
             new Track
             {
                 Album = "Avengers: Age Of Ultron",
                 Artist = "Bryan Tyler",
                 Title = "Avengers: Age Of Ultron Title",
-                File = "Avengers; Age Of Ultron - Bryan Tyler & Danny Elfman/01 - Avengers; Age Of Ultron Title.flac"
+                File = "Avengers; Age Of Ultron - Bryan Tyler & Danny Elfman/01 - Avengers; Age Of Ultron Title.flac",
+                Duration = TimeSpan.FromSeconds(43)
             }
         };
 
         private readonly ITagReader _tagReader;
+        private readonly ICambion _cambion;
         private readonly ILogger<PlaylistHandler> _log;
         private readonly CommonConfig _commonConfig;
         private readonly Random _randomizer = new Random();
 
-        public PlaylistHandler(ITagReader tagReader, IOptions<CommonConfig> commonConfig, ILogger<PlaylistHandler> log)
+        public PlaylistHandler(ITagReader tagReader, IOptions<CommonConfig> commonConfig, ICambion cambion, ILogger<PlaylistHandler> log)
         {
             _tagReader = tagReader;
+            _cambion = cambion;
             _log = log;
             _commonConfig = commonConfig.Value;
+
+            cambion.Register(this);
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            // No need to do anything specific during startup
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            // Stop the existing track countdown timers
+            return Task.CompletedTask;
         }
 
         public Track GetNextTrack()
@@ -69,6 +93,8 @@ namespace Whitestone.WASP.Playlist
                 fileAttempt++;
                 int fileIndex = _randomizer.Next(0, noOfFiles);
                 string file = files.ElementAt(fileIndex);
+
+                _log.LogDebug("Next file to be played is {file}", file);
 
                 bool fileExists = File.Exists(file);
 
@@ -90,7 +116,8 @@ namespace Whitestone.WASP.Playlist
                     Album = tags.Album,
                     Artist = tags.Artist,
                     Title = tags.Title,
-                    File = file
+                    File = file,
+                    Duration = TimeSpan.FromSeconds(tags.Duration)
                 };
 
                 return fileTrack;
@@ -122,6 +149,17 @@ namespace Whitestone.WASP.Playlist
             } while (attempt < noOfAttempts);
 
             return null;
+        }
+
+        public async void HandleEvent(PlayerReady input)
+        {
+            // Get next track
+            Track track = GetNextTrack();
+
+            // Start timer that counts down from track.Duration and sends a new track to the player when current track reaches zero
+
+            // Send the track to the player
+            await _cambion.PublishEventAsync(new PlayTrack(track));
         }
     }
 }

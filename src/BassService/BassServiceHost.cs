@@ -14,32 +14,25 @@ using BassNetWindows::Un4seen.Bass;
 using Whitestone.WASP.Common.Events;
 using Whitestone.Cambion.Interfaces;
 using Whitestone.WASP.BassService.Models;
-using Whitestone.WASP.Common.Interfaces;
-using Whitestone.WASP.Common.Models;
-using SYNCPROC = Whitestone.WASP.BassService.Models.Bass.SYNCPROC;
 
 namespace Whitestone.WASP.BassService
 {
-    public class BassServiceHost : IHostedService, IEventHandler<PlayNextTrack>, IEventHandler<StartStreaming>, IEventHandler<StopStreaming>
+    public class BassServiceHost : IHostedService, IEventHandler<PlayTrack>, IEventHandler<StartStreaming>, IEventHandler<StopStreaming>
     {
         private readonly IBassWrapper _bassWrapper;
         private readonly ICambion _cambion;
-        private readonly IPlaylistHandler _playlistHandler;
         private readonly ILogger<BassServiceHost> _log;
 
         private int _mixer;
-        private SYNCPROC _mixerStallSync;
         private TrackExt _currentlyPlayingTrack;
 
         public BassServiceHost(IBassWrapper bassWrapper,
             IOptions<BassRegistration> bassRegistration,
             ICambion cambion,
-            IPlaylistHandler playlistHandler,
             ILogger<BassServiceHost> log)
         {
             _bassWrapper = bassWrapper;
             _cambion = cambion;
-            _playlistHandler = playlistHandler;
             _log = log;
 
             _cambion.Register(this);
@@ -66,20 +59,14 @@ namespace Whitestone.WASP.BassService
                     _log.LogError("Failed to create mixer: {0}", _bassWrapper.GetLastBassError());
                 }
 
-                _mixerStallSync = OnMixerStall;
-                if (_bassWrapper.AddSynchronizer(_mixer, (int)BASSSync.BASS_SYNC_STALL, 0L, _mixerStallSync, IntPtr.Zero) == 0)
-                {
-                    _log.LogError("Failed to attach 'stall' event handler: {0}", _bassWrapper.GetLastBassError());
-                }
-
                 // Start playback of BASS Mixer
                 if (!_bassWrapper.Play(_mixer, false))
                 {
                     _log.LogError("Failed to play mixer: {0}", _bassWrapper.GetLastBassError());
                 }
 
-                // Fire the "Play next track" event to start actual playback
-                await _cambion.PublishEventAsync(new PlayNextTrack());
+                // Fire the "Player ready" event that tells the playlist handler to start actual playback
+                await _cambion.PublishEventAsync(new PlayerReady());
 
                 // Start encoding and streaming to server
                 await _cambion.PublishEventAsync(new StartStreaming());
@@ -165,27 +152,22 @@ namespace Whitestone.WASP.BassService
             _bassWrapper.BassUnload();
         }
 
-        private void OnMixerStall(int handle, int channel, int data, IntPtr user)
-        {
-            _log.LogDebug("MIXER STALL CALLED");
-        }
-
-        public void HandleEvent(PlayNextTrack input)
+        public void HandleEvent(PlayTrack input)
         {
             try
             {
-                _log.LogTrace("{event} event fired.", nameof(PlayNextTrack));
+                _log.LogTrace("{event} event fired.", nameof(PlayTrack));
 
-                Track nextTrack = _playlistHandler.GetNextTrack();
-
-                if (nextTrack == null)
+                if (input.Track == null)
                 {
-                    _log.LogError("No track returned from playlist. Do nothing and let the current track play out.");
+                    _log.LogError("No track contained in event. Do nothing and let the current track play out.");
                     return;
                 }
 
-                TrackExt track = new TrackExt(nextTrack);
+                // Convert track to extended object
+                TrackExt track = new TrackExt(input.Track);
 
+                // Load music file
                 track.ChannelHandle = _bassWrapper.CreateFileStream(track.File, 0L, 0L, (int)(BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE));
 
                 if (track.ChannelHandle == 0)
@@ -194,29 +176,19 @@ namespace Whitestone.WASP.BassService
                     return;
                 }
 
+                // Stop previous track (with 1 second fadeout)
                 if (_currentlyPlayingTrack != null)
                 {
-                    // Stop previous track (with 1 second fadeout)
                     _bassWrapper.SlideAttribute(_currentlyPlayingTrack.ChannelHandle, (int)BASSAttribute.BASS_ATTRIB_VOL, -1f, 1000);
-
-                    if (!_bassWrapper.MixerRemoveSynchronizer(_currentlyPlayingTrack.ChannelHandle, _currentlyPlayingTrack.SyncHandle))
-                    {
-                        _log.LogError("Could not remove sync from channel: {0}", _bassWrapper.GetLastBassError());
-                    }
                 }
 
+                // Add new track to mixer
                 if (!_bassWrapper.MixerAddStream(_mixer, track.ChannelHandle, (int)(BASSFlag.BASS_MIXER_PAUSE | BASSFlag.BASS_MIXER_DOWNMIX | BASSFlag.BASS_STREAM_AUTOFREE)))
                 {
                     _log.LogError("Failed to add channel to mixer: {0}", _bassWrapper.GetLastBassError());
                 }
 
-                track.Sync = OnTrackSync;
-                track.SyncHandle = _bassWrapper.MixerAddSynchronizer(track.ChannelHandle, (int)BASSSync.BASS_SYNC_END, 0L, track.Sync, new IntPtr(0));
-                if (track.SyncHandle == 0)
-                {
-                    _log.LogError("Could not set sync to channel: {0}", _bassWrapper.GetLastBassError());
-                }
-
+                // And start the playback
                 if (!_bassWrapper.MixerPlay(track.ChannelHandle))
                 {
                     _log.LogError("Failed to play channel: {0}", _bassWrapper.GetLastBassError());
@@ -224,27 +196,15 @@ namespace Whitestone.WASP.BassService
 
                 _log.LogDebug("Started playing {0}", track.File);
 
+                // Update the title of the broadcaster
                 _bassWrapper.SetStreamingTitle($"{track.Title} - {track.Artist} ({track.Album})");
 
+                // Update which track is currently playing
                 _currentlyPlayingTrack = track;
             }
             catch (Exception e)
             {
-                _log.LogError(e, $"Unknown error during {nameof(PlayNextTrack)} event in {nameof(BassServiceHost)}");
-            }
-        }
-
-        private void OnTrackSync(int handle, int channel, int data, IntPtr user)
-        {
-            try
-            {
-                _log.LogDebug("Track complete. Playing next track.");
-
-                _cambion.PublishEventAsync(new PlayNextTrack());
-            }
-            catch (Exception e)
-            {
-                _log.LogError(e, "Unknown exceotion during {event}", nameof(OnTrackSync));
+                _log.LogError(e, $"Unknown error during {nameof(PlayTrack)} event in {nameof(BassServiceHost)}");
             }
         }
 

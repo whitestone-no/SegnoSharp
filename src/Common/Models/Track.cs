@@ -1,4 +1,6 @@
-﻿namespace Whitestone.WASP.Common.Models
+﻿using System;
+
+namespace Whitestone.WASP.Common.Models
 {
     public class Track
     {
@@ -6,5 +8,6 @@
         public string Artist { get; set; }
         public string Album { get; set; }
         public string File { get; set; }
+        public TimeSpan Duration { get; set; }
     }
 }

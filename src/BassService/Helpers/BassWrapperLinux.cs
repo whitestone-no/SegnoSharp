@@ -62,21 +62,6 @@ namespace Whitestone.WASP.BassService.Helpers
             return BassNetLinux::Un4seen.Bass.Bass.BASS_StreamFree(handle);
         }
 
-        public int AddSynchronizer(int handle, int type, long param, Models.Bass.SYNCPROC proc, IntPtr user)
-        {
-            return BassNetLinux::Un4seen.Bass.Bass.BASS_ChannelSetSync(handle, (BassNetLinux::Un4seen.Bass.BASSSync)type, param, new BassNetLinux::Un4seen.Bass.SYNCPROC(proc), user);
-        }
-
-        public int MixerAddSynchronizer(int handle, int type, long param, Models.Bass.SYNCPROC proc, IntPtr user)
-        {
-            return BassNetLinux::Un4seen.Bass.AddOn.Mix.BassMix.BASS_Mixer_ChannelSetSync(handle, (BassNetLinux::Un4seen.Bass.BASSSync)type, param, new BassNetLinux::Un4seen.Bass.SYNCPROC(proc), user);
-        }
-
-        public bool MixerRemoveSynchronizer(int handle, int sync)
-        {
-            return BassNetLinux::Un4seen.Bass.AddOn.Mix.BassMix.BASS_Mixer_ChannelRemoveSync(handle, sync);
-        }
-
         public bool BassLoad(string folder)
         {
             return true;
