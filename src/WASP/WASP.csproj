@@ -22,10 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\BassService\BassService.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Playlist\Playlist.csproj" />
