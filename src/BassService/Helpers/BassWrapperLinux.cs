@@ -16,8 +16,6 @@ namespace Whitestone.WASP.BassService.Helpers
         private readonly ILogger<BassWrapperWindows> _log;
         private readonly StreamingServer _streamingServerConfig;
         private BassNetLinux::Un4seen.Bass.Misc.IBaseEncoder _encoder;
-        private BassNetLinux::Un4seen.Bass.Misc.BroadCast _broadCast;
-        private BassNetLinux::Un4seen.Bass.Misc.IStreamingServer _streamingServer;
         private string _currentTitle = "WASP";
 
         public BassWrapperLinux(IOptions<StreamingServer> streamingServerConfig, ILogger<BassWrapperWindows> log)
@@ -183,7 +181,7 @@ namespace Whitestone.WASP.BassService.Helpers
         // can't be shared between the two implementations and they must have their own.
         public void StartStreaming(int channel)
         {
-            if (_encoder != null || _streamingServer != null || _broadCast != null)
+            if (_encoder != null)
             {
                 return;
             }
@@ -195,9 +193,9 @@ namespace Whitestone.WASP.BassService.Helpers
                 {
                     EncoderDirectory = encoderPath,
                     CMDLN_Executable = "ffmpeg",
-                    CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a mp3 -b:a ${kbps}k -vn -f mp3 ${output}", // Remember to use "-f adts" for AAC streaming
-                    CMDLN_EncoderType = BassNetLinux::Un4seen.Bass.BASSChannelType.BASS_CTYPE_STREAM_MP3,
-                    CMDLN_DefaultOutputExtension = ".mp3",
+                    CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a aac -b:a ${kbps}k -vn -f adts ${output}", // Remember to use "-f adts" for AAC streaming
+                    CMDLN_EncoderType = BassNetLinux::Un4seen.Bass.BASSChannelType.BASS_CTYPE_STREAM_AAC,
+                    CMDLN_DefaultOutputExtension = ".aac",
                     CMDLN_Bitrate = 320,
                     CMDLN_SupportsSTDOUT = true,
                     CMDLN_ParamSTDIN = "-",
@@ -214,38 +212,41 @@ namespace Whitestone.WASP.BassService.Helpers
                 _log.LogCritical("Could not find FFMPEG in {0}", encoder.EncoderDirectory);
             }
 
-            BassNetLinux::Un4seen.Bass.Misc.ICEcast icecast = new BassNetLinux::Un4seen.Bass.Misc.ICEcast(_encoder, true)
+            if (!encoder.Start(null, IntPtr.Zero, false))
             {
-                ServerAddress = _streamingServerConfig.Address,
-                ServerPort = _streamingServerConfig.Port,
-                AdminUsername = _streamingServerConfig.AdminUsername,
-                AdminPassword = _streamingServerConfig.AdminPassword,
-                PublicFlag = _streamingServerConfig.IsPublic,
-                MountPoint = _streamingServerConfig.MountPoint,
-                Password = _streamingServerConfig.Password,
-                StreamGenre = _streamingServerConfig.Genre,
-                StreamName = _streamingServerConfig.Name,
-                StreamDescription = _streamingServerConfig.Description,
-                StreamUrl = _streamingServerConfig.ServerUrl,
-                SongTitle = _currentTitle
-            };
-
-            _streamingServer = icecast;
-
-            _broadCast = new BassNetLinux::Un4seen.Bass.Misc.BroadCast(_streamingServer)
-            {
-                AutoReconnect = true,
-                ReconnectTimeout = 5
-            };
-            _broadCast.Notification += BroadCastOnNotification;
-
-            if (!_broadCast.AutoConnect())
-            {
-                _log.LogError("Could not autoconnect to broadcast server at {address}:{port}{mount}: {lastError} ({lastErrorMessage})", _streamingServerConfig.Address, _streamingServerConfig.Port, _streamingServerConfig.MountPoint, _streamingServer.LastError, _streamingServer.LastErrorMessage);
+                _log.LogCritical("Could not start encoder");
             }
             else
             {
-                _log.LogDebug("Connected to broadcast server at {address}:{port}{mount}", _streamingServerConfig.Address, _streamingServerConfig.Port, _streamingServerConfig.MountPoint);
+                _log.LogDebug("Encoder started");
+            }
+
+            bool castInitSuccess = BassNetLinux::Un4seen.Bass.AddOn.Enc.BassEnc.BASS_Encode_CastInit(
+                encoder.EncoderHandle,
+                _streamingServerConfig.Address + ":" + _streamingServerConfig.Port + _streamingServerConfig.MountPoint,
+                _streamingServerConfig.Password,
+                BassNetLinux::Un4seen.Bass.AddOn.Enc.BassEnc.BASS_ENCODE_TYPE_AAC,
+                _streamingServerConfig.Name,
+                _streamingServerConfig.ServerUrl,
+                _streamingServerConfig.Genre,
+                _streamingServerConfig.Description,
+                null,
+                0,
+                _streamingServerConfig.IsPublic
+            );
+
+            if (!castInitSuccess)
+            {
+                _log.LogCritical("Could not start casting. {error}", GetLastBassError());
+            }
+            else
+            {
+                _log.LogDebug("Casting to {server} started", _streamingServerConfig.Address + ":" + _streamingServerConfig.Port + _streamingServerConfig.MountPoint);
+            }
+
+            if (!BassNetLinux::Un4seen.Bass.AddOn.Enc.BassEnc.BASS_Encode_CastSetTitle(encoder.EncoderHandle, _currentTitle, null))
+            {
+                _log.LogWarning("Could not update title on streaming server. {error}", GetLastBassError());
             }
         }
 
@@ -254,23 +255,15 @@ namespace Whitestone.WASP.BassService.Helpers
         // can't be shared between the two implementations and they must have their own.
         public void StopStreaming()
         {
-            if (_broadCast != null && _broadCast.IsConnected)
-            {
-                _broadCast.Disconnect();
-            }
-            _broadCast = null;
-
-            if (_streamingServer != null && _streamingServer.IsConnected)
-            {
-                _streamingServer.Disconnect();
-            }
-            _streamingServer = null;
-
             if (_encoder != null && _encoder.IsActive)
             {
                 if (!_encoder.Stop())
                 {
                     _log.LogError("Failed to stop encoder: {0}", GetLastBassError());
+                }
+                else
+                {
+                    _log.LogDebug("Encoder stopped");
                 }
             }
             _encoder = null;
@@ -280,18 +273,13 @@ namespace Whitestone.WASP.BassService.Helpers
         {
             _currentTitle = title;
 
-            if (_streamingServer != null)
+            if (_encoder != null)
             {
-                if (!_streamingServer.UpdateTitle(title, null))
+                if (!BassNetLinux::Un4seen.Bass.AddOn.Enc.BassEnc.BASS_Encode_CastSetTitle(_encoder.EncoderHandle, _currentTitle, null))
                 {
                     _log.LogWarning("Could not update title on streaming server");
                 }
             }
-        }
-
-        private void BroadCastOnNotification(object sender, BassNetLinux::Un4seen.Bass.Misc.BroadCastEventArgs e)
-        {
-            _log.LogDebug("BROADCAST NOTIFICATION: {0}", e.EventType);
         }
     }
 }
