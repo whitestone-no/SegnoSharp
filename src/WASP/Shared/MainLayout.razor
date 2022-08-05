@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
 
 <PageTitle>BlazorApp1</PageTitle>
 
@@ -20,6 +21,21 @@
             </li>
         </ul>
     </nav>
+    <div>
+        <AuthorizeView Policy="IgnoreRole">
+            <Authorized>
+                Logged in as <em>@_loggedInAs</em>
+                <NavLink href="/logout">Logout</NavLink>
+            </Authorized>
+            <Authorizing>
+                Please wait while logging in
+            </Authorizing>
+            <NotAuthorized>
+                <NavLink href="@("/login?redirectUri=" + @NavigationManager.Uri)">Login</NavLink>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+
 </header>
 
 <div>
