@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WASP", "WASP\WASP.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BassService", "BassService\BassService.csproj", "{BDD0E31B-E145-4310-A60F-6252BED6C3FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{500968CD-207E-452A-B4C8-41D20738AC40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{500968CD-207E-452A-B4C8-41D20738AC40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playlist", "Playlist\Playlist.csproj", "{5D25CC0B-1C78-4ECD-A653-996B08B3B9AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Playlist", "Playlist\Playlist.csproj", "{5D25CC0B-1C78-4ECD-A653-996B08B3B9AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

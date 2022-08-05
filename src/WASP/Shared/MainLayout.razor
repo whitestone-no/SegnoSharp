@@ -2,6 +2,26 @@
 
 <PageTitle>BlazorApp1</PageTitle>
 
+<header>
+    <nav>
+        <ul>
+            <li>
+                <NavLink href="/" Match="NavLinkMatch.All">Home</NavLink>
+            </li>
+            <li>
+                <NavLink href="/queue">Queue</NavLink>
+            </li>
+            <li>
+                <ul>
+                    <li>
+                        <NavLink href="/admin/queue">Queue admin</NavLink>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+
 <div>
     @Body
 </div>
