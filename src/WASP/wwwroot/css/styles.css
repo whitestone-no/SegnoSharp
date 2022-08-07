@@ -67,7 +67,7 @@
 }
 
 #menu-toggle-button:checked ~ #menu-toggle-icon {
-    transform: rotate(180deg);
+    transform: rotateY(180deg);
 }
 
 #menu-toggle-button:checked ~ nav {
