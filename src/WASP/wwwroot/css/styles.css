@@ -111,11 +111,21 @@ nav ul {
         nav ul li > span {
             margin-top: 20px;
             background-color: #444444;
+            font-weight: bold;
         }
+
+            nav ul li > span > span[class~=fa-solid] {
+                margin-right: 10px;
+            }
 
         nav ul li > a:hover {
             background-color: #888888;
         }
+
+        nav ul li > a > span {
+            margin-right: 10px;
+        }
+
 
 nav a {
     text-decoration: none;
