@@ -4,7 +4,24 @@
 <PageTitle>BlazorApp1</PageTitle>
 
 <input id="menu-toggle-button" type="checkbox" role="button" checked="checked" /> <!-- checked="checked" -->
-<label id="menu-toggle-icon" for="menu-toggle-button"><span>X</span></label> <!-- fa-bars -->
+<label id="menu-toggle-icon-open" class="menu-toggle-icon" for="menu-toggle-button"><span class="fa-solid fa-bars"></span></label>
+<label id="menu-toggle-icon-close" class="menu-toggle-icon" for="menu-toggle-button"><span class="fa-solid fa-xmark"></span></label>
+<header>
+    <div>
+        <AuthorizeView Policy="IgnoreRole">
+            <Authorized>
+                Logged in as <em>@_loggedInAs</em>
+                <NavLink href="/logout">Logout</NavLink>
+            </Authorized>
+            <Authorizing>
+                Please wait while logging in
+            </Authorizing>
+            <NotAuthorized>
+                <NavLink href="@("/login?redirectUri=" + @NavigationManager.Uri)">Login</NavLink>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</header>
 <nav>
     <ul>
         <li>
@@ -26,20 +43,6 @@
             </Authorized>
         </AuthorizeView>
     </ul>
-    <div>
-        <AuthorizeView Policy="IgnoreRole">
-            <Authorized>
-                Logged in as <em>@_loggedInAs</em>
-                <NavLink href="/logout">Logout</NavLink>
-            </Authorized>
-            <Authorizing>
-                Please wait while logging in
-            </Authorizing>
-            <NotAuthorized>
-                <NavLink href="@("/login?redirectUri=" + @NavigationManager.Uri)">Login</NavLink>
-            </NotAuthorized>
-        </AuthorizeView>
-    </div>
 </nav>
 
 <main>
