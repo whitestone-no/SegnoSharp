@@ -48,7 +48,7 @@
         padding: 10px;
     }
 
-.menu-toggle-icon {
+#menu-toggle-icon {
     position: fixed;
     top: 2.5px;
     left: 2.5px;
@@ -63,25 +63,11 @@
     background-color: #ffffff;
     font-size: 20px;
     cursor: pointer;
-    transition: transform 0.5s ease, opacity 0.5s cubic-bezier(1, 1, 0, 1);
+    transition: transform 0.5s ease;
 }
 
-#menu-toggle-icon-open {
-    opacity: 1;
-}
-
-#menu-toggle-icon-close {
-    opacity: 0;
-}
-
-#menu-toggle-button:checked ~ #menu-toggle-icon-open {
-    transform: rotateY(180deg);
-    opacity: 0;
-}
-
-#menu-toggle-button:checked ~ #menu-toggle-icon-close {
-    transform: rotateY(180deg);
-    opacity: 1;
+#menu-toggle-button:checked ~ #menu-toggle-icon {
+    transform: rotate(180deg);
 }
 
 #menu-toggle-button:checked ~ nav {
