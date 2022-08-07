@@ -23,7 +23,12 @@
         body > header > div {
             text-align: right;
             line-height: 40px;
+            margin-right: 10px;
         }
+
+            body > header > div > a:hover {
+                text-decoration: none;
+            }
 
     body > nav {
         position: fixed;
