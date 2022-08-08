@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Playlist", "Playlist\Playlist.csproj", "{5D25CC0B-1C78-4ECD-A653-996B08B3B9AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Database.csproj", "{6B8CB358-6546-4303-8D7E-81511378DC38}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Database.csproj", "{28914D74-62D3-409A-A302-E359EAE9FF77}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{5D25CC0B-1C78-4ECD-A653-996B08B3B9AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D25CC0B-1C78-4ECD-A653-996B08B3B9AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D25CC0B-1C78-4ECD-A653-996B08B3B9AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6B8CB358-6546-4303-8D7E-81511378DC38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B8CB358-6546-4303-8D7E-81511378DC38}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B8CB358-6546-4303-8D7E-81511378DC38}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B8CB358-6546-4303-8D7E-81511378DC38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28914D74-62D3-409A-A302-E359EAE9FF77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28914D74-62D3-409A-A302-E359EAE9FF77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28914D74-62D3-409A-A302-E359EAE9FF77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28914D74-62D3-409A-A302-E359EAE9FF77}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
