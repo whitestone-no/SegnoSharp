@@ -1,5 +1,7 @@
-﻿using Serilog;
+﻿using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Serilog.Events;
+using Whitestone.WASP.Database;
 
 namespace Whitestone.WASP
 {
@@ -40,6 +42,12 @@ namespace Whitestone.WASP
                     });
 
                 IHost host = builder.Build();
+
+                using (IServiceScope scope = host.Services.CreateScope())
+                {
+                    WaspDbContext? dbContext = scope.ServiceProvider.GetService<WaspDbContext>();
+                    await dbContext?.Database.MigrateAsync()!;
+                }
 
                 await host.RunAsync();
             }
