@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using Whitestone.WASP.Database;
@@ -6,11 +7,10 @@ using Whitestone.WASP.Database;
 namespace Whitestone.WASP
 {
     public class Bootstrapper
+
     {
         public static async Task Main(string[] args)
         {
-            //AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
-
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
@@ -19,14 +19,9 @@ namespace Whitestone.WASP
 
             try
             {
-                IHostBuilder builder = Host.CreateDefaultBuilder()
-                    .ConfigureAppConfiguration(conf =>
-                    {
-                        conf.AddJsonFile("appsettings.json");
-                        conf.AddUserSecrets("ef2b06ee-7634-4a6e-9cce-5ad721a03d65");
-                        conf.AddEnvironmentVariables("WASP_");
-                    })
-                    .ConfigureWebHostDefaults(webBuilder =>
+                IHostBuilder builder = CreateHostBuilder(args);
+
+                builder.ConfigureWebHostDefaults(webBuilder =>
                     {
                         webBuilder.UseStartup<Startup>();
                     })
@@ -37,7 +32,8 @@ namespace Whitestone.WASP
                             .MinimumLevel.Override("Whitestone.WASP", LogEventLevel.Verbose)
                             .Enrich.FromLogContext()
                             .WriteTo.Console()
-                            .WriteTo.File(Path.Combine(context.Configuration["CommonConfig:DataPath"], "logs", "wasp.log"),
+                            .WriteTo.File(
+                                Path.Combine(context.Configuration["CommonConfig:DataPath"], "logs", "wasp.log"),
                                 rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true);
                     });
 
@@ -61,24 +57,56 @@ namespace Whitestone.WASP
             }
         }
 
-        //private static Assembly? CurrentDomain_AssemblyResolve(object? sender, ResolveEventArgs args)
-        //{
-        //    string? executingFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        //    string libraryPath = Path.Combine(executingFolder ?? Directory.GetCurrentDirectory(), "lib", "Bass.Net");
+        // This method is run instead of Main() when doing EF migrations. Keep it as simple as possible (database settings only)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(conf =>
+                {
+                    conf.AddJsonFile("appsettings.json");
+                    conf.AddUserSecrets("ef2b06ee-7634-4a6e-9cce-5ad721a03d65");
+                    conf.AddEnvironmentVariables("WASP_");
+                    conf.AddCommandLine(args);
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    string databaseType = context.Configuration.GetSection("Database").GetValue<string>("Type").ToLower();
 
-        //    if (args.Name.StartsWith("Bass.Net"))
-        //    {
-        //        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        //        {
-        //            return Assembly.LoadFrom(Path.Combine(libraryPath, "Bass.Net.Linux.dll"));
-        //        }
-        //        else
-        //        {
-        //            return Assembly.LoadFrom(Path.Combine(libraryPath, "Bass.Net.dll"));
-        //        }
-        //    }
-            
-        //    return Assembly.LoadFrom("");
-        //}
+                    switch (databaseType)
+                    {
+                        case "sqlite":
+                            services.AddDbContext<WaspDbContext, WaspSqliteDbContext>(options =>
+                                ConfigureDatabase(options, context.Configuration));
+                            break;
+                        case "mysql":
+                            services.AddDbContext<WaspDbContext, WaspMysqlDbContext>(options =>
+                                ConfigureDatabase(options, context.Configuration));
+                            break;
+                        default:
+                            throw new ArgumentException($"Unsupported database type: {databaseType}");
+                    }
+                });
+        }
+
+        public static void ConfigureDatabase(DbContextOptionsBuilder options, IConfiguration configuration)
+        {
+            string databaseType = configuration.GetSection("Database").GetValue<string>("Type").ToLower();
+
+            switch (databaseType)
+            {
+                case "sqlite":
+                    string connSqlite = configuration.GetConnectionString("WaspDatabaseSqlite");
+                    SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
+                    connectionStringBuilder.DataSource = Path.Combine(configuration["CommonConfig:DataPath"], connectionStringBuilder.DataSource);
+                    options.UseSqlite(connectionStringBuilder.ConnectionString);
+                    break;
+                case "mysql":
+                    string connMysql = configuration.GetConnectionString("WaspDatabaseMysql");
+                    options.UseMySql(connMysql, ServerVersion.AutoDetect(connMysql));
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported database type: {databaseType}");
+            }
+        }
     }
 }

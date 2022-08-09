@@ -22,24 +22,6 @@ namespace Whitestone.WASP
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<WaspDbContext>(options =>
-            {
-                string databaseType = _configuration.GetSection("Database").GetValue<string>("Type").ToLower();
-                switch (databaseType)
-                {
-                    case "sqlite":
-                        SqliteConnectionStringBuilder connectionStringBuilder = new SqliteConnectionStringBuilder(_configuration.GetConnectionString("WaspDatabase"));
-                        connectionStringBuilder.DataSource = Path.Combine(_configuration["CommonConfig:DataPath"], connectionStringBuilder.DataSource);
-                        options.UseSqlite(connectionStringBuilder.ConnectionString);
-                        break;
-                    case "mysql":
-                        options.UseMySQL(_configuration.GetConnectionString("WaspDatabase"));
-                        break;
-                    default:
-                        throw new ArgumentException($"Unsupported database type: {databaseType}");
-                }
-            });
-
             services.Configure<CommonConfig>(_configuration.GetSection(CommonConfig.Section));
             services.Configure<StreamingServer>(_configuration.GetSection(StreamingServer.Section));
 
