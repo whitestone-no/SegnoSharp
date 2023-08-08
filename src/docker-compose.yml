@@ -1,5 +1,6 @@
 services:
   wasp:
+    container_name: wasp
     build:
       context: .
       dockerfile: WASP/Dockerfile
