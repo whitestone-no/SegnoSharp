@@ -351,3 +351,4 @@ MigrationBackup/
 
 # Specifically ignore the .env file used for Docker Compose, as it will include secrets
 /src/.env
+/src/docker-compose.override.yml
