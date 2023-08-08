@@ -26,6 +26,9 @@ namespace Whitestone.WASP.Configuration.Extensions
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.ClaimActions.MapUniqueJsonKey("role", "role");
                 options.ClaimActions.MapUniqueJsonKey("preferred_username", "preferred_username");
+                
+                options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
 
                 options.Events = new OpenIdConnectEvents
                 {
