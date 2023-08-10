@@ -1,13 +1,13 @@
-﻿using Whitestone.WASP.BassService.Helpers;
-using Whitestone.WASP.BassService.Interfaces;
-using Whitestone.WASP.BassService.Models.Config;
+﻿using Whitestone.SegnoSharp.BassService.Helpers;
+using Whitestone.SegnoSharp.BassService.Interfaces;
+using Whitestone.SegnoSharp.BassService.Models.Config;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Runtime.InteropServices;
-using Whitestone.WASP.Common.Interfaces;
+using Whitestone.SegnoSharp.Common.Interfaces;
 
-namespace Whitestone.WASP.BassService.Extensions
+namespace Whitestone.SegnoSharp.BassService.Extensions
 {
     public static class ServiceCollectionExtensions
     {

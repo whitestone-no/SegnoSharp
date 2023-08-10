@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Whitestone.WASP.Database.Models;
+using Whitestone.SegnoSharp.Database.Models;
 
-namespace Whitestone.WASP.Database
+namespace Whitestone.SegnoSharp.Database
 {
-    public class WaspDbContext : DbContext
+    public class SegnoSharpDbContext : DbContext
     {
         public DbSet<Album> Albums { get; set; }
         public DbSet<Disc> Discs { get; set; }
@@ -22,21 +22,21 @@ namespace Whitestone.WASP.Database
         public DbSet<StreamQueue> StreamQueue { get; set; }
         public DbSet<StreamHistory> StreamHistory { get; set; }
 
-        public WaspDbContext( DbContextOptions options) : base(options)
+        public SegnoSharpDbContext( DbContextOptions options) : base(options)
         {
         }
     }
 
-    public class WaspMysqlDbContext : WaspDbContext
+    public class SegnoSharpMysqlDbContext : SegnoSharpDbContext
     {
-        public WaspMysqlDbContext(DbContextOptions options) : base(options)
+        public SegnoSharpMysqlDbContext(DbContextOptions options) : base(options)
         {
         }
     }
 
-    public class WaspSqliteDbContext : WaspDbContext
+    public class SegnoSharpSqliteDbContext : SegnoSharpDbContext
     {
-        public WaspSqliteDbContext(DbContextOptions options) : base(options)
+        public SegnoSharpSqliteDbContext(DbContextOptions options) : base(options)
         {
         }
     }

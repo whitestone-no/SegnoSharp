@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>Whitestone.WASP.$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>Whitestone.WASP.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <AssemblyName>Whitestone.SegnoSharp.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>Whitestone.SegnoSharp.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Whitestone.WASP.Configuration.Extensions
+namespace Whitestone.SegnoSharp.Configuration.Extensions
 {
     public static class ServiceCollectionExtensions
     {
@@ -11,10 +11,10 @@ namespace Whitestone.WASP.Configuration.Extensions
         {
             services.AddAuthentication(options =>
             {
-                options.DefaultScheme = "WaspAuthCookies";
+                options.DefaultScheme = "SegnoSharpAuthCookies";
                 options.DefaultChallengeScheme = "oidc";
             })
-            .AddCookie("WaspAuthCookies")
+            .AddCookie("SegnoSharpAuthCookies")
             .AddOpenIdConnect("oidc", options =>
             {
                 options.Authority = configuration.GetSection("OpenIdConnect").GetValue<string>("Authority");

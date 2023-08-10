@@ -1,17 +1,17 @@
 services:
-  wasp:
-    container_name: wasp
+  segnosharp:
+    container_name: segnosharp
     build:
       context: .
-      dockerfile: WASP/Dockerfile
-    image: wasp:latest
+      dockerfile: SegnoSharp/Dockerfile
+    image: segnosharp:latest
     ports:
       - "8080:80"
       - "8443:443"
     volumes:
-      - "../data:/var/wasp"
+      - "../data:/var/segnosharp"
       - "../music:/var/music"
     env_file: .env
     environment:
-      WASP_CommonConfig__DataPath: /var/wasp
-      WASP_CommonConfig__MusicPath: /var/music
+      SegnoSharp_CommonConfig__DataPath: /var/segnosharp
+      SegnoSharp_CommonConfig__MusicPath: /var/music

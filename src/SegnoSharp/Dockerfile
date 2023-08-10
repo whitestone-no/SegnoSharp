@@ -7,10 +7,10 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY . .
-WORKDIR "/src/WASP"
-RUN dotnet publish "WASP.csproj" -c Release -o /app/publish
+WORKDIR "/src/SegnoSharp"
+RUN dotnet publish "SegnoSharp.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "Whitestone.WASP.dll"]
+ENTRYPOINT ["dotnet", "Whitestone.SegnoSharp.dll"]

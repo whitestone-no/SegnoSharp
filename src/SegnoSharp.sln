@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WASP", "WASP\WASP.csproj", "{7D5C13C8-E09F-4B3C-8572-7A4107820F6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SegnoSharp", "SegnoSharp\SegnoSharp.csproj", "{7D5C13C8-E09F-4B3C-8572-7A4107820F6F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BassService", "BassService\BassService.csproj", "{BDD0E31B-E145-4310-A60F-6252BED6C3FE}"
 EndProject

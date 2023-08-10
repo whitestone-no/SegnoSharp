@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Whitestone.WASP.Database.Migrations.SQLite
+namespace Whitestone.SegnoSharp.Database.Migrations.SQLite
 {
     public partial class Initial : Migration
     {

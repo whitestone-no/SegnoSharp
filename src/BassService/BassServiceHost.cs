@@ -1,7 +1,7 @@
 ﻿extern alias BassNetWindows;
 using System;
-using Whitestone.WASP.BassService.Interfaces;
-using Whitestone.WASP.BassService.Models.Config;
+using Whitestone.SegnoSharp.BassService.Interfaces;
+using Whitestone.SegnoSharp.BassService.Models.Config;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,11 +11,11 @@ using System.Threading;
 using System.Threading.Tasks;
 // Make sure to only use enums from BassNetWindows::Un4seen.Bass;
 using BassNetWindows::Un4seen.Bass;
-using Whitestone.WASP.Common.Events;
+using Whitestone.SegnoSharp.Common.Events;
 using Whitestone.Cambion.Interfaces;
-using Whitestone.WASP.BassService.Models;
+using Whitestone.SegnoSharp.BassService.Models;
 
-namespace Whitestone.WASP.BassService
+namespace Whitestone.SegnoSharp.BassService
 {
     public class BassServiceHost : IHostedService, IEventHandler<PlayTrack>, IEventHandler<StartStreaming>, IEventHandler<StopStreaming>
     {

@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Whitestone.Cambion.Interfaces;
-using Whitestone.WASP.Common.Events;
-using Whitestone.WASP.Common.Interfaces;
-using Whitestone.WASP.Common.Models;
-using Whitestone.WASP.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Common.Events;
+using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Common.Models;
+using Whitestone.SegnoSharp.Common.Models.Configuration;
 
-namespace Whitestone.WASP.Playlist
+namespace Whitestone.SegnoSharp.Playlist
 {
     public class PlaylistHandler : IPlaylistHandler, IEventHandler<PlayerReady>, IEventHandler<PlayNextTrack>
     {

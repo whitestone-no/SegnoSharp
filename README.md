@@ -1,8 +1,7 @@
-# WASP
-Whitestone Audio Streaming Project
+# SegnoSharp
 
 ## Purpose
-To create a simple audio streaming tool that can randomly stream audio files to Shoutcast. Meant to replace SAM Broadcaster for internal internet radio.
+To create a simple audio streaming tool that can randomly stream audio files to Shoutcast/Icecast. Meant to replace SAM Broadcaster for internal internet radio.
 
 ## Usage
 
@@ -30,12 +29,12 @@ Put your registration email and key in the User Secrets file, and/or create an `
 ### Example .env
 
 ```
-WASP_BASS__Registration__Key=xxxx
-WASP_BASS__Registration__Email=yyyy@zzzz.aaa	
+SegnoSharp_BASS__Registration__Key=xxxx
+SegnoSharp_BASS__Registration__Email=yyyy@zzzz.aaa	
 ```
 
 ## Database
 
-WASP uses SQLite by default. The connection string can be seen in `appsettings.json`. The database filename referenced by default will be stored in the data folder.
+SegnoSharp uses SQLite by default. The connection string can be seen in `appsettings.json`. The database filename referenced by default will be stored in the data folder.
 
-WASP also supports MySQL, so change `Database:Type` to `mysql`, and place your connection string in the User Secrets file, and/or in the `.env` file. This is an example connection string for MySQL: `server=serverIpOrDns;uid=dbuser;pwd=dbpassword;database=wasp`
+SegnoSharp also supports MySQL, so change `Database:Type` to `mysql`, and place your connection string in the User Secrets file, and/or in the `.env` file. This is an example connection string for MySQL: `server=serverIpOrDns;uid=dbuser;pwd=dbpassword;database=SegnoSharp`

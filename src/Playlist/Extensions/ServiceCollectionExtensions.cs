@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Whitestone.WASP.Common.Interfaces;
+using Whitestone.SegnoSharp.Common.Interfaces;
 
-namespace Whitestone.WASP.Playlist.Extensions
+namespace Whitestone.SegnoSharp.Playlist.Extensions
 {
     public static class ServiceCollectionExtensions
     {

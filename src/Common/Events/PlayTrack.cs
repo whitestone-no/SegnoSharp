@@ -1,6 +1,6 @@
-﻿using Whitestone.WASP.Common.Models;
+﻿using Whitestone.SegnoSharp.Common.Models;
 
-namespace Whitestone.WASP.Common.Events
+namespace Whitestone.SegnoSharp.Common.Events
 {
     public class PlayTrack
     {

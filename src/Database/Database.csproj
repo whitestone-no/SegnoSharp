@@ -4,8 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>Whitestone.WASP.$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>Whitestone.WASP.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <AssemblyName>Whitestone.SegnoSharp.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>Whitestone.SegnoSharp.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

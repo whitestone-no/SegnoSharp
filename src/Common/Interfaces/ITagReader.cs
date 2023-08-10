@@ -1,6 +1,6 @@
-﻿using Whitestone.WASP.Common.Models;
+﻿using Whitestone.SegnoSharp.Common.Models;
 
-namespace Whitestone.WASP.Common.Interfaces
+namespace Whitestone.SegnoSharp.Common.Interfaces
 {
     public interface ITagReader
     {

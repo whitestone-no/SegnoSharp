@@ -1,4 +1,4 @@
-﻿namespace Whitestone.WASP.BassService.Models.Bass
+﻿namespace Whitestone.SegnoSharp.BassService.Models.Bass
 {
     public enum BASSError
     {

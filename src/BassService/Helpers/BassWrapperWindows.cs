@@ -1,22 +1,22 @@
 ﻿extern alias BassNetWindows;
 
-using Whitestone.WASP.BassService.Interfaces;
+using Whitestone.SegnoSharp.BassService.Interfaces;
 using System;
 using System.IO;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Whitestone.WASP.Common.Models;
-using StreamingServer = Whitestone.WASP.Common.Models.Configuration.StreamingServer;
+using Whitestone.SegnoSharp.Common.Models;
+using StreamingServer = Whitestone.SegnoSharp.Common.Models.Configuration.StreamingServer;
 
-namespace Whitestone.WASP.BassService.Helpers
+namespace Whitestone.SegnoSharp.BassService.Helpers
 {
     public class BassWrapperWindows : IBassWrapper
     {
         private readonly ILogger<BassWrapperWindows> _log;
         private readonly StreamingServer _streamingServerConfig;
         private BassNetWindows::Un4seen.Bass.Misc.IBaseEncoder _encoder;
-        private string _currentTitle = "WASP";
+        private string _currentTitle = "SegnoSharp";
 
         public BassWrapperWindows(IOptions<StreamingServer> streamingServerConfig, ILogger<BassWrapperWindows> log)
         {

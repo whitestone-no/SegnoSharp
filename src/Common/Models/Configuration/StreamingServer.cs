@@ -1,4 +1,4 @@
-﻿namespace Whitestone.WASP.Common.Models.Configuration
+﻿namespace Whitestone.SegnoSharp.Common.Models.Configuration
 {
     public class StreamingServer
     {

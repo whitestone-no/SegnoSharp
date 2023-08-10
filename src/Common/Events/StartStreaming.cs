@@ -1,4 +1,4 @@
-﻿namespace Whitestone.WASP.Common.Events
+﻿namespace Whitestone.SegnoSharp.Common.Events
 {
     public class StartStreaming
     {

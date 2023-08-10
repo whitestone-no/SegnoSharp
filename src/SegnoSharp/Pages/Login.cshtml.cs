@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Whitestone.WASP.Pages
+namespace Whitestone.SegnoSharp.Pages
 {
     public class LoginModel : PageModel
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Whitestone.WASP.Database.Models
+namespace Whitestone.SegnoSharp.Database.Models
 {
     public class AlbumPersonGroupPersonRelation
     {

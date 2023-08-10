@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
-using Whitestone.WASP.Database;
+using Whitestone.SegnoSharp.Database;
 
-namespace Whitestone.WASP
+namespace Whitestone.SegnoSharp
 {
     public class Bootstrapper
 
@@ -29,11 +29,11 @@ namespace Whitestone.WASP
                     {
                         configuration
                             .ReadFrom.Services(services)
-                            .MinimumLevel.Override("Whitestone.WASP", LogEventLevel.Verbose)
+                            .MinimumLevel.Override("Whitestone.SegnoSharp", LogEventLevel.Verbose)
                             .Enrich.FromLogContext()
                             .WriteTo.Console()
                             .WriteTo.File(
-                                Path.Combine(context.Configuration["CommonConfig:DataPath"], "logs", "wasp.log"),
+                                Path.Combine(context.Configuration["CommonConfig:DataPath"], "logs", "SegnoSharp.log"),
                                 rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true);
                     });
 
@@ -41,7 +41,7 @@ namespace Whitestone.WASP
 
                 using (IServiceScope scope = host.Services.CreateScope())
                 {
-                    WaspDbContext? dbContext = scope.ServiceProvider.GetService<WaspDbContext>();
+                    SegnoSharpDbContext? dbContext = scope.ServiceProvider.GetService<SegnoSharpDbContext>();
                     await dbContext?.Database.MigrateAsync()!;
                 }
 
@@ -65,7 +65,7 @@ namespace Whitestone.WASP
                 {
                     conf.AddJsonFile("appsettings.json");
                     conf.AddUserSecrets("ef2b06ee-7634-4a6e-9cce-5ad721a03d65");
-                    conf.AddEnvironmentVariables("WASP_");
+                    conf.AddEnvironmentVariables("SegnoSharp_");
                     conf.AddCommandLine(args);
                 })
                 .ConfigureServices((context, services) =>
@@ -75,11 +75,11 @@ namespace Whitestone.WASP
                     switch (databaseType)
                     {
                         case "sqlite":
-                            services.AddDbContext<WaspDbContext, WaspSqliteDbContext>(options =>
+                            services.AddDbContext<SegnoSharpDbContext, SegnoSharpSqliteDbContext>(options =>
                                 ConfigureDatabase(options, context.Configuration));
                             break;
                         case "mysql":
-                            services.AddDbContext<WaspDbContext, WaspMysqlDbContext>(options =>
+                            services.AddDbContext<SegnoSharpDbContext, SegnoSharpMysqlDbContext>(options =>
                                 ConfigureDatabase(options, context.Configuration));
                             break;
                         default:
@@ -95,13 +95,13 @@ namespace Whitestone.WASP
             switch (databaseType)
             {
                 case "sqlite":
-                    string connSqlite = configuration.GetConnectionString("WaspDatabaseSqlite");
+                    string connSqlite = configuration.GetConnectionString("SegnoSharpDatabaseSqlite");
                     SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
                     connectionStringBuilder.DataSource = Path.Combine(configuration["CommonConfig:DataPath"], connectionStringBuilder.DataSource);
                     options.UseSqlite(connectionStringBuilder.ConnectionString);
                     break;
                 case "mysql":
-                    string connMysql = configuration.GetConnectionString("WaspDatabaseMysql");
+                    string connMysql = configuration.GetConnectionString("SegnoSharpDatabaseMysql");
                     options.UseMySql(connMysql, ServerVersion.AutoDetect(connMysql));
                     break;
                 default:

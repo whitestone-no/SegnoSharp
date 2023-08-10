@@ -1,4 +1,4 @@
-﻿namespace Whitestone.WASP.Database.Models
+﻿namespace Whitestone.SegnoSharp.Database.Models
 {
     public class AlbumCoverData
     {

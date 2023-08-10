@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace Whitestone.WASP.Shared
+namespace Whitestone.SegnoSharp.Shared
 {
     public partial class MainLayout
     {

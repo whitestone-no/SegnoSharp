@@ -1,12 +1,12 @@
 {
   "profiles": {
-    "WASP": {
+    "SegnoSharp": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "WASP_CommonConfig__DataPath": "$(SolutionDir)../data",
-        "WASP_CommonConfig__MusicPath": "$(SolutionDir)../music"
+        "SegnoSharp_CommonConfig__DataPath": "$(SolutionDir)../data",
+        "SegnoSharp_CommonConfig__MusicPath": "$(SolutionDir)../music"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
@@ -20,9 +20,9 @@
       "useSSL": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "WASP_CommonConfig__DataPath": "/var/wasp",
-        "WASP_CommonConfig__MusicPath": "/var/music",
-        "WASP_StreamingServer__Address": "host.docker.internal" 
+        "SegnoSharp_CommonConfig__DataPath": "/var/segnosharp",
+        "SegnoSharp_CommonConfig__MusicPath": "/var/music",
+        "SegnoSharp_StreamingServer__Address": "host.docker.internal" 
       }
     },
     "WSL": {
@@ -32,8 +32,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000",
-        "WASP_CommonConfig__DataPath": "../../data",
-        "WASP_CommonConfig__MusicPath": "../../music"
+        "SegnoSharp_CommonConfig__DataPath": "../../data",
+        "SegnoSharp_CommonConfig__MusicPath": "../../music"
       },
       "distributionName": ""
     }

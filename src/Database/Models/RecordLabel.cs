@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Whitestone.WASP.Database.Models
+namespace Whitestone.SegnoSharp.Database.Models
 {
     [Index(nameof(Name))]
     public class RecordLabel

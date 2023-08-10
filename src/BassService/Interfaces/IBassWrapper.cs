@@ -1,7 +1,7 @@
 ﻿using System;
-using Whitestone.WASP.Common.Models;
+using Whitestone.SegnoSharp.Common.Models;
 
-namespace Whitestone.WASP.BassService.Interfaces
+namespace Whitestone.SegnoSharp.BassService.Interfaces
 {
     public interface IBassWrapper
     {

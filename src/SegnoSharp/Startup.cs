@@ -1,15 +1,15 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Whitestone.WASP.BassService.Extensions;
+using Whitestone.SegnoSharp.BassService.Extensions;
 using Serilog;
 using Whitestone.Cambion.Extensions;
 using Whitestone.Cambion.Serializer.MessagePack;
-using Whitestone.WASP.Common.Models.Configuration;
-using Whitestone.WASP.Configuration.Extensions;
-using Whitestone.WASP.Database;
-using Whitestone.WASP.Playlist.Extensions;
+using Whitestone.SegnoSharp.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Configuration.Extensions;
+using Whitestone.SegnoSharp.Database;
+using Whitestone.SegnoSharp.Playlist.Extensions;
 
-namespace Whitestone.WASP
+namespace Whitestone.SegnoSharp
 {
     public class Startup
     {

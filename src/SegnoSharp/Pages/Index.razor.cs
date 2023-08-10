@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Whitestone.Cambion.Interfaces;
-using Whitestone.WASP.Common.Events;
+using Whitestone.SegnoSharp.Common.Events;
 
-namespace Whitestone.WASP.Pages
+namespace Whitestone.SegnoSharp.Pages
 {
     public partial class Index
     {

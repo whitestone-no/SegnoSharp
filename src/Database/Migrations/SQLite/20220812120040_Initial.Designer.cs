@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Whitestone.WASP.Database;
+using Whitestone.SegnoSharp.Database;
 
 #nullable disable
 
-namespace Whitestone.WASP.Database.Migrations.SQLite
+namespace Whitestone.SegnoSharp.Database.Migrations.SQLite
 {
-    [DbContext(typeof(WaspSqliteDbContext))]
+    [DbContext(typeof(SegnoSharpSqliteDbContext))]
     [Migration("20220812120040_Initial")]
     partial class Initial
     {
@@ -94,7 +94,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("PersonTrackPersonGroupPersonRelation");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.Album", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Album", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -128,7 +128,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("Albums");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.AlbumCover", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.AlbumCover", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -156,7 +156,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("AlbumCovers");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.AlbumCoverData", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.AlbumCoverData", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -177,7 +177,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("AlbumCoversData");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.AlbumPersonGroupPersonRelation", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.AlbumPersonGroupPersonRelation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -198,7 +198,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("AlbumPersonGroupsRelations");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.Disc", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Disc", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -221,7 +221,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("Discs");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.Genre", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Genre", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -238,7 +238,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("Genres");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.MediaType", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.MediaType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -256,7 +256,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("MediaTypes");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.Person", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Person", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -280,7 +280,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("Persons");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.PersonGroup", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersonGroup", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -301,7 +301,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("PersonGroups");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.RecordLabel", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.RecordLabel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -317,7 +317,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("RecordLabels");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.StreamHistory", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.StreamHistory", b =>
                 {
                     b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
@@ -336,7 +336,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("StreamHistory");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.StreamQueue", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.StreamQueue", b =>
                 {
                     b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
@@ -355,7 +355,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("StreamQueue");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.Track", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Track", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -383,7 +383,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("Tracks");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.TrackGroup", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.TrackGroup", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -406,7 +406,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("TrackGroups");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.TrackPersonGroupPersonRelation", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.TrackPersonGroupPersonRelation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -432,7 +432,7 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.ToTable("TrackPersonGroupsRelations");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.TrackStreamInfo", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -466,13 +466,13 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
 
             modelBuilder.Entity("AlbumGenre", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Album", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Album", null)
                         .WithMany()
                         .HasForeignKey("AlbumsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Whitestone.WASP.Database.Models.Genre", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Genre", null)
                         .WithMany()
                         .HasForeignKey("GenresId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -481,13 +481,13 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
 
             modelBuilder.Entity("AlbumPersonGroupPersonRelationPerson", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.AlbumPersonGroupPersonRelation", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.AlbumPersonGroupPersonRelation", null)
                         .WithMany()
                         .HasForeignKey("AlbumPersonGroupPersonRelationsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Whitestone.WASP.Database.Models.Person", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Person", null)
                         .WithMany()
                         .HasForeignKey("PersonsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -496,13 +496,13 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
 
             modelBuilder.Entity("AlbumRecordLabel", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Album", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Album", null)
                         .WithMany()
                         .HasForeignKey("AlbumsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Whitestone.WASP.Database.Models.RecordLabel", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.RecordLabel", null)
                         .WithMany()
                         .HasForeignKey("RecordLabelsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -511,13 +511,13 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
 
             modelBuilder.Entity("DiscMediaType", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Disc", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Disc", null)
                         .WithMany()
                         .HasForeignKey("DiscsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Whitestone.WASP.Database.Models.MediaType", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.MediaType", null)
                         .WithMany()
                         .HasForeignKey("MediaTypesId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -526,50 +526,50 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
 
             modelBuilder.Entity("PersonTrackPersonGroupPersonRelation", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Person", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Person", null)
                         .WithMany()
                         .HasForeignKey("PersonsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Whitestone.WASP.Database.Models.TrackPersonGroupPersonRelation", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.TrackPersonGroupPersonRelation", null)
                         .WithMany()
                         .HasForeignKey("TrackPersonGroupPersonRelationsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.AlbumCover", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.AlbumCover", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Album", "Album")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Album", "Album")
                         .WithOne("AlbumCover")
-                        .HasForeignKey("Whitestone.WASP.Database.Models.AlbumCover", "AlbumId")
+                        .HasForeignKey("Whitestone.SegnoSharp.Database.Models.AlbumCover", "AlbumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Album");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.AlbumCoverData", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.AlbumCoverData", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.AlbumCover", "AlbumCover")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.AlbumCover", "AlbumCover")
                         .WithOne("AlbumCoverData")
-                        .HasForeignKey("Whitestone.WASP.Database.Models.AlbumCoverData", "AlbumCoverId")
+                        .HasForeignKey("Whitestone.SegnoSharp.Database.Models.AlbumCoverData", "AlbumCoverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("AlbumCover");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.AlbumPersonGroupPersonRelation", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.AlbumPersonGroupPersonRelation", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Album", "Album")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Album", "Album")
                         .WithMany("AlbumPersonGroupPersonRelations")
                         .HasForeignKey("AlbumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Whitestone.WASP.Database.Models.PersonGroup", "PersonGroup")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.PersonGroup", "PersonGroup")
                         .WithMany("AlbumPersonGroupPersonRelations")
                         .HasForeignKey("PersonGroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -580,9 +580,9 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.Navigation("PersonGroup");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.Disc", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Disc", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Album", "Album")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Album", "Album")
                         .WithMany("Discs")
                         .HasForeignKey("AlbumId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -591,9 +591,9 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.Navigation("Album");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.StreamHistory", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.StreamHistory", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.TrackStreamInfo", "TrackStreamInfo")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", "TrackStreamInfo")
                         .WithMany("StreamHistory")
                         .HasForeignKey("TrackStreamInfoId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -602,9 +602,9 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.Navigation("TrackStreamInfo");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.StreamQueue", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.StreamQueue", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.TrackStreamInfo", "TrackStreamInfo")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", "TrackStreamInfo")
                         .WithMany("StreamQueue")
                         .HasForeignKey("TrackStreamInfoId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -613,9 +613,9 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.Navigation("TrackStreamInfo");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.Track", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Track", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Disc", "Disc")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Disc", "Disc")
                         .WithMany("Tracks")
                         .HasForeignKey("DiscId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -624,9 +624,9 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.Navigation("Disc");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.TrackGroup", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.TrackGroup", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Disc", "Disc")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Disc", "Disc")
                         .WithMany("TrackGroups")
                         .HasForeignKey("DiscId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -635,19 +635,19 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.Navigation("Disc");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.TrackPersonGroupPersonRelation", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.TrackPersonGroupPersonRelation", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Album", null)
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Album", null)
                         .WithMany("TrackPersonGroupPersonRelations")
                         .HasForeignKey("AlbumId");
 
-                    b.HasOne("Whitestone.WASP.Database.Models.PersonGroup", "PersonGroup")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.PersonGroup", "PersonGroup")
                         .WithMany("TrackPersonGroupPersonRelations")
                         .HasForeignKey("PersonGroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Whitestone.WASP.Database.Models.Track", "Track")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Track", "Track")
                         .WithMany()
                         .HasForeignKey("TrackId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -658,18 +658,18 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.Navigation("Track");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.TrackStreamInfo", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", b =>
                 {
-                    b.HasOne("Whitestone.WASP.Database.Models.Track", "Track")
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.Track", "Track")
                         .WithOne("TrackStreamInfo")
-                        .HasForeignKey("Whitestone.WASP.Database.Models.TrackStreamInfo", "TrackId")
+                        .HasForeignKey("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", "TrackId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Track");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.Album", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Album", b =>
                 {
                     b.Navigation("AlbumCover")
                         .IsRequired();
@@ -681,33 +681,33 @@ namespace Whitestone.WASP.Database.Migrations.SQLite
                     b.Navigation("TrackPersonGroupPersonRelations");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.AlbumCover", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.AlbumCover", b =>
                 {
                     b.Navigation("AlbumCoverData")
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.Disc", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Disc", b =>
                 {
                     b.Navigation("TrackGroups");
 
                     b.Navigation("Tracks");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.PersonGroup", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersonGroup", b =>
                 {
                     b.Navigation("AlbumPersonGroupPersonRelations");
 
                     b.Navigation("TrackPersonGroupPersonRelations");
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.Track", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Track", b =>
                 {
                     b.Navigation("TrackStreamInfo")
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Whitestone.WASP.Database.Models.TrackStreamInfo", b =>
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", b =>
                 {
                     b.Navigation("StreamHistory");
 

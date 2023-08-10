@@ -1,8 +1,8 @@
-﻿using Whitestone.WASP.BassService.Interfaces;
-using Whitestone.WASP.Common.Interfaces;
-using Whitestone.WASP.Common.Models;
+﻿using Whitestone.SegnoSharp.BassService.Interfaces;
+using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Common.Models;
 
-namespace Whitestone.WASP.BassService.Helpers
+namespace Whitestone.SegnoSharp.BassService.Helpers
 {
     public class TagReader : ITagReader
     {

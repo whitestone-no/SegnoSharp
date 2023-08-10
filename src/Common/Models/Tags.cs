@@ -1,4 +1,4 @@
-﻿namespace Whitestone.WASP.Common.Models
+﻿namespace Whitestone.SegnoSharp.Common.Models
 {
     public class Tags
     {

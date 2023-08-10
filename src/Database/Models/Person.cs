@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
-namespace Whitestone.WASP.Database.Models
+namespace Whitestone.SegnoSharp.Database.Models
 {
     [Index(nameof(LastName), nameof(FirstName))]
     public class Person
