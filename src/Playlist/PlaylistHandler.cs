@@ -199,11 +199,8 @@ namespace Whitestone.SegnoSharp.Playlist
 
         public void HandleEvent(PlayNextTrack input)
         {
-            if (_playlistTaskCancellationTokenSource != null)
-            {
-                // Playlist task is already running. Stop it before starting a new instance.
-                _playlistTaskCancellationTokenSource.Cancel();
-            }
+            // Stop playlist task before starting a new instance
+            _playlistTaskCancellationTokenSource?.Cancel();
 
             _playlistTaskCancellationTokenSource = new CancellationTokenSource();
 

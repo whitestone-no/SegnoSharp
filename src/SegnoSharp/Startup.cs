@@ -1,13 +1,17 @@
-﻿using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Whitestone.SegnoSharp.BassService.Extensions;
 using Serilog;
 using Whitestone.Cambion.Extensions;
 using Whitestone.Cambion.Serializer.MessagePack;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Configuration.Extensions;
-using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Playlist.Extensions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Whitestone.SegnoSharp.HealthChecks;
 
 namespace Whitestone.SegnoSharp
 {
@@ -53,6 +57,7 @@ namespace Whitestone.SegnoSharp
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHealthChecks("/health", new HealthCheckOptions{ ResponseWriter = HealthCheckResponseWriter.WriteResponse });
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });

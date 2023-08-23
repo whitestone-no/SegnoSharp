@@ -1,7 +1,11 @@
 ﻿using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Whitestone.SegnoSharp.Configuration.Extensions
 {
@@ -48,7 +52,7 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                     // Would love to use .RequireRole() here, but somehow the "role" claims from IDP is not mapped to user roles.
                     .RequireAssertion(ctx =>
                     {
-                        Claim? claim = ctx.User.FindFirst("role");
+                        Claim claim = ctx.User.FindFirst("role");
                         return claim != null && claim.Value.Contains(configuration.GetSection("OpenIdConnect").GetValue<string>("AdminRoleId"));
                     })
                     .Build();

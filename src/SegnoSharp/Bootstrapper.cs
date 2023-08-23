@@ -1,5 +1,12 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Whitestone.SegnoSharp.Database;
@@ -41,7 +48,7 @@ namespace Whitestone.SegnoSharp
 
                 using (IServiceScope scope = host.Services.CreateScope())
                 {
-                    SegnoSharpDbContext? dbContext = scope.ServiceProvider.GetService<SegnoSharpDbContext>();
+                    var dbContext = scope.ServiceProvider.GetService<SegnoSharpDbContext>();
                     await dbContext?.Database.MigrateAsync()!;
                 }
 
@@ -75,38 +82,29 @@ namespace Whitestone.SegnoSharp
                     switch (databaseType)
                     {
                         case "sqlite":
-                            services.AddDbContext<SegnoSharpDbContext, SegnoSharpSqliteDbContext>(options =>
-                                ConfigureDatabase(options, context.Configuration));
+                            string connSqlite = context.Configuration.GetConnectionString("SegnoSharpDatabaseSqlite");
+                            SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
+                            connectionStringBuilder.DataSource = Path.Combine(context.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
+
+                            services.AddDbContext<SegnoSharpDbContext, SegnoSharpSqliteDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString));
+
+                            services.AddHealthChecks().AddSqlite(connectionStringBuilder.ConnectionString, name: "Database");
+                            services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
+
                             break;
                         case "mysql":
-                            services.AddDbContext<SegnoSharpDbContext, SegnoSharpMysqlDbContext>(options =>
-                                ConfigureDatabase(options, context.Configuration));
+                            string connMysql = context.Configuration.GetConnectionString("SegnoSharpDatabaseMysql");
+
+                            services.AddDbContext<SegnoSharpDbContext, SegnoSharpMysqlDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql)));
+
+                            services.AddHealthChecks().AddMySql(connMysql ?? string.Empty, name: "Database");
+                            services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
+
                             break;
                         default:
                             throw new ArgumentException($"Unsupported database type: {databaseType}");
                     }
                 });
-        }
-
-        public static void ConfigureDatabase(DbContextOptionsBuilder options, IConfiguration configuration)
-        {
-            string databaseType = configuration.GetSection("Database").GetValue<string>("Type").ToLower();
-
-            switch (databaseType)
-            {
-                case "sqlite":
-                    string connSqlite = configuration.GetConnectionString("SegnoSharpDatabaseSqlite");
-                    SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
-                    connectionStringBuilder.DataSource = Path.Combine(configuration["CommonConfig:DataPath"], connectionStringBuilder.DataSource);
-                    options.UseSqlite(connectionStringBuilder.ConnectionString);
-                    break;
-                case "mysql":
-                    string connMysql = configuration.GetConnectionString("SegnoSharpDatabaseMysql");
-                    options.UseMySql(connMysql, ServerVersion.AutoDetect(connMysql));
-                    break;
-                default:
-                    throw new ArgumentException($"Unsupported database type: {databaseType}");
-            }
         }
     }
 }

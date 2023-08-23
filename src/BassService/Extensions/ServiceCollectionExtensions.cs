@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Runtime.InteropServices;
+using Whitestone.SegnoSharp.BassService.HealthChecks;
 using Whitestone.SegnoSharp.Common.Interfaces;
 
 namespace Whitestone.SegnoSharp.BassService.Extensions
@@ -31,6 +32,9 @@ namespace Whitestone.SegnoSharp.BassService.Extensions
             services.AddSingleton<ITagReader, TagReader>();
 
             services.AddHostedService<BassServiceHost>();
+
+            services.AddHttpClient<StreamingServerHealthCheck>();
+            services.AddHealthChecks().AddCheck<StreamingServerHealthCheck>("StreamingServer");
 
             return services;
         }

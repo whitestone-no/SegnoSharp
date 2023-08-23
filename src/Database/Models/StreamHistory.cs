@@ -1,4 +1,6 @@
-﻿namespace Whitestone.SegnoSharp.Database.Models
+﻿using System;
+
+namespace Whitestone.SegnoSharp.Database.Models
 {
     public class StreamHistory
     {
