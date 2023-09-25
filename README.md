@@ -1,5 +1,7 @@
 # SegnoSharp
 
+![SegnoSharp logo](https://github.com/gthvidsten/segnosharp/img/logo.png)
+
 ## Purpose
 To create a simple audio streaming tool that can randomly stream audio files to Shoutcast/Icecast. Meant to replace SAM Broadcaster for internal internet radio.
 
