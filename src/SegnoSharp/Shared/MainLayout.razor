@@ -6,7 +6,7 @@
 <input id="menu-toggle-button" type="checkbox" role="button" checked="checked" /> <!-- checked="checked" -->
 <label id="menu-toggle-icon" for="menu-toggle-button"><span class="fa-solid fa-angles-right"></span></label>
 <header>
-    <div>
+    <div class="auth">
         <AuthorizeView Policy="IgnoreRole">
             <Authorized>
                 Logged in as <em>@_loggedInAs</em>
@@ -19,6 +19,9 @@
                 <NavLink href="@("/login?redirectUri=" + @NavigationManager.Uri)">Login</NavLink>
             </NotAuthorized>
         </AuthorizeView>
+    </div>
+    <div class="headerLogo">
+        <img src="img/logoHeader.png" alt="SegnoSharp Logo" />
     </div>
 </header>
 <nav>
