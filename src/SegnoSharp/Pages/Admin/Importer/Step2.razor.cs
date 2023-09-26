@@ -14,6 +14,40 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
 
         private string ErrorMessage { get; set; }
 
+        private bool AllImport
+        {
+            get => ImporterState.SelectedFiles.All(f => f.Import);
+            set
+            {
+                foreach (SelectedFile file in ImporterState.SelectedFiles)
+                {
+                    file.Import = value;
+                }
+            }
+        }
+        private bool AllImportPublic
+        {
+            get => ImporterState.SelectedFiles.All(f => f.ImportToPublicLibrary);
+            set
+            {
+                foreach (SelectedFile file in ImporterState.SelectedFiles)
+                {
+                    file.ImportToPublicLibrary = value;
+                }
+            }
+        }
+        private bool AllImportPlaylist
+        {
+            get => ImporterState.SelectedFiles.All(f => f.ImportToPlaylist);
+            set
+            {
+                foreach (SelectedFile file in ImporterState.SelectedFiles)
+                {
+                    file.ImportToPlaylist = value;
+                }
+            }
+        }
+
         protected override void OnInitialized()
         {
             if (ImporterState.SelectedFiles != null &&
@@ -60,43 +94,6 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
         private void OnBackClick()
         {
             NavigationManager.NavigateTo("/admin/import");
-        }
-
-        private void OnAllImportChange(ChangeEventArgs e)
-        {
-            if (e.Value == null)
-            {
-                return;
-            }
-
-            foreach (SelectedFile file in ImporterState.SelectedFiles)
-            {
-                file.Import = (bool)e.Value;
-            }
-        }
-        private void OnAllImportPublicChange(ChangeEventArgs e)
-        {
-            if (e.Value == null)
-            {
-                return;
-            }
-
-            foreach (SelectedFile file in ImporterState.SelectedFiles)
-            {
-                file.ImportToPublicLibrary = (bool)e.Value;
-            }
-        }
-        private void OnAllImportPlaylistChange(ChangeEventArgs e)
-        {
-            if (e.Value == null)
-            {
-                return;
-            }
-
-            foreach (SelectedFile file in ImporterState.SelectedFiles)
-            {
-                file.ImportToPlaylist = (bool)e.Value;
-            }
         }
     }
 }

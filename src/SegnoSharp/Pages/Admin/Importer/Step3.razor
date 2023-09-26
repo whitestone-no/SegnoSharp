@@ -1,0 +1,17 @@
+﻿@page "/admin/import/step-3"
+@attribute [Authorize]
+
+<div class="Import">
+    <ul class="Steps">
+        <li>Select Folder</li>
+        <li>Select Files</li>
+        <li class="active">Verify Metadata</li>
+        <li>Import</li>
+    </ul>
+    <div class="ImportVerifyMetadata">
+        <div class="NextBack">
+            <button @onclick="OnNextClick">Next &gt;</button>
+            <button @onclick="OnBackClick">&lt; Back</button>
+        </div>
+    </div>
+</div>
