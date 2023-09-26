@@ -12,6 +12,7 @@ using Whitestone.SegnoSharp.Playlist.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Whitestone.SegnoSharp.HealthChecks;
+using Whitestone.SegnoSharp.Models.States;
 
 namespace Whitestone.SegnoSharp
 {
@@ -36,6 +37,8 @@ namespace Whitestone.SegnoSharp
                 .UseMessagePackSerializer();
             services.AddPlaylistHandler(_configuration);
             services.AddBassService(_configuration);
+
+            services.AddScoped<ImportState>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

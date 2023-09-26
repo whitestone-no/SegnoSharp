@@ -31,7 +31,6 @@
             body > header > div.auth > a:active,
             body > header > div.auth > a:focus {
                 margin-left: 10px;
-                color: #f8f8f8;
             }
 
             body > header > div.auth > a:hover {
@@ -156,6 +155,173 @@ nav a {
     text-decoration: none;
 }
 
-a:visited, a:active {
+a, a:visited, a:active, a:focus {
     color: inherit;
+}
+
+
+
+
+
+.Import {
+    background-color: #f8f8f8;
+    border: solid 1px #bbb;
+    display: inline-block;
+}
+
+    .Import ul.Steps {
+        margin: 0 0 10px 0;
+        padding: 10px 20px;
+        list-style: none;
+        font-weight: bold;
+        color: #222222;
+        background-color: #ffce10;
+    }
+
+        .Import ul.Steps li {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+            .Import ul.Steps li.active {
+                border-bottom: solid 2px #222222;
+            }
+
+.ImportSelectFolder {
+    margin: 10px 20px;
+}
+
+    .ImportSelectFolder .SelectedFolder span {
+        position: relative;
+        top: -9px;
+    }
+
+    .ImportSelectFolder .SelectedFolder div {
+        display: inline-block;
+        background-color: #fff;
+        border: solid 1px #bbb;
+    }
+
+    .ImportSelectFolder .SelectedFolder ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+        .ImportSelectFolder .SelectedFolder ul li {
+            float: left;
+        }
+
+    .ImportSelectFolder .SelectedFolder button {
+        display: block;
+        padding: 5px 0;
+        border: solid 1px transparent;
+        background-color: transparent;
+        text-align: center;
+        cursor: pointer;
+    }
+
+        .ImportSelectFolder .SelectedFolder button:hover {
+            background-color: #e5f3ff;
+            border: solid 1px #cce8ff;
+        }
+
+        .ImportSelectFolder .SelectedFolder button:focus {
+            outline: none;
+        }
+
+        .ImportSelectFolder .SelectedFolder button:after {
+            content: '\\';
+        }
+
+    .ImportSelectFolder .SelectedFolder li:first-child button:after {
+        content: '>';
+        padding: 0 5px;
+    }
+
+    .ImportSelectFolder .SelectedFolder li:last-child button:after {
+        content: '';
+        margin-left: 0;
+        padding: 0;
+    }
+
+    .ImportSelectFolder .SelectedFolder li:nth-child(2) button:after {
+        content: '';
+    }
+
+    .ImportSelectFolder .SelectedFolder li:first-child button {
+        margin-left: 0;
+        padding-left: 5px;
+    }
+
+    .ImportSelectFolder .SelectedFolder li:last-child button {
+        padding-right: 5px;
+    }
+
+.Import .AvailableFolders {
+    background-color: #fff;
+    padding: 10px;
+    border: solid 1px #bbb;
+    margin: 10px 0;
+    max-height: 50vh;
+    overflow-y: scroll;
+}
+
+    .Import .AvailableFolders ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+        .Import .AvailableFolders ul li {
+            margin: 0;
+            padding: 0;
+        }
+
+            .Import .AvailableFolders ul li.NoPermission {
+                font-weight: bold;
+                color: #b44;
+            }
+
+    .Import .AvailableFolders button {
+        display: block;
+        width: 100%;
+        margin: 0;
+        padding: 2px 2px 2px 25px;
+        border: 0;
+        text-align: left;
+        border: solid 1px transparent;
+        background-color: transparent;
+        background-image: url("../../../img/folder_16.png");
+        background-repeat: no-repeat;
+        background-position: left center;
+        cursor: pointer;
+    }
+
+        .Import .AvailableFolders button:hover {
+            background-color: #e5f3ff;
+            border: solid 1px #cce8ff;
+        }
+
+        .Import .AvailableFolders button:focus {
+            outline: none;
+        }
+
+.Import .NextBack {
+    padding-top: 10px;
+}
+
+    .Import .NextBack button {
+        float: right;
+        margin: 5px 5px 5px 0;
+    }
+
+.Import .Error {
+    text-align: center;
+    font-weight: bold;
+    color: #b44;
+}
+
+.Import .ImportSelectFiles {
+    padding: 10px;
 }
