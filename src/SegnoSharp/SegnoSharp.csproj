@@ -38,8 +38,4 @@
     <ProjectReference Include="..\Playlist\Playlist.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\Admin\Importer\" />
-  </ItemGroup>
-
 </Project>

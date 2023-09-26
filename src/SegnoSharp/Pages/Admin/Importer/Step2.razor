@@ -1,0 +1,79 @@
+﻿@page "/admin/import/step-2"
+@attribute [Authorize]
+
+<div class="Import">
+    <ul class="Steps">
+        <li>Select Folder</li>
+        <li class="active">Select Files</li>
+        <li>Verify Metadata</li>
+        <li>Import</li>
+    </ul>
+    <div class="ImportSelectFiles">
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="Error">@ErrorMessage</div>
+        }
+        else
+        {
+            <div class="FileListProperties">
+                <table>
+                    <tr>
+                        <th>Selected folder:</th>
+                        <td>@ImporterState.SelectedFolder?.FullName</td>
+                    </tr>
+                    <tr>
+                        <th>Import subfolders:</th>
+                        <td>
+                            @if (ImporterState.ImportSubfolders)
+                            {
+                                <span>Yes</span>
+                            }
+                            else
+                            {
+                                <span>No</span>
+                            }
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="FileList">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Filename</th>
+                            <th>
+                                <label for="chkAllImport">Import file</label>
+                                <input id="chkAllImport" type="checkbox" checked="checked" @onchange="OnAllImportChange" />
+                            </th>
+                            <th>
+                                <label for="chkAllImportPublic">Import to public library</label>
+                                <input id="chkAllImportPublic" type="checkbox" checked="checked" @onchange="OnAllImportPublicChange" />
+                            </th>
+                            <th>
+                                <label for="chkAllImportPlaylist">Import to playlist</label>
+                                <input id="chkAllImportPlaylist" type="checkbox" checked="checked" @onchange="OnAllImportPlaylistChange" />
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < ImporterState.SelectedFiles.Length; i++)
+                        {
+                            // Because @bind uses a lambda, and the i variable constantly gets changed, bind to a local variable instead
+                            int localIndex = i;
+                            <tr>
+                                <td>@ImporterState.SelectedFiles[localIndex].Filename</td>
+                                <td><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].Import" /></td>
+                                <td><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].ImportToPublicLibrary" /></td>
+                                <td><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].ImportToPlaylist" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        <div class="NextBack">
+            <button @onclick="OnNextClick">Next &gt;</button>
+            <button @onclick="OnBackClick">&lt; Back</button>
+        </div>
+    </div>
+</div>

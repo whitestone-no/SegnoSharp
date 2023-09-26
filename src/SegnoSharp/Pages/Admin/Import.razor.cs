@@ -51,6 +51,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin
         private void OnPathClick(DirectoryInfo di)
         {
             ImporterState.SelectedFolder = di;
+            ImporterState.SelectedFiles = null;
         }
 
         private void OnNextClick()

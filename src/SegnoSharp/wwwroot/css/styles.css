@@ -1,4 +1,12 @@
-﻿body {
+﻿:root {
+    --text-white: #f8f8f8;
+    --text-black: #222222;
+    --bg-yellow: #ffce10;
+    --bg-black: #222222;
+    --bg-darkgray: #444444;
+}
+
+body {
     margin: 0;
     padding: 0;
     font-family: Tahoma, Arial, Sans-serif;
@@ -15,8 +23,8 @@
         height: 40px;
         top: 0;
         left: 0;
-        background-color: #333333;
-        color: #f8f8f8;
+        background-color: var(--bg-black);
+        color: var(--text-white);
         z-index: 1;
     }
 
@@ -45,8 +53,8 @@
 
     body > nav {
         position: fixed;
-        background-color: #444444;
-        color: #f8f8f8;
+        background-color: var(--bg-darkgray);
+        color: var(--text-white);
         width: 250px;
         height: calc(100vh - 40px);
         top: 40px;
@@ -175,7 +183,7 @@ a, a:visited, a:active, a:focus {
         list-style: none;
         font-weight: bold;
         color: #222222;
-        background-color: #ffce10;
+        background-color: var(--bg-yellow);
     }
 
         .Import ul.Steps li {
@@ -184,7 +192,7 @@ a, a:visited, a:active, a:focus {
         }
 
             .Import ul.Steps li.active {
-                border-bottom: solid 2px #222222;
+                border-bottom: solid 2px var(--bg-black);
             }
 
 .ImportSelectFolder {
@@ -325,3 +333,28 @@ a, a:visited, a:active, a:focus {
 .Import .ImportSelectFiles {
     padding: 10px;
 }
+
+.Import .FileListProperties {
+    margin-bottom: 20px;
+}
+
+.Import .FileList th {
+    text-align: left;
+    border-right: solid 1px #ccc;
+    padding: 10px;
+    background-color: #eee;
+}
+
+.Import .FileList tbody tr:hover {
+    background-color: #fff;
+}
+
+.Import .FileList tbody td {
+    padding: 5px;
+    cursor: default;
+}
+
+    .Import .FileList tbody td:not(:first-child) {
+        text-align: right;
+        padding-right: 10px;
+    }
