@@ -20,9 +20,54 @@ namespace Whitestone.SegnoSharp.Models.States
 
     public class SelectedFile
     {
-        public bool Import { get; set; } = true;
-        public bool ImportToPublicLibrary { get; set; } = true;
-        public bool ImportToPlaylist { get; set; } = true;
+        private bool _import = true;
+        private bool _importToPublicLibrary = true;
+        private bool _importToPlaylist = true;
+
+        public bool Import
+        {
+            get => _import;
+            set
+            {
+                if (!value)
+                {
+                    _importToPlaylist = false;
+                    _importToPublicLibrary = false;
+                }
+
+                _import = value;
+            }
+        }
+
+        public bool ImportToPublicLibrary
+        {
+            get => _importToPublicLibrary;
+            set
+            {
+                if (value && !_import)
+                {
+                    _import = true;
+                }
+
+                _importToPublicLibrary = value;
+            }
+        }
+
+        public bool ImportToPlaylist
+        {
+            get => _importToPlaylist;
+            set
+            {
+                if (value && !_import)
+                {
+                    _import = true;
+                }
+
+                _importToPlaylist = value;
+
+            }
+        }
+
         public string Filename { get; set; }
         public FileInfo File { get; set; }
     }
