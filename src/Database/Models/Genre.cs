@@ -11,6 +11,6 @@ namespace Whitestone.SegnoSharp.Database.Models
         [Required]
         public string Name { get; set; }
 
-        public ICollection<Album> Albums { get; set; }
+        public IList<Album> Albums { get; set; }
     }
 }

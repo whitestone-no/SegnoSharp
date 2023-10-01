@@ -10,6 +10,6 @@ namespace Whitestone.SegnoSharp.Database.Models
         public string Name { get; set; }
         public byte SortOrder { get; set; }
 
-        public ICollection<Disc> Discs { get; set; }
+        public IList<Disc> Discs { get; set; }
     }
 }

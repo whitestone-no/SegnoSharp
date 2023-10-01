@@ -21,7 +21,6 @@ namespace Whitestone.SegnoSharp.Models.States
     public class SelectedFile
     {
         private bool _import = true;
-        private bool _importToPublicLibrary = true;
         private bool _importToPlaylist = true;
 
         public bool Import
@@ -32,24 +31,9 @@ namespace Whitestone.SegnoSharp.Models.States
                 if (!value)
                 {
                     _importToPlaylist = false;
-                    _importToPublicLibrary = false;
                 }
 
                 _import = value;
-            }
-        }
-
-        public bool ImportToPublicLibrary
-        {
-            get => _importToPublicLibrary;
-            set
-            {
-                if (value && !_import)
-                {
-                    _import = true;
-                }
-
-                _importToPublicLibrary = value;
             }
         }
 

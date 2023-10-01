@@ -42,16 +42,10 @@
                         <tr>
                             <th>Filename</th>
                             <th>
-                                <label for="chkAllImport">Import file</label>
-                                <input id="chkAllImport" type="checkbox" @bind="@AllImport" />
+                                <label for="chkAllImport">Import file</label>&nbsp;<input id="chkAllImport" type="checkbox" @bind="@AllImport" />
                             </th>
                             <th>
-                                <label for="chkAllImportPublic">Import to public library</label>
-                                <input id="chkAllImportPublic" type="checkbox" @bind="@AllImportPublic" />
-                            </th>
-                            <th>
-                                <label for="chkAllImportPlaylist">Import to playlist</label>
-                                <input id="chkAllImportPlaylist" type="checkbox" @bind="@AllImportPlaylist" />
+                                <label for="chkAllImportPlaylist">Import to playlist</label>&nbsp;<input id="chkAllImportPlaylist" type="checkbox" @bind="@AllImportPlaylist" />
                             </th>
                         </tr>
                     </thead>
@@ -63,7 +57,6 @@
                             <tr>
                                 <td>@ImporterState.SelectedFiles[localIndex].Filename</td>
                                 <td><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].Import" /></td>
-                                <td><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].ImportToPublicLibrary" /></td>
                                 <td><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].ImportToPlaylist" /></td>
                             </tr>
                         }

@@ -6,6 +6,12 @@
     --bg-darkgray: #444444;
 }
 
+*,
+*:before,
+*:after {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -41,15 +47,15 @@ body {
                 margin-left: 10px;
             }
 
-            body > header > div.auth > a:hover {
-                text-decoration: none;
-            }
+                body > header > div.auth > a:hover {
+                    text-decoration: none;
+                }
 
-            body > header > div.headerLogo {
-                position: fixed;
-                top: 5px;
-                right: 5px;
-            }
+        body > header > div.headerLogo {
+            position: fixed;
+            top: 5px;
+            right: 5px;
+        }
 
     body > nav {
         position: fixed;
@@ -76,9 +82,9 @@ body {
         padding: 10px;
     }
 
-    body > main > div.welcome {
-        text-align: center;
-    }
+        body > main > div.welcome {
+            text-align: center;
+        }
 
 h1 {
     font-size: 3em;
@@ -136,9 +142,10 @@ nav ul {
             font-weight: bold;
             padding-left: 10px;
         }
-        nav ul li > a.active {
-            background-color: #555555;
-        }
+
+            nav ul li > a.active {
+                background-color: #555555;
+            }
 
         nav ul li > span {
             margin-top: 20px;
@@ -339,11 +346,15 @@ a, a:visited, a:active, a:focus {
 }
 
 .Import .FileList th {
-    text-align: left;
+    text-align: right;
     border-right: solid 1px #ccc;
     padding: 10px;
     background-color: #eee;
 }
+
+    .Import .FileList th:first-child {
+        text-align: left;
+    }
 
 .Import .FileList tbody tr:hover {
     background-color: #fff;
@@ -358,3 +369,151 @@ a, a:visited, a:active, a:focus {
         text-align: right;
         padding-right: 10px;
     }
+
+
+.Import .ImportVerifyMetadata div.drag-on {
+    border-bottom: solid 2px var(--bg-black);
+}
+
+.Import .ImportVerifyMetadata div[draggable="true"] .td:first-child,
+.Import .ImportVerifyMetadata div[draggable="true"] .td:first-child * {
+    pointer-events: none;
+}
+
+.Import .ImportVerifyMetadata input {
+    background-color: transparent;
+    border: solid 1px transparent;
+    border-radius: 0;
+}
+
+    .Import .ImportVerifyMetadata input:focus {
+        background-color: var(--text-white);
+        border: solid 1px var(--bg-darkgray);
+        border-radius: 0;
+    }
+
+    .Import .ImportVerifyMetadata input.Number {
+        max-width: 20px;
+        text-align: center;
+    }
+
+    .Import .ImportVerifyMetadata input.Duration {
+        width: 60px;
+    }
+
+.Import .ImportVerifyMetadata .fa-solid {
+    color: var(--bg-darkgray);
+}
+
+.Import .ImportVerifyMetadata .AlbumInfo:not(:first-child) {
+    margin-top: 40px;
+    border-top: solid 2px var(--bg-darkgray);
+    padding-top: 20px;
+}
+
+.Import .ImportVerifyMetadata .AlbumInfo input.Title {
+    font-size: 2em;
+    width: 800px;
+}
+
+.Import .ImportVerifyMetadata .AlbumInfo th {
+    font-size: 0.9em;
+    text-align: left;
+}
+
+.Import .ImportVerifyMetadata .AlbumInfo table input[type="text"] {
+    width: 700px;
+}
+
+.Import .ImportVerifyMetadata .MediaInfo {
+    margin-top: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+    .Import .ImportVerifyMetadata .MediaInfo input {
+        font-weight: bold;
+        font-size: 1em;
+    }
+
+.Import .ImportVerifyMetadata .FakeTable .th {
+    font-weight: bold;
+    font-size: 0.9em;
+    text-align: center;
+    border-left: solid 1px #ccc;
+    background-color: #eee;
+    padding: 5px;
+}
+
+    .Import .ImportVerifyMetadata .FakeTable .th:first-child {
+        border-left: none;
+    }
+
+    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(5) {
+        text-align: left;
+    }
+
+.Import .ImportVerifyMetadata .FakeTable .th,
+.Import .ImportVerifyMetadata .FakeTable .td {
+    display: inline-block;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(1),
+    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(1) {
+        width: 30px;
+    }
+
+    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(2),
+    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(2) {
+        width: 80px;
+    }
+
+    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(3),
+    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(3) {
+        width: 70px;
+        text-align: left;
+    }
+
+    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(4),
+    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(4) {
+        width: 70px;
+    }
+
+    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(5),
+    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(5) {
+        width: 550px;
+        text-align: left;
+    }
+
+    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(6),
+    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(6) {
+        width: 200px;
+        text-align: left;
+    }
+
+    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(6),
+    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(6) {
+        width: 200px;
+        text-align: left;
+    }
+
+.Import .ImportVerifyMetadata .Track input.Title {
+    min-width: 550px;
+}
+.Import .ImportVerifyMetadata .Track input.Artist,
+.Import .ImportVerifyMetadata .Track input.Composer {
+    min-width: 200px;
+}
+
+/* Remove spinner on input type=number */
+/* Chrome, Safari, Edge, Opera */
+.Import .ImportVerifyMetadata input::-webkit-outer-spin-button, .Import .ImportVerifyMetadata input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+/* Firefox */
+.Import .ImportVerifyMetadata input[type=number] {
+    -moz-appearance: textfield;
+}

@@ -13,6 +13,6 @@ namespace Whitestone.SegnoSharp.Database.Models
         [Required]
         public PersonGroup PersonGroup { get; set; }
         [Required]
-        public ICollection<Person> Persons { get; set; }
+        public IList<Person> Persons { get; set; }
     }
 }

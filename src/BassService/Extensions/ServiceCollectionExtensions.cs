@@ -7,6 +7,7 @@ using System;
 using System.Runtime.InteropServices;
 using Whitestone.SegnoSharp.BassService.HealthChecks;
 using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Common.Models.Configuration;
 
 namespace Whitestone.SegnoSharp.BassService.Extensions
 {
@@ -15,6 +16,7 @@ namespace Whitestone.SegnoSharp.BassService.Extensions
         public static IServiceCollection AddBassService(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<BassRegistration>(configuration.GetSection(BassRegistration.Section));
+            services.Configure<TagReaderConfig>(configuration.GetSection(TagReaderConfig.Section));
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {

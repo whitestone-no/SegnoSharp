@@ -25,17 +25,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                 }
             }
         }
-        private bool AllImportPublic
-        {
-            get => ImporterState.SelectedFiles.All(f => f.ImportToPublicLibrary);
-            set
-            {
-                foreach (SelectedFile file in ImporterState.SelectedFiles)
-                {
-                    file.ImportToPublicLibrary = value;
-                }
-            }
-        }
+
         private bool AllImportPlaylist
         {
             get => ImporterState.SelectedFiles.All(f => f.ImportToPlaylist);

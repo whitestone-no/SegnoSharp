@@ -18,7 +18,7 @@ namespace Whitestone.SegnoSharp.Database.Models
 
         public int TrackId { get; set; }
         public Track Track { get; set; }
-        public ICollection<StreamQueue> StreamQueue { get; set; }
-        public ICollection<StreamHistory> StreamHistory { get; set; }
+        public IList<StreamQueue> StreamQueue { get; set; }
+        public IList<StreamHistory> StreamHistory { get; set; }
     }
 }

@@ -11,8 +11,8 @@ namespace Whitestone.SegnoSharp.Database.Models
         public string Title { get; set; }
 
         public Album Album { get; set; }
-        public ICollection<MediaType> MediaTypes { get; set; }
-        public ICollection<Track> Tracks { get; set; }
-        public ICollection<TrackGroup> TrackGroups { get; set; }
+        public IList<MediaType> MediaTypes { get; set; }
+        public IList<Track> Tracks { get; set; }
+        public IList<TrackGroup> TrackGroups { get; set; }
     }
 }

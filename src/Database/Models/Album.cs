@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 
 namespace Whitestone.SegnoSharp.Database.Models
@@ -20,10 +22,9 @@ namespace Whitestone.SegnoSharp.Database.Models
         public bool IsPublic { get; set; }
 
         public AlbumCover AlbumCover { get; set; }
-        public ICollection<Disc> Discs { get; set; }
-        public ICollection<Genre> Genres { get; set; }
-        public ICollection<RecordLabel> RecordLabels { get; set; }
-        public ICollection<AlbumPersonGroupPersonRelation> AlbumPersonGroupPersonRelations { get; set; }
-        public ICollection<TrackPersonGroupPersonRelation> TrackPersonGroupPersonRelations { get; set; }
+        public IList<Disc> Discs { get; set; }
+        public IList<Genre> Genres { get; set; }
+        public IList<RecordLabel> RecordLabels { get; set; }
+        public IList<AlbumPersonGroupPersonRelation> AlbumPersonGroupPersonRelations { get; set; }
     }
 }

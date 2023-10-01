@@ -148,18 +148,21 @@ namespace Whitestone.SegnoSharp.BassService.Helpers
             BassNetWindows::Un4seen.Bass.AddOn.Tags.TAG_INFO tags = new BassNetWindows::Un4seen.Bass.AddOn.Tags.TAG_INFO(file);
             if (BassNetWindows::Un4seen.Bass.AddOn.Tags.BassTags.BASS_TAG_GetFromFile(stream, tags))
             {
+                _ = ushort.TryParse(tags.year, out ushort year);
+                _ = byte.TryParse(tags.disc, out byte disc);
+                _ = ushort.TryParse(tags.track, out ushort trackNo);
                 return new Tags
                 {
                     Album = tags.album,
                     AlbumArtist = tags.albumartist,
                     Artist = tags.artist,
                     Composer = tags.composer,
-                    Disc = tags.disc,
+                    Disc = disc,
                     Duration = tags.duration,
                     Genre = tags.genre,
                     Title = tags.title,
-                    TrackNumber = tags.track,
-                    Year = tags.year
+                    TrackNumber = trackNo,
+                    Year = year
                 };
             }
             else

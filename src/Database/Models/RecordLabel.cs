@@ -9,6 +9,6 @@ namespace Whitestone.SegnoSharp.Database.Models
         public int Id { get; set; }
         public int Name { get; set; }
 
-        public ICollection<Album> Albums { get; set; }
+        public IList<Album> Albums { get; set; }
     }
 }
