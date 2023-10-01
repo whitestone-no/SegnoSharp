@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata;
 using Whitestone.SegnoSharp.Database.Models;
 
 namespace Whitestone.SegnoSharp.Database
@@ -24,6 +25,15 @@ namespace Whitestone.SegnoSharp.Database
 
         public SegnoSharpDbContext( DbContextOptions options) : base(options)
         {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 1, Type = PersonGroupType.Album, Name = "Artist", SortOrder = 1 });
+            modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 2, Type = PersonGroupType.Track, Name = "Artist", SortOrder = 1 });
+            modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 3, Type = PersonGroupType.Track, Name = "Composer", SortOrder = 2 });
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 
