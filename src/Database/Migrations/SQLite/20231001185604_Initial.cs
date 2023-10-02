@@ -1,132 +1,112 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
+namespace Whitestone.SegnoSharp.Database.Migrations.SQLite
 {
     public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase()
-                .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Albums",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Title = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Published = table.Column<ushort>(type: "smallint unsigned", nullable: false),
-                    Upc = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CatalogueNumber = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Added = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    IsPublic = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Title = table.Column<string>(type: "TEXT", nullable: false),
+                    Published = table.Column<ushort>(type: "INTEGER", nullable: false),
+                    Upc = table.Column<string>(type: "TEXT", nullable: true),
+                    CatalogueNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    Added = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsPublic = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Albums", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "Genres",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Genres", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "MediaTypes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SortOrder = table.Column<byte>(type: "tinyint unsigned", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    SortOrder = table.Column<byte>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MediaTypes", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "PersonGroups",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SortOrder = table.Column<ushort>(type: "smallint unsigned", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    SortOrder = table.Column<ushort>(type: "INTEGER", nullable: false),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PersonGroups", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "Persons",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    LastName = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    FirstName = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Version = table.Column<ushort>(type: "smallint unsigned", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    LastName = table.Column<string>(type: "TEXT", nullable: false),
+                    FirstName = table.Column<string>(type: "TEXT", nullable: true),
+                    Version = table.Column<ushort>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Persons", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "RecordLabels",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RecordLabels", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "AlbumCovers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Filename = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Filesize = table.Column<uint>(type: "int unsigned", nullable: false),
-                    Mime = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    AlbumId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Filename = table.Column<string>(type: "TEXT", nullable: false),
+                    Filesize = table.Column<uint>(type: "INTEGER", nullable: false),
+                    Mime = table.Column<string>(type: "TEXT", nullable: false),
+                    AlbumId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -137,19 +117,17 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         principalTable: "Albums",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "Discs",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    DiscNumber = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    Title = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    AlbumId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    DiscNumber = table.Column<byte>(type: "INTEGER", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    AlbumId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -158,17 +136,15 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         name: "FK_Discs_Albums_AlbumId",
                         column: x => x.AlbumId,
                         principalTable: "Albums",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                        principalColumn: "Id");
+                });
 
             migrationBuilder.CreateTable(
                 name: "AlbumGenre",
                 columns: table => new
                 {
-                    AlbumsId = table.Column<int>(type: "int", nullable: false),
-                    GenresId = table.Column<int>(type: "int", nullable: false)
+                    AlbumsId = table.Column<int>(type: "INTEGER", nullable: false),
+                    GenresId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -185,24 +161,23 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         principalTable: "Genres",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "AlbumPersonGroupsRelations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    AlbumId = table.Column<int>(type: "int", nullable: false),
-                    PersonGroupId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ParentId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PersonGroupId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AlbumPersonGroupsRelations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AlbumPersonGroupsRelations_Albums_AlbumId",
-                        column: x => x.AlbumId,
+                        name: "FK_AlbumPersonGroupsRelations_Albums_ParentId",
+                        column: x => x.ParentId,
                         principalTable: "Albums",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -212,15 +187,14 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         principalTable: "PersonGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "AlbumRecordLabel",
                 columns: table => new
                 {
-                    AlbumsId = table.Column<int>(type: "int", nullable: false),
-                    RecordLabelsId = table.Column<int>(type: "int", nullable: false)
+                    AlbumsId = table.Column<int>(type: "INTEGER", nullable: false),
+                    RecordLabelsId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -237,17 +211,16 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         principalTable: "RecordLabels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "AlbumCoversData",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Data = table.Column<byte[]>(type: "longblob", nullable: false),
-                    AlbumCoverId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Data = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    AlbumCoverId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -258,15 +231,14 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         principalTable: "AlbumCovers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "DiscMediaType",
                 columns: table => new
                 {
-                    DiscsId = table.Column<int>(type: "int", nullable: false),
-                    MediaTypesId = table.Column<int>(type: "int", nullable: false)
+                    DiscsId = table.Column<int>(type: "INTEGER", nullable: false),
+                    MediaTypesId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -283,19 +255,17 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         principalTable: "MediaTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "TrackGroups",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    GroupBeforeTrackNumber = table.Column<ushort>(type: "smallint unsigned", nullable: false),
-                    DiscId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    GroupBeforeTrackNumber = table.Column<ushort>(type: "INTEGER", nullable: false),
+                    DiscId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -304,22 +274,19 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         name: "FK_TrackGroups_Discs_DiscId",
                         column: x => x.DiscId,
                         principalTable: "Discs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                        principalColumn: "Id");
+                });
 
             migrationBuilder.CreateTable(
                 name: "Tracks",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    TrackNumber = table.Column<ushort>(type: "smallint unsigned", nullable: false),
-                    Title = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Length = table.Column<ushort>(type: "smallint unsigned", nullable: false),
-                    DiscId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TrackNumber = table.Column<ushort>(type: "INTEGER", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: false),
+                    Length = table.Column<ushort>(type: "INTEGER", nullable: false),
+                    DiscId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -328,23 +295,21 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         name: "FK_Tracks_Discs_DiscId",
                         column: x => x.DiscId,
                         principalTable: "Discs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                        principalColumn: "Id");
+                });
 
             migrationBuilder.CreateTable(
                 name: "AlbumPersonGroupPersonRelationPerson",
                 columns: table => new
                 {
-                    AlbumPersonGroupPersonRelationsId = table.Column<int>(type: "int", nullable: false),
-                    PersonsId = table.Column<int>(type: "int", nullable: false)
+                    AlbumPersonGroupPersonRelationsId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PersonsId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AlbumPersonGroupPersonRelationPerson", x => new { x.AlbumPersonGroupPersonRelationsId, x.PersonsId });
                     table.ForeignKey(
-                        name: "FK_AlbumPersonGroupPersonRelationPerson_AlbumPersonGroupsRelati~",
+                        name: "FK_AlbumPersonGroupPersonRelationPerson_AlbumPersonGroupsRelations_AlbumPersonGroupPersonRelationsId",
                         column: x => x.AlbumPersonGroupPersonRelationsId,
                         principalTable: "AlbumPersonGroupsRelations",
                         principalColumn: "Id",
@@ -355,27 +320,20 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         principalTable: "Persons",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "TrackPersonGroupsRelations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    TrackId = table.Column<int>(type: "int", nullable: false),
-                    PersonGroupId = table.Column<int>(type: "int", nullable: false),
-                    AlbumId = table.Column<int>(type: "int", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ParentId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PersonGroupId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TrackPersonGroupsRelations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TrackPersonGroupsRelations_Albums_AlbumId",
-                        column: x => x.AlbumId,
-                        principalTable: "Albums",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_TrackPersonGroupsRelations_PersonGroups_PersonGroupId",
                         column: x => x.PersonGroupId,
@@ -383,26 +341,24 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TrackPersonGroupsRelations_Tracks_TrackId",
-                        column: x => x.TrackId,
+                        name: "FK_TrackPersonGroupsRelations_Tracks_ParentId",
+                        column: x => x.ParentId,
                         principalTable: "Tracks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "TrackStreamInfos",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    FilePath = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    IncludeInAutoPlaylist = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    LastPlayed = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    PlayCount = table.Column<int>(type: "int", nullable: false),
-                    TrackId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    FilePath = table.Column<string>(type: "TEXT", nullable: false),
+                    IncludeInAutoPlaylist = table.Column<bool>(type: "INTEGER", nullable: false),
+                    LastPlayed = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    PlayCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    TrackId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -413,15 +369,14 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         principalTable: "Tracks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "PersonTrackPersonGroupPersonRelation",
                 columns: table => new
                 {
-                    PersonsId = table.Column<int>(type: "int", nullable: false),
-                    TrackPersonGroupPersonRelationsId = table.Column<int>(type: "int", nullable: false)
+                    PersonsId = table.Column<int>(type: "INTEGER", nullable: false),
+                    TrackPersonGroupPersonRelationsId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -433,22 +388,21 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PersonTrackPersonGroupPersonRelation_TrackPersonGroupsRelati~",
+                        name: "FK_PersonTrackPersonGroupPersonRelation_TrackPersonGroupsRelations_TrackPersonGroupPersonRelationsId",
                         column: x => x.TrackPersonGroupPersonRelationsId,
                         principalTable: "TrackPersonGroupsRelations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "StreamHistory",
                 columns: table => new
                 {
-                    Id = table.Column<uint>(type: "int unsigned", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Played = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    TrackStreamInfoId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Played = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    TrackStreamInfoId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -457,19 +411,17 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         name: "FK_StreamHistory_TrackStreamInfos_TrackStreamInfoId",
                         column: x => x.TrackStreamInfoId,
                         principalTable: "TrackStreamInfos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                        principalColumn: "Id");
+                });
 
             migrationBuilder.CreateTable(
                 name: "StreamQueue",
                 columns: table => new
                 {
-                    Id = table.Column<uint>(type: "int unsigned", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    SortOrder = table.Column<ushort>(type: "smallint unsigned", nullable: false),
-                    TrackStreamInfoId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SortOrder = table.Column<ushort>(type: "INTEGER", nullable: false),
+                    TrackStreamInfoId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -478,10 +430,23 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                         name: "FK_StreamQueue_TrackStreamInfos_TrackStreamInfoId",
                         column: x => x.TrackStreamInfoId,
                         principalTable: "TrackStreamInfos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.InsertData(
+                table: "PersonGroups",
+                columns: new[] { "Id", "Name", "SortOrder", "Type" },
+                values: new object[] { 1, "Artist", (ushort)1, 0 });
+
+            migrationBuilder.InsertData(
+                table: "PersonGroups",
+                columns: new[] { "Id", "Name", "SortOrder", "Type" },
+                values: new object[] { 2, "Artist", (ushort)1, 1 });
+
+            migrationBuilder.InsertData(
+                table: "PersonGroups",
+                columns: new[] { "Id", "Name", "SortOrder", "Type" },
+                values: new object[] { 3, "Composer", (ushort)2, 1 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AlbumCovers_AlbumId",
@@ -506,9 +471,9 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                 column: "PersonsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AlbumPersonGroupsRelations_AlbumId",
+                name: "IX_AlbumPersonGroupsRelations_ParentId",
                 table: "AlbumPersonGroupsRelations",
-                column: "AlbumId");
+                column: "ParentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AlbumPersonGroupsRelations_PersonGroupId",
@@ -546,7 +511,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                 columns: new[] { "LastName", "FirstName" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PersonTrackPersonGroupPersonRelation_TrackPersonGroupPersonR~",
+                name: "IX_PersonTrackPersonGroupPersonRelation_TrackPersonGroupPersonRelationsId",
                 table: "PersonTrackPersonGroupPersonRelation",
                 column: "TrackPersonGroupPersonRelationsId");
 
@@ -571,19 +536,14 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL
                 column: "DiscId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TrackPersonGroupsRelations_AlbumId",
+                name: "IX_TrackPersonGroupsRelations_ParentId",
                 table: "TrackPersonGroupsRelations",
-                column: "AlbumId");
+                column: "ParentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TrackPersonGroupsRelations_PersonGroupId",
                 table: "TrackPersonGroupsRelations",
                 column: "PersonGroupId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TrackPersonGroupsRelations_TrackId",
-                table: "TrackPersonGroupsRelations",
-                column: "TrackId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tracks_DiscId",

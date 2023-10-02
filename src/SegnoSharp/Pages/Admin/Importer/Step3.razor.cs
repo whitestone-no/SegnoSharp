@@ -93,7 +93,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                 {
                     new()
                     {
-                        Album = album,
+                        Parent = album,
                         PersonGroup = new PersonGroup
                         {
                             Id = albumArtistGroupId
@@ -180,7 +180,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                                 {
                                     new()
                                     {
-                                        Track = track,
+                                        Parent = track,
                                         PersonGroup = new PersonGroup
                                         {
                                             Id = trackArtistGroupId
@@ -222,7 +222,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                                 {
                                     new()
                                     {
-                                        Track = track,
+                                        Parent = track,
                                         PersonGroup = new PersonGroup
                                         {
                                             Id = trackComposerGroupId
@@ -302,20 +302,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
 
         public string ArtistString
         {
-            get => string.Join(", ", TrackPersonGroupPersonRelations?
-                .FirstOrDefault(r => r.PersonGroup.Id == ArtistPersonGroupMappingId)?
-                .Persons
-                .Select(p =>
-                {
-                    string name = p.LastName;
-                    if (p.FirstName != null)
-                    {
-                        name = p.FirstName + " " + p.LastName;
-                    }
-
-                    return name;
-                })
-                .ToList() ?? new List<string>());
+            get => TrackPersonGroupPersonRelations.GetNameString(ArtistPersonGroupMappingId);
             set
             {
                 string[] names = value.Split(",", StringSplitOptions.RemoveEmptyEntries);
@@ -353,7 +340,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                         {
                             new()
                             {
-                                Track = this,
+                                Parent = this,
                                 PersonGroup = new PersonGroup
                                 {
                                     Id = ArtistPersonGroupMappingId
@@ -385,20 +372,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
 
         public string ComposerString
         {
-            get => string.Join(", ", TrackPersonGroupPersonRelations?
-                .FirstOrDefault(r => r.PersonGroup.Id == ComposerPersonGroupMappingId)?
-                .Persons
-                .Select(p =>
-                {
-                    string name = p.LastName;
-                    if (p.FirstName != null)
-                    {
-                        name = p.FirstName + " " + p.LastName;
-                    }
-
-                    return name;
-                })
-                .ToList() ?? new List<string>());
+            get => TrackPersonGroupPersonRelations.GetNameString(ComposerPersonGroupMappingId);
             set
             {
                 string[] names = value.Split(",", StringSplitOptions.RemoveEmptyEntries);
@@ -436,7 +410,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                         {
                             new()
                             {
-                                Track = this,
+                                Parent = this,
                                 PersonGroup = new PersonGroup
                                 {
                                     Id = ComposerPersonGroupMappingId
@@ -496,20 +470,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
 
         public string AlbumArtistString
         {
-            get => string.Join(", ", AlbumPersonGroupPersonRelations
-                .FirstOrDefault(r => r.PersonGroup.Id == PersonGroupMappingId)?
-                .Persons
-                .Select(p =>
-                {
-                    string name = p.LastName;
-                    if (p.FirstName != null)
-                    {
-                        name = p.FirstName + " " + p.LastName;
-                    }
-
-                    return name;
-                })
-                .ToList() ?? new List<string>());
+            get => AlbumPersonGroupPersonRelations.GetNameString(PersonGroupMappingId);
             set
             {
                 string[] names = value.Split(",", StringSplitOptions.RemoveEmptyEntries);
@@ -536,7 +497,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                 {
                     new()
                     {
-                        Album = this,
+                        Parent = this,
                         PersonGroup = new PersonGroup
                         {
                             Id = PersonGroupMappingId
@@ -545,6 +506,34 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                     }
                 };
             }
+        }
+    }
+
+    public static class PersonHelperExtensions
+    {
+        public static string GetNameString<TParent>(this IEnumerable<BasePersonGroupPersonRelation<TParent>> relations, int groupId)
+        {
+            if (relations == null)
+            {
+                return null;
+            }
+
+            string names = string.Join(", ", relations
+                .FirstOrDefault(r => r.PersonGroup.Id == groupId)?
+                .Persons
+                .Select(p =>
+                {
+                    string name = p.LastName;
+                    if (p.FirstName != null)
+                    {
+                        name = p.FirstName + " " + p.LastName;
+                    }
+
+                    return name;
+                })
+                .ToList() ?? new List<string>());
+
+            return string.IsNullOrEmpty(names) ? null : names;
         }
     }
 }

@@ -1,17 +1,6 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
-namespace Whitestone.SegnoSharp.Database.Models
+﻿namespace Whitestone.SegnoSharp.Database.Models
 {
-    public class AlbumPersonGroupPersonRelation
+    public class AlbumPersonGroupPersonRelation : BasePersonGroupPersonRelation<Album>
     {
-        public int Id { get; set; }
-
-        [Required]
-        public Album Album { get; set; }
-        [Required]
-        public PersonGroup PersonGroup { get; set; }
-        [Required]
-        public IList<Person> Persons { get; set; }
     }
 }
