@@ -30,7 +30,7 @@ namespace Whitestone.SegnoSharp.BassService.Helpers
 
         public bool Initialize(int device, int frequency, int flags, IntPtr win)
         {
-            return BassNetLinux::Un4seen.Bass.Bass.BASS_Init(device, frequency, (BassNetLinux::Un4seen.Bass.BASSInit) flags, win);
+            return BassNetLinux::Un4seen.Bass.Bass.BASS_Init(device, frequency, (BassNetLinux::Un4seen.Bass.BASSInit)flags, win);
         }
 
         public bool Uninitialize()
@@ -158,7 +158,8 @@ namespace Whitestone.SegnoSharp.BassService.Helpers
                 _ = ushort.TryParse(tags.year, out ushort year);
                 _ = byte.TryParse(tags.disc, out byte disc);
                 _ = ushort.TryParse(tags.track, out ushort trackNo);
-                return new Tags
+
+                var tagsFromFile = new Tags
                 {
                     Album = tags.album,
                     AlbumArtist = tags.albumartist,
@@ -171,12 +172,27 @@ namespace Whitestone.SegnoSharp.BassService.Helpers
                     TrackNumber = trackNo,
                     Year = year
                 };
+
+                if (tags.PictureCount > 0)
+                {
+                    BassNetLinux::Un4seen.Bass.AddOn.Tags.TagPicture tagPicture = tags.PictureGet(0);
+                    if (tagPicture != null &&
+                        tagPicture.PictureStorage == BassNetLinux::Un4seen.Bass.AddOn.Tags.TagPicture.PICTURE_STORAGE.Internal &&
+                        tagPicture.PictureType == BassNetLinux::Un4seen.Bass.AddOn.Tags.TagPicture.PICTURE_TYPE.FrontAlbumCover)
+                    {
+                        tagsFromFile.CoverImage = new TagsImage
+                        {
+                            MimeType = tagPicture.MIMEType,
+                            Data = tagPicture.Data
+                        };
+                    }
+                }
+
+                return tagsFromFile;
             }
-            else
-            {
-                _log.LogWarning("Could not read tags from {file}", file);
-                return null;
-            }
+
+            _log.LogWarning("Could not read tags from {file}", file);
+            return null;
         }
 
         // This method must be duplicated between Windows and Linux implementations of IBassWrapper
@@ -193,17 +209,17 @@ namespace Whitestone.SegnoSharp.BassService.Helpers
             string encoderPath = Path.Combine(executingFolder ?? Directory.GetCurrentDirectory(), "encoder");
 
             BassNetLinux::Un4seen.Bass.Misc.EncoderCMDLN encoder = new BassNetLinux::Un4seen.Bass.Misc.EncoderCMDLN(channel)
-                {
-                    EncoderDirectory = encoderPath,
-                    CMDLN_Executable = "ffmpeg",
-                    CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a mp3 -b:a ${kbps}k -vn -f mp3 ${output}", // Remember to use "-f adts" for AAC streaming
-                    CMDLN_EncoderType = BassNetLinux::Un4seen.Bass.BASSChannelType.BASS_CTYPE_STREAM_MP3,
-                    CMDLN_DefaultOutputExtension = ".mp3",
-                    CMDLN_Bitrate = 320,
-                    CMDLN_SupportsSTDOUT = true,
-                    CMDLN_ParamSTDIN = "-",
-                    CMDLN_ParamSTDOUT = "-"
-                };
+            {
+                EncoderDirectory = encoderPath,
+                CMDLN_Executable = "ffmpeg",
+                CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a mp3 -b:a ${kbps}k -vn -f mp3 ${output}", // Remember to use "-f adts" for AAC streaming
+                CMDLN_EncoderType = BassNetLinux::Un4seen.Bass.BASSChannelType.BASS_CTYPE_STREAM_MP3,
+                CMDLN_DefaultOutputExtension = ".mp3",
+                CMDLN_Bitrate = 320,
+                CMDLN_SupportsSTDOUT = true,
+                CMDLN_ParamSTDIN = "-",
+                CMDLN_ParamSTDOUT = "-"
+            };
 
             if (encoder.EncoderExists)
             {

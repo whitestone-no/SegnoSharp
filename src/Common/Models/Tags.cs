@@ -15,5 +15,12 @@ namespace Whitestone.SegnoSharp.Common.Models
         public ushort Year { get; set; }
         public double Duration { get; set; }
         public string File { get; set; }
+        public TagsImage CoverImage { get; set; }
+    }
+
+    public class TagsImage
+    {
+        public string MimeType { get; set; }
+        public byte[] Data { get; set; }
     }
 }

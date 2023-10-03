@@ -151,7 +151,8 @@ namespace Whitestone.SegnoSharp.BassService.Helpers
                 _ = ushort.TryParse(tags.year, out ushort year);
                 _ = byte.TryParse(tags.disc, out byte disc);
                 _ = ushort.TryParse(tags.track, out ushort trackNo);
-                return new Tags
+
+                var tagsFromFile = new Tags
                 {
                     Album = tags.album,
                     AlbumArtist = tags.albumartist,
@@ -164,12 +165,27 @@ namespace Whitestone.SegnoSharp.BassService.Helpers
                     TrackNumber = trackNo,
                     Year = year
                 };
+
+                if (tags.PictureCount > 0)
+                {
+                    BassNetWindows::Un4seen.Bass.AddOn.Tags.TagPicture tagPicture = tags.PictureGet(0);
+                    if (tagPicture != null &&
+                        tagPicture.PictureStorage == BassNetWindows::Un4seen.Bass.AddOn.Tags.TagPicture.PICTURE_STORAGE.Internal &&
+                        tagPicture.PictureType == BassNetWindows::Un4seen.Bass.AddOn.Tags.TagPicture.PICTURE_TYPE.FrontAlbumCover)
+                    {
+                        tagsFromFile.CoverImage = new TagsImage
+                        {
+                            MimeType = tagPicture.MIMEType,
+                            Data = tagPicture.Data
+                        };
+                    }
+                }
+
+                return tagsFromFile;
             }
-            else
-            {
-                _log.LogWarning("Could not read tags from {file}", file);
-                return null;
-            }
+
+            _log.LogWarning("Could not read tags from {file}", file);
+            return null;
         }
 
         // This method must be duplicated between Windows and Linux implementations of IBassWrapper
