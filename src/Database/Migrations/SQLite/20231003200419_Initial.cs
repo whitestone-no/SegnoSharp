@@ -434,6 +434,26 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite
                 });
 
             migrationBuilder.InsertData(
+                table: "MediaTypes",
+                columns: new[] { "Id", "Name", "SortOrder" },
+                values: new object[] { 1, "CD", (byte)1 });
+
+            migrationBuilder.InsertData(
+                table: "MediaTypes",
+                columns: new[] { "Id", "Name", "SortOrder" },
+                values: new object[] { 2, "DVD-Audio", (byte)2 });
+
+            migrationBuilder.InsertData(
+                table: "MediaTypes",
+                columns: new[] { "Id", "Name", "SortOrder" },
+                values: new object[] { 3, "Super Audio CD", (byte)3 });
+
+            migrationBuilder.InsertData(
+                table: "MediaTypes",
+                columns: new[] { "Id", "Name", "SortOrder" },
+                values: new object[] { 4, "Digital Download", (byte)4 });
+
+            migrationBuilder.InsertData(
                 table: "PersonGroups",
                 columns: new[] { "Id", "Name", "SortOrder", "Type" },
                 values: new object[] { 1, "Artist", (ushort)1, 0 });

@@ -248,6 +248,32 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite
                     b.HasKey("Id");
 
                     b.ToTable("MediaTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "CD",
+                            SortOrder = (byte)1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "DVD-Audio",
+                            SortOrder = (byte)2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Super Audio CD",
+                            SortOrder = (byte)3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Digital Download",
+                            SortOrder = (byte)4
+                        });
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Person", b =>

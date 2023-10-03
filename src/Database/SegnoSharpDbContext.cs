@@ -33,6 +33,11 @@ namespace Whitestone.SegnoSharp.Database
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 2, Type = PersonGroupType.Track, Name = "Artist", SortOrder = 1 });
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 3, Type = PersonGroupType.Track, Name = "Composer", SortOrder = 2 });
 
+            modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 1, Name = "CD", SortOrder = 1 });
+            modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 2, Name = "DVD-Audio", SortOrder = 2 });
+            modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 3, Name = "Super Audio CD", SortOrder = 3 });
+            modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 4, Name = "Digital Download", SortOrder = 4 });
+
             base.OnModelCreating(modelBuilder);
         }
     }
