@@ -411,6 +411,16 @@ a, a:visited, a:active, a:focus {
     padding-top: 20px;
 }
 
+.Import .ImportVerifyMetadata .AlbumInfo .AlbumCover {
+    float: right;
+    padding-right: 10px;
+    text-align: center;
+}
+
+    .Import .ImportVerifyMetadata .AlbumInfo .AlbumCover img {
+        height: 150px;
+    }
+
 .Import .ImportVerifyMetadata .AlbumInfo input.Title {
     font-size: 2em;
     width: 800px;
@@ -426,6 +436,7 @@ a, a:visited, a:active, a:focus {
 }
 
 .Import .ImportVerifyMetadata .MediaInfo {
+    clear: both;
     margin-top: 20px;
     font-weight: bold;
     margin-bottom: 10px;
@@ -443,6 +454,9 @@ a, a:visited, a:active, a:focus {
     border-left: solid 1px #ccc;
     background-color: #eee;
     padding: 5px;
+}
+.Import .ImportVerifyMetadata .FakeTable .td {
+    padding-left: 5px;
 }
 
     .Import .ImportVerifyMetadata .FakeTable .th:first-child {
@@ -478,7 +492,7 @@ a, a:visited, a:active, a:focus {
 
     .Import .ImportVerifyMetadata .FakeTable .th:nth-child(4),
     .Import .ImportVerifyMetadata .FakeTable .td:nth-child(4) {
-        width: 70px;
+        width: 80px;
     }
 
     .Import .ImportVerifyMetadata .FakeTable .th:nth-child(5),
@@ -502,6 +516,7 @@ a, a:visited, a:active, a:focus {
 .Import .ImportVerifyMetadata .Track input.Title {
     min-width: 550px;
 }
+
 .Import .ImportVerifyMetadata .Track input.Artist,
 .Import .ImportVerifyMetadata .Track input.Composer {
     min-width: 200px;

@@ -15,24 +15,45 @@
             @foreach (Album album in Albums.OrderBy(a => a.Title))
             {
                 <div class="AlbumInfo">
-                    <input type="text" @bind="@album.Title" class="Title" />
+                    <div class="AlbumCover">
+                        @if (((AlbumViewModel)album).CoverImage != null)
+                        {
+                            <div>
+                                <img src="@(((AlbumViewModel)album).CoverImage)" alt="Album cover" />
+                            </div>
+                            <div>
+                                <button @onclick="() => OnAlbumCoverRemoveClick(album)">Remove</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                <InputFile OnChange="e => LoadAlbumCover(e, album)" accept=".jpg,.jpeg,image/jpeg,.png,image/png" />
+                            </div>
+                            @if (((AlbumViewModel)album).AlbumCoverFileSizeError)
+                            {
+                                <div class="Error">Image is too large. Max image size is 5MB.</div>
+                            }
+                        }
+                    </div>
+                    <input type="text" @bind="@album.Title" class="Title"/>
                     <table>
                         <tbody>
                             <tr>
                                 <th>Published:</th>
-                                <td><input type="number" @bind="@album.Published" /></td>
+                                <td><input type="number" @bind="@album.Published"/></td>
                             </tr>
                             <tr>
                                 <th>Genres:</th>
-                                <td><input type="text" @bind="@(((AlbumViewModel)album).GenresString)" /></td>
+                                <td><input type="text" @bind="@(((AlbumViewModel)album).GenresString)"/></td>
                             </tr>
                             <tr>
                                 <th>Album artist(s):</th>
-                                <td><input type="text" @bind="@(((AlbumViewModel)album).AlbumArtistString)" /></td>
+                                <td><input type="text" @bind="@(((AlbumViewModel)album).AlbumArtistString)"/></td>
                             </tr>
                             <tr>
                                 <th><label for="@(((AlbumViewModel)album).TempId + "-isPublic")">Is public:</label></th>
-                                <td><input id="@(((AlbumViewModel)album).TempId + "-isPublic")" type="checkbox" @bind="@album.IsPublic" /></td>
+                                <td><input id="@(((AlbumViewModel)album).TempId + "-isPublic")" type="checkbox" @bind="@album.IsPublic"/></td>
                             </tr>
                         </tbody>
                     </table>
@@ -56,7 +77,7 @@
                             <div class="th">&nbsp;</div><!-- These 'weird' comments are to make the divs be on the same "line", and therefore not have a whitespace between them.
                             --><div class="th">Track #</div><!--
                             --><div class="th">Length</div><!--
-                            --><div class="th">Playlist</div><!--
+                            --><div class="th">Autoplay</div><!--
                             --><div class="th">Title</div><!--
                             --><div class="th">Artist(s)</div><!--
                             --><div class="th">Composer(s)</div>
@@ -73,7 +94,7 @@
                                     <div class="td"><span class="fa-solid fa-grip"></span></div><!--
                                     --><div class="td"><input type="number" @bind="@track.TrackNumber" class="Number" /></div><!--
                                     --><div class="td"><input type="text" @bind="@track.Duration" class="Duration" /></div><!--
-                                    --><div class="td"><input type="checkbox" @bind="@(((TrackViewModel)track).ImportToPlaylist)" /></div><!--
+                                    --><div class="td"><input type="checkbox" @bind="@(((TrackViewModel)track).IncludeInAutoPlaylist)" disabled="@(((TrackViewModel)track).AutoPlaylistDisabled)" /></div><!--
                                     --><div class="td"><input type="text" @bind="@track.Title" class="Title" /></div><!--
                                     --><div class="td"><input type="text" @bind="@(((TrackViewModel)track).ArtistString)" class="Artist" /></div><!--
                                     --><div class="td"><input type="text" @bind="@(((TrackViewModel)track).ComposerString)" class="Composer" /></div>

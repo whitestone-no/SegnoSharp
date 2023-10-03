@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Options;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models;
@@ -59,6 +62,20 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                     TempId = Guid.NewGuid(),
                     PersonGroupMappingId = albumArtistGroupId
                 };
+
+                Tags firstTagWithCover = albumGroup.FirstOrDefault(t => t.CoverImage != null);
+                if (firstTagWithCover != null)
+                {
+                    album.AlbumCover = new AlbumCover
+                    {
+                        Filesize = Convert.ToUInt32(firstTagWithCover.CoverImage.Data.Length),
+                        Mime = firstTagWithCover.CoverImage.MimeType,
+                        AlbumCoverData = new AlbumCoverData
+                        {
+                            Data = firstTagWithCover.CoverImage.Data
+                        }
+                    };
+                }
 
                 List<Person> albumArtists = albumGroup
                     .Select(x => x.AlbumArtist)
@@ -143,11 +160,21 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                             TrackNumber = fileTrack.TrackNumber,
                             Length = length,
                             Disc = disc,
-                            ImportToPlaylist = ImporterState.SelectedFiles.FirstOrDefault(f => f.File.FullName == fileTrack.File)?.ImportToPlaylist ?? true,
                             ArtistPersonGroupMappingId = trackArtistGroupId,
                             ComposerPersonGroupMappingId = trackComposerGroupId,
                             AlbumArtistPersonGroupMappingId = albumArtistGroupId
                         };
+
+                        bool importToPlaylist = ImporterState.SelectedFiles.FirstOrDefault(f => f.File.FullName == fileTrack.File)?.ImportToPlaylist ?? false;
+                        if (importToPlaylist)
+                        {
+                            track.TrackStreamInfo = new TrackStreamInfo
+                            {
+                                FilePath = fileTrack.File,
+                                IncludeInAutoPlaylist = true,
+                                Track = track
+                            };
+                        }
 
                         if (!string.IsNullOrEmpty(fileTrack.Artist))
                         {
@@ -280,6 +307,42 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
         {
             _currentlyDraggingTrack = null;
         }
+
+        private static void OnAlbumCoverRemoveClick(Album album)
+        {
+            album.AlbumCover = null;
+        }
+
+        private static async Task LoadAlbumCover(InputFileChangeEventArgs e, Album album)
+        {
+            if (e.FileCount <= 0)
+            {
+                return;
+            }
+
+            using MemoryStream ms = new(); 
+            try
+            {
+                await e.File.OpenReadStream(5 * 1024 * 1024).CopyToAsync(ms); // Max image size = 5MB
+            }
+            catch (Exception exception)
+            {
+                ((AlbumViewModel)album).AlbumCoverFileSizeError = true;
+                return;
+            }
+
+            byte[] fileBytes = ms.ToArray();
+
+            album.AlbumCover = new AlbumCover
+            {
+                Filesize = Convert.ToUInt32(e.File.Size),
+                Mime = e.File.ContentType,
+                AlbumCoverData = new AlbumCoverData
+                {
+                    Data = fileBytes
+                }
+            };
+        }
     }
 
     public class TrackViewModel : Track
@@ -288,7 +351,14 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
         public int ArtistPersonGroupMappingId;
         public int ComposerPersonGroupMappingId;
 
-        public bool ImportToPlaylist { get; set; }
+        public bool AutoPlaylistDisabled => TrackStreamInfo == null;
+
+        public bool IncludeInAutoPlaylist
+        {
+            get => TrackStreamInfo is { IncludeInAutoPlaylist: true };
+            set => TrackStreamInfo.IncludeInAutoPlaylist = value;
+        }
+
         public string CssClass { get; set; } = string.Empty;
 
         public void HandleDragEnter()
@@ -449,7 +519,21 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
     public class AlbumViewModel : Album
     {
         public int PersonGroupMappingId;
+        public bool AlbumCoverFileSizeError;
         public Guid TempId { get; set; }
+
+        public string CoverImage
+        {
+            get
+            {
+                if (AlbumCover == null)
+                {
+                    return null;
+                }
+
+                return $"data:{AlbumCover.Mime};base64,{Convert.ToBase64String(AlbumCover.AlbumCoverData.Data)}";
+            }
+        }
 
         public string GenresString
         {
