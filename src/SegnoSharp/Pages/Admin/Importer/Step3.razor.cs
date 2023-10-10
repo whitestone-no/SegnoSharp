@@ -350,6 +350,33 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                 }
             };
         }
+
+        public void TrackNumberChanged(Track track, int oldTrackNumber)
+        {
+            if (track.TrackNumber > track.Disc.Tracks.Count)
+            {
+                track.TrackNumber = (ushort)track.Disc.Tracks.Count;
+            }
+            else if (track.TrackNumber <= 0)
+            {
+                track.TrackNumber = 1;
+            }
+
+            if (track.TrackNumber < oldTrackNumber) // Moving track up
+            {
+                foreach (Track existingTrack in track.Disc.Tracks.Where(t => t.TrackNumber >= track.TrackNumber && t.TrackNumber < oldTrackNumber && t != track))
+                {
+                    existingTrack.TrackNumber++;
+                }
+            }
+            else if (track.TrackNumber > oldTrackNumber) // Moving track down
+            {
+                foreach (Track existingTrack in track.Disc.Tracks.Where(t => t.TrackNumber > oldTrackNumber && t.TrackNumber <= track.TrackNumber && t != track))
+                {
+                    existingTrack.TrackNumber--;
+                }
+            }
+        }
     }
 
     public class TrackViewModel : Track

@@ -81,24 +81,32 @@
                             --><div class="th">Title</div><!--
                             --><div class="th">Artist(s)</div><!--
                             --><div class="th">Composer(s)</div>
+
+                            @{
+                                var trackCounter = 1;
+                            }
                             @foreach (Track track in disc.Tracks.OrderBy(t => t.TrackNumber))
                             {
+                                int currentTrackNumber = trackCounter; // Using trackCounter directly makes it the same across all tracks, so take a copy of it first
                                 <div draggable="true"
                                      class="@(((TrackViewModel)track).CssClass) Track tr"
                                      ondragover="event.preventDefault();"
-                                @ondragstart="() => OnDragStart((TrackViewModel)track)"
-                                @ondrop="() => HandleDrop((TrackViewModel)track)"
-                                @ondragend="HandleDragEnd"
-                                @ondragenter="((TrackViewModel)track).HandleDragEnter"
-                                @ondragleave="((TrackViewModel)track).HandleDragLeave">
+                                     @ondragstart="() => OnDragStart((TrackViewModel)track)"
+                                     @ondrop="() => HandleDrop((TrackViewModel)track)"
+                                     @ondragend="HandleDragEnd"
+                                     @ondragenter="((TrackViewModel)track).HandleDragEnter"
+                                     @ondragleave="((TrackViewModel)track).HandleDragLeave">
                                     <div class="td"><span class="fa-solid fa-grip"></span></div><!--
-                                    --><div class="td"><input type="number" @bind="@track.TrackNumber" class="Number" /></div><!--
+                                    --><div class="td"><input type="number" @bind="@track.TrackNumber" class="Number"@bind:after="() => TrackNumberChanged(track, currentTrackNumber)"  /></div><!--
                                     --><div class="td"><input type="text" @bind="@track.Duration" class="Duration" /></div><!--
                                     --><div class="td"><input type="checkbox" @bind="@(((TrackViewModel)track).IncludeInAutoPlaylist)" disabled="@(((TrackViewModel)track).AutoPlaylistDisabled)" /></div><!--
                                     --><div class="td"><input type="text" @bind="@track.Title" class="Title" /></div><!--
                                     --><div class="td"><input type="text" @bind="@(((TrackViewModel)track).ArtistString)" class="Artist" /></div><!--
                                     --><div class="td"><input type="text" @bind="@(((TrackViewModel)track).ComposerString)" class="Composer" /></div>
                                 </div>
+                                {
+                                    trackCounter++;
+                                }
                             }
                         </div>
                     </div>
