@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Whitestone.SegnoSharp.Common.Models
+﻿namespace Whitestone.SegnoSharp.Common.Models
 {
     public class Tags
     {
