@@ -49,20 +49,20 @@ namespace Whitestone.SegnoSharp.BassService
                 // Initialize BASS
                 if (!_bassWrapper.Initialize(0, 44100, (int)BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
                 {
-                    _log.LogCritical("Could not initialize BASS.NET: {0}", _bassWrapper.GetLastBassError());
+                    _log.LogCritical("Could not initialize BASS.NET: {bassError}", _bassWrapper.GetLastBassError());
                 }
 
                 // Initialize BASS Mixer
                 _mixer = _bassWrapper.CreateMixerStream(44100, 2, (int)BASSFlag.BASS_MIXER_NONSTOP);
                 if (_mixer == 0)
                 {
-                    _log.LogError("Failed to create mixer: {0}", _bassWrapper.GetLastBassError());
+                    _log.LogError("Failed to create mixer: {bassError}", _bassWrapper.GetLastBassError());
                 }
 
                 // Start playback of BASS Mixer
                 if (!_bassWrapper.Play(_mixer, false))
                 {
-                    _log.LogError("Failed to play mixer: {0}", _bassWrapper.GetLastBassError());
+                    _log.LogError("Failed to play mixer: {bassError}", _bassWrapper.GetLastBassError());
                 }
 
                 // Fire the "Player ready" event that tells the playlist handler to start actual playback
@@ -86,19 +86,19 @@ namespace Whitestone.SegnoSharp.BassService
                 // Stop playback of BASS Mixer
                 if (!_bassWrapper.Stop(_mixer))
                 {
-                    _log.LogError("Could not stop mixer: {0}", _bassWrapper.GetLastBassError());
+                    _log.LogError("Could not stop mixer: {bassError}", _bassWrapper.GetLastBassError());
                 }
 
                 // Uninitialize BASS Mixer
                 if (!_bassWrapper.FreeStream(_mixer))
                 {
-                    _log.LogError("Failed to free mixer: {0}", _bassWrapper.GetLastBassError());
+                    _log.LogError("Failed to free mixer: {bassError}", _bassWrapper.GetLastBassError());
                 }
 
                 // Uninitialize BASS
                 if (!_bassWrapper.Uninitialize())
                 {
-                    _log.LogError("Could not free BASS.NET resources: {0}", _bassWrapper.GetLastBassError());
+                    _log.LogError("Could not free BASS.NET resources: {bassError}", _bassWrapper.GetLastBassError());
                 }
 
                 UnloadAssemblies();
@@ -119,27 +119,27 @@ namespace Whitestone.SegnoSharp.BassService
             if (!_bassWrapper.BassLoad(libraryPath))
             {
                 // Don't use GetLastBassError here as Bass hasn't been loaded
-                _log.LogCritical("Could not load BASS from {0}", libraryPath);
+                _log.LogCritical("Could not load BASS from {libraryPath}", libraryPath);
             }
 
             if (!_bassWrapper.BassLoadEnc(libraryPath))
             {
-                _log.LogCritical("Could not load bassenc.dll from {0}", libraryPath);
+                _log.LogCritical("Could not load bassenc.dll from {libraryPath}", libraryPath);
             }
 
             if (!_bassWrapper.BassLoadMixer(libraryPath))
             {
-                _log.LogCritical("Could not load bassmix.dll from {0}", libraryPath);
+                _log.LogCritical("Could not load bassmix.dll from {libraryPath}", libraryPath);
             }
 
             if (!_bassWrapper.BassLoadFlac(libraryPath))
             {
-                _log.LogCritical("Could not load bassflac.dll from {0}", libraryPath);
+                _log.LogCritical("Could not load bassflac.dll from {libraryPath}", libraryPath);
             }
 
-            _log.LogInformation("BASS Version: {0}", _bassWrapper.GetBassVersion());
-            _log.LogInformation("BASS Enc Version: {0}", _bassWrapper.GetBassEncVersion());
-            _log.LogInformation("BASS Mixer Version: {0}", _bassWrapper.GetBassMixerVersion());
+            _log.LogInformation("BASS Version: {bassVersion}", _bassWrapper.GetBassVersion());
+            _log.LogInformation("BASS Enc Version: {bassEncVersion}", _bassWrapper.GetBassEncVersion());
+            _log.LogInformation("BASS Mixer Version: {bassMixerVersion}", _bassWrapper.GetBassMixerVersion());
         }
 
         private void UnloadAssemblies()
@@ -165,14 +165,14 @@ namespace Whitestone.SegnoSharp.BassService
                 }
 
                 // Convert track to extended object
-                TrackExt track = new TrackExt(input.Track);
+                TrackExt track = new (input.Track);
 
                 // Load music file
                 track.ChannelHandle = _bassWrapper.CreateFileStream(track.File, 0L, 0L, (int)(BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE));
 
                 if (track.ChannelHandle == 0)
                 {
-                    _log.LogError("Could not create stream from {0}: {1}", track.File, _bassWrapper.GetLastBassError());
+                    _log.LogError("Could not create stream from {file}: {bassError}", track.File, _bassWrapper.GetLastBassError());
                     return;
                 }
 
@@ -185,16 +185,16 @@ namespace Whitestone.SegnoSharp.BassService
                 // Add new track to mixer
                 if (!_bassWrapper.MixerAddStream(_mixer, track.ChannelHandle, (int)(BASSFlag.BASS_MIXER_PAUSE | BASSFlag.BASS_MIXER_DOWNMIX | BASSFlag.BASS_STREAM_AUTOFREE)))
                 {
-                    _log.LogError("Failed to add channel to mixer: {0}", _bassWrapper.GetLastBassError());
+                    _log.LogError("Failed to add channel to mixer: {bassError}", _bassWrapper.GetLastBassError());
                 }
 
                 // And start the playback
                 if (!_bassWrapper.MixerPlay(track.ChannelHandle))
                 {
-                    _log.LogError("Failed to play channel: {0}", _bassWrapper.GetLastBassError());
+                    _log.LogError("Failed to play channel: {bassError}", _bassWrapper.GetLastBassError());
                 }
 
-                _log.LogDebug("Started playing {0}", track.File);
+                _log.LogDebug("Started playing {file}", track.File);
 
                 // Update the title of the broadcaster
                 _bassWrapper.SetStreamingTitle($"{track.Title} - {track.Artist} ({track.Album})");
