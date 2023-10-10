@@ -89,7 +89,6 @@ namespace Whitestone.SegnoSharp
                             services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")));
 
                             services.AddHealthChecks().AddSqlite(connectionStringBuilder.ConnectionString, name: "Database");
-                            services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
 
                             break;
                         case "mysql":
@@ -98,12 +97,13 @@ namespace Whitestone.SegnoSharp
                             services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")));
 
                             services.AddHealthChecks().AddMySql(connMysql ?? string.Empty, name: "Database");
-                            services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
 
                             break;
                         default:
                             throw new ArgumentException($"Unsupported database type: {databaseType}");
                     }
+
+                    services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
                 });
         }
     }
