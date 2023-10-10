@@ -35,6 +35,8 @@
     <ProjectReference Include="..\BassService\BassService.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Database\Database.csproj" />
+    <ProjectReference Include="..\Migrations\MySQL\MySQL.csproj" />
+    <ProjectReference Include="..\Migrations\SQLite\SQLite.csproj" />
     <ProjectReference Include="..\Playlist\Playlist.csproj" />
   </ItemGroup>
 

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Reflection.Metadata;
 using Whitestone.SegnoSharp.Database.Models;
 
 namespace Whitestone.SegnoSharp.Database
@@ -23,7 +22,7 @@ namespace Whitestone.SegnoSharp.Database
         public DbSet<StreamQueue> StreamQueue { get; set; }
         public DbSet<StreamHistory> StreamHistory { get; set; }
 
-        public SegnoSharpDbContext( DbContextOptions options) : base(options)
+        public SegnoSharpDbContext(DbContextOptions<SegnoSharpDbContext> options) : base(options)
         {
         }
 
@@ -39,20 +38,6 @@ namespace Whitestone.SegnoSharp.Database
             modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 4, Name = "Digital Download", SortOrder = 4 });
 
             base.OnModelCreating(modelBuilder);
-        }
-    }
-
-    public class SegnoSharpMysqlDbContext : SegnoSharpDbContext
-    {
-        public SegnoSharpMysqlDbContext(DbContextOptions options) : base(options)
-        {
-        }
-    }
-
-    public class SegnoSharpSqliteDbContext : SegnoSharpDbContext
-    {
-        public SegnoSharpSqliteDbContext(DbContextOptions options) : base(options)
-        {
         }
     }
 }

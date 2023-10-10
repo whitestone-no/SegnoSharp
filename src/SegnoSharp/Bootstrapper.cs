@@ -86,7 +86,7 @@ namespace Whitestone.SegnoSharp
                             SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
                             connectionStringBuilder.DataSource = Path.Combine(context.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
 
-                            services.AddDbContext<SegnoSharpDbContext, SegnoSharpSqliteDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString));
+                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")));
 
                             services.AddHealthChecks().AddSqlite(connectionStringBuilder.ConnectionString, name: "Database");
                             services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
@@ -95,7 +95,7 @@ namespace Whitestone.SegnoSharp
                         case "mysql":
                             string connMysql = context.Configuration.GetConnectionString("SegnoSharpDatabaseMysql");
 
-                            services.AddDbContext<SegnoSharpDbContext, SegnoSharpMysqlDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql)));
+                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")));
 
                             services.AddHealthChecks().AddMySql(connMysql ?? string.Empty, name: "Database");
                             services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");

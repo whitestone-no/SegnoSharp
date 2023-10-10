@@ -21,8 +21,6 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
-    <Folder Include="Migrations\MySQL\" />
-    <Folder Include="Migrations\SQLite\" />
   </ItemGroup>
 
 </Project>

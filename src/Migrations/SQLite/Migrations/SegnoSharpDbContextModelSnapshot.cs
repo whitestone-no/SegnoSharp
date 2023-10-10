@@ -2,19 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whitestone.SegnoSharp.Database;
 
 #nullable disable
 
-namespace Whitestone.SegnoSharp.Database.Migrations.SQLite
+namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 {
-    [DbContext(typeof(SegnoSharpSqliteDbContext))]
-    [Migration("20231003200419_Initial")]
-    partial class Initial
+    [DbContext(typeof(SegnoSharpDbContext))]
+    partial class SegnoSharpDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.21");
