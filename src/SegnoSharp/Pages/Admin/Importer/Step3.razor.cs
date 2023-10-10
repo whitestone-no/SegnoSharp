@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models;
@@ -21,12 +23,13 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
         [Inject] private NavigationManager NavigationManager { get; set; }
         [Inject] private ImportState ImporterState { get; set; }
         [Inject] private ITagReader TagReader { get; set; }
-        [Inject] private SegnoSharpDbContext DbContext { get; set; }
+        [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
         [Inject] private IOptions<TagReaderConfig> TagReaderConfig { get; set; }
 
         private List<Album> Albums { get; } = new();
         private TrackViewModel _currentlyDraggingTrack;
-        private List<MediaType> MediaTypes => DbContext.MediaTypes.ToList();
+
+        private List<MediaType> MediaTypes { get; set; }
 
         private readonly char[] _nameSeparators = new[] { ',', '&', '/', '\\' };
 
@@ -36,6 +39,10 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
             {
                 return;
             }
+
+            using SegnoSharpDbContext dbContext = DbFactory.CreateDbContext();
+
+            MediaTypes = dbContext.MediaTypes.ToList();
 
             int albumArtistGroupId = TagReaderConfig.Value.TagMappings["AlbumArtist"];
             int trackArtistGroupId = TagReaderConfig.Value.TagMappings["Artist"];
@@ -325,7 +332,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
             {
                 await e.File.OpenReadStream(5 * 1024 * 1024).CopyToAsync(ms); // Max image size = 5MB
             }
-            catch (Exception exception)
+            catch
             {
                 ((AlbumViewModel)album).AlbumCoverFileSizeError = true;
                 return;
