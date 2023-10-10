@@ -66,7 +66,8 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                     Genres = new List<Genre>(),
                     Discs = new List<Disc>(),
                     TempId = Guid.NewGuid(),
-                    PersonGroupMappingId = albumArtistGroupId
+                    PersonGroupMappingId = albumArtistGroupId,
+                    AlbumAlreadyExists = dbContext.Albums.Any(a => a.Title == albumGroup.Key)
                 };
 
                 Tags firstTagWithCover = albumGroup.FirstOrDefault(t => t.CoverImage != null);
@@ -554,6 +555,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
         public int PersonGroupMappingId;
         public bool AlbumCoverFileSizeError;
         public Guid TempId { get; set; }
+        public bool AlbumAlreadyExists { get; set; }
 
         public string CoverImage
         {

@@ -370,94 +370,105 @@ a, a:visited, a:active, a:focus {
         padding-right: 10px;
     }
 
-
-.Import .ImportVerifyMetadata div.drag-on {
-    border-bottom: solid 2px var(--bg-black);
+.Import .ImportVerifyMetadata {
+    margin-left: 10px;
 }
 
-.Import .ImportVerifyMetadata div[draggable="true"] .td:first-child,
-.Import .ImportVerifyMetadata div[draggable="true"] .td:first-child * {
-    pointer-events: none;
-}
+    .Import .ImportVerifyMetadata div.drag-on {
+        border-bottom: solid 2px var(--bg-black);
+    }
 
-.Import .ImportVerifyMetadata input {
-    background-color: transparent;
-    border: solid 1px transparent;
-    border-radius: 0;
-}
+    .Import .ImportVerifyMetadata div[draggable="true"] .td:first-child,
+    .Import .ImportVerifyMetadata div[draggable="true"] .td:first-child * {
+        pointer-events: none;
+    }
 
-    .Import .ImportVerifyMetadata input:focus {
-        background-color: var(--text-white);
-        border: solid 1px var(--bg-darkgray);
+    .Import .ImportVerifyMetadata input {
+        background-color: transparent;
+        border: solid 1px transparent;
         border-radius: 0;
     }
 
-    .Import .ImportVerifyMetadata input.Number {
-        max-width: 20px;
+        .Import .ImportVerifyMetadata input:focus {
+            background-color: var(--text-white);
+            border: solid 1px var(--bg-darkgray);
+            border-radius: 0;
+        }
+
+        .Import .ImportVerifyMetadata input.Number {
+            max-width: 20px;
+            text-align: center;
+        }
+
+        .Import .ImportVerifyMetadata input.Duration {
+            width: 60px;
+        }
+
+    .Import .ImportVerifyMetadata .fa-solid {
+        color: var(--bg-darkgray);
+    }
+
+    .Import .ImportVerifyMetadata .AlbumInfo:not(:first-child) {
+        margin-top: 40px;
+        border-top: solid 2px var(--bg-darkgray);
+        padding-top: 20px;
+    }
+
+    .Import .ImportVerifyMetadata .AlbumInfo .AlbumCover {
+        float: right;
+        padding-right: 10px;
         text-align: center;
     }
 
-    .Import .ImportVerifyMetadata input.Duration {
-        width: 60px;
+        .Import .ImportVerifyMetadata .AlbumInfo .AlbumCover img {
+            height: 150px;
+        }
+
+    .Import .ImportVerifyMetadata .AlbumInfo input.Title {
+        font-size: 2em;
+        width: 800px;
     }
 
-.Import .ImportVerifyMetadata .fa-solid {
-    color: var(--bg-darkgray);
-}
-
-.Import .ImportVerifyMetadata .AlbumInfo:not(:first-child) {
-    margin-top: 40px;
-    border-top: solid 2px var(--bg-darkgray);
-    padding-top: 20px;
-}
-
-.Import .ImportVerifyMetadata .AlbumInfo .AlbumCover {
-    float: right;
-    padding-right: 10px;
-    text-align: center;
-}
-
-    .Import .ImportVerifyMetadata .AlbumInfo .AlbumCover img {
-        height: 150px;
+    .Import .ImportVerifyMetadata .AlbumInfo th {
+        font-size: 0.9em;
+        text-align: left;
     }
 
-.Import .ImportVerifyMetadata .AlbumInfo input.Title {
-    font-size: 2em;
-    width: 800px;
-}
+    .Import .ImportVerifyMetadata .AlbumInfo table input[type="text"] {
+        width: 700px;
+    }
 
-.Import .ImportVerifyMetadata .AlbumInfo th {
-    font-size: 0.9em;
-    text-align: left;
-}
+    .Import .ImportVerifyMetadata .AlbumInfo {
+        .AlreadyExists {
+            font-weight: bold;
+            color: red;
+        }
+    }
 
-.Import .ImportVerifyMetadata .AlbumInfo table input[type="text"] {
-    width: 700px;
-}
-
-.Import .ImportVerifyMetadata .MediaInfo {
-    clear: both;
-    margin-top: 20px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-    .Import .ImportVerifyMetadata .MediaInfo input {
+    .Import .ImportVerifyMetadata .MediaInfo {
+        clear: both;
+        margin-top: 20px;
         font-weight: bold;
-        font-size: 1em;
+        margin-bottom: 10px;
     }
 
-.Import .ImportVerifyMetadata .FakeTable .th {
-    font-weight: bold;
-    font-size: 0.9em;
-    text-align: center;
-    border-left: solid 1px #ccc;
-    background-color: #eee;
-    padding: 5px;
-}
-.Import .ImportVerifyMetadata .FakeTable .td {
-    padding-left: 5px;
-}
+        .Import .ImportVerifyMetadata .MediaInfo input {
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+    .Import .ImportVerifyMetadata .FakeTable .th {
+        font-weight: bold;
+        font-size: 0.9em;
+        text-align: center;
+        border-left: solid 1px #ccc;
+        background-color: #eee;
+        padding: 5px;
+    }
+
+    .Import .ImportVerifyMetadata .FakeTable .td {
+        padding-left: 5px;
+    }
 
     .Import .ImportVerifyMetadata .FakeTable .th:first-child {
         border-left: none;
@@ -467,68 +478,68 @@ a, a:visited, a:active, a:focus {
         text-align: left;
     }
 
-.Import .ImportVerifyMetadata .FakeTable .th,
-.Import .ImportVerifyMetadata .FakeTable .td {
-    display: inline-block;
-    box-sizing: border-box;
-    text-align: center;
-}
-
-    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(1),
-    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(1) {
-        width: 30px;
+    .Import .ImportVerifyMetadata .FakeTable .th,
+    .Import .ImportVerifyMetadata .FakeTable .td {
+        display: inline-block;
+        box-sizing: border-box;
+        text-align: center;
     }
 
-    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(2),
-    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(2) {
-        width: 80px;
+        .Import .ImportVerifyMetadata .FakeTable .th:nth-child(1),
+        .Import .ImportVerifyMetadata .FakeTable .td:nth-child(1) {
+            width: 30px;
+        }
+
+        .Import .ImportVerifyMetadata .FakeTable .th:nth-child(2),
+        .Import .ImportVerifyMetadata .FakeTable .td:nth-child(2) {
+            width: 80px;
+        }
+
+        .Import .ImportVerifyMetadata .FakeTable .th:nth-child(3),
+        .Import .ImportVerifyMetadata .FakeTable .td:nth-child(3) {
+            width: 70px;
+            text-align: left;
+        }
+
+        .Import .ImportVerifyMetadata .FakeTable .th:nth-child(4),
+        .Import .ImportVerifyMetadata .FakeTable .td:nth-child(4) {
+            width: 80px;
+        }
+
+        .Import .ImportVerifyMetadata .FakeTable .th:nth-child(5),
+        .Import .ImportVerifyMetadata .FakeTable .td:nth-child(5) {
+            width: 550px;
+            text-align: left;
+        }
+
+        .Import .ImportVerifyMetadata .FakeTable .th:nth-child(6),
+        .Import .ImportVerifyMetadata .FakeTable .td:nth-child(6) {
+            width: 200px;
+            text-align: left;
+        }
+
+        .Import .ImportVerifyMetadata .FakeTable .th:nth-child(6),
+        .Import .ImportVerifyMetadata .FakeTable .td:nth-child(6) {
+            width: 200px;
+            text-align: left;
+        }
+
+    .Import .ImportVerifyMetadata .Track input.Title {
+        min-width: 550px;
     }
 
-    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(3),
-    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(3) {
-        width: 70px;
-        text-align: left;
+    .Import .ImportVerifyMetadata .Track input.Artist,
+    .Import .ImportVerifyMetadata .Track input.Composer {
+        min-width: 200px;
     }
 
-    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(4),
-    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(4) {
-        width: 80px;
+    /* Remove spinner on input type=number */
+    /* Chrome, Safari, Edge, Opera */
+    .Import .ImportVerifyMetadata input::-webkit-outer-spin-button, .Import .ImportVerifyMetadata input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
-
-    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(5),
-    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(5) {
-        width: 550px;
-        text-align: left;
+    /* Firefox */
+    .Import .ImportVerifyMetadata input[type=number] {
+        -moz-appearance: textfield;
     }
-
-    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(6),
-    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(6) {
-        width: 200px;
-        text-align: left;
-    }
-
-    .Import .ImportVerifyMetadata .FakeTable .th:nth-child(6),
-    .Import .ImportVerifyMetadata .FakeTable .td:nth-child(6) {
-        width: 200px;
-        text-align: left;
-    }
-
-.Import .ImportVerifyMetadata .Track input.Title {
-    min-width: 550px;
-}
-
-.Import .ImportVerifyMetadata .Track input.Artist,
-.Import .ImportVerifyMetadata .Track input.Composer {
-    min-width: 200px;
-}
-
-/* Remove spinner on input type=number */
-/* Chrome, Safari, Edge, Opera */
-.Import .ImportVerifyMetadata input::-webkit-outer-spin-button, .Import .ImportVerifyMetadata input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-/* Firefox */
-.Import .ImportVerifyMetadata input[type=number] {
-    -moz-appearance: textfield;
-}

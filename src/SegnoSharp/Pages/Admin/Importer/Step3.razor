@@ -15,30 +15,36 @@
             @foreach (Album album in Albums.OrderBy(a => a.Title))
             {
                 <div class="AlbumInfo">
-                    <div class="AlbumCover">
-                        @if (((AlbumViewModel)album).CoverImage != null)
-                        {
-                            <div>
-                                <img src="@(((AlbumViewModel)album).CoverImage)" alt="Album cover" />
-                            </div>
-                            <div>
-                                <button @onclick="() => OnAlbumCoverRemoveClick(album)">Remove</button>
-                            </div>
-                        }
-                        else
-                        {
-                            <div>
-                                <InputFile OnChange="e => LoadAlbumCover(e, album)" accept=".jpg,.jpeg,image/jpeg,.png,image/png" />
-                            </div>
-                            @if (((AlbumViewModel)album).AlbumCoverFileSizeError)
+                    @if (((AlbumViewModel)album).AlbumAlreadyExists)
+                    {
+                        <di class="AlreadyExists">Warning!<br />Album already exists. Tracks below will be added as new media to the existing album. Album info will not be updated.</di>
+                    }
+                    else
+                    {
+                        <div class="AlbumCover">
+                            @if (((AlbumViewModel)album).CoverImage != null)
                             {
-                                <div class="Error">Image is too large. Max image size is 5MB.</div>
+                                <div>
+                                    <img src="@(((AlbumViewModel)album).CoverImage)" alt="Album cover"/>
+                                </div>
+                                <div>
+                                    <button @onclick="() => OnAlbumCoverRemoveClick(album)">Remove</button>
+                                </div>
                             }
-                        }
-                    </div>
-                    <input type="text" @bind="@album.Title" class="Title"/>
-                    <table>
-                        <tbody>
+                            else
+                            {
+                                <div>
+                                    <InputFile OnChange="e => LoadAlbumCover(e, album)" accept=".jpg,.jpeg,image/jpeg,.png,image/png"/>
+                                </div>
+                                @if (((AlbumViewModel)album).AlbumCoverFileSizeError)
+                                {
+                                    <div class="Error">Image is too large. Max image size is 5MB.</div>
+                                }
+                            }
+                        </div>
+                        <input type="text" @bind="@album.Title" class="Title"/>
+                        <table>
+                            <tbody>
                             <tr>
                                 <th>Published:</th>
                                 <td><input type="number" @bind="@album.Published"/></td>
@@ -55,8 +61,9 @@
                                 <th><label for="@(((AlbumViewModel)album).TempId + "-isPublic")">Is public:</label></th>
                                 <td><input id="@(((AlbumViewModel)album).TempId + "-isPublic")" type="checkbox" @bind="@album.IsPublic"/></td>
                             </tr>
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    }
                 </div>
 
                 @foreach (Disc disc in album.Discs.OrderBy(d => d.DiscNumber))
