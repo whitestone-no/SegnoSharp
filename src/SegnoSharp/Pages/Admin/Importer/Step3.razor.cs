@@ -31,7 +31,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
 
         private List<MediaType> MediaTypes { get; set; }
 
-        private readonly char[] _nameSeparators = new[] { ',', '&', '/', '\\' };
+        private readonly char[] _nameSeparators = new[] { ',', '&', '/', '\\', ';' };
 
         protected override void OnInitialized()
         {
