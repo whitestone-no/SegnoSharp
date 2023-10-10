@@ -49,6 +49,7 @@ namespace Whitestone.SegnoSharp
                 using (IServiceScope scope = host.Services.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetService<SegnoSharpDbContext>();
+                    await dbContext?.Database?.EnsureCreatedAsync();
                     await dbContext?.Database.MigrateAsync()!;
                 }
 
