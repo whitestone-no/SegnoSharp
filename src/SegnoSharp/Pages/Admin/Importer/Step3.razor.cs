@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.JSInterop;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
@@ -24,6 +25,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
         [Inject] private ITagReader TagReader { get; set; }
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
         [Inject] private IOptions<TagReaderConfig> TagReaderConfig { get; set; }
+        [Inject] private IJSRuntime JsRuntime { get; set; }
 
         private List<Album> Albums { get; } = new();
         private TrackViewModel _currentlyDraggingTrack;
@@ -275,14 +277,22 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
             base.OnInitialized();
         }
 
-        private void OnNextClick()
+        private async Task OnNextClick()
         {
-            NavigationManager.NavigateTo("/admin/import/step-4");
+            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to import?");
+            if (confirmed)
+            {
+                NavigationManager.NavigateTo("/admin/import/step-4");
+            }
         }
 
-        private void OnBackClick()
+        private async Task OnBackClick()
         {
-            NavigationManager.NavigateTo("/admin/import/step-2");
+            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to go back and lose any changes?");
+            if (confirmed)
+            {
+                NavigationManager.NavigateTo("/admin/import/step-2");
+            }
         }
 
         private void OnDragStart(TrackViewModel track)
@@ -376,6 +386,37 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                     existingTrack.TrackNumber--;
                 }
             }
+        }
+
+        private async Task AlbumNameChanged(AlbumViewModel album)
+        {
+            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+            album.AlbumAlreadyExists = await dbContext.Albums.AnyAsync(a => a.Title == album.Title);
+        }
+
+        private async Task CreateAlbumNameCopy(AlbumViewModel album)
+        {
+            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+            var iterator = 1;
+
+            do
+            {
+                string albumCopyName = album.Title + " - Copy " + iterator;
+
+                if (await dbContext.Albums.AnyAsync(a => a.Title == albumCopyName))
+                {
+                    iterator++;
+                }
+                else
+                {
+                    album.Title = albumCopyName;
+                    album.AlbumAlreadyExists = false;
+                    iterator = 0;
+                }
+
+            } while (iterator > 0);
         }
     }
 

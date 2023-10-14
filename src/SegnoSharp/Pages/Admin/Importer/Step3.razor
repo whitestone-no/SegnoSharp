@@ -17,7 +17,10 @@
                 <div class="AlbumInfo">
                     @if (((AlbumViewModel)album).AlbumAlreadyExists)
                     {
-                        <di class="AlreadyExists">Warning!<br />Album already exists. Tracks below will be added as new media to the existing album. Album info will not be updated.</di>
+                        <div class="AlreadyExists">Warning!<br />Album already exists. Tracks below will be added as new media to the existing album. Album info will not be updated.</div>
+                        <div>
+                            <button @onclick="() => CreateAlbumNameCopy((AlbumViewModel)album)">Create a copy</button>
+                        </div>
                     }
                     else
                     {
@@ -42,7 +45,7 @@
                                 }
                             }
                         </div>
-                        <input type="text" @bind="@album.Title" class="Title"/>
+                        <input type="text" @bind="@album.Title" class="Title" @bind:after="() => AlbumNameChanged((AlbumViewModel)album)" />
                         <table>
                             <tbody>
                             <tr>
