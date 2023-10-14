@@ -14,6 +14,7 @@ using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 using Whitestone.SegnoSharp.Models.States;
+using Whitestone.SegnoSharp.Models.ViewModels;
 using Track = Whitestone.SegnoSharp.Database.Models.Track;
 
 namespace Whitestone.SegnoSharp.Pages.Admin.Importer
@@ -32,7 +33,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
 
         private List<MediaType> MediaTypes { get; set; }
 
-        private readonly char[] _nameSeparators = new[] { ',', '&', '/', '\\', ';' };
+        private readonly char[] _nameSeparators = { ',', '&', '/', '\\', ';' };
 
         protected override void OnInitialized()
         {
@@ -142,7 +143,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
 
                 foreach (IGrouping<byte, Tags> discGroup in albumGroup.GroupBy(x => x.Disc))
                 {
-                    var disc = new DiscViewModel()
+                    var disc = new DiscViewModel
                     {
                         DiscNumber = discGroup.Key,
                         Tracks = new List<Track>(),
@@ -277,52 +278,35 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
             base.OnInitialized();
         }
 
-        private async Task OnNextClick()
+        private async Task AlbumNameChanged(AlbumViewModel album)
         {
-            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to import?");
-            if (confirmed)
-            {
-                NavigationManager.NavigateTo("/admin/import/step-4");
-            }
+            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+            album.AlbumAlreadyExists = await dbContext.Albums.AnyAsync(a => a.Title == album.Title);
         }
 
-        private async Task OnBackClick()
+        private async Task CreateAlbumNameCopy(AlbumViewModel album)
         {
-            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to go back and lose any changes?");
-            if (confirmed)
+            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+            var iterator = 1;
+
+            do
             {
-                NavigationManager.NavigateTo("/admin/import/step-2");
-            }
-        }
+                string albumCopyName = album.Title + " - Copy " + iterator;
 
-        private void OnDragStart(TrackViewModel track)
-        {
-            _currentlyDraggingTrack = track;
-        }
+                if (await dbContext.Albums.AnyAsync(a => a.Title == albumCopyName))
+                {
+                    iterator++;
+                }
+                else
+                {
+                    album.Title = albumCopyName;
+                    album.AlbumAlreadyExists = false;
+                    iterator = 0;
+                }
 
-        private void HandleDrop(TrackViewModel targetTrack)
-        {
-            _currentlyDraggingTrack.Disc.Tracks.Remove(_currentlyDraggingTrack);
-
-            foreach (Track trackAbove in _currentlyDraggingTrack.Disc.Tracks.Where(t => t.TrackNumber > _currentlyDraggingTrack.TrackNumber))
-            {
-                trackAbove.TrackNumber = (ushort)(trackAbove.TrackNumber - 1);
-            }
-
-            foreach (Track destinationTrackBelow in targetTrack.Disc.Tracks.Where(t => t.TrackNumber > targetTrack.TrackNumber))
-            {
-                destinationTrackBelow.TrackNumber = (ushort)(destinationTrackBelow.TrackNumber + 1);
-            }
-
-            _currentlyDraggingTrack.TrackNumber = (ushort)(targetTrack.TrackNumber + 1);
-            _currentlyDraggingTrack.Disc = targetTrack.Disc;
-            targetTrack.Disc.Tracks.Add(_currentlyDraggingTrack);
-            targetTrack.CssClass = string.Empty;
-        }
-
-        private void HandleDragEnd()
-        {
-            _currentlyDraggingTrack = null;
+            } while (iterator > 0);
         }
 
         private static void OnAlbumCoverRemoveClick(Album album)
@@ -387,313 +371,53 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                 }
             }
         }
-
-        private async Task AlbumNameChanged(AlbumViewModel album)
+        private void OnDragStart(TrackViewModel track)
         {
-            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
-
-            album.AlbumAlreadyExists = await dbContext.Albums.AnyAsync(a => a.Title == album.Title);
+            _currentlyDraggingTrack = track;
         }
 
-        private async Task CreateAlbumNameCopy(AlbumViewModel album)
+        private void HandleDrop(TrackViewModel targetTrack)
         {
-            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+            _currentlyDraggingTrack.Disc.Tracks.Remove(_currentlyDraggingTrack);
 
-            var iterator = 1;
-
-            do
+            foreach (Track trackAbove in _currentlyDraggingTrack.Disc.Tracks.Where(t => t.TrackNumber > _currentlyDraggingTrack.TrackNumber))
             {
-                string albumCopyName = album.Title + " - Copy " + iterator;
+                trackAbove.TrackNumber = (ushort)(trackAbove.TrackNumber - 1);
+            }
 
-                if (await dbContext.Albums.AnyAsync(a => a.Title == albumCopyName))
-                {
-                    iterator++;
-                }
-                else
-                {
-                    album.Title = albumCopyName;
-                    album.AlbumAlreadyExists = false;
-                    iterator = 0;
-                }
-
-            } while (iterator > 0);
-        }
-    }
-
-    public class TrackViewModel : Track
-    {
-        public int AlbumArtistPersonGroupMappingId;
-        public int ArtistPersonGroupMappingId;
-        public int ComposerPersonGroupMappingId;
-
-        public bool AutoPlaylistDisabled => TrackStreamInfo == null;
-
-        public bool IncludeInAutoPlaylist
-        {
-            get => TrackStreamInfo is { IncludeInAutoPlaylist: true };
-            set => TrackStreamInfo.IncludeInAutoPlaylist = value;
-        }
-
-        public string CssClass { get; set; } = string.Empty;
-
-        public void HandleDragEnter()
-        {
-            CssClass = "drag-on";
-        }
-        public void HandleDragLeave()
-        {
-            CssClass = string.Empty;
-        }
-
-        public string ArtistString
-        {
-            get => TrackPersonGroupPersonRelations.GetNameString(ArtistPersonGroupMappingId);
-            set
+            foreach (Track destinationTrackBelow in targetTrack.Disc.Tracks.Where(t => t.TrackNumber > targetTrack.TrackNumber))
             {
-                string[] names = value.Split(",", StringSplitOptions.RemoveEmptyEntries);
-                List<Person> persons = names.Select(n =>
-                {
-                    string lastname = n.Trim();
-                    string firstname = null;
+                destinationTrackBelow.TrackNumber = (ushort)(destinationTrackBelow.TrackNumber + 1);
+            }
 
-                    int lastSpaceIndex = n.LastIndexOf(' ');
-                    if (lastSpaceIndex != -1)
-                    {
-                        firstname = n[..lastSpaceIndex].Trim();
-                        lastname = n[lastSpaceIndex..].Trim();
-                    }
+            _currentlyDraggingTrack.TrackNumber = (ushort)(targetTrack.TrackNumber + 1);
+            _currentlyDraggingTrack.Disc = targetTrack.Disc;
+            targetTrack.Disc.Tracks.Add(_currentlyDraggingTrack);
+            targetTrack.CssClass = string.Empty;
+        }
 
-                    return new Person
-                    {
-                        FirstName = firstname,
-                        LastName = lastname
-                    };
-                }).ToList();
+        private void HandleDragEnd()
+        {
+            _currentlyDraggingTrack = null;
+        }
 
-                // If track artist is the same persons as album artist, then blank the track artists
-                bool? sequenceEqual = Disc.Album.AlbumPersonGroupPersonRelations
-                    .FirstOrDefault(r => r.PersonGroup.Id == AlbumArtistPersonGroupMappingId)?
-                    .Persons
-                    .OrderBy(x => x)
-                    .SequenceEqual(persons.OrderBy(x => x));
-
-                if (sequenceEqual == null || !sequenceEqual.Value)
-                {
-                    if (TrackPersonGroupPersonRelations == null)
-                    {
-                        TrackPersonGroupPersonRelations = new List<TrackPersonGroupPersonRelation>
-                        {
-                            new()
-                            {
-                                Parent = this,
-                                PersonGroup = new PersonGroup
-                                {
-                                    Id = ArtistPersonGroupMappingId
-                                },
-                                Persons = persons
-                            }
-                        };
-                    }
-                    else
-                    {
-                        TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ArtistPersonGroupMappingId);
-                        if (relation == null)
-                        {
-                            relation = new TrackPersonGroupPersonRelation
-                            {
-                                PersonGroup = new PersonGroup
-                                {
-                                    Id = ComposerPersonGroupMappingId
-                                }
-                            };
-                            TrackPersonGroupPersonRelations.Add(relation);
-                        }
-
-                        relation.Persons = persons;
-                    }
-                }
+        private async Task OnNextClick()
+        {
+            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to import?");
+            if (confirmed)
+            {
+                NavigationManager.NavigateTo("/admin/import/step-4");
             }
         }
 
-        public string ComposerString
+        private async Task OnBackClick()
         {
-            get => TrackPersonGroupPersonRelations.GetNameString(ComposerPersonGroupMappingId);
-            set
+            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to go back and lose any changes?");
+            if (confirmed)
             {
-                string[] names = value.Split(",", StringSplitOptions.RemoveEmptyEntries);
-                List<Person> persons = names.Select(n =>
-                {
-                    string lastname = n.Trim();
-                    string firstname = null;
-
-                    int lastSpaceIndex = n.LastIndexOf(' ');
-                    if (lastSpaceIndex != -1)
-                    {
-                        firstname = n[..lastSpaceIndex].Trim();
-                        lastname = n[lastSpaceIndex..].Trim();
-                    }
-
-                    return new Person
-                    {
-                        FirstName = firstname,
-                        LastName = lastname
-                    };
-                }).ToList();
-
-                // If track composer is the same persons as album artist, then blank the track composers
-                bool? sequenceEqual = Disc.Album.AlbumPersonGroupPersonRelations
-                    .FirstOrDefault(r => r.PersonGroup.Id == AlbumArtistPersonGroupMappingId)?
-                    .Persons
-                    .OrderBy(x => x)
-                    .SequenceEqual(persons.OrderBy(x => x));
-
-                if (sequenceEqual == null || !sequenceEqual.Value)
-                {
-                    if (TrackPersonGroupPersonRelations == null)
-                    {
-                        TrackPersonGroupPersonRelations = new List<TrackPersonGroupPersonRelation>
-                        {
-                            new()
-                            {
-                                Parent = this,
-                                PersonGroup = new PersonGroup
-                                {
-                                    Id = ComposerPersonGroupMappingId
-                                },
-                                Persons = persons
-                            }
-                        };
-                    }
-                    else
-                    {
-                        TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ComposerPersonGroupMappingId);
-                        if (relation == null)
-                        {
-                            relation = new TrackPersonGroupPersonRelation
-                            {
-                                PersonGroup = new PersonGroup
-                                {
-                                    Id = ComposerPersonGroupMappingId
-                                }
-                            };
-                            TrackPersonGroupPersonRelations.Add(relation);
-                        }
-
-                        relation.Persons = persons;
-                    }
-                }
-            }
-        }
-    }
-
-    public class DiscViewModel : Disc
-    {
-        public int SelectedMediaType { get; set; }
-    }
-
-    public class AlbumViewModel : Album
-    {
-        public int PersonGroupMappingId;
-        public bool AlbumCoverFileSizeError;
-        public Guid TempId { get; set; }
-        public bool AlbumAlreadyExists { get; set; }
-
-        public string CoverImage
-        {
-            get
-            {
-                if (AlbumCover == null)
-                {
-                    return null;
-                }
-
-                return $"data:{AlbumCover.Mime};base64,{Convert.ToBase64String(AlbumCover.AlbumCoverData.Data)}";
+                NavigationManager.NavigateTo("/admin/import/step-2");
             }
         }
 
-        public string GenresString
-        {
-            get => string.Join(", ", Genres.Select(g => g.Name));
-            set
-            {
-                string[] genres = value.Split(",", StringSplitOptions.RemoveEmptyEntries);
-                Genres = new List<Genre>();
-                foreach (string genre in genres)
-                {
-                    Genres.Add(new Genre
-                    {
-                        Name = genre.Trim()
-                    });
-                }
-            }
-        }
-
-        public string AlbumArtistString
-        {
-            get => AlbumPersonGroupPersonRelations.GetNameString(PersonGroupMappingId);
-            set
-            {
-                string[] names = value.Split(",", StringSplitOptions.RemoveEmptyEntries);
-                List<Person> persons = names.Select(n =>
-                    {
-                        string lastname = n.Trim();
-                        string firstname = null;
-
-                        int lastSpaceIndex = n.LastIndexOf(' ');
-                        if (lastSpaceIndex != -1)
-                        {
-                            firstname = n[..lastSpaceIndex].Trim();
-                            lastname = n[lastSpaceIndex..].Trim();
-                        }
-
-                        return new Person
-                        {
-                            FirstName = firstname,
-                            LastName = lastname
-                        };
-                    }).ToList();
-
-                AlbumPersonGroupPersonRelations = new List<AlbumPersonGroupPersonRelation>
-                {
-                    new()
-                    {
-                        Parent = this,
-                        PersonGroup = new PersonGroup
-                        {
-                            Id = PersonGroupMappingId
-                        },
-                        Persons = persons
-                    }
-                };
-            }
-        }
-    }
-
-    public static class PersonHelperExtensions
-    {
-        public static string GetNameString<TParent>(this IEnumerable<BasePersonGroupPersonRelation<TParent>> relations, int groupId)
-        {
-            if (relations == null)
-            {
-                return null;
-            }
-
-            string names = string.Join(", ", relations
-                .FirstOrDefault(r => r.PersonGroup.Id == groupId)?
-                .Persons
-                .Select(p =>
-                {
-                    string name = p.LastName;
-                    if (p.FirstName != null)
-                    {
-                        name = p.FirstName + " " + p.LastName;
-                    }
-
-                    return name;
-                })
-                .ToList() ?? new List<string>());
-
-            return string.IsNullOrEmpty(names) ? null : names;
-        }
     }
 }
