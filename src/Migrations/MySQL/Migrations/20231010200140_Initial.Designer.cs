@@ -11,14 +11,16 @@ using Whitestone.SegnoSharp.Database;
 namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
 {
     [DbContext(typeof(SegnoSharpDbContext))]
-    [Migration("20231010154725_Initial")]
+    [Migration("20231010200140_Initial")]
     partial class Initial
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.21")
+                .UseCollation("utf8mb4_unicode_ci")
+                .HasAnnotation("ProductVersion", "7.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("AlbumGenre", b =>

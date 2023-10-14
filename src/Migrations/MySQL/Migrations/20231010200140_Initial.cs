@@ -4,28 +4,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
 {
+    /// <inheritdoc />
     public partial class Initial : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase()
-                .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Albums",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Title = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Title = table.Column<string>(type: "varchar(255)", nullable: false, collation: "utf8mb4_unicode_ci"),
                     Published = table.Column<ushort>(type: "smallint unsigned", nullable: false),
-                    Upc = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CatalogueNumber = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Upc = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_unicode_ci"),
+                    CatalogueNumber = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_unicode_ci"),
                     Added = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsPublic = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
@@ -33,7 +31,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     table.PrimaryKey("PK_Albums", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "Genres",
@@ -41,14 +39,13 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                    Name = table.Column<string>(type: "varchar(255)", nullable: false, collation: "utf8mb4_unicode_ci")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Genres", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "MediaTypes",
@@ -56,15 +53,14 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_unicode_ci"),
                     SortOrder = table.Column<byte>(type: "tinyint unsigned", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MediaTypes", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "PersonGroups",
@@ -72,8 +68,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_unicode_ci"),
                     SortOrder = table.Column<ushort>(type: "smallint unsigned", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false)
                 },
@@ -81,7 +76,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     table.PrimaryKey("PK_PersonGroups", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "Persons",
@@ -89,17 +84,15 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    LastName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    FirstName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LastName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false, collation: "utf8mb4_unicode_ci"),
+                    FirstName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_unicode_ci"),
                     Version = table.Column<ushort>(type: "smallint unsigned", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Persons", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "RecordLabels",
@@ -113,7 +106,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     table.PrimaryKey("PK_RecordLabels", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "AlbumCovers",
@@ -121,11 +114,9 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Filename = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Filename = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_unicode_ci"),
                     Filesize = table.Column<uint>(type: "int unsigned", nullable: false),
-                    Mime = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Mime = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_unicode_ci"),
                     AlbumId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -138,7 +129,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "Discs",
@@ -147,8 +138,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     DiscNumber = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    Title = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Title = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_unicode_ci"),
                     AlbumId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -160,7 +150,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalTable: "Albums",
                         principalColumn: "Id");
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "AlbumGenre",
@@ -185,7 +175,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "AlbumPersonGroupsRelations",
@@ -212,7 +202,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "AlbumRecordLabel",
@@ -237,7 +227,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "AlbumCoversData",
@@ -258,7 +248,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "DiscMediaType",
@@ -283,7 +273,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "TrackGroups",
@@ -291,8 +281,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_unicode_ci"),
                     GroupBeforeTrackNumber = table.Column<ushort>(type: "smallint unsigned", nullable: false),
                     DiscId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -305,7 +294,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalTable: "Discs",
                         principalColumn: "Id");
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "Tracks",
@@ -314,8 +303,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     TrackNumber = table.Column<ushort>(type: "smallint unsigned", nullable: false),
-                    Title = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Title = table.Column<string>(type: "varchar(255)", nullable: false, collation: "utf8mb4_unicode_ci"),
                     Length = table.Column<ushort>(type: "smallint unsigned", nullable: false),
                     DiscId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -328,7 +316,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalTable: "Discs",
                         principalColumn: "Id");
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "AlbumPersonGroupPersonRelationPerson",
@@ -353,7 +341,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "TrackPersonGroupsRelations",
@@ -380,7 +368,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "TrackStreamInfos",
@@ -388,8 +376,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    FilePath = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FilePath = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_unicode_ci"),
                     IncludeInAutoPlaylist = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     LastPlayed = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     PlayCount = table.Column<int>(type: "int", nullable: false),
@@ -405,7 +392,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "PersonTrackPersonGroupPersonRelation",
@@ -430,7 +417,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "StreamHistory",
@@ -450,7 +437,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalTable: "TrackStreamInfos",
                         principalColumn: "Id");
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
                 name: "StreamQueue",
@@ -470,7 +457,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         principalTable: "TrackStreamInfos",
                         principalColumn: "Id");
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.InsertData(
                 table: "MediaTypes",
@@ -612,6 +599,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 unique: true);
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

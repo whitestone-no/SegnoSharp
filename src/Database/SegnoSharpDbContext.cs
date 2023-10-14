@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Whitestone.SegnoSharp.Database.Models;
 
 namespace Whitestone.SegnoSharp.Database
@@ -22,12 +25,30 @@ namespace Whitestone.SegnoSharp.Database
         public DbSet<StreamQueue> StreamQueue { get; set; }
         public DbSet<StreamHistory> StreamHistory { get; set; }
 
-        public SegnoSharpDbContext(DbContextOptions<SegnoSharpDbContext> options) : base(options)
+        private readonly IConfiguration _configuration;
+
+        public SegnoSharpDbContext(DbContextOptions<SegnoSharpDbContext> options, IConfiguration configuration) : base(options)
         {
+            _configuration = configuration;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            string databaseType = _configuration.GetSection("Database").GetChildren().FirstOrDefault(c => c.Key == "Type")?.Value?.ToLower();
+
+            switch (databaseType)
+            {
+                case "sqlite":
+                    modelBuilder.UseCollation("NOCASE");
+                    modelBuilder.Entity<Album>().Property(t => t.Title).HasColumnType("TEXT COLLATE NOCASE");
+                    break;
+                case "mysql":
+                    modelBuilder.UseCollation("utf8mb4_unicode_ci");
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported database type: {databaseType}");
+            }
+
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 1, Type = PersonGroupType.Album, Name = "Artist", SortOrder = 1 });
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 2, Type = PersonGroupType.Track, Name = "Artist", SortOrder = 1 });
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 3, Type = PersonGroupType.Track, Name = "Composer", SortOrder = 2 });

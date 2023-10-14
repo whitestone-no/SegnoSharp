@@ -16,7 +16,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.21")
+                .UseCollation("utf8mb4_unicode_ci")
+                .HasAnnotation("ProductVersion", "7.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("AlbumGenre", b =>

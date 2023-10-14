@@ -11,13 +11,16 @@ using Whitestone.SegnoSharp.Database;
 namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 {
     [DbContext(typeof(SegnoSharpDbContext))]
-    [Migration("20231010154404_Initial")]
+    [Migration("20231010200028_Initial")]
     partial class Initial
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.21");
+            modelBuilder
+                .UseCollation("NOCASE")
+                .HasAnnotation("ProductVersion", "7.0.12");
 
             modelBuilder.Entity("AlbumGenre", b =>
                 {
@@ -114,7 +117,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT COLLATE NOCASE");
 
                     b.Property<string>("Upc")
                         .HasColumnType("TEXT");
@@ -285,10 +288,12 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("FirstName")
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<ushort>("Version")

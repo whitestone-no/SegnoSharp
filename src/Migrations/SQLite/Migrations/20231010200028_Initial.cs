@@ -3,10 +3,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 {
+    /// <inheritdoc />
     public partial class Initial : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -15,7 +19,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
+                    Title = table.Column<string>(type: "TEXT COLLATE NOCASE", nullable: false),
                     Published = table.Column<ushort>(type: "INTEGER", nullable: false),
                     Upc = table.Column<string>(type: "TEXT", nullable: true),
                     CatalogueNumber = table.Column<string>(type: "TEXT", nullable: true),
@@ -75,8 +79,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    LastName = table.Column<string>(type: "TEXT", nullable: false),
-                    FirstName = table.Column<string>(type: "TEXT", nullable: true),
+                    LastName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    FirstName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
                     Version = table.Column<ushort>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -436,37 +440,23 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
             migrationBuilder.InsertData(
                 table: "MediaTypes",
                 columns: new[] { "Id", "Name", "SortOrder" },
-                values: new object[] { 1, "CD", (byte)1 });
-
-            migrationBuilder.InsertData(
-                table: "MediaTypes",
-                columns: new[] { "Id", "Name", "SortOrder" },
-                values: new object[] { 2, "DVD-Audio", (byte)2 });
-
-            migrationBuilder.InsertData(
-                table: "MediaTypes",
-                columns: new[] { "Id", "Name", "SortOrder" },
-                values: new object[] { 3, "Super Audio CD", (byte)3 });
-
-            migrationBuilder.InsertData(
-                table: "MediaTypes",
-                columns: new[] { "Id", "Name", "SortOrder" },
-                values: new object[] { 4, "Digital Download", (byte)4 });
+                values: new object[,]
+                {
+                    { 1, "CD", (byte)1 },
+                    { 2, "DVD-Audio", (byte)2 },
+                    { 3, "Super Audio CD", (byte)3 },
+                    { 4, "Digital Download", (byte)4 }
+                });
 
             migrationBuilder.InsertData(
                 table: "PersonGroups",
                 columns: new[] { "Id", "Name", "SortOrder", "Type" },
-                values: new object[] { 1, "Artist", (ushort)1, 0 });
-
-            migrationBuilder.InsertData(
-                table: "PersonGroups",
-                columns: new[] { "Id", "Name", "SortOrder", "Type" },
-                values: new object[] { 2, "Artist", (ushort)1, 1 });
-
-            migrationBuilder.InsertData(
-                table: "PersonGroups",
-                columns: new[] { "Id", "Name", "SortOrder", "Type" },
-                values: new object[] { 3, "Composer", (ushort)2, 1 });
+                values: new object[,]
+                {
+                    { 1, "Artist", (ushort)1, 0 },
+                    { 2, "Artist", (ushort)1, 1 },
+                    { 3, "Composer", (ushort)2, 1 }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AlbumCovers_AlbumId",
@@ -587,6 +577,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 unique: true);
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
