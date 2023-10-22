@@ -438,11 +438,9 @@ a, a:visited, a:active, a:focus {
         width: 700px;
     }
 
-    .Import .ImportVerifyMetadata .AlbumInfo {
-        .AlreadyExists {
-            font-weight: bold;
-            color: red;
-        }
+    .Import .ImportVerifyMetadata .AlbumInfo .AlreadyExists {
+        font-weight: bold;
+        color: red;
     }
 
     .Import .ImportVerifyMetadata .MediaInfo {
@@ -543,3 +541,7 @@ a, a:visited, a:active, a:focus {
     .Import .ImportVerifyMetadata input[type=number] {
         -moz-appearance: textfield;
     }
+
+.Import .ImportDoImport {
+    margin: 10px;
+}

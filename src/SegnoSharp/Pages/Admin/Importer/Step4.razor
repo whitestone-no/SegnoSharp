@@ -1,0 +1,15 @@
+﻿@page "/admin/import/step-4"
+
+@attribute [Authorize]
+
+<div class="Import">
+    <ul class="Steps">
+        <li>Select Folder</li>
+        <li>Select Files</li>
+        <li>Verify Metadata</li>
+        <li class="active">Import</li>
+    </ul>
+    <div class="ImportDoImport">
+        <ProgressBar @bind-CurrentStep="CurrentStep" @bind-TotalSteps="TotalNumberOfSteps"></ProgressBar>
+    </div>
+</div>
