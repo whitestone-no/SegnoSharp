@@ -7,8 +7,7 @@ namespace Whitestone.SegnoSharp.Pages
     {
         public async void OnGet()
         {
-            await HttpContext.SignOutAsync("SegnoSharpAuthCookies");
-            await HttpContext.SignOutAsync("oidc", new AuthenticationProperties
+            await HttpContext.SignOutAsync("SegnoSharpAuthCookies", new AuthenticationProperties
             {
                 RedirectUri = Url.Content("~/")
             });
