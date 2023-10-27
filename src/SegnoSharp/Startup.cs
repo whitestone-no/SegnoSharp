@@ -50,11 +50,11 @@ namespace Whitestone.SegnoSharp
 
             app.UseSerilogRequestLogging();
 
-            app.UseAuthentication();
-
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
