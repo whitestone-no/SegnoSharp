@@ -1,0 +1,41 @@
+﻿@page "/admin/albumeditor"
+@using Whitestone.SegnoSharp.Database.Models
+@attribute [Authorize]
+
+<h1>Album Editor</h1>
+
+<div style="margin-bottom: 10px;">
+    <EditForm Model="@SearchModel" OnSubmit="DoSearch">
+        <span>Search:</span>
+        <InputText @bind-Value="SearchModel.SearchString" />
+        <button type="submit"><span class="fa-solid fa-magnifying-glass"></span></button>
+    </EditForm>
+</div>
+
+@if (!AlbumList.Any())
+{
+    <div>No albums found</div>
+    return;
+}
+
+<div class="FileList">
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Number of tracks</th>
+                <th>Added</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Album album in AlbumList)
+            {
+                <tr>
+                    <td><NavLink href="@GetAlbumUrl(album.Id)">@album.Title</NavLink></td>
+                    <td>@album.Discs.SelectMany(d => d.Tracks).Count()</td>
+                    <td>@album.Added</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

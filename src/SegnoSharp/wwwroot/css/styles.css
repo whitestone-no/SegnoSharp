@@ -86,10 +86,6 @@ body {
             text-align: center;
         }
 
-h1 {
-    font-size: 3em;
-}
-
 #menu-toggle-icon {
     position: fixed;
     top: 2.5px;
@@ -345,31 +341,6 @@ a, a:visited, a:active, a:focus {
     margin-bottom: 20px;
 }
 
-.Import .FileList th {
-    text-align: right;
-    border-right: solid 1px #ccc;
-    padding: 10px;
-    background-color: #eee;
-}
-
-    .Import .FileList th:first-child {
-        text-align: left;
-    }
-
-.Import .FileList tbody tr:hover {
-    background-color: #fff;
-}
-
-.Import .FileList tbody td {
-    padding: 5px;
-    cursor: default;
-}
-
-    .Import .FileList tbody td:not(:first-child) {
-        text-align: right;
-        padding-right: 10px;
-    }
-
 .Import .ImportVerifyMetadata {
     margin-left: 10px;
 }
@@ -546,6 +517,31 @@ a, a:visited, a:active, a:focus {
     margin: 10px;
 }
 
-.Import .ImportDoImport div {
-    margin-bottom: 10px;
+    .Import .ImportDoImport div {
+        margin-bottom: 10px;
+    }
+
+.FileList th {
+    text-align: right;
+    border-right: solid 1px #ccc;
+    padding: 10px;
+    background-color: #eee;
 }
+
+    .FileList th:first-child {
+        text-align: left;
+    }
+
+.FileList tbody tr:hover {
+    background-color: #fff;
+}
+
+.FileList tbody td {
+    padding: 5px;
+    cursor: default;
+}
+
+    .FileList tbody td:not(:first-child) {
+        text-align: right;
+        padding-right: 10px;
+    }
