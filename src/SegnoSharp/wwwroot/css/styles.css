@@ -545,3 +545,7 @@ a, a:visited, a:active, a:focus {
 .Import .ImportDoImport {
     margin: 10px;
 }
+
+.Import .ImportDoImport div {
+    margin-bottom: 10px;
+}

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
+using System.Collections.Generic;
 using System.IO;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Models.ViewModels;
 
 namespace Whitestone.SegnoSharp.Models.States
 {
@@ -16,6 +18,7 @@ namespace Whitestone.SegnoSharp.Models.States
         public bool ImportSubfolders { get; set; }
         public SelectedFile[] SelectedFiles { get; set; }
         public DirectoryInfo MusicFolder { get; set; }
+        public List<AlbumViewModel> AlbumsToImport { get; set; }
     }
 
     public class SelectedFile

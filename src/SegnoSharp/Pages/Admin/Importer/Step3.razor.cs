@@ -12,6 +12,7 @@ using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Database;
+using Whitestone.SegnoSharp.Database.Extensions;
 using Whitestone.SegnoSharp.Database.Models;
 using Whitestone.SegnoSharp.Models.States;
 using Whitestone.SegnoSharp.Models.ViewModels;
@@ -28,7 +29,6 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
         [Inject] private IOptions<TagReaderConfig> TagReaderConfig { get; set; }
         [Inject] private IJSRuntime JsRuntime { get; set; }
 
-        private List<Album> Albums { get; } = new();
         private TrackViewModel _currentlyDraggingTrack;
 
         private List<MediaType> MediaTypes { get; set; }
@@ -39,6 +39,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
         {
             if (ImporterState.SelectedFiles == null)
             {
+                ImporterState.AlbumsToImport = null;
                 return;
             }
 
@@ -59,6 +60,8 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                 })
                 .ToList();
 
+            ImporterState.AlbumsToImport = new List<AlbumViewModel>();
+
             foreach (IGrouping<string, Tags> albumGroup in tags.GroupBy(a => a.Album))
             {
                 var album = new AlbumViewModel
@@ -78,6 +81,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                 {
                     album.AlbumCover = new AlbumCover
                     {
+                        Filename = albumGroup.Key.ToFileName(firstTagWithCover.CoverImage.MimeType),
                         Filesize = Convert.ToUInt32(firstTagWithCover.CoverImage.Data.Length),
                         Mime = firstTagWithCover.CoverImage.MimeType,
                         AlbumCoverData = new AlbumCoverData
@@ -139,7 +143,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                     album.Genres.Add(genre);
                 }
 
-                Albums.Add(album);
+                ImporterState.AlbumsToImport.Add(album);
 
                 foreach (IGrouping<byte, Tags> discGroup in albumGroup.GroupBy(x => x.Disc))
                 {
@@ -321,7 +325,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                 return;
             }
 
-            using MemoryStream ms = new(); 
+            using MemoryStream ms = new();
             try
             {
                 await e.File.OpenReadStream(5 * 1024 * 1024).CopyToAsync(ms); // Max image size = 5MB
@@ -336,6 +340,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
 
             album.AlbumCover = new AlbumCover
             {
+                Filename = e.File.Name,
                 Filesize = Convert.ToUInt32(e.File.Size),
                 Mime = e.File.ContentType,
                 AlbumCoverData = new AlbumCoverData
@@ -401,23 +406,18 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
             _currentlyDraggingTrack = null;
         }
 
-        private async Task OnNextClick()
+        private void OnNextClick()
         {
-            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to import?");
-            if (confirmed)
-            {
-                NavigationManager.NavigateTo("/admin/import/step-4");
-            }
+            NavigationManager.NavigateTo("/admin/import/step-4");
         }
 
         private async Task OnBackClick()
         {
-            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to go back and lose any changes?");
+            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to go back? Any changes you've made to album/track names, artists, or reorderings will be lost");
             if (confirmed)
             {
                 NavigationManager.NavigateTo("/admin/import/step-2");
             }
         }
-
     }
 }

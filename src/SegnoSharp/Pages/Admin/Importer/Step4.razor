@@ -10,6 +10,33 @@
         <li class="active">Import</li>
     </ul>
     <div class="ImportDoImport">
-        <ProgressBar @bind-CurrentStep="CurrentStep" @bind-TotalSteps="TotalNumberOfSteps"></ProgressBar>
+        @if (!ImportComplete && (ImporterState.AlbumsToImport == null || !ImporterState.AlbumsToImport.Any()))
+        {
+            <span>Nothing to import. Please redo the previous steps.</span>
+        }
+        else
+        {
+            <div>
+                <span>You are about to import @NewAlbumCount new album@(NewAlbumCount is > 1 or < 1 ? "s" : string.Empty), with a total of @NewAlbumTracksCount track@(NewAlbumTracksCount is > 1 or < 1 ? "s" : string.Empty)</span>
+                @if (ExistingAlbumCount > 0)
+                {
+                    <span>, and update @ExistingAlbumCount album@(ExistingAlbumCount is > 1 or < 1 ? "s" : string.Empty), with a total of @ExistingAlbumTracksCount track@(ExistingAlbumTracksCount is > 1 or < 1 ? "s" : string.Empty)</span>
+                }
+            </div>
+
+            @if (ImportComplete)
+            {
+                <div>
+                    Import complete!
+                </div>
+            }
+            else
+            {
+                <div class="NextBack">
+                    <button @onclick="OnBackClick">&lt; Back</button>
+                    <button @onclick="DoImport">Import</button>
+                </div>
+            }
+        }
     </div>
 </div>
