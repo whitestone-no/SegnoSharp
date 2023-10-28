@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
+using Whitestone.SegnoSharp.Models.ViewModels;
 
 namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
 {
@@ -16,6 +20,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
         private Album Album { get; set; }
         private List<PersonGroup> PersonGroups { get; set; }
         private int SelectedPersonGroupId { get; set; }
+        private bool AlbumCoverFileSizeError { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -23,8 +28,10 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
 
             Album = await dbContext.Albums
                 .Include(a => a.Genres)
+                .Include(a => a.RecordLabels)
                 .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.Persons)
                 .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.PersonGroup)
+                .Include(a => a.AlbumCover).ThenInclude(c => c.AlbumCoverData)
                 .FirstOrDefaultAsync(a => a.Id == Id);
 
             PersonGroups = await dbContext.PersonGroups
@@ -50,6 +57,15 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
                 .ToListAsync();
         }
 
+        private async Task<IEnumerable<RecordLabel>> ExecuteRecordLabelSearch(string searchTerm)
+        {
+            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+            return await dbContext.RecordLabels
+                .Where(rl => EF.Functions.Like(rl.Name, "%" + searchTerm + "%"))
+                .ToListAsync();
+        }
+        
         private void AddPersonGroup()
         {
             Album.AlbumPersonGroupPersonRelations.Add(new AlbumPersonGroupPersonRelation
@@ -61,6 +77,45 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
         private void Save()
         {
             ;
+        }
+
+        private async Task AddAlbumCover(InputFileChangeEventArgs e)
+        {
+            if (e.FileCount <= 0)
+            {
+                return;
+            }
+
+            using MemoryStream ms = new();
+            try
+            {
+                await e.File.OpenReadStream(5 * 1024 * 1024).CopyToAsync(ms); // Max image size = 5MB
+            }
+            catch
+            {
+                AlbumCoverFileSizeError = true;
+                return;
+            }
+
+            AlbumCoverFileSizeError = false;
+
+            byte[] fileBytes = ms.ToArray();
+
+            Album.AlbumCover = new AlbumCover
+            {
+                Filename = e.File.Name,
+                Filesize = Convert.ToUInt32(e.File.Size),
+                Mime = e.File.ContentType,
+                AlbumCoverData = new AlbumCoverData
+                {
+                    Data = fileBytes
+                }
+            };
+        }
+
+        private void RemoveAlbumCover()
+        {
+            Album.AlbumCover = null;
         }
     }
 }

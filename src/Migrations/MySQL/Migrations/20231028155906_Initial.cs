@@ -100,7 +100,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<int>(type: "int", nullable: false)
+                    Name = table.Column<string>(type: "varchar(255)", nullable: true, collation: "utf8mb4_unicode_ci")
                 },
                 constraints: table =>
                 {
@@ -477,7 +477,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     { 1, "Artist", (ushort)1, 0 },
                     { 2, "Artist", (ushort)1, 1 },
-                    { 3, "Composer", (ushort)2, 1 }
+                    { 3, "Composer", (ushort)2, 0 },
+                    { 4, "Composer", (ushort)2, 1 }
                 });
 
             migrationBuilder.CreateIndex(

@@ -22,7 +22,7 @@ namespace Whitestone.SegnoSharp.Models.ViewModels
                     return null;
                 }
 
-                return $"data:{AlbumCover.Mime};base64,{Convert.ToBase64String(AlbumCover.AlbumCoverData.Data)}";
+                return AlbumCover.ToInlineBase64();
             }
         }
 

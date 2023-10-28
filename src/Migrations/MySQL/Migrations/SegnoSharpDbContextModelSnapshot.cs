@@ -344,6 +344,13 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                             Id = 3,
                             Name = "Composer",
                             SortOrder = (ushort)2,
+                            Type = 0
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Composer",
+                            SortOrder = (ushort)2,
                             Type = 1
                         });
                 });
@@ -354,8 +361,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("Name")
-                        .HasColumnType("int");
+                    b.Property<string>("Name")
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 

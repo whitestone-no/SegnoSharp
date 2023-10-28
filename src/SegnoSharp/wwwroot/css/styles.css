@@ -16,6 +16,10 @@ input{
     font-size: 15px;
 }
 
+th {
+    text-align: right;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -376,7 +380,7 @@ a, a:visited, a:active, a:focus {
         }
 
         .Import .ImportVerifyMetadata input.Duration {
-            width: 60px;
+            width: 70px;
         }
 
     .Import .ImportVerifyMetadata .fa-solid {
@@ -465,12 +469,12 @@ a, a:visited, a:active, a:focus {
 
         .Import .ImportVerifyMetadata .FakeTable .th:nth-child(2),
         .Import .ImportVerifyMetadata .FakeTable .td:nth-child(2) {
-            width: 80px;
+            width: 70px;
         }
 
         .Import .ImportVerifyMetadata .FakeTable .th:nth-child(3),
         .Import .ImportVerifyMetadata .FakeTable .td:nth-child(3) {
-            width: 70px;
+            width: 80px;
             text-align: left;
         }
 

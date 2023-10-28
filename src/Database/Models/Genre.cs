@@ -7,7 +7,6 @@ using Whitestone.SegnoSharp.Database.Interfaces;
 namespace Whitestone.SegnoSharp.Database.Models
 {
     [Index(nameof(Name))]
-    [MetadataType(typeof(ITag))]
     public class Genre : ITag
     {
         public int Id { get; set; }

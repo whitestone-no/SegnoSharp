@@ -1,6 +1,7 @@
 ﻿@page "/admin/albums/{Id:int}"
 @using Whitestone.SegnoSharp.Database.Models
 @using Microsoft.AspNetCore.Mvc.Diagnostics
+@using Whitestone.SegnoSharp.Database.Extensions
 @attribute [Authorize]
 
 @if (Album == null)
@@ -11,7 +12,11 @@
 
 <h1>Edit album</h1>
 
-<div style="display: inline-block;">
+<div>
+    Added: <em>@Album.Added</em>
+</div>
+
+<div style="float: left;margin-right: 20px;">
     <h2>Album data</h2>
     <table class="Editor">
         <tr>
@@ -29,6 +34,12 @@
             </td>
         </tr>
         <tr>
+            <th>Record labels:</th>
+            <td>
+                <TagList Items="Album.RecordLabels" ExecuteSearch="ExecuteRecordLabelSearch"/>
+            </td>
+        </tr>
+        <tr>
             <th>UPC:</th>
             <td><input @bind="Album.Upc" /></td>
         </tr>
@@ -42,7 +53,7 @@
         </tr>
     </table>
 </div>
-<div style="display: inline-block;">
+<div style="float: left; margin-right: 20px;">
     <h2>People</h2>
 
     <table>
@@ -80,7 +91,29 @@
         }
     </table>
 </div>
+<div style="float: left;">
+    <h2>Cover</h2>
+    @if (Album.AlbumCover != null)
+    {
+        <div>
+            <img style="max-width: 250px;" src="@Album.AlbumCover.ToInlineBase64()" alt="Album cover" />
+        </div>
+        <div>
+            <button @onclick="RemoveAlbumCover">Remove</button>
+        </div>
+    }
+    else
+    {
+        <div>
+            <InputFile OnChange="AddAlbumCover" accept=".jpg,.jpeg,image/jpeg,.png,image/png" />
+        </div>
+        @if (AlbumCoverFileSizeError)
+        {
+            <div class="Error">Image is too large. Max image size is 5MB.</div>
+        }
+    }
+</div>
 
-<div>
+<div style="clear: both;">
     <button @onclick="Save">Save</button>
 </div>

@@ -37,7 +37,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                    Name = table.Column<string>(type: "TEXT COLLATE NOCASE", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -94,7 +94,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<int>(type: "INTEGER", nullable: false)
+                    Name = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -455,7 +455,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     { 1, "Artist", (ushort)1, 0 },
                     { 2, "Artist", (ushort)1, 1 },
-                    { 3, "Composer", (ushort)2, 1 }
+                    { 3, "Composer", (ushort)2, 0 },
+                    { 4, "Composer", (ushort)2, 1 }
                 });
 
             migrationBuilder.CreateIndex(
