@@ -43,7 +43,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin
 
         private static string GetAlbumUrl(int id)
         {
-            return $"/admin/albumeditor/album/{id}";
+            return $"/admin/albums/{id}";
         }
     }
 

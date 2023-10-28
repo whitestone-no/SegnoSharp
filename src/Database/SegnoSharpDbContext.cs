@@ -41,6 +41,7 @@ namespace Whitestone.SegnoSharp.Database
                 case "sqlite":
                     modelBuilder.UseCollation("NOCASE");
                     modelBuilder.Entity<Album>().Property(t => t.Title).HasColumnType("TEXT COLLATE NOCASE");
+                    modelBuilder.Entity<Genre>().Property(g => g.Name).HasColumnType("TEXT COLLATE NOCASE");
                     break;
                 case "mysql":
                     modelBuilder.UseCollation("utf8mb4_unicode_ci");

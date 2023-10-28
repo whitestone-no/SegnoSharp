@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Whitestone.SegnoSharp.Database.Interfaces;
 
 namespace Whitestone.SegnoSharp.Database.Models
 {
     [Index(nameof(LastName), nameof(FirstName))]
-    public class Person : IEquatable<Person>, IComparable<Person>
+    public class Person : IEquatable<Person>, IComparable<Person>, ITag
     {
         public int Id { get; set; }
 
@@ -100,6 +102,48 @@ namespace Whitestone.SegnoSharp.Database.Models
         public static bool operator >=(Person left, Person right)
         {
             return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
+        }
+
+        [NotMapped]
+        public string TagName
+        {
+            get
+            {
+                var name = string.Empty;
+
+                if (FirstName != null)
+                {
+                    name = FirstName + " ";
+                }
+
+                name += LastName;
+                return name;
+            }
+            set
+            {
+                value = value.Trim();
+                string lastname = value;
+                string firstname = null;
+
+                int firstCommaIndex = value.IndexOf(',');
+                if (firstCommaIndex != -1)
+                {
+                    lastname = value[..firstCommaIndex].Trim();
+                    firstname = value[(firstCommaIndex + 1)..].Trim();
+                }
+                else
+                {
+                    int lastSpaceIndex = value.LastIndexOf(' ');
+                    if (lastSpaceIndex != -1)
+                    {
+                        firstname = value[..lastSpaceIndex].Trim();
+                        lastname = value[lastSpaceIndex..].Trim();
+                    }
+                }
+
+                LastName = lastname;
+                FirstName = firstname;
+            }
         }
     }
 }

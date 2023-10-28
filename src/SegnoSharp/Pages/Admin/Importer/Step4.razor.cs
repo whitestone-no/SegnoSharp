@@ -122,7 +122,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                                 {
                                     FirstName = personVm.FirstName,
                                     LastName = personVm.LastName,
-                                    Version = 1
+                                    Version = 0
                                 };
                             albumPersonRelations.Persons.Add(person);
 
@@ -209,7 +209,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                                 {
                                     FirstName = personVm.FirstName,
                                     LastName = personVm.LastName,
-                                    Version = 1
+                                    Version = 0
                                 };
                                 trackPersonRelations.Persons.Add(person);
 

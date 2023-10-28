@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whitestone.SegnoSharp.Database;
 
@@ -10,9 +11,11 @@ using Whitestone.SegnoSharp.Database;
 namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 {
     [DbContext(typeof(SegnoSharpDbContext))]
-    partial class SegnoSharpDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231027153313_GenreCollation")]
+    partial class GenreCollation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,7 +34,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("GenresId");
 
-                    b.ToTable("AlbumGenre", (string)null);
+                    b.ToTable("AlbumGenre");
                 });
 
             modelBuilder.Entity("AlbumPersonGroupPersonRelationPerson", b =>
@@ -46,7 +49,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("PersonsId");
 
-                    b.ToTable("AlbumPersonGroupPersonRelationPerson", (string)null);
+                    b.ToTable("AlbumPersonGroupPersonRelationPerson");
                 });
 
             modelBuilder.Entity("AlbumRecordLabel", b =>
@@ -61,7 +64,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("RecordLabelsId");
 
-                    b.ToTable("AlbumRecordLabel", (string)null);
+                    b.ToTable("AlbumRecordLabel");
                 });
 
             modelBuilder.Entity("DiscMediaType", b =>
@@ -76,7 +79,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("MediaTypesId");
 
-                    b.ToTable("DiscMediaType", (string)null);
+                    b.ToTable("DiscMediaType");
                 });
 
             modelBuilder.Entity("PersonTrackPersonGroupPersonRelation", b =>
@@ -91,7 +94,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("TrackPersonGroupPersonRelationsId");
 
-                    b.ToTable("PersonTrackPersonGroupPersonRelation", (string)null);
+                    b.ToTable("PersonTrackPersonGroupPersonRelation");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Album", b =>
@@ -123,7 +126,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("Title");
 
-                    b.ToTable("Albums", (string)null);
+                    b.ToTable("Albums");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.AlbumCover", b =>
@@ -151,7 +154,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                     b.HasIndex("AlbumId")
                         .IsUnique();
 
-                    b.ToTable("AlbumCovers", (string)null);
+                    b.ToTable("AlbumCovers");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.AlbumCoverData", b =>
@@ -171,7 +174,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                     b.HasIndex("AlbumCoverId")
                         .IsUnique();
 
-                    b.ToTable("AlbumCoversData", (string)null);
+                    b.ToTable("AlbumCoversData");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.AlbumPersonGroupPersonRelation", b =>
@@ -192,7 +195,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("PersonGroupId");
 
-                    b.ToTable("AlbumPersonGroupsRelations", (string)null);
+                    b.ToTable("AlbumPersonGroupsRelations");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Disc", b =>
@@ -214,7 +217,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("AlbumId");
 
-                    b.ToTable("Discs", (string)null);
+                    b.ToTable("Discs");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Genre", b =>
@@ -231,7 +234,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Genres", (string)null);
+                    b.ToTable("Genres");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.MediaType", b =>
@@ -249,7 +252,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MediaTypes", (string)null);
+                    b.ToTable("MediaTypes");
 
                     b.HasData(
                         new
@@ -300,7 +303,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("LastName", "FirstName");
 
-                    b.ToTable("Persons", (string)null);
+                    b.ToTable("Persons");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersonGroup", b =>
@@ -321,7 +324,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PersonGroups", (string)null);
+                    b.ToTable("PersonGroups");
 
                     b.HasData(
                         new
@@ -360,7 +363,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("RecordLabels", (string)null);
+                    b.ToTable("RecordLabels");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.StreamHistory", b =>
@@ -379,7 +382,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("TrackStreamInfoId");
 
-                    b.ToTable("StreamHistory", (string)null);
+                    b.ToTable("StreamHistory");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.StreamQueue", b =>
@@ -398,7 +401,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("TrackStreamInfoId");
 
-                    b.ToTable("StreamQueue", (string)null);
+                    b.ToTable("StreamQueue");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Track", b =>
@@ -426,7 +429,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("Title");
 
-                    b.ToTable("Tracks", (string)null);
+                    b.ToTable("Tracks");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.TrackGroup", b =>
@@ -449,7 +452,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("DiscId");
 
-                    b.ToTable("TrackGroups", (string)null);
+                    b.ToTable("TrackGroups");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.TrackPersonGroupPersonRelation", b =>
@@ -470,7 +473,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("PersonGroupId");
 
-                    b.ToTable("TrackPersonGroupsRelations", (string)null);
+                    b.ToTable("TrackPersonGroupsRelations");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", b =>
@@ -502,7 +505,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
                     b.HasIndex("IncludeInAutoPlaylist", "LastPlayed", "PlayCount");
 
-                    b.ToTable("TrackStreamInfos", (string)null);
+                    b.ToTable("TrackStreamInfos");
                 });
 
             modelBuilder.Entity("AlbumGenre", b =>

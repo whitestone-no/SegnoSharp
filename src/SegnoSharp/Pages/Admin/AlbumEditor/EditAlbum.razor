@@ -1,0 +1,86 @@
+﻿@page "/admin/albums/{Id:int}"
+@using Whitestone.SegnoSharp.Database.Models
+@using Microsoft.AspNetCore.Mvc.Diagnostics
+@attribute [Authorize]
+
+@if (Album == null)
+{
+    <h1 style="color: red">Album not found</h1>
+    return;
+}
+
+<h1>Edit album</h1>
+
+<div style="display: inline-block;">
+    <h2>Album data</h2>
+    <table class="Editor">
+        <tr>
+            <th>Title:</th>
+            <td><input @bind="Album.Title" /></td>
+        </tr>
+        <tr>
+            <th>Published:</th>
+            <td><input @bind="Album.Published" /></td>
+        </tr>
+        <tr>
+            <th>Genres:</th>
+            <td>
+                <TagList Items="Album.Genres" ExecuteSearch="ExecuteGenreSearch" />
+            </td>
+        </tr>
+        <tr>
+            <th>UPC:</th>
+            <td><input @bind="Album.Upc" /></td>
+        </tr>
+        <tr>
+            <th>Catalogue Number:</th>
+            <td><input @bind="Album.CatalogueNumber" /></td>
+        </tr>
+        <tr>
+            <th>Public:</th>
+            <td><input type="checkbox" @bind="Album.IsPublic" /></td>
+        </tr>
+    </table>
+</div>
+<div style="display: inline-block;">
+    <h2>People</h2>
+
+    <table>
+        @foreach (AlbumPersonGroupPersonRelation personGroupRelation in Album.AlbumPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
+        {
+            <tr>
+                <th>@personGroupRelation.PersonGroup.Name:</th>
+                <td>
+                    <TagList Items="@personGroupRelation.Persons" ExecuteSearch="ExecutePersonSearch"></TagList>
+                </td>
+            </tr>
+        }
+
+        @{
+            List<PersonGroup> personGroups = PersonGroups
+            .Where(pg => Album.AlbumPersonGroupPersonRelations.All(apg => apg.PersonGroup.Id != pg.Id))
+            .ToList();
+
+            if (personGroups.Any())
+            {
+                <tr>
+                    <th>Add group:</th>
+                    <td>
+                        <select @bind="SelectedPersonGroupId">
+                            <option value="-1"></option>
+                            @foreach (PersonGroup personGroup in personGroups)
+                            {
+                                <option value="@personGroup.Id">@personGroup.Name</option>
+                            }
+                        </select>
+                        <button @onclick="AddPersonGroup" disabled="@(SelectedPersonGroupId <= 0)">Add</button>
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+</div>
+
+<div>
+    <button @onclick="Save">Save</button>
+</div>
