@@ -1,19 +1,16 @@
-﻿extern alias BassNetWindows;
-using System;
+﻿using System;
 using Whitestone.SegnoSharp.BassService.Interfaces;
 using Whitestone.SegnoSharp.BassService.Models.Config;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.IO;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-// Make sure to only use enums from BassNetWindows::Un4seen.Bass;
-using BassNetWindows::Un4seen.Bass;
+using Un4seen.Bass;
 using Whitestone.SegnoSharp.Common.Events;
 using Whitestone.Cambion.Interfaces;
 using Whitestone.SegnoSharp.BassService.Models;
+using System.Runtime.InteropServices;
 
 namespace Whitestone.SegnoSharp.BassService
 {
@@ -47,13 +44,13 @@ namespace Whitestone.SegnoSharp.BassService
                 LoadAssemblies();
 
                 // Initialize BASS
-                if (!_bassWrapper.Initialize(0, 44100, (int)BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
+                if (!_bassWrapper.Initialize(0, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
                 {
                     _log.LogCritical("Could not initialize BASS.NET: {bassError}", _bassWrapper.GetLastBassError());
                 }
 
                 // Initialize BASS Mixer
-                _mixer = _bassWrapper.CreateMixerStream(44100, 2, (int)BASSFlag.BASS_MIXER_NONSTOP);
+                _mixer = _bassWrapper.CreateMixerStream(44100, 2, BASSFlag.BASS_MIXER_NONSTOP);
                 if (_mixer == 0)
                 {
                     _log.LogError("Failed to create mixer: {bassError}", _bassWrapper.GetLastBassError());
@@ -113,43 +110,26 @@ namespace Whitestone.SegnoSharp.BassService
 
         private void LoadAssemblies()
         {
-            string executingFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string libraryPath = Path.Combine(executingFolder ?? Directory.GetCurrentDirectory(), "basslibwin");
-
-            if (!_bassWrapper.BassLoad(libraryPath))
+            var flacLib = "bassflac.dll";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                // Don't use GetLastBassError here as Bass hasn't been loaded
-                _log.LogCritical("Could not load BASS from {libraryPath}", libraryPath);
+                flacLib = "libbassflac.so";
             }
-
-            if (!_bassWrapper.BassLoadEnc(libraryPath))
+            if (_bassWrapper.BassLoadPlugin(flacLib) == 0)
             {
-                _log.LogCritical("Could not load bassenc.dll from {libraryPath}", libraryPath);
-            }
-
-            if (!_bassWrapper.BassLoadMixer(libraryPath))
-            {
-                _log.LogCritical("Could not load bassmix.dll from {libraryPath}", libraryPath);
-            }
-
-            if (!_bassWrapper.BassLoadFlac(libraryPath))
-            {
-                _log.LogCritical("Could not load bassflac.dll from {libraryPath}", libraryPath);
+                _log.LogCritical("Could not load {libName}", flacLib);
             }
 
             _log.LogInformation("BASS Version: {bassVersion}", _bassWrapper.GetBassVersion());
             _log.LogInformation("BASS Enc Version: {bassEncVersion}", _bassWrapper.GetBassEncVersion());
+            _log.LogInformation("BASS Enc MP3 Version: {bassEncMp3Version}", _bassWrapper.GetBassEncMp3Version());
             _log.LogInformation("BASS Mixer Version: {bassMixerVersion}", _bassWrapper.GetBassMixerVersion());
+            _log.LogInformation("BASS.NET Version: {bassMixerVersion}", _bassWrapper.GetBassNetVersion());
         }
 
         private void UnloadAssemblies()
         {
-            // Unload the BASS DLLs in the reverse order than they were loaded in.
-            // No need to ensure unload with an if as they will always be unloaded when the application ends.
-            _bassWrapper.BassUnloadFlac();
-            _bassWrapper.BassUnloadMixer();
-            _bassWrapper.BassUnloadEnc();
-            _bassWrapper.BassUnload();
+            _bassWrapper.BassUnloadPlugins();
         }
 
         public void HandleEvent(PlayTrack input)
@@ -168,7 +148,7 @@ namespace Whitestone.SegnoSharp.BassService
                 TrackExt track = new (input.Track);
 
                 // Load music file
-                track.ChannelHandle = _bassWrapper.CreateFileStream(track.File, 0L, 0L, (int)(BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE));
+                track.ChannelHandle = _bassWrapper.CreateFileStream(track.File, 0L, 0L, BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE);
 
                 if (track.ChannelHandle == 0)
                 {
@@ -179,11 +159,11 @@ namespace Whitestone.SegnoSharp.BassService
                 // Stop previous track (with 1 second fadeout)
                 if (_currentlyPlayingTrack != null)
                 {
-                    _bassWrapper.SlideAttribute(_currentlyPlayingTrack.ChannelHandle, (int)BASSAttribute.BASS_ATTRIB_VOL, -1f, 1000);
+                    _bassWrapper.SlideAttribute(_currentlyPlayingTrack.ChannelHandle, BASSAttribute.BASS_ATTRIB_VOL, -1f, 1000);
                 }
 
                 // Add new track to mixer
-                if (!_bassWrapper.MixerAddStream(_mixer, track.ChannelHandle, (int)(BASSFlag.BASS_MIXER_PAUSE | BASSFlag.BASS_MIXER_DOWNMIX | BASSFlag.BASS_STREAM_AUTOFREE)))
+                if (!_bassWrapper.MixerAddStream(_mixer, track.ChannelHandle, BASSFlag.BASS_MIXER_CHAN_PAUSE | BASSFlag.BASS_MIXER_CHAN_DOWNMIX | BASSFlag.BASS_STREAM_AUTOFREE))
                 {
                     _log.LogError("Failed to add channel to mixer: {bassError}", _bassWrapper.GetLastBassError());
                 }

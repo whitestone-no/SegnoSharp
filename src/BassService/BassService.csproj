@@ -38,19 +38,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\lib\BASS\windows\bass.dll" Visible="true" Link="basslibwin\bass.dll">
+    <None Include="..\lib\BASS\windows\bass.dll" Visible="true" Link="bass.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\lib\BASS\windows\bassenc.dll" Visible="true" Link="basslibwin\bassenc.dll">
+    <None Include="..\lib\BASS\windows\bassenc.dll" Visible="true" Link="bassenc.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\lib\BASS\windows\bassenc_mp3.dll" Visible="true" Link="basslibwin\bassenc_mp3.dll">
+    <None Include="..\lib\BASS\windows\bassenc_mp3.dll" Visible="true" Link="bassenc_mp3.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\lib\BASS\windows\bassmix.dll" Visible="true" Link="basslibwin\bassmix.dll">
+    <None Include="..\lib\BASS\windows\bassmix.dll" Visible="true" Link="bassmix.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\lib\BASS\windows\bassflac.dll" Visible="true" Link="basslibwin\bassflac.dll">
+    <None Include="..\lib\BASS\windows\bassflac.dll" Visible="true" Link="bassflac.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -71,11 +71,6 @@
   <ItemGroup>
     <Reference Include="Bass.Net">
       <HintPath>..\lib\BASS\Bass.Net\Bass.Net.dll</HintPath>
-      <Aliases>BassNetWindows</Aliases>
-    </Reference>
-    <Reference Include="Bass.Net.Linux">
-      <HintPath>..\lib\BASS\Bass.Net\Bass.Net.Linux.dll</HintPath>
-      <Aliases>BassNetLinux</Aliases>
     </Reference>
   </ItemGroup>
 

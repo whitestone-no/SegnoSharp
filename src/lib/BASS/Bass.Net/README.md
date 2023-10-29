@@ -1,6 +1,5 @@
-This folder should contain the following files:
+This folder should contain the following files (verified with version in parantheses)):
 
-- Bass.Net.dll
-- Bass.Net.Linux.dll
+- Bass.Net.dll (2.4.17.5)
 
-Bass.NET for Linux is also called `Bass.Net.dll` so make sure you rename the Linux version of Bass.Net to `Bass.Net.Linux.dll` and leave the Windows version of the file with the default name.
+Download from http://bass.radio42.com/

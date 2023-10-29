@@ -3,8 +3,6 @@ using Whitestone.SegnoSharp.BassService.Interfaces;
 using Whitestone.SegnoSharp.BassService.Models.Config;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Runtime.InteropServices;
 using Whitestone.SegnoSharp.BassService.HealthChecks;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
@@ -18,19 +16,7 @@ namespace Whitestone.SegnoSharp.BassService.Extensions
             services.Configure<BassRegistration>(configuration.GetSection(BassRegistration.Section));
             services.Configure<TagReaderConfig>(configuration.GetSection(TagReaderConfig.Section));
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                services.AddSingleton<IBassWrapper, BassWrapperLinux>();
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                services.AddSingleton<IBassWrapper, BassWrapperWindows>();
-            }
-            else
-            {
-                throw new Exception("Unsupported Operating System");
-            }
-
+            services.AddSingleton<IBassWrapper, BassWrapper>();
             services.AddSingleton<ITagReader, TagReader>();
 
             services.AddHostedService<BassServiceHost>();
