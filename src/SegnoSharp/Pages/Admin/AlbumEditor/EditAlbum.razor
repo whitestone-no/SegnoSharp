@@ -1,6 +1,5 @@
 ﻿@page "/admin/albums/{Id:int}"
 @using Whitestone.SegnoSharp.Database.Models
-@using Microsoft.AspNetCore.Mvc.Diagnostics
 @using Whitestone.SegnoSharp.Database.Extensions
 @attribute [Authorize]
 
@@ -115,5 +114,5 @@
 </div>
 
 <div style="clear: both;">
-    <button @onclick="Save">Save</button>
+    <button @onclick="Save">Save & Close</button>
 </div>

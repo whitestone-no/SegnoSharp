@@ -8,15 +8,16 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
-using Whitestone.SegnoSharp.Models.ViewModels;
 
 namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
 {
-    public partial class EditAlbum
+    public partial class EditAlbum : IDisposable
     {
         [Parameter] public int Id { get; set; }
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
+        [Inject] private NavigationManager NavigationManager { get; set; }
 
+        private SegnoSharpDbContext DbContext { get; set; }
         private Album Album { get; set; }
         private List<PersonGroup> PersonGroups { get; set; }
         private int SelectedPersonGroupId { get; set; }
@@ -24,9 +25,9 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
 
         protected override async Task OnInitializedAsync()
         {
-            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+            DbContext = await DbFactory.CreateDbContextAsync();
 
-            Album = await dbContext.Albums
+            Album = await DbContext.Albums
                 .Include(a => a.Genres)
                 .Include(a => a.RecordLabels)
                 .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.Persons)
@@ -34,38 +35,32 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
                 .Include(a => a.AlbumCover).ThenInclude(c => c.AlbumCoverData)
                 .FirstOrDefaultAsync(a => a.Id == Id);
 
-            PersonGroups = await dbContext.PersonGroups
+            PersonGroups = await DbContext.PersonGroups
                 .Where(g => g.Type == PersonGroupType.Album)
                 .ToListAsync();
         }
 
         private async Task<IEnumerable<Genre>> ExecuteGenreSearch(string searchTerm)
         {
-            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
-
-            return await dbContext.Genres
+            return await DbContext.Genres
                 .Where(g => EF.Functions.Like(g.Name, "%" + searchTerm + "%") && !Album.Genres.Select(gg => gg.Id).Contains(g.Id))
                 .ToListAsync();
         }
 
         private async Task<IEnumerable<Person>> ExecutePersonSearch(string searchTerm)
         {
-            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
-
-            return await dbContext.Persons
+            return await DbContext.Persons
                 .Where(p => EF.Functions.Like(p.LastName, "%" + searchTerm + "%") || EF.Functions.Like(p.FirstName, "%" + searchTerm + "%"))
                 .ToListAsync();
         }
 
         private async Task<IEnumerable<RecordLabel>> ExecuteRecordLabelSearch(string searchTerm)
         {
-            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
-
-            return await dbContext.RecordLabels
+            return await DbContext.RecordLabels
                 .Where(rl => EF.Functions.Like(rl.Name, "%" + searchTerm + "%"))
                 .ToListAsync();
         }
-        
+
         private void AddPersonGroup()
         {
             Album.AlbumPersonGroupPersonRelations.Add(new AlbumPersonGroupPersonRelation
@@ -117,10 +112,25 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             Album.AlbumPersonGroupPersonRelations.Remove(personGroupRelation);
         }
 
-        private void Save()
+        private async Task Save()
         {
-            ;
+            await DbContext.SaveChangesAsync();
+
+            NavigationManager.NavigateTo("/admin/albums");
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                DbContext?.Dispose();
+            }
+        }
     }
 }
