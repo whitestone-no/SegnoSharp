@@ -77,5 +77,11 @@ namespace Whitestone.SegnoSharp.Components
         {
             Items.Remove(item);
         }
+
+        private void OnBlur()
+        {
+            Search = string.Empty;
+            SearchResults = new List<TItem>();
+        }
     }
 }

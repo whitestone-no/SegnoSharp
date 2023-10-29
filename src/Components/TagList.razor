@@ -6,7 +6,7 @@
     {
         <span>@item.TagName<button @onclick="() => RemoveItem(item)"><span class="fa-regular fa-circle-xmark"></span></button></span>
     }
-    <input @bind="Search" @bind:event="oninput" @bind:after="StartSearchTimer" />
+    <input @bind="Search" @bind:event="oninput" @bind:after="StartSearchTimer" @onblur="OnBlur" />
     @if (Search.Trim().Length > 0)
     {
         <div>
