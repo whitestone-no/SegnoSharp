@@ -14,7 +14,7 @@
             {
                 @foreach (TItem searchResultItem in SearchResults)
                 {
-                    <button @onclick="() => AddItem(searchResultItem)">@searchResultItem.TagName</button>
+                    <button @onmousedown="() => AddItem(searchResultItem)">@searchResultItem.TagName</button>
                 }
             }
             @{
@@ -22,7 +22,7 @@
                 {
                     if (Items.All(g => g.TagName != newName))
                     {
-                        <button class="New" title="Create new" @onclick="() => AddNewItem(newName)">@newName <span class="fa-solid fa-plus-circle"></span></button>
+                        <button class="New" title="Create new" @onmousedown="() => AddNewItem(newName)">@newName <span class="fa-solid fa-plus-circle"></span></button>
                     }
                 }
             }

@@ -10,8 +10,9 @@ namespace Whitestone.SegnoSharp.Components
     public partial class TagList<TItem> where TItem : ITag, new()
     {
         [Parameter] public IList<TItem> Items { get; set; }
+        [Parameter] public object Context { get; set; }
 
-        [Parameter, EditorRequired] public Func<string, Task<IEnumerable<TItem>>> ExecuteSearch { get; set; }
+        [Parameter, EditorRequired] public Func<string, object, Task<IEnumerable<TItem>>> ExecuteSearch { get; set; }
 
         private string Search { get; set; } = string.Empty;
         private IEnumerable<TItem> SearchResults { get; set; } = new List<TItem>();
@@ -51,7 +52,7 @@ namespace Whitestone.SegnoSharp.Components
                 return;
             }
 
-            SearchResults = await ExecuteSearch(Search);
+            SearchResults = await ExecuteSearch(Search, Context);
 
             await InvokeAsync(StateHasChanged);
         }
