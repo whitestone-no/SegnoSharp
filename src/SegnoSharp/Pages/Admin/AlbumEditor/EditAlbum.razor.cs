@@ -73,12 +73,6 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
                 PersonGroup = PersonGroups.First(pg => pg.Id == SelectedPersonGroupId)
             });
         }
-
-        private void Save()
-        {
-            ;
-        }
-
         private async Task AddAlbumCover(InputFileChangeEventArgs e)
         {
             if (e.FileCount <= 0)
@@ -117,5 +111,16 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
         {
             Album.AlbumCover = null;
         }
+
+        private void RemovePersonGroup(AlbumPersonGroupPersonRelation personGroupRelation)
+        {
+            Album.AlbumPersonGroupPersonRelations.Remove(personGroupRelation);
+        }
+
+        private void Save()
+        {
+            ;
+        }
+
     }
 }

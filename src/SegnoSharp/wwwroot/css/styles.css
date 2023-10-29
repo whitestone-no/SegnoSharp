@@ -553,3 +553,11 @@ a, a:visited, a:active, a:focus {
         text-align: right;
         padding-right: 10px;
     }
+
+.TinyDelete {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin-right: 3px;
+    cursor: pointer;
+}

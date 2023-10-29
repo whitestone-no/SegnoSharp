@@ -60,7 +60,7 @@
         @foreach (AlbumPersonGroupPersonRelation personGroupRelation in Album.AlbumPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
         {
             <tr>
-                <th>@personGroupRelation.PersonGroup.Name:</th>
+                <th>@personGroupRelation.PersonGroup.Name <button title="Remove @personGroupRelation.PersonGroup.Name group" class="TinyDelete" @onclick="() => RemovePersonGroup(personGroupRelation)"><span class="fa-regular fa-circle-xmark"></span></button>:</th>
                 <td>
                     <TagList Items="@personGroupRelation.Persons" ExecuteSearch="ExecutePersonSearch"></TagList>
                 </td>
