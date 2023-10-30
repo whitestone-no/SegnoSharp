@@ -69,4 +69,5 @@
 
             .TagList > div > button.New {
                 background-color: white;
+                margin-left: 3px;
             }

@@ -40,26 +40,26 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
                 .ToListAsync();
         }
 
-        private async Task<IEnumerable<Genre>> ExecuteGenreSearch(string searchTerm, object context)
+        private async Task<IEnumerable<Genre>> ExecuteGenreSearch(string searchTerm)
         {
             return await DbContext.Genres
-                .Where(g => EF.Functions.Like(g.Name, "%" + searchTerm + "%") && !Album.Genres.Select(gg => gg.Id).Contains(g.Id))
+                .Where(g => EF.Functions.Like(g.Name, "%" + searchTerm + "%"))
                 .ToListAsync();
         }
 
-        private async Task<IEnumerable<Person>> ExecutePersonSearch(string searchTerm, object context)
+        private async Task<IEnumerable<Person>> ExecutePersonSearch(string searchTerm)
         {
-            var personGroupRelation = context as AlbumPersonGroupPersonRelation;
-            return (await DbContext.Persons
-                    .Where(p => EF.Functions.Like(p.LastName, "%" + searchTerm + "%") || EF.Functions.Like(p.FirstName, "%" + searchTerm + "%"))
-                    .ToListAsync())
-                .Where(p => personGroupRelation != null && !personGroupRelation.Persons.Select(pp => pp.Id).Contains(p.Id));
+            var p = new Person { TagName = searchTerm };
+
+            return await DbContext.Persons
+                    .Where(pp => EF.Functions.Like(pp.LastName, "%" + p.LastName + "%") || EF.Functions.Like(pp.FirstName, "%" + p.FirstName + "%"))
+                    .ToListAsync();
         }
 
-        private async Task<IEnumerable<RecordLabel>> ExecuteRecordLabelSearch(string searchTerm, object context)
+        private async Task<IEnumerable<RecordLabel>> ExecuteRecordLabelSearch(string searchTerm)
         {
             return await DbContext.RecordLabels
-                .Where(rl => EF.Functions.Like(rl.Name, "%" + searchTerm + "%") && !Album.RecordLabels.Select(rr => rr.Id).Contains(rl.Id))
+                .Where(rl => EF.Functions.Like(rl.Name, "%" + searchTerm + "%"))
                 .ToListAsync();
         }
 

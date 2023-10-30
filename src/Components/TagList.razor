@@ -18,11 +18,13 @@
                 }
             }
             @{
-                string newName = CultureInfo.CurrentUICulture.TextInfo.ToTitleCase(Search);if (SearchResults.All(i => i.TagName != newName))
+                string newName = CultureInfo.CurrentUICulture.TextInfo.ToTitleCase(Search);
+                var item = new TItem { TagName = newName };
+                if (SearchResults.All(i => i.TagName != item.TagName))
                 {
-                    if (Items.All(g => g.TagName != newName))
+                    if (Items.All(g => g.TagName != item.TagName))
                     {
-                        <button class="New" title="Create new" @onmousedown="() => AddNewItem(newName)">@newName <span class="fa-solid fa-plus-circle"></span></button>
+                        <button class="New" title="Create new" @onmousedown="() => AddNewItem(newName)">@newName<span class="fa-solid fa-plus-circle"></span></button>
                     }
                 }
             }

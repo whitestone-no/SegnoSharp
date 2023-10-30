@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using Whitestone.SegnoSharp.Database.Interfaces;
@@ -10,9 +11,8 @@ namespace Whitestone.SegnoSharp.Components
     public partial class TagList<TItem> where TItem : ITag, new()
     {
         [Parameter] public IList<TItem> Items { get; set; }
-        [Parameter] public object Context { get; set; }
 
-        [Parameter, EditorRequired] public Func<string, object, Task<IEnumerable<TItem>>> ExecuteSearch { get; set; }
+        [Parameter, EditorRequired] public Func<string, Task<IEnumerable<TItem>>> ExecuteSearch { get; set; }
 
         private string Search { get; set; } = string.Empty;
         private IEnumerable<TItem> SearchResults { get; set; } = new List<TItem>();
@@ -52,7 +52,9 @@ namespace Whitestone.SegnoSharp.Components
                 return;
             }
 
-            SearchResults = await ExecuteSearch(Search, Context);
+            IEnumerable<TItem> searchResults = await ExecuteSearch(Search);
+
+            SearchResults = searchResults.Where(r => !Items.Contains(r));
 
             await InvokeAsync(StateHasChanged);
         }
