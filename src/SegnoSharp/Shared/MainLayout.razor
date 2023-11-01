@@ -10,13 +10,13 @@
         <AuthorizeView Policy="IgnoreRole">
             <Authorized>
                 Logged in as <em>@_loggedInAs</em>
-                <NavLink href="/logout">Logout</NavLink>
+                <NavLink href="/auth/logout">Logout</NavLink>
             </Authorized>
             <Authorizing>
                 Please wait while logging in
             </Authorizing>
             <NotAuthorized>
-                <NavLink href="@("/login?redirectUri=" + @NavigationManager.Uri)">Login</NavLink>
+                <NavLink href="@("/auth/login?redirectUri=" + @NavigationManager.Uri)">Login</NavLink>
             </NotAuthorized>
         </AuthorizeView>
     </div>

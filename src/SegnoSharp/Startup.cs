@@ -30,6 +30,7 @@ namespace Whitestone.SegnoSharp
             services.Configure<CommonConfig>(_configuration.GetSection(CommonConfig.Section));
             services.Configure<StreamingServer>(_configuration.GetSection(StreamingServer.Section));
 
+            services.AddControllers();
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddOidcAuthorizaton(_configuration);
@@ -61,6 +62,7 @@ namespace Whitestone.SegnoSharp
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/health", new HealthCheckOptions{ ResponseWriter = HealthCheckResponseWriter.WriteResponse });
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
