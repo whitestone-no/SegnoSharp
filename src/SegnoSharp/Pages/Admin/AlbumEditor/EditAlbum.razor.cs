@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
@@ -22,6 +23,10 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
         private List<PersonGroup> PersonGroups { get; set; }
         private int SelectedPersonGroupId { get; set; }
         private bool AlbumCoverFileSizeError { get; set; }
+        private List<MediaType> MediaTypes { get; set; }
+
+        private Track _currentlyDraggingTrack = null;
+        private Track _currentlyDraggingOverTrack = null;
 
         protected override async Task OnInitializedAsync()
         {
@@ -33,11 +38,14 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
                 .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.Persons)
                 .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.PersonGroup)
                 .Include(a => a.AlbumCover).ThenInclude(c => c.AlbumCoverData)
+                .Include(a => a.Discs).ThenInclude(d => d.Tracks)
                 .FirstOrDefaultAsync(a => a.Id == Id);
 
             PersonGroups = await DbContext.PersonGroups
                 .Where(g => g.Type == PersonGroupType.Album)
                 .ToListAsync();
+
+            MediaTypes = await DbContext.MediaTypes.ToListAsync();
         }
 
         private async Task<IEnumerable<Genre>> ExecuteGenreSearch(string searchTerm)
@@ -114,9 +122,12 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             Album.AlbumPersonGroupPersonRelations.Remove(personGroupRelation);
         }
 
-        private async Task Save()
+        private async Task Close(bool save = false)
         {
-            await DbContext.SaveChangesAsync();
+            if (save)
+            {
+                await DbContext.SaveChangesAsync();
+            }
 
             NavigationManager.NavigateTo("/admin/albums");
         }
@@ -133,6 +144,41 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             {
                 DbContext?.Dispose();
             }
+        }
+
+        private void DragStart(Track track)
+        {
+            _currentlyDraggingTrack = track;
+        }
+
+        private void HandleDrop(Track targetTrack)
+        {
+            _currentlyDraggingTrack.Disc.Tracks.Remove(_currentlyDraggingTrack);
+
+            foreach (Track trackAbove in _currentlyDraggingTrack.Disc.Tracks.Where(t => t.TrackNumber > _currentlyDraggingTrack.TrackNumber))
+            {
+                trackAbove.TrackNumber = (ushort)(trackAbove.TrackNumber - 1);
+            }
+
+            foreach (Track destinationTrackBelow in targetTrack.Disc.Tracks.Where(t => t.TrackNumber > targetTrack.TrackNumber))
+            {
+                destinationTrackBelow.TrackNumber = (ushort)(destinationTrackBelow.TrackNumber + 1);
+            }
+
+            _currentlyDraggingTrack.TrackNumber = (ushort)(targetTrack.TrackNumber + 1);
+            _currentlyDraggingTrack.Disc = targetTrack.Disc;
+            targetTrack.Disc.Tracks.Add(_currentlyDraggingTrack);
+        }
+
+        private void HandleDragEnd()
+        {
+            _currentlyDraggingTrack = null;
+            _currentlyDraggingOverTrack = null;
+        }
+
+        private void HandleDragEnter(Track track)
+        {
+            _currentlyDraggingOverTrack = track;
         }
     }
 }

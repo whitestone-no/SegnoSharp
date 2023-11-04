@@ -561,3 +561,7 @@ a, a:visited, a:active, a:focus {
     margin-right: 3px;
     cursor: pointer;
 }
+
+table.DraggableTable tr.drag-on td {
+    border-bottom: solid 2px black;
+}

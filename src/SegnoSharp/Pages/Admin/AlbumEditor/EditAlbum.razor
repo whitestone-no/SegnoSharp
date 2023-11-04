@@ -1,6 +1,7 @@
 ﻿@page "/admin/albums/{Id:int}"
 @using Whitestone.SegnoSharp.Database.Models
 @using Whitestone.SegnoSharp.Database.Extensions
+@using Microsoft.IdentityModel.Tokens
 @attribute [Authorize]
 
 @if (Album == null)
@@ -35,7 +36,7 @@
         <tr>
             <th>Record labels:</th>
             <td>
-                <TagList Items="Album.RecordLabels" ExecuteSearch="ExecuteRecordLabelSearch"/>
+                <TagList Items="Album.RecordLabels" ExecuteSearch="ExecuteRecordLabelSearch" />
             </td>
         </tr>
         <tr>
@@ -61,7 +62,7 @@
             <tr>
                 <th>@personGroupRelation.PersonGroup.Name <button title="Remove @personGroupRelation.PersonGroup.Name group" class="TinyDelete" @onclick="() => RemovePersonGroup(personGroupRelation)"><span class="fa-regular fa-circle-xmark"></span></button>:</th>
                 <td>
-                    <TagList Items="@personGroupRelation.Persons" ExecuteSearch="ExecutePersonSearch" Context="personGroupRelation" />
+                    <TagList Items="@personGroupRelation.Persons" ExecuteSearch="ExecutePersonSearch" />
                 </td>
             </tr>
         }
@@ -114,5 +115,48 @@
 </div>
 
 <div style="clear: both;">
-    <button @onclick="Save">Save & Close</button>
+    @foreach (Disc disc in Album.Discs)
+    {
+        <div>
+            <h2>
+                <span>Disc @disc.DiscNumber</span>
+                @if (!disc.Title.IsNullOrEmpty())
+                {
+                    <span>@disc.Title</span>
+                }
+            </h2>
+            <table class="DraggableTable">
+                <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>Track #</th>
+                        <th>Length</th>
+                        <th>Title</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Track track in disc.Tracks.OrderBy(t => t.TrackNumber))
+                    {
+                        <tr draggable="true"
+                            ondragover="event.preventDefault();"
+                            @ondragstart="() => DragStart(track)"
+                            @ondrop="() => HandleDrop(track)"
+                            @ondragend="HandleDragEnd"
+                            @ondragenter="() => HandleDragEnter(track)"
+                            class="@(_currentlyDraggingOverTrack == track ? "drag-on" : null)">
+                            <td><span class="fa-solid fa-grip"></span></td>
+                            <td>@track.TrackNumber</td>
+                            <td>@track.Duration</td>
+                            <td><NavLink href="@($"/admin/albums/track/{track.Id}")">@track.Title</NavLink></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div>
+    <button @onclick="() => Close()">Close</button>
+    <button @onclick="() => Close(true)">Close & Save</button>
 </div>

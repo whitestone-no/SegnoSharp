@@ -1,0 +1,15 @@
+﻿@page "/admin/albums/track/{Id:int}"
+@attribute [Authorize]
+
+@if (Track == null)
+{
+    <h1 style="color: red">Track not found</h1>
+    return;
+}
+
+<h1>Edit track</h1>
+
+<div>
+    <button @onclick="() => Close()">Close</button>
+    <button @onclick="() => Close(true)">Close & Save</button>
+</div>
