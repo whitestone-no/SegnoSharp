@@ -1,12 +1,32 @@
 ﻿@using System.Globalization
+@using Microsoft.AspNetCore.Components.Forms
 @typeparam TItem
 
 <div class="TagList">
-    @foreach (TItem item in Items.OrderBy(i => i.TagName))
+    @if (Items != null)
     {
-        <span>@item.TagName<button @onclick="() => RemoveItem(item)"><span class="fa-regular fa-circle-xmark"></span></button></span>
+        @foreach (TItem item in Items.OrderBy(i => i.TagName))
+        {
+            <span>@item.TagName<button @onclick="() => RemoveItem(item)"><span class="fa-regular fa-circle-xmark"></span></button></span>
+        }
     }
-    <input @bind="Search" @bind:event="oninput" @bind:after="StartSearchTimer" @onblur="OnBlur" />
+    @if (Selection != null)
+    {
+        <select @bind="SelectionSelected">
+            <option value="0"></option>
+            @if (Items != null)
+            {
+                @foreach (TItem item in Selection.Where(i => !Items.Contains(i)))
+                {
+                    <option value="@item.Id">@item.TagName (@item.Id)</option>
+                }
+            }
+        </select>
+    }
+    else
+    {
+        <input @bind="Search" @bind:event="oninput" @bind:after="StartSearchTimer" @onblur="OnBlur" />
+    }
     @if (Search.Trim().Length > 0)
     {
         <div>

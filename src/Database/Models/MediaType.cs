@@ -8,6 +8,7 @@ namespace Whitestone.SegnoSharp.Database.Models
     public class MediaType : ITag
     {
         public int Id { get; set; }
+
         [Required]
         public string Name { get; set; }
         public byte SortOrder { get; set; }

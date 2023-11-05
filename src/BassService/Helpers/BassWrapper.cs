@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
-using Un4seen.Bass.AddOn.Flac;
 using Un4seen.Bass.AddOn.Mix;
 using Un4seen.Bass.AddOn.Tags;
 using Un4seen.Bass.Misc;

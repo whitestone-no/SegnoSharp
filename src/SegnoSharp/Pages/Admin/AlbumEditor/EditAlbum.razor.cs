@@ -5,8 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 
@@ -17,6 +18,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
         [Parameter] public int Id { get; set; }
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
         [Inject] private NavigationManager NavigationManager { get; set; }
+        [Inject] private IJSRuntime JsRuntime { get; set; }
 
         private SegnoSharpDbContext DbContext { get; set; }
         private Album Album { get; set; }
@@ -39,6 +41,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
                 .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.PersonGroup)
                 .Include(a => a.AlbumCover).ThenInclude(c => c.AlbumCoverData)
                 .Include(a => a.Discs).ThenInclude(d => d.Tracks)
+                .Include(a => a.Discs).ThenInclude(d => d.MediaTypes)
                 .FirstOrDefaultAsync(a => a.Id == Id);
 
             PersonGroups = await DbContext.PersonGroups
@@ -179,6 +182,18 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
         private void HandleDragEnter(Track track)
         {
             _currentlyDraggingOverTrack = track;
+        }
+
+        private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+        {
+            if (DbContext.ChangeTracker.HasChanges())
+            {
+                var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "You have unsaved changes. Are you sure you want to close?");
+                if (!confirmed)
+                {
+                    context.PreventNavigation();
+                }
+            }
         }
     }
 }

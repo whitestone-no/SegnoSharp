@@ -9,7 +9,7 @@
     <h1 style="color: red">Album not found</h1>
     return;
 }
-
+<NavigationLock ConfirmExternalNavigation="true" OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 <h1>Edit album</h1>
 
 <div>
@@ -124,6 +124,7 @@
                 {
                     <span>@disc.Title</span>
                 }
+                <TagList Items="disc.MediaTypes" Selection="MediaTypes"></TagList>
             </h2>
             <table class="DraggableTable">
                 <thead>

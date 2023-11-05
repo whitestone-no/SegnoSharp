@@ -2,6 +2,7 @@
 {
     public interface ITag
     {
+        int Id { get; set; }
         string TagName { get; set; }
     }
 }

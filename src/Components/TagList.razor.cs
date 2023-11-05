@@ -12,12 +12,28 @@ namespace Whitestone.SegnoSharp.Components
     {
         [Parameter] public IList<TItem> Items { get; set; }
 
-        [Parameter, EditorRequired] public Func<string, Task<IEnumerable<TItem>>> ExecuteSearch { get; set; }
+        [Parameter] public Func<string, Task<IEnumerable<TItem>>> ExecuteSearch { get; set; }
+        [Parameter] public IList<TItem> Selection { get; set; }
 
         private string Search { get; set; } = string.Empty;
         private IEnumerable<TItem> SearchResults { get; set; } = new List<TItem>();
 
+        private int SelectionSelected
+        {
+            get => _selectionSelected;
+            set
+            {
+                if (_selectionSelected == value)
+                {
+                    return;
+                }
+                _selectionSelected = value;
+                AddItem(value);
+            }
+        }
+
         private Timer _searchTimer;
+        private int _selectionSelected;
 
         private void StartSearchTimer()
         {
@@ -85,6 +101,17 @@ namespace Whitestone.SegnoSharp.Components
         {
             Search = string.Empty;
             SearchResults = new List<TItem>();
+        }
+
+        private void AddItem(int id)
+        {
+            if (id == 0)
+            {
+                return;
+            }
+
+            Items.Add(Selection.First(s => s.Id == id));
+            SelectionSelected = 0;
         }
     }
 }
