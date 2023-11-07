@@ -1,4 +1,5 @@
 ﻿@page "/admin/albums/track/{Id:int}"
+@using Whitestone.SegnoSharp.Database.Models
 @attribute [Authorize]
 
 @if (Track == null)
@@ -6,10 +7,83 @@
     <h1 style="color: red">Track not found</h1>
     return;
 }
-
+<NavigationLock ConfirmExternalNavigation="true" OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 <h1>Edit track</h1>
 
 <div>
+    <table class="Editor">
+        <tr>
+            <th>Track #:</th>
+            <td><input @bind="Track.TrackNumber" /></td>
+        </tr>
+        <tr>
+            <th>Title:</th>
+            <td><input @bind="Track.Title" /></td>
+        </tr>
+        <tr>
+            <th>Length:</th>
+            <td><input @bind="Track.Duration" /></td>
+        </tr>
+        @foreach (TrackPersonGroupPersonRelation personGroupRelation in Track.TrackPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
+        {
+            <tr>
+                <th>@personGroupRelation.PersonGroup.Name <button title="Remove @personGroupRelation.PersonGroup.Name group" class="TinyDelete" @onclick="() => RemovePersonGroup(personGroupRelation)"><span class="fa-regular fa-circle-xmark"></span></button>:</th>
+                <td>
+                    <TagList Items="@personGroupRelation.Persons" ExecuteSearch="ExecutePersonSearch" />
+                </td>
+            </tr>
+        }
+        @{
+            List<PersonGroup> personGroups = PersonGroups
+            .Where(pg => Track.TrackPersonGroupPersonRelations.All(apg => apg.PersonGroup.Id != pg.Id))
+            .ToList();
+
+            if (personGroups.Any())
+            {
+                <tr>
+                    <th>Add group:</th>
+                    <td>
+                        <select @bind="SelectedPersonGroupId">
+                            <option value="-1"></option>
+                            @foreach (PersonGroup personGroup in personGroups)
+                            {
+                                <option value="@personGroup.Id">@personGroup.Name</option>
+                            }
+                        </select>
+                        <button @onclick="AddPersonGroup" disabled="@(SelectedPersonGroupId <= 0)">Add</button>
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+
+    <div>
+        @if (Track?.TrackStreamInfo == null)
+        {
+            <button style="margin-top:20px;" type="button" @onclick="AddStreamInfo">Add stream info</button>
+        }
+        else
+        {
+            <h2>
+                Stream Info
+                <button title="Remove Stream Info" class="TinyDelete" @onclick="RemoveStreamInfo"><span class="fa-regular fa-circle-xmark"></span></button>
+            </h2>
+            <table class="Editor">
+                <tr>
+                    <td>Include in auto playlist:</td>
+                    <td><input type="checkbox" @bind="Track.TrackStreamInfo.IncludeInAutoPlaylist" /></td>
+                </tr>
+                <tr>
+                    <td>File path:</td>
+                    <td><input @bind="Track.TrackStreamInfo.FilePath" /></td>
+                </tr>
+            </table>
+        }
+    </div>
+</div>
+
+<div style="margin-top: 20px;">
     <button @onclick="() => Close()">Close</button>
-    <button @onclick="() => Close(true)">Close & Save</button>
+    <button @onclick="() => Close(true)" disabled="@Invalid">Close & Save</button>
+    <button style="margin-left: 20px;" @onclick="DeleteTrack">Delete</button>
 </div>
