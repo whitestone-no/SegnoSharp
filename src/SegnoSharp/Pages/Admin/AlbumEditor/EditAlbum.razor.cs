@@ -63,7 +63,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             var p = new Person { TagName = searchTerm };
 
             return await DbContext.Persons
-                    .Where(pp => EF.Functions.Like(pp.LastName, "%" + p.LastName + "%") || EF.Functions.Like(pp.FirstName, "%" + p.FirstName + "%"))
+                    .Where(pp => EF.Functions.Like(pp.LastName, "%" + searchTerm + "%") || EF.Functions.Like(pp.FirstName, "%" + searchTerm + "%"))
                     .ToListAsync();
         }
 
