@@ -144,8 +144,14 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             Track.TrackStreamInfo = new TrackStreamInfo();
         }
 
-        private void RemoveStreamInfo()
+        private async Task RemoveStreamInfo()
         {
+            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete the stream info? This will remove the track from all playlist history!");
+            if (!confirmed)
+            {
+                return;
+            }
+
             Track.TrackStreamInfo = null;
         }
 
