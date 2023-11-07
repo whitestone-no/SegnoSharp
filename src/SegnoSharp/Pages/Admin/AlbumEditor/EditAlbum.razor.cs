@@ -195,5 +195,19 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
                 }
             }
         }
+
+        private async Task DeleteTrack()
+        {
+            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this album and all its media and tracks? This operation cannot be undone!");
+            if (!confirmed)
+            {
+                return;
+            }
+
+            DbContext.Albums.Remove(Album);
+            await DbContext.SaveChangesAsync();
+
+            NavigationManager.NavigateTo($"/admin/albums");
+        }
     }
 }
