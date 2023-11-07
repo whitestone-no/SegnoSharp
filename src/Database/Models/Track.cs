@@ -27,6 +27,7 @@ namespace Whitestone.SegnoSharp.Database.Models
             set => Length = (ushort)value.TotalSeconds;
         }
 
+        public int DiscId { get; set; }
         public Disc Disc { get; set; }
         public TrackStreamInfo TrackStreamInfo { get; set; }
         public IList<TrackPersonGroupPersonRelation> TrackPersonGroupPersonRelations { get; set; }

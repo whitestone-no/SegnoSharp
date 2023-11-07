@@ -10,6 +10,7 @@ namespace Whitestone.SegnoSharp.Database.Models
         public byte DiscNumber { get; set; }
         public string Title { get; set; }
 
+        public int AlbumId { get; set; }
         public Album Album { get; set; }
         public IList<MediaType> MediaTypes { get; set; }
         public IList<Track> Tracks { get; set; }
