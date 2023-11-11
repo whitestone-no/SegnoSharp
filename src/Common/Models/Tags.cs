@@ -12,6 +12,7 @@
         public ushort TrackNumber { get; set; }
         public ushort Year { get; set; }
         public double Duration { get; set; }
+        public string Notes { get; set; }
         public string File { get; set; }
         public TagsImage CoverImage { get; set; }
     }

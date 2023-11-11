@@ -147,7 +147,8 @@ namespace Whitestone.SegnoSharp.BassService.Helpers
                     Genre = tags.genre,
                     Title = tags.title,
                     TrackNumber = trackNo,
-                    Year = year
+                    Year = year,
+                    Notes = tags.comment
                 };
 
                 if (tags.PictureCount <= 0)

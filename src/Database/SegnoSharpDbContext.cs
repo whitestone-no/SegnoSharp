@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Whitestone.SegnoSharp.Database.Models;
@@ -59,6 +60,11 @@ namespace Whitestone.SegnoSharp.Database
             modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 2, Name = "DVD-Audio", SortOrder = 2 });
             modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 3, Name = "Super Audio CD", SortOrder = 3 });
             modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 4, Name = "Digital Download", SortOrder = 4 });
+
+            modelBuilder.Entity<Track>().Property(e => e.Notes)
+                .HasConversion(
+                    s => string.IsNullOrWhiteSpace(s) ? null : s,
+                    s => s);
 
             base.OnModelCreating(modelBuilder);
         }

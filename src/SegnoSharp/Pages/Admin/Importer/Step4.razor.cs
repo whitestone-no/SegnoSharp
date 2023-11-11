@@ -165,6 +165,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                             Title = trackVm.Title,
                             Length = trackVm.Length,
                             TrackNumber = trackVm.TrackNumber,
+                            Notes = trackVm.Notes,
                             TrackPersonGroupPersonRelations = new List<TrackPersonGroupPersonRelation>()
                         };
 

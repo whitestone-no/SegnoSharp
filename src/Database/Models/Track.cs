@@ -14,6 +14,7 @@ namespace Whitestone.SegnoSharp.Database.Models
         public ushort TrackNumber { get; set; }
         [Required]
         public string Title { get; set; }
+        public string Notes { get; set; }
 
         /// <summary>
         ///  Length of track, in seconds
