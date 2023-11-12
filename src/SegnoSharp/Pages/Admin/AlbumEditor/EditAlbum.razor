@@ -55,7 +55,7 @@
 <div style="float: left; margin-right: 20px;">
     <h2>People</h2>
 
-    <table>
+    <table class="Editor">
         @foreach (AlbumPersonGroupPersonRelation personGroupRelation in Album.AlbumPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
         {
             <tr>
@@ -117,16 +117,27 @@
     @foreach (Disc disc in Album.Discs)
     {
         <div>
-            <h2>
-                <span>Disc:</span><input type="number" min="1" max="@(byte.MaxValue)" @bind="disc.DiscNumber" />
-
-            </h2>
-            <h3>
-                <span>Title:</span><input @bind="disc.Title" />
-            </h3>
-            <div>
-                Media type: <TagList Items="disc.MediaTypes" Selection="MediaTypes"></TagList>
-            </div>
+            <table class="Editor">
+                <tr>
+                    <th>Disc:</th>
+                    <td><input type="number" min="1" max="@(byte.MaxValue)" @bind="disc.DiscNumber" /></td>
+                </tr>
+                <tr>
+                    <th>Title:</th>
+                    <td><input @bind="disc.Title" /></td>
+                </tr>
+                <tr>
+                    <th>Media types:</th>
+                    <td><TagList Items="disc.MediaTypes" Selection="MediaTypes"></TagList></td>
+                </tr>
+                <tr>
+                    <th>&nbsp;</th>
+                    <td>
+                        <button @onclick="() => AddTrackGroup(disc)">Add track group</button>
+                        <button style="margin-left: 20px;" @onclick="() => DeleteDisc(disc)">Delete disc</button>
+                    </td>
+                </tr>
+            </table>
             <table class="DraggableTable">
                 <thead>
                     <tr>
@@ -139,12 +150,26 @@
                 <tbody>
                     @foreach (Track track in disc.Tracks.OrderBy(t => t.TrackNumber))
                     {
+                        TrackGroup trackGroup = disc.TrackGroups.FirstOrDefault(tg => tg.GroupBeforeTrackNumber == track.TrackNumber);
+                        if (trackGroup != null)
+                        {
+                            <tr draggable="true"
+                                ondragover="event.preventDefault();"
+                            @ondragstart="() => DragStart(trackGroup)"
+                            @ondragend="HandleDragEnd">
+                                <td><span class="fa-solid fa-grip"></span></td>
+                                <td colspan="3">
+                                    <input @bind="@trackGroup.Name" />
+                                    <button @onclick="() => RemoveTrackGroup(trackGroup)"><span class="fa-regular fa-circle-xmark"></span></button>
+                                </td>
+                            </tr>
+                        }
                         <tr draggable="true"
                             ondragover="event.preventDefault();"
-                            @ondragstart="() => DragStart(track)"
-                            @ondrop="() => HandleDrop(track)"
-                            @ondragend="HandleDragEnd"
-                            @ondragenter="() => HandleDragEnter(track)"
+                        @ondragstart="() => DragStart(track)"
+                        @ondrop="() => HandleDrop(track)"
+                        @ondragend="HandleDragEnd"
+                        @ondragenter="() => HandleDragEnter(track)"
                             class="@(_currentlyDraggingOverTrack == track ? "drag-on" : null)">
                             <td><span class="fa-solid fa-grip"></span></td>
                             <td>@track.TrackNumber</td>

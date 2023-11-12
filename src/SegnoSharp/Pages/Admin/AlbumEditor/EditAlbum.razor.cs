@@ -28,6 +28,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
         private List<MediaType> MediaTypes { get; set; }
 
         private Track _currentlyDraggingTrack = null;
+        private TrackGroup _currentlyDraggingTrackGroup = null;
         private Track _currentlyDraggingOverTrack = null;
 
         protected override async Task OnInitializedAsync()
@@ -155,7 +156,40 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             _currentlyDraggingTrack = track;
         }
 
+        private void DragStart(TrackGroup trackGroup)
+        {
+            _currentlyDraggingTrackGroup = trackGroup;
+        }
+
         private void HandleDrop(Track targetTrack)
+        {
+            if (_currentlyDraggingTrack != null)
+            {
+                UpdateTrackNumberByDrag(targetTrack);
+            }
+
+            if (_currentlyDraggingTrackGroup != null)
+            {
+                UpdateTrackGroupByDrag(targetTrack);
+            }
+        }
+
+        private void UpdateTrackGroupByDrag(Track targetTrack)
+        {
+            _currentlyDraggingTrackGroup.GroupBeforeTrackNumber = targetTrack.TrackNumber;
+
+            if (_currentlyDraggingTrackGroup.Disc.Id == targetTrack.DiscId)
+            {
+                return;
+            }
+
+            // If dragging group to another disc
+            _currentlyDraggingTrackGroup.Disc.TrackGroups.Remove(_currentlyDraggingTrackGroup);
+            _currentlyDraggingTrackGroup.Disc = targetTrack.Disc;
+            targetTrack.Disc.TrackGroups.Add(_currentlyDraggingTrackGroup);
+        }
+
+        private void UpdateTrackNumberByDrag(Track targetTrack)
         {
             ushort newTrackNumber = targetTrack.TrackNumber;
             ushort oldTrackNumber = _currentlyDraggingTrack.TrackNumber;
@@ -210,12 +244,16 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
         private void HandleDragEnd()
         {
             _currentlyDraggingTrack = null;
+            _currentlyDraggingTrackGroup = null;
             _currentlyDraggingOverTrack = null;
         }
 
         private void HandleDragEnter(Track track)
         {
-            _currentlyDraggingOverTrack = track;
+            if (_currentlyDraggingTrack != null || _currentlyDraggingTrackGroup != null)
+            {
+                _currentlyDraggingOverTrack = track;
+            }
         }
 
         private async Task OnBeforeInternalNavigation(LocationChangingContext context)
@@ -242,6 +280,27 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             await DbContext.SaveChangesAsync();
 
             NavigationManager.NavigateTo($"/admin/albums");
+        }
+
+        private void RemoveTrackGroup(TrackGroup trackGroup)
+        {
+            trackGroup.Disc.TrackGroups.Remove(trackGroup);
+        }
+
+        private void AddTrackGroup(Disc disc)
+        {
+            disc.TrackGroups.Add(new TrackGroup { Disc = disc, DiscId = disc.Id, GroupBeforeTrackNumber = 1, Name = "New Track Group" });
+        }
+
+        private async Task DeleteDisc(Disc disc)
+        {
+            var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this disc?");
+            if (!confirmed)
+            {
+                return;
+            }
+
+            disc.Album.Discs.Remove(disc);
         }
     }
 }

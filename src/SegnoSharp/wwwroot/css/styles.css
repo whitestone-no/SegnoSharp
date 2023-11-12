@@ -563,6 +563,11 @@ a, a:visited, a:active, a:focus {
     cursor: pointer;
 }
 
+table.Editor th {
+    text-align: left;
+    padding-right: 5px;
+}
+
 table.DraggableTable {
     border-spacing: 0;
 }
