@@ -1,7 +1,6 @@
 ﻿@page "/admin/albums/{Id:int}"
 @using Whitestone.SegnoSharp.Database.Models
 @using Whitestone.SegnoSharp.Database.Extensions
-@using Microsoft.IdentityModel.Tokens
 @attribute [Authorize]
 
 @if (Album == null)
@@ -119,13 +118,15 @@
     {
         <div>
             <h2>
-                <span>Disc @disc.DiscNumber</span>
-                @if (!disc.Title.IsNullOrEmpty())
-                {
-                    <span>@disc.Title</span>
-                }
-                <TagList Items="disc.MediaTypes" Selection="MediaTypes"></TagList>
+                <span>Disc:</span><input type="number" min="1" max="@(byte.MaxValue)" @bind="disc.DiscNumber" />
+
             </h2>
+            <h3>
+                <span>Title:</span><input @bind="disc.Title" />
+            </h3>
+            <div>
+                Media type: <TagList Items="disc.MediaTypes" Selection="MediaTypes"></TagList>
+            </div>
             <table class="DraggableTable">
                 <thead>
                     <tr>

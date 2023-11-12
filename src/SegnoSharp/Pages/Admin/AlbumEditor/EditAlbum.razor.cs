@@ -42,6 +42,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
                 .Include(a => a.AlbumCover).ThenInclude(c => c.AlbumCoverData)
                 .Include(a => a.Discs).ThenInclude(d => d.Tracks)
                 .Include(a => a.Discs).ThenInclude(d => d.MediaTypes)
+                .Include(a => a.Discs).ThenInclude(d => d.TrackGroups)
                 .FirstOrDefaultAsync(a => a.Id == Id);
 
             PersonGroups = await DbContext.PersonGroups
@@ -156,21 +157,54 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
 
         private void HandleDrop(Track targetTrack)
         {
-            _currentlyDraggingTrack.Disc.Tracks.Remove(_currentlyDraggingTrack);
+            ushort newTrackNumber = targetTrack.TrackNumber;
+            ushort oldTrackNumber = _currentlyDraggingTrack.TrackNumber;
 
-            foreach (Track trackAbove in _currentlyDraggingTrack.Disc.Tracks.Where(t => t.TrackNumber > _currentlyDraggingTrack.TrackNumber))
+            // If dragging track to another disc
+            if (_currentlyDraggingTrack.DiscId != targetTrack.DiscId)
             {
-                trackAbove.TrackNumber = (ushort)(trackAbove.TrackNumber - 1);
+                // Clean up the track numbers on the previous disc
+                foreach (Track previousDiscTrack in _currentlyDraggingTrack.Disc.Tracks.Where(t => t.TrackNumber > oldTrackNumber))
+                {
+                    previousDiscTrack.TrackNumber = (ushort)(previousDiscTrack.TrackNumber - 1);
+                }
+
+                // Update track numbers greater than the new track number
+                foreach (Track newDiscTrack in targetTrack.Disc.Tracks.Where(t => t.TrackNumber >= newTrackNumber))
+                {
+                    newDiscTrack.TrackNumber = (ushort)(newDiscTrack.TrackNumber + 1);
+                }
+
+                _currentlyDraggingTrack.Disc.Tracks.Remove(_currentlyDraggingTrack);
+                _currentlyDraggingTrack.DiscId = targetTrack.DiscId;
+                _currentlyDraggingTrack.Disc = targetTrack.Disc;
+                targetTrack.Disc.Tracks.Add(_currentlyDraggingTrack);
+            }
+            // If dragging within same disc
+            else
+            {
+                // If moving "down"
+                if (newTrackNumber > oldTrackNumber)
+                {
+                    newTrackNumber = (ushort)(newTrackNumber - 1);
+
+                    foreach (Track moveTrack in targetTrack.Disc.Tracks.Where(t => t.TrackNumber <= newTrackNumber && t.TrackNumber > oldTrackNumber && t.Id != _currentlyDraggingTrack.Id))
+                    {
+                        moveTrack.TrackNumber = (ushort)(moveTrack.TrackNumber - 1);
+                    }
+
+                }
+                // If moving "up"
+                else if (newTrackNumber < oldTrackNumber)
+                {
+                    foreach (Track moveTrack in targetTrack.Disc.Tracks.Where(t => t.TrackNumber < oldTrackNumber && t.TrackNumber >= newTrackNumber && t.Id != _currentlyDraggingTrack.Id))
+                    {
+                        moveTrack.TrackNumber = (ushort)(moveTrack.TrackNumber + 1);
+                    }
+                }
             }
 
-            foreach (Track destinationTrackBelow in targetTrack.Disc.Tracks.Where(t => t.TrackNumber > targetTrack.TrackNumber))
-            {
-                destinationTrackBelow.TrackNumber = (ushort)(destinationTrackBelow.TrackNumber + 1);
-            }
-
-            _currentlyDraggingTrack.TrackNumber = (ushort)(targetTrack.TrackNumber + 1);
-            _currentlyDraggingTrack.Disc = targetTrack.Disc;
-            targetTrack.Disc.Tracks.Add(_currentlyDraggingTrack);
+            _currentlyDraggingTrack.TrackNumber = newTrackNumber;
         }
 
         private void HandleDragEnd()
