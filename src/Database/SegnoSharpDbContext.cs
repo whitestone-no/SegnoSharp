@@ -61,10 +61,12 @@ namespace Whitestone.SegnoSharp.Database
             modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 3, Name = "Super Audio CD", SortOrder = 3 });
             modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 4, Name = "Digital Download", SortOrder = 4 });
 
-            modelBuilder.Entity<Track>().Property(e => e.Notes)
-                .HasConversion(
-                    s => string.IsNullOrWhiteSpace(s) ? null : s,
-                    s => s);
+            // Don't allow empty strings in nullable text types.
+            modelBuilder.Entity<Album>().Property(e => e.Upc).HasConversion(s => string.IsNullOrWhiteSpace(s) ? null : s, s => s);
+            modelBuilder.Entity<Album>().Property(e => e.CatalogueNumber).HasConversion(s => string.IsNullOrWhiteSpace(s) ? null : s, s => s);
+            modelBuilder.Entity<Disc>().Property(e => e.Title).HasConversion(s => string.IsNullOrWhiteSpace(s) ? null : s, s => s);
+            modelBuilder.Entity<Track>().Property(e => e.Notes).HasConversion(s => string.IsNullOrWhiteSpace(s) ? null : s, s => s);
+            modelBuilder.Entity<Person>().Property(e => e.FirstName).HasConversion(s => string.IsNullOrWhiteSpace(s) ? null : s, s => s);
 
             base.OnModelCreating(modelBuilder);
         }
