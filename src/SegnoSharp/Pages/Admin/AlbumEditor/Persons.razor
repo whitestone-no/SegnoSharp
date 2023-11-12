@@ -1,0 +1,51 @@
+﻿@page "/admin/albums/people"
+@using Whitestone.SegnoSharp.Database.Models
+@attribute [Authorize]
+
+<NavigationLock ConfirmExternalNavigation="true" OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+<h1>Persons</h1>
+
+<div>
+    Search: <input @bind="SearchQuery" @bind:event="oninput" @bind:after="StartSearchTimer" placeholder="Name" disabled="@DbContext.ChangeTracker.HasChanges()" />
+</div>
+
+<div>
+    @if (PersonResults.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Firstname</th>
+                    <th>Lastname</th>
+                    <th>Version</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Person person in PersonResults)
+                {
+                    <tr>
+                        <td>@person.Id</td>
+                        <td><input @bind="@person.FirstName" /></td>
+                        <td><input @bind="@person.LastName" /></td>
+                        <td><input @bind="@person.Version" /></td>
+                        <td><button @onclick="() => RemovePerson(person)"><span class="fa-regular fa-circle-xmark"></span></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <span>No persons found that matches search criteria</span>
+    }
+</div>
+
+<div style="margin-top: 20px;">
+    @if (DbContext.ChangeTracker.HasChanges())
+    {
+        <button @onclick="SaveChanges">Save</button>
+        <button @onclick="DiscardChanges">Discard changes</button>
+    }
+</div>
