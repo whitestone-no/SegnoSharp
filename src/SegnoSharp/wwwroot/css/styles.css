@@ -4,6 +4,7 @@
     --bg-yellow: #ffce10;
     --bg-black: #222222;
     --bg-darkgray: #444444;
+    --bg-lightyellow: #f8e496;
 }
 
 *,
@@ -562,6 +563,14 @@ a, a:visited, a:active, a:focus {
     cursor: pointer;
 }
 
+table.DraggableTable {
+    border-spacing: 0;
+}
+
+    table.DraggableTable tr td {
+        padding: 2px 5px;
+    }
+
 table.DraggableTable tr.drag-on td {
-    border-bottom: solid 2px black;
+    border-top: solid 25px var(--bg-lightyellow);
 }
