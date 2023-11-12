@@ -131,6 +131,32 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
         {
             if (save)
             {
+                foreach (AlbumPersonGroupPersonRelation personRelation in Album.AlbumPersonGroupPersonRelations)
+                {
+                    List<Person> persons = new();
+
+                    foreach (Person person in personRelation.Persons)
+                    {
+                        if (person.Id != 0)
+                        {
+                            persons.Add(person);
+                            continue;
+                        }
+
+                        // Check if the person already exists in the database. If it does replace the dummy entry with the existing entry
+                        Person existingPerson = await DbContext.Persons.FirstOrDefaultAsync(p => p.FirstName == person.FirstName && p.LastName == person.LastName && p.Version == person.Version);
+                        if (existingPerson == null)
+                        {
+                            persons.Add(person);
+                            continue;
+                        }
+
+                        persons.Add(existingPerson);
+                    }
+
+                    personRelation.Persons = persons;
+                }
+
                 await DbContext.SaveChangesAsync();
             }
 
