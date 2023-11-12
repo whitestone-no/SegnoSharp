@@ -1,0 +1,67 @@
+﻿@page "/admin/albums/persongroups"
+@using Whitestone.SegnoSharp.Database.Models
+@attribute [Authorize]
+
+<NavigationLock ConfirmExternalNavigation="true" OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+<h1>Person Groups</h1>
+
+<div>
+    @if (DbGroups.Any())
+    {
+        <h2>Album groups</h2>
+
+        <table class="DraggableTable">
+            <tbody>
+                @foreach (PersonGroup group in DbGroups.Where(g => g.Type == PersonGroupType.Album).OrderBy(pg => pg.Type).ThenBy(pg => pg.SortOrder))
+                {
+                    <tr draggable="true"
+                        ondragover="event.preventDefault();"
+                    @ondragstart="() => HandleDragStart(group)"
+                    @ondrop="() => HandleDrop(group)"
+                    @ondragend="HandleDragEnd"
+                    @ondragenter="() => HandleDragEnter(group)"
+                        class="@(_currentlyDraggingOverGroup == group ? "drag-on" : null)">
+                        <td><span class="fa-solid fa-grip"></span></td>
+                        <td>@group.SortOrder</td>
+                        <td><input @bind="@group.Name" /></td>
+                        <td><button @onclick="() => RemoveGroup(group)"><span class="fa-regular fa-circle-xmark"></span></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <h2>Track groups</h2>
+
+        <table class="DraggableTable">
+            <tbody>
+                @foreach (PersonGroup group in DbGroups.Where(g => g.Type == PersonGroupType.Track).OrderBy(pg => pg.Type).ThenBy(pg => pg.SortOrder))
+                {
+                    <tr draggable="true"
+                        ondragover="event.preventDefault();"
+                    @ondragstart="() => HandleDragStart(group)"
+                    @ondrop="() => HandleDrop(group)"
+                    @ondragend="HandleDragEnd"
+                    @ondragenter="() => HandleDragEnter(group)"
+                        class="@(_currentlyDraggingOverGroup == group ? "drag-on" : null)">
+                        <td><span class="fa-solid fa-grip"></span></td>
+                        <td>@group.SortOrder</td>
+                        <td><input @bind="@group.Name" /></td>
+                        <td><button @onclick="() => RemoveGroup(group)"><span class="fa-regular fa-circle-xmark"></span></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <span>No person groups found</span>
+    }
+</div>
+
+<div style="margin-top: 20px;">
+    @if (DbContext.ChangeTracker.HasChanges())
+    {
+        <button @onclick="SaveChanges">Save</button>
+        <button @onclick="DiscardChanges">Discard changes</button>
+    }
+</div>
