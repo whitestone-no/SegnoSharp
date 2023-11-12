@@ -20,7 +20,7 @@
                     @ondrop="() => HandleDrop(group)"
                     @ondragend="HandleDragEnd"
                     @ondragenter="() => HandleDragEnter(group)"
-                        class="@(_currentlyDraggingOverGroup == group ? "drag-on" : null)">
+                        class="@(_currentlyDraggingGroup == group ? "drag-current" : _currentlyDraggingOverGroup == group ? "drag-on" : null)">
                         <td><span class="fa-solid fa-grip"></span></td>
                         <td>@group.SortOrder</td>
                         <td><input @bind="@group.Name" /></td>
@@ -42,7 +42,7 @@
                     @ondrop="() => HandleDrop(group)"
                     @ondragend="HandleDragEnd"
                     @ondragenter="() => HandleDragEnter(group)"
-                        class="@(_currentlyDraggingOverGroup == group ? "drag-on" : null)">
+                        class="@(_currentlyDraggingGroup == group ? "drag-current" : _currentlyDraggingOverGroup == group ? "drag-on" : null)">
                         <td><span class="fa-solid fa-grip"></span></td>
                         <td>@group.SortOrder</td>
                         <td><input @bind="@group.Name" /></td>

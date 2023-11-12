@@ -583,6 +583,10 @@ table.DraggableTable {
         border-top: solid 25px var(--bg-lightyellow);
     }
 
+    table.DraggableTable tr.drag-current {
+        display: none;
+    }
+
 nav li.Submenu ul a {
     font-size: 0.8em;
     margin-left: 30px;

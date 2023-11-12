@@ -81,6 +81,11 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
 
             DbGroups.Remove(group);
             DbContext.PersonGroups.Remove(group);
+
+            foreach (PersonGroup dbGroup in DbGroups.Where(g => g.Type == group.Type && g.SortOrder > group.SortOrder))
+            {
+                dbGroup.SortOrder = (ushort)(dbGroup.SortOrder - 1);
+            }
         }
 
         private void HandleDragStart(PersonGroup group)

@@ -170,7 +170,7 @@
                         @ondrop="() => HandleDrop(track)"
                         @ondragend="HandleDragEnd"
                         @ondragenter="() => HandleDragEnter(track)"
-                            class="@(_currentlyDraggingOverTrack == track ? "drag-on" : null)">
+                            class="@(_currentlyDraggingTrack == track ? "drag-current" : _currentlyDraggingOverTrack == track ? "drag-on" : null)">
                             <td><span class="fa-solid fa-grip"></span></td>
                             <td>@track.TrackNumber</td>
                             <td>@track.Duration</td>
