@@ -3,7 +3,9 @@
     --text-black: #222222;
     --bg-yellow: #ffce10;
     --bg-black: #222222;
+    --bg-darkergray: #333333;
     --bg-darkgray: #444444;
+    --bg-gray: #555555;
     --bg-lightyellow: #f8e496;
 }
 
@@ -149,9 +151,9 @@ nav ul {
             padding-left: 10px;
         }
 
-            nav ul li > a.active {
-                background-color: #555555;
-            }
+        nav ul li > a.active {
+            background-color: #555555;
+        }
 
         nav ul li > span {
             margin-top: 20px;
@@ -585,4 +587,55 @@ nav li.Submenu ul a {
     font-size: 0.8em;
     margin-left: 30px;
     width: calc(100% - 30px);
+}
+
+.Submenu a div {
+    display: inline-block;
+}
+
+.Submenu input[type=checkbox] {
+    display: none;
+}
+
+.Submenu label {
+    display: block;
+    float: right;
+}
+
+.Submenu label {
+    display: flex;
+    width: 20px;
+    height: 40px;
+    background-color: var(--bg-darkgray);
+    cursor: pointer;
+    z-index: 20;
+}
+
+    .Submenu label span {
+        display: inline-block;
+        margin: auto;
+        transform: rotateZ(-90deg);
+    }
+
+.Submenu input[type=checkbox]:checked ~ label span {
+    transform: rotateZ(90deg);
+}
+
+.Submenu > a {
+    width: calc(100% - 20px);
+}
+
+
+    .Submenu > a:hover ~ label,
+    .Submenu label:hover {
+        background-color: var(--bg-gray);
+    }
+
+
+.Submenu input[type=checkbox] ~ ul {
+    display: none
+}
+
+.Submenu input[type=checkbox]:checked ~ ul {
+    display: block;
 }
