@@ -14,7 +14,7 @@
     <table class="Editor">
         <tr>
             <th>Track #:</th>
-            <td><input @bind="Track.TrackNumber" /></td>
+            <td><input type="number" min="1" max="@(ushort.MaxValue)" @bind="Track.TrackNumber" /></td>
         </tr>
         <tr>
             <th>Title:</th>
