@@ -117,6 +117,10 @@ namespace Whitestone.SegnoSharp.Database.Models
                 }
 
                 name += LastName;
+                if (Version > 0)
+                {
+                    name += " (" + Version + ")";
+                }
                 return name;
             }
             set
@@ -124,6 +128,9 @@ namespace Whitestone.SegnoSharp.Database.Models
                 value = value.Trim();
                 string lastname = value;
                 string firstname = null;
+
+                int paranthesesStartIndex = value.LastIndexOf('(');
+                int paranthesesEndIndex = value.LastIndexOf(')');
 
                 int firstCommaIndex = value.IndexOf(',');
                 if (firstCommaIndex != -1)
@@ -134,6 +141,11 @@ namespace Whitestone.SegnoSharp.Database.Models
                 else
                 {
                     int lastSpaceIndex = value.LastIndexOf(' ');
+
+                    if (paranthesesStartIndex != -1)
+                    {
+                        lastSpaceIndex = value.LastIndexOf(' ', paranthesesStartIndex - 2);
+                    }
                     if (lastSpaceIndex != -1)
                     {
                         firstname = value[..lastSpaceIndex].Trim();
@@ -141,9 +153,40 @@ namespace Whitestone.SegnoSharp.Database.Models
                     }
                 }
 
-                LastName = lastname;
-                FirstName = firstname;
+                FirstName = FilterOutParantheses(firstname, out ushort version);
+                if (version > 0)
+                {
+                    Version = version;
+                }
+                LastName = FilterOutParantheses(lastname, out version);
+                if (version > 0)
+                {
+                    Version = version;
+                }
             }
+        }
+
+        public static string FilterOutParantheses(string value, out ushort valueWithinParantheses)
+        {
+            if (value == null)
+            {
+                valueWithinParantheses = 0;
+                return null;
+            }
+
+            int paranthesesStartIndex = value.LastIndexOf('(');
+            int paranthesesEndIndex = value.LastIndexOf(')');
+
+            if (paranthesesStartIndex == -1 || paranthesesEndIndex == -1)
+            {
+                valueWithinParantheses = 0;
+                return value;
+            }
+
+            string valueWithin = value[(paranthesesStartIndex + 1)..paranthesesEndIndex];
+            _ = ushort.TryParse(valueWithin, out valueWithinParantheses);
+
+            return value[..(paranthesesStartIndex - 1)];
         }
     }
 }
