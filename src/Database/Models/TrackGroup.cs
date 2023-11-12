@@ -10,6 +10,7 @@ namespace Whitestone.SegnoSharp.Database.Models
         public string Name { get; set; }
         public ushort GroupBeforeTrackNumber { get; set; }
 
+        public int DiscId { get; set; }
         public Disc Disc { get; set; }
     }
 }
