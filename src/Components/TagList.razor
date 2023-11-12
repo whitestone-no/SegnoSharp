@@ -18,7 +18,7 @@
             {
                 @foreach (TItem item in Selection.Where(i => !Items.Contains(i)))
                 {
-                    <option value="@item.Id">@item.TagName (@item.Id)</option>
+                    <option value="@item.Id">@item.TagName</option>
                 }
             }
         </select>
