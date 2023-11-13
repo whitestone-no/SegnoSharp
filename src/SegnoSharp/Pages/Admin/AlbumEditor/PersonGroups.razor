@@ -29,6 +29,9 @@
                 }
             </tbody>
         </table>
+        <div>
+            <button @onclick="() => AddGroup(PersonGroupType.Album)">Add</button>
+        </div>
 
         <h2>Track groups</h2>
 
@@ -51,6 +54,9 @@
                 }
             </tbody>
         </table>
+        <div>
+            <button @onclick="() => AddGroup(PersonGroupType.Track)">Add</button>
+        </div>
     }
     else
     {

@@ -137,5 +137,18 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
                 _currentlyDraggingOverGroup = group;
             }
         }
+
+        private void AddGroup(PersonGroupType type)
+        {
+            PersonGroup pg = new()
+            {
+                Type = type,
+                Name = "New group",
+                SortOrder = (ushort)(DbGroups.Where(g => g.Type == type).Max(g => g.SortOrder) + 1),
+            };
+
+            DbGroups.Add(pg);
+            DbContext.PersonGroups.Add(pg);
+        }
     }
 }

@@ -1,0 +1,46 @@
+﻿@page "/admin/albums/mediatypes"
+@using Whitestone.SegnoSharp.Database.Models
+@attribute [Authorize]
+
+<NavigationLock ConfirmExternalNavigation="true" OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+<h1>Media Types</h1>
+
+<div>
+    @if (DbTypes.Any())
+    {
+        <table class="DraggableTable">
+            <tbody>
+                @foreach (MediaType type in DbTypes.OrderBy(t => t.SortOrder))
+                {
+                    <tr draggable="true"
+                        ondragover="event.preventDefault();"
+                    @ondragstart="() => HandleDragStart(type)"
+                    @ondrop="() => HandleDrop(type)"
+                    @ondragend="HandleDragEnd"
+                    @ondragenter="() => HandleDragEnter(type)"
+                        class="@(_currentlyDraggingType == type ? "drag-current" : _currentlyDraggingOverType == type ? "drag-on" : null)">
+                        <td><span class="fa-solid fa-grip"></span></td>
+                        <td>@type.SortOrder</td>
+                        <td><input @bind="@type.Name" /></td>
+                        <td><button @onclick="() => RemoveType(type)"><span class="fa-regular fa-circle-xmark"></span></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <span>No media types found</span>
+    }
+    <div>
+        <button @onclick="AddType">Add</button>
+    </div>
+</div>
+
+<div style="margin-top: 20px;">
+    @if (DbContext.ChangeTracker.HasChanges())
+    {
+        <button @onclick="SaveChanges">Save</button>
+        <button @onclick="DiscardChanges">Discard changes</button>
+    }
+</div>
