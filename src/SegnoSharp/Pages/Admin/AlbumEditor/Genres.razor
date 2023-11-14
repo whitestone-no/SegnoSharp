@@ -1,0 +1,38 @@
+﻿@page "/admin/albums/genres"
+@using Whitestone.SegnoSharp.Database.Models
+@attribute [Authorize]
+
+<NavigationLock ConfirmExternalNavigation="true" OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+<h1>Genres</h1>
+
+<div>
+    @if (DbGenres.Any())
+    {
+        <table>
+            <tbody>
+                @foreach (Genre genre in DbGenres)
+                {
+                    <tr>
+                        <td><input @bind="@genre.Name" /></td>
+                        <td><button @onclick="() => RemoveGenre(genre)"><span class="fa-regular fa-circle-xmark"></span></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <span>No genres found</span>
+    }
+    <div>
+        <button @onclick="AddGenre">Add</button>
+    </div>
+</div>
+
+<div style="margin-top: 20px;">
+    @if (DbContext.ChangeTracker.HasChanges())
+    {
+        <button @onclick="SaveChanges">Save</button>
+        <button @onclick="DiscardChanges">Discard changes</button>
+    }
+</div>
