@@ -1,0 +1,48 @@
+﻿@page "/admin/albums/recordlabels"
+@using Whitestone.SegnoSharp.Database.Models
+@attribute [Authorize]
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+<h1>Record labels</h1>
+
+<div>
+    Search: <input @bind="SearchQuery" @bind:event="oninput" @bind:after="StartSearchTimer" placeholder="Name" disabled="@DbContext.ChangeTracker.HasChanges()" />
+</div>
+
+<div>
+    @if (DbResults.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Record label</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (RecordLabel recordLabel in DbResults)
+                {
+                    <tr>
+                        <td><input @bind="@recordLabel.Name" /></td>
+                        <td><button @onclick="() => Remove(recordLabel)"><span class="fa-regular fa-circle-xmark"></span></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <span>No persons found that matches search criteria</span>
+    }
+    <div>
+        <button @onclick="Add">Add</button>
+    </div>
+</div>
+
+<div style="margin-top: 20px;">
+    @if (DbContext.ChangeTracker.HasChanges())
+    {
+        <button @onclick="SaveChanges">Save</button>
+        <button @onclick="DiscardChanges">Discard changes</button>
+    }
+</div>
