@@ -6,6 +6,8 @@
     --bg-darkergray: #333333;
     --bg-darkgray: #444444;
     --bg-gray: #555555;
+    --bg-lightgray: #cccccc;
+    --bg-lightergray: #dddddd;
     --bg-lightyellow: #f8e496;
 }
 
@@ -643,3 +645,20 @@ nav li.Submenu ul a {
 .Submenu input[type=checkbox]:checked ~ ul {
     display: block;
 }
+
+
+table.Standard {
+    border-collapse: collapse;
+}
+    table.Standard th {
+        text-align: left;
+        background-color: var(--bg-lightgray);
+        padding: 5px;
+    }
+    table.Standard td {
+        border: solid 1px var(--bg-lightergray);
+        padding: 1px 5px;
+    }
+    table.Standard tr:hover td {
+        background-color: var(--bg-lightergray);
+    }

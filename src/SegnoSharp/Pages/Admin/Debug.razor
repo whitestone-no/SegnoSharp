@@ -1,0 +1,26 @@
+﻿@page "/admin/debug"
+@attribute [Authorize]
+
+<h1>Debug</h1>
+
+<h2>Dependency Injection configuration</h2>
+
+<table class="Standard" style="font-size: 12px;">
+    <thead>
+        <tr>
+            <th>Lifetime</th>
+            <th>Service</th>
+            <th>Implementation</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (DependencyViewModel dependency in _dependencies)
+        {
+            <tr>
+                <td>@dependency.Lifetime</td>
+                <td>@dependency.ServiceType</td>
+                <td>@dependency.ImplementationType</td>
+            </tr>
+        }
+    </tbody>
+</table>

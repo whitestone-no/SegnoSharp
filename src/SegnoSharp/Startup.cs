@@ -40,6 +40,7 @@ namespace Whitestone.SegnoSharp
             services.AddBassService(_configuration);
 
             services.AddScoped<ImportState>();
+            services.AddSingleton(services);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
