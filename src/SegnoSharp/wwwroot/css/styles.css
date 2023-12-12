@@ -658,6 +658,7 @@ table.Standard {
     table.Standard td {
         border: solid 1px var(--bg-lightergray);
         padding: 1px 5px;
+        vertical-align: top;
     }
     table.Standard tr:hover td {
         background-color: var(--bg-lightergray);

@@ -1,7 +1,39 @@
 ﻿@page "/admin/debug"
+@using Microsoft.Extensions.Configuration
 @attribute [Authorize]
 
 <h1>Debug</h1>
+
+@if (!CommonConfig.Value.EnableDebugPage)
+{
+    <div>The debug page is disabled. Set <em>CommonConfig:EnableDebugPage</em> to <em>true</em> to enable.</div>
+
+    return;
+}
+
+<h2>Configuration</h2>
+
+
+
+<table class="Standard" style="font-size: 12px; width: 100%;">
+    <thead>
+        <tr>
+            <th>Key</th>
+            <th style="max-width: 500px;">Value</th>
+            <th>Provider</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (ConfigurationViewModel configuration in _configurations)
+        {
+            <tr>
+                <td>@configuration.Key</td>
+                <td style="max-width: 500px; word-wrap: break-word;">@configuration.Value</td>
+                <td>@configuration.Provider</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 <h2>Dependency Injection configuration</h2>
 
