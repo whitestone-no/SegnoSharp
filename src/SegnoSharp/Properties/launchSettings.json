@@ -5,8 +5,8 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "SegnoSharp_CommonConfig__DataPath": "$(SolutionDir)../data",
-        "SegnoSharp_CommonConfig__MusicPath": "$(SolutionDir)../music"
+        "SegnoSharp_CommonConfig__DataPath": "$(SolutionDir)..\\data",
+        "SegnoSharp_CommonConfig__MusicPath": "$(SolutionDir)..\\music"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
