@@ -354,6 +354,42 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersonGroupStreamInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IncludeInAutoPlaylist")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PersonGroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IncludeInAutoPlaylist");
+
+                    b.HasIndex("PersonGroupId")
+                        .IsUnique();
+
+                    b.ToTable("PersonGroupsStreamInfos");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IncludeInAutoPlaylist = true,
+                            PersonGroupId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IncludeInAutoPlaylist = true,
+                            PersonGroupId = 2
+                        });
+                });
+
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.RecordLabel", b =>
                 {
                     b.Property<int>("Id")
@@ -506,6 +542,9 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                     b.Property<int>("TrackId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Weight")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TrackId")
@@ -643,6 +682,17 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                     b.Navigation("Album");
                 });
 
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersonGroupStreamInfo", b =>
+                {
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.PersonGroup", "PersonGroup")
+                        .WithOne("PersonGroupStreamInfo")
+                        .HasForeignKey("Whitestone.SegnoSharp.Database.Models.PersonGroupStreamInfo", "PersonGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PersonGroup");
+                });
+
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.StreamHistory", b =>
                 {
                     b.HasOne("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", "TrackStreamInfo")
@@ -737,6 +787,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersonGroup", b =>
                 {
                     b.Navigation("AlbumPersonGroupPersonRelations");
+
+                    b.Navigation("PersonGroupStreamInfo");
 
                     b.Navigation("TrackPersonGroupPersonRelations");
                 });

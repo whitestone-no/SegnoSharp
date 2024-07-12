@@ -94,7 +94,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -131,7 +131,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     DiscNumber = table.Column<byte>(type: "INTEGER", nullable: false),
                     Title = table.Column<string>(type: "TEXT", nullable: true),
-                    AlbumId = table.Column<int>(type: "INTEGER", nullable: true)
+                    AlbumId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -140,7 +140,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         name: "FK_Discs_Albums_AlbumId",
                         column: x => x.AlbumId,
                         principalTable: "Albums",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -187,6 +188,26 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AlbumPersonGroupsRelations_PersonGroups_PersonGroupId",
+                        column: x => x.PersonGroupId,
+                        principalTable: "PersonGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PersonGroupsStreamInfos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    IncludeInAutoPlaylist = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PersonGroupId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PersonGroupsStreamInfos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PersonGroupsStreamInfos_PersonGroups_PersonGroupId",
                         column: x => x.PersonGroupId,
                         principalTable: "PersonGroups",
                         principalColumn: "Id",
@@ -269,7 +290,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     GroupBeforeTrackNumber = table.Column<ushort>(type: "INTEGER", nullable: false),
-                    DiscId = table.Column<int>(type: "INTEGER", nullable: true)
+                    DiscId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -278,7 +299,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         name: "FK_TrackGroups_Discs_DiscId",
                         column: x => x.DiscId,
                         principalTable: "Discs",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -289,8 +311,9 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     TrackNumber = table.Column<ushort>(type: "INTEGER", nullable: false),
                     Title = table.Column<string>(type: "TEXT", nullable: false),
+                    Notes = table.Column<string>(type: "TEXT", nullable: true),
                     Length = table.Column<ushort>(type: "INTEGER", nullable: false),
-                    DiscId = table.Column<int>(type: "INTEGER", nullable: true)
+                    DiscId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -299,7 +322,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         name: "FK_Tracks_Discs_DiscId",
                         column: x => x.DiscId,
                         principalTable: "Discs",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -362,6 +386,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                     IncludeInAutoPlaylist = table.Column<bool>(type: "INTEGER", nullable: false),
                     LastPlayed = table.Column<DateTime>(type: "TEXT", nullable: true),
                     PlayCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    Weight = table.Column<int>(type: "INTEGER", nullable: false),
                     TrackId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -459,6 +484,15 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                     { 4, "Composer", (ushort)2, 1 }
                 });
 
+            migrationBuilder.InsertData(
+                table: "PersonGroupsStreamInfos",
+                columns: new[] { "Id", "IncludeInAutoPlaylist", "PersonGroupId" },
+                values: new object[,]
+                {
+                    { 1, true, 1 },
+                    { 2, true, 2 }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AlbumCovers_AlbumId",
                 table: "AlbumCovers",
@@ -515,6 +549,17 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 name: "IX_Genres_Name",
                 table: "Genres",
                 column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersonGroupsStreamInfos_IncludeInAutoPlaylist",
+                table: "PersonGroupsStreamInfos",
+                column: "IncludeInAutoPlaylist");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersonGroupsStreamInfos_PersonGroupId",
+                table: "PersonGroupsStreamInfos",
+                column: "PersonGroupId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Persons_LastName_FirstName",
@@ -595,6 +640,9 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
             migrationBuilder.DropTable(
                 name: "DiscMediaType");
+
+            migrationBuilder.DropTable(
+                name: "PersonGroupsStreamInfos");
 
             migrationBuilder.DropTable(
                 name: "PersonTrackPersonGroupPersonRelation");

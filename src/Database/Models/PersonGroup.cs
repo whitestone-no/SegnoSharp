@@ -13,6 +13,7 @@ namespace Whitestone.SegnoSharp.Database.Models
         public ushort SortOrder { get; set; }
         public PersonGroupType Type { get; set; }
 
+        public PersonGroupStreamInfo PersonGroupStreamInfo { get; set; }
         public IList<AlbumPersonGroupPersonRelation> AlbumPersonGroupPersonRelations { get; set; }
         public IList<TrackPersonGroupPersonRelation> TrackPersonGroupPersonRelations { get; set; }
     }

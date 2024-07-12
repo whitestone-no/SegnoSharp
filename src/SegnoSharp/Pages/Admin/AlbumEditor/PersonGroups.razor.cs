@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
-using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
+using Whitestone.SegnoSharp.Models.ViewModels;
 
 namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
 {
@@ -19,16 +18,25 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
         [Inject] private IJSRuntime JsRuntime { get; set; }
 
         private SegnoSharpDbContext DbContext { get; set; }
-        private List<PersonGroup> DbGroups { get; set; } = new();
+        private List<PersonGroupViewModel> DbGroups { get; set; } = new();
 
-        private PersonGroup _currentlyDraggingGroup = null;
-        private PersonGroup _currentlyDraggingOverGroup = null;
+        private PersonGroupViewModel _currentlyDraggingGroup = null;
+        private PersonGroupViewModel _currentlyDraggingOverGroup = null;
 
         protected override async Task OnInitializedAsync()
         {
             DbContext = await DbFactory.CreateDbContextAsync();
 
             DbGroups = await DbContext.PersonGroups
+                .Include(p => p.PersonGroupStreamInfo)
+                .Select(g => new PersonGroupViewModel(DbContext)
+                {
+                    Id = g.Id,
+                    Name = g.Name,
+                    SortOrder = g.SortOrder,
+                    Type = g.Type,
+                    PersonGroupStreamInfo = g.PersonGroupStreamInfo
+                })
                 .ToListAsync();
         }
 
@@ -42,6 +50,15 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             DbContext.ChangeTracker.Clear();
 
             DbGroups = await DbContext.PersonGroups
+                .Include(p => p.PersonGroupStreamInfo)
+                .Select(g => new PersonGroupViewModel(DbContext)
+                {
+                    Id = g.Id,
+                    Name = g.Name,
+                    SortOrder = g.SortOrder,
+                    Type = g.Type,
+                    PersonGroupStreamInfo = g.PersonGroupStreamInfo
+                })
                 .ToListAsync();
         }
 
@@ -71,7 +88,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             }
         }
 
-        private async Task RemoveGroup(PersonGroup group)
+        private async Task RemoveGroup(PersonGroupViewModel group)
         {
             var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {group.Name}?");
             if (!confirmed)
@@ -82,18 +99,18 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             DbGroups.Remove(group);
             DbContext.PersonGroups.Remove(group);
 
-            foreach (PersonGroup dbGroup in DbGroups.Where(g => g.Type == group.Type && g.SortOrder > group.SortOrder))
+            foreach (PersonGroupViewModel dbGroup in DbGroups.Where(g => g.Type == group.Type && g.SortOrder > group.SortOrder))
             {
                 dbGroup.SortOrder = (ushort)(dbGroup.SortOrder - 1);
             }
         }
 
-        private void HandleDragStart(PersonGroup group)
+        private void HandleDragStart(PersonGroupViewModel group)
         {
             _currentlyDraggingGroup = group;
         }
 
-        private void HandleDrop(PersonGroup targetGroup)
+        private void HandleDrop(PersonGroupViewModel targetGroup)
         {
             if (targetGroup.Type != _currentlyDraggingGroup.Type)
             {
@@ -107,7 +124,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             if (newSortOrder > oldSortOrder)
             {
                 newSortOrder = (ushort)(newSortOrder - 1);
-                foreach (PersonGroup moveGroup in DbGroups.Where(g => g.Type == targetGroup.Type && g.SortOrder <= newSortOrder && g.SortOrder > oldSortOrder && g.Id != _currentlyDraggingGroup.Id))
+                foreach (PersonGroupViewModel moveGroup in DbGroups.Where(g => g.Type == targetGroup.Type && g.SortOrder <= newSortOrder && g.SortOrder > oldSortOrder && g.Id != _currentlyDraggingGroup.Id))
                 {
                     moveGroup.SortOrder = (ushort)(moveGroup.SortOrder - 1);
                 }
@@ -115,7 +132,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             // If moving "up"
             else if (newSortOrder < oldSortOrder)
             {
-                foreach (PersonGroup moveGroup in DbGroups.Where(g => g.Type == targetGroup.Type && g.SortOrder < oldSortOrder && g.SortOrder >= newSortOrder && g.Id != _currentlyDraggingGroup.Id))
+                foreach (PersonGroupViewModel moveGroup in DbGroups.Where(g => g.Type == targetGroup.Type && g.SortOrder < oldSortOrder && g.SortOrder >= newSortOrder && g.Id != _currentlyDraggingGroup.Id))
                 {
                     moveGroup.SortOrder = (ushort)(moveGroup.SortOrder + 1);
                 }
@@ -130,7 +147,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             _currentlyDraggingOverGroup = null;
         }
 
-        private void HandleDragEnter(PersonGroup group)
+        private void HandleDragEnter(PersonGroupViewModel group)
         {
             if (group.Type == _currentlyDraggingGroup.Type)
             {
@@ -140,7 +157,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
 
         private void AddGroup(PersonGroupType type)
         {
-            PersonGroup pg = new()
+            PersonGroupViewModel pg = new(DbContext)
             {
                 Type = type,
                 Name = "New group",

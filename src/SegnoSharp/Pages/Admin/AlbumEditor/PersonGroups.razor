@@ -1,5 +1,6 @@
 ﻿@page "/admin/albums/persongroups"
 @using Whitestone.SegnoSharp.Database.Models
+@using Whitestone.SegnoSharp.Models.ViewModels
 @attribute [Authorize]
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
@@ -12,21 +13,22 @@
 
         <table class="DraggableTable">
             <tbody>
-                @foreach (PersonGroup group in DbGroups.Where(g => g.Type == PersonGroupType.Album).OrderBy(pg => pg.Type).ThenBy(pg => pg.SortOrder))
-                {
-                    <tr draggable="true"
-                        ondragover="event.preventDefault();"
+            @foreach (PersonGroupViewModel group in DbGroups.Where(g => g.Type == PersonGroupType.Album).OrderBy(pg => pg.Type).ThenBy(pg => pg.SortOrder))
+            {
+                <tr draggable="true"
+                    ondragover="event.preventDefault();"
                     @ondragstart="() => HandleDragStart(group)"
                     @ondrop="() => HandleDrop(group)"
                     @ondragend="HandleDragEnd"
                     @ondragenter="() => HandleDragEnter(group)"
-                        class="@(_currentlyDraggingGroup == group ? "drag-current" : _currentlyDraggingOverGroup == group ? "drag-on" : null)">
-                        <td><span class="fa-solid fa-grip"></span></td>
-                        <td>@group.SortOrder</td>
-                        <td><input @bind="@group.Name" /></td>
-                        <td><button @onclick="() => RemoveGroup(group)"><span class="fa-regular fa-circle-xmark"></span></button></td>
-                    </tr>
-                }
+                    class="@(_currentlyDraggingGroup == group ? "drag-current" : _currentlyDraggingOverGroup == group ? "drag-on" : null)">
+                    <td><span class="fa-solid fa-grip"></span></td>
+                    <td>@group.SortOrder</td>
+                    <td><input @bind="@group.Name"/></td>
+                    <td><input type="checkbox" @bind="@group.IncludeInAutoPlaylist" title="Include in auto playlist"/></td>
+                    <td><button @onclick="() => RemoveGroup(group)"><span class="fa-regular fa-circle-xmark"></span></button></td>
+                </tr>
+            }
             </tbody>
         </table>
         <div>
@@ -37,18 +39,19 @@
 
         <table class="DraggableTable">
             <tbody>
-                @foreach (PersonGroup group in DbGroups.Where(g => g.Type == PersonGroupType.Track).OrderBy(pg => pg.Type).ThenBy(pg => pg.SortOrder))
+                @foreach (PersonGroupViewModel group in DbGroups.Where(g => g.Type == PersonGroupType.Track).OrderBy(pg => pg.Type).ThenBy(pg => pg.SortOrder))
                 {
                     <tr draggable="true"
                         ondragover="event.preventDefault();"
-                    @ondragstart="() => HandleDragStart(group)"
-                    @ondrop="() => HandleDrop(group)"
-                    @ondragend="HandleDragEnd"
-                    @ondragenter="() => HandleDragEnter(group)"
+                        @ondragstart="() => HandleDragStart(group)"
+                        @ondrop="() => HandleDrop(group)"
+                        @ondragend="HandleDragEnd"
+                        @ondragenter="() => HandleDragEnter(group)"
                         class="@(_currentlyDraggingGroup == group ? "drag-current" : _currentlyDraggingOverGroup == group ? "drag-on" : null)">
                         <td><span class="fa-solid fa-grip"></span></td>
                         <td>@group.SortOrder</td>
                         <td><input @bind="@group.Name" /></td>
+                        <td><input type="checkbox" @bind="@group.IncludeInAutoPlaylist" /></td>
                         <td><button @onclick="() => RemoveGroup(group)"><span class="fa-regular fa-circle-xmark"></span></button></td>
                     </tr>
                 }

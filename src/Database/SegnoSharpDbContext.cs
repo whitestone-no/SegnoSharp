@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Whitestone.SegnoSharp.Database.Models;
@@ -18,6 +17,7 @@ namespace Whitestone.SegnoSharp.Database
         public DbSet<TrackStreamInfo> TrackStreamInfos { get; set; }
         public DbSet<Person> Persons { get; set; }
         public DbSet<PersonGroup> PersonGroups { get; set; }
+        public DbSet<PersonGroupStreamInfo> PersonGroupsStreamInfos { get; set; }
         public DbSet<AlbumPersonGroupPersonRelation> AlbumPersonGroupsRelations { get; set; }
         public DbSet<TrackPersonGroupPersonRelation> TrackPersonGroupsRelations { get; set; }
         public DbSet<TrackGroup> TrackGroups { get; set; }
@@ -55,6 +55,9 @@ namespace Whitestone.SegnoSharp.Database
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 2, Type = PersonGroupType.Track, Name = "Artist", SortOrder = 1 });
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 3, Type = PersonGroupType.Album, Name = "Composer", SortOrder = 2 });
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 4, Type = PersonGroupType.Track, Name = "Composer", SortOrder = 2 });
+
+            modelBuilder.Entity<PersonGroupStreamInfo>().HasData(new PersonGroupStreamInfo { Id = 1, IncludeInAutoPlaylist = true, PersonGroupId = 1 });
+            modelBuilder.Entity<PersonGroupStreamInfo>().HasData(new PersonGroupStreamInfo { Id = 2, IncludeInAutoPlaylist = true, PersonGroupId = 2 });
 
             modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 1, Name = "CD", SortOrder = 1 });
             modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 2, Name = "DVD-Audio", SortOrder = 2 });

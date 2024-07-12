@@ -176,6 +176,7 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                                 FilePath = trackVm.TrackStreamInfo.FilePath,
                                 IncludeInAutoPlaylist = trackVm.TrackStreamInfo.IncludeInAutoPlaylist,
                                 PlayCount = 0,
+                                Weight = 100
                             };
                         }
 

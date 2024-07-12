@@ -81,6 +81,15 @@
                     <td>File path:</td>
                     <td><input @bind="Track.TrackStreamInfo.FilePath" /></td>
                 </tr>
+                <tr>
+                    <td>Weight:</td>
+                    <td><input type="number" @bind="Track.TrackStreamInfo.Weight" /></td>
+                </tr>
+                <td>
+                    <td colspan="2">
+                        Weight is a whole number where 0 equals no playlist rotation. Default rotation should be 100.
+                    </td>
+                </td>
             </table>
         }
     </div>

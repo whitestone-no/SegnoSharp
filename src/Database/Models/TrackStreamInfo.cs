@@ -14,7 +14,8 @@ namespace Whitestone.SegnoSharp.Database.Models
         public string FilePath { get; set; }
         public bool IncludeInAutoPlaylist { get; set; }
         public DateTime? LastPlayed { get; set; }
-        public int PlayCount { get; set; }
+        public int PlayCount { get; set; } = 0;
+        public int Weight { get; set; } = 100;
 
         public int TrackId { get; set; }
         public Track Track { get; set; }
