@@ -59,6 +59,19 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PersistenceManagerEntries",
+                columns: table => new
+                {
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
+                    Value = table.Column<string>(type: "TEXT", nullable: true),
+                    DataType = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PersistenceManagerEntries", x => x.Key);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PersonGroups",
                 columns: table => new
                 {
@@ -640,6 +653,9 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
             migrationBuilder.DropTable(
                 name: "DiscMediaType");
+
+            migrationBuilder.DropTable(
+                name: "PersistenceManagerEntries");
 
             migrationBuilder.DropTable(
                 name: "PersonGroupsStreamInfos");

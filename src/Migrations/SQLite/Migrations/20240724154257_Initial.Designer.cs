@@ -2,31 +2,33 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whitestone.SegnoSharp.Database;
 
 #nullable disable
 
-namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
+namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 {
     [DbContext(typeof(SegnoSharpDbContext))]
-    partial class SegnoSharpDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240724154257_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .UseCollation("utf8mb4_unicode_ci")
-                .HasAnnotation("ProductVersion", "7.0.12")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .UseCollation("NOCASE")
+                .HasAnnotation("ProductVersion", "8.0.7");
 
             modelBuilder.Entity("AlbumGenre", b =>
                 {
                     b.Property<int>("AlbumsId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("GenresId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("AlbumsId", "GenresId");
 
@@ -38,10 +40,10 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
             modelBuilder.Entity("AlbumPersonGroupPersonRelationPerson", b =>
                 {
                     b.Property<int>("AlbumPersonGroupPersonRelationsId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("PersonsId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("AlbumPersonGroupPersonRelationsId", "PersonsId");
 
@@ -53,10 +55,10 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
             modelBuilder.Entity("AlbumRecordLabel", b =>
                 {
                     b.Property<int>("AlbumsId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("RecordLabelsId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("AlbumsId", "RecordLabelsId");
 
@@ -68,10 +70,10 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
             modelBuilder.Entity("DiscMediaType", b =>
                 {
                     b.Property<int>("DiscsId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("MediaTypesId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("DiscsId", "MediaTypesId");
 
@@ -83,10 +85,10 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
             modelBuilder.Entity("PersonTrackPersonGroupPersonRelation", b =>
                 {
                     b.Property<int>("PersonsId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TrackPersonGroupPersonRelationsId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("PersonsId", "TrackPersonGroupPersonRelationsId");
 
@@ -99,26 +101,26 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Added")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("CatalogueNumber")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsPublic")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("INTEGER");
 
                     b.Property<ushort>("Published")
-                        .HasColumnType("smallint unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT COLLATE NOCASE");
 
                     b.Property<string>("Upc")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -131,21 +133,21 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("AlbumId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Filename")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<uint>("Filesize")
-                        .HasColumnType("int unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Mime")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -159,13 +161,13 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("AlbumCoverId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("Data")
-                        .HasColumnType("longblob");
+                        .HasColumnType("BLOB");
 
                     b.HasKey("Id");
 
@@ -179,13 +181,13 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ParentId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("PersonGroupId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -200,16 +202,16 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AlbumId")
-                        .HasColumnType("int");
+                    b.Property<int>("AlbumId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<byte>("DiscNumber")
-                        .HasColumnType("tinyint unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Title")
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -222,11 +224,11 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT COLLATE NOCASE");
 
                     b.HasKey("Id");
 
@@ -239,14 +241,14 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<byte>("SortOrder")
-                        .HasColumnType("tinyint unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -279,23 +281,39 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersistenceManagerEntry", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DataType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("PersistenceManagerEntries");
+                });
+
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Person", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("FirstName")
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("TEXT");
 
                     b.Property<ushort>("Version")
-                        .HasColumnType("smallint unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -308,17 +326,17 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<ushort>("SortOrder")
-                        .HasColumnType("smallint unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -355,14 +373,51 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersonGroupStreamInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IncludeInAutoPlaylist")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PersonGroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IncludeInAutoPlaylist");
+
+                    b.HasIndex("PersonGroupId")
+                        .IsUnique();
+
+                    b.ToTable("PersonGroupsStreamInfos");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IncludeInAutoPlaylist = true,
+                            PersonGroupId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IncludeInAutoPlaylist = true,
+                            PersonGroupId = 2
+                        });
+                });
+
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.RecordLabel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
-                        .HasColumnType("varchar(255)");
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -375,13 +430,13 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Played")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("TrackStreamInfoId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -394,13 +449,13 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.Property<ushort>("SortOrder")
-                        .HasColumnType("smallint unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("TrackStreamInfoId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -413,20 +468,23 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<int?>("DiscId")
-                        .HasColumnType("int");
+                    b.Property<int>("DiscId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<ushort>("Length")
-                        .HasColumnType("smallint unsigned");
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.Property<ushort>("TrackNumber")
-                        .HasColumnType("smallint unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -441,17 +499,17 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<int?>("DiscId")
-                        .HasColumnType("int");
+                    b.Property<int>("DiscId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<ushort>("GroupBeforeTrackNumber")
-                        .HasColumnType("smallint unsigned");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -464,13 +522,13 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ParentId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("PersonGroupId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -485,23 +543,26 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("FilePath")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IncludeInAutoPlaylist")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("LastPlayed")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("PlayCount")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TrackId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Weight")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -633,9 +694,22 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.HasOne("Whitestone.SegnoSharp.Database.Models.Album", "Album")
                         .WithMany("Discs")
-                        .HasForeignKey("AlbumId");
+                        .HasForeignKey("AlbumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Album");
+                });
+
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersonGroupStreamInfo", b =>
+                {
+                    b.HasOne("Whitestone.SegnoSharp.Database.Models.PersonGroup", "PersonGroup")
+                        .WithOne("PersonGroupStreamInfo")
+                        .HasForeignKey("Whitestone.SegnoSharp.Database.Models.PersonGroupStreamInfo", "PersonGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PersonGroup");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.StreamHistory", b =>
@@ -660,7 +734,9 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.HasOne("Whitestone.SegnoSharp.Database.Models.Disc", "Disc")
                         .WithMany("Tracks")
-                        .HasForeignKey("DiscId");
+                        .HasForeignKey("DiscId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Disc");
                 });
@@ -669,7 +745,9 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
                 {
                     b.HasOne("Whitestone.SegnoSharp.Database.Models.Disc", "Disc")
                         .WithMany("TrackGroups")
-                        .HasForeignKey("DiscId");
+                        .HasForeignKey("DiscId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Disc");
                 });
@@ -728,6 +806,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.MySQL.Migrations
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersonGroup", b =>
                 {
                     b.Navigation("AlbumPersonGroupPersonRelations");
+
+                    b.Navigation("PersonGroupStreamInfo");
 
                     b.Navigation("TrackPersonGroupPersonRelations");
                 });

@@ -17,7 +17,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("NOCASE")
-                .HasAnnotation("ProductVersion", "7.0.12");
+                .HasAnnotation("ProductVersion", "8.0.7");
 
             modelBuilder.Entity("AlbumGenre", b =>
                 {
@@ -276,6 +276,22 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                             Name = "Digital Download",
                             SortOrder = (byte)4
                         });
+                });
+
+            modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersistenceManagerEntry", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DataType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("PersistenceManagerEntries");
                 });
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.Person", b =>

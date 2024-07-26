@@ -26,6 +26,8 @@ namespace Whitestone.SegnoSharp.Database
         public DbSet<StreamQueue> StreamQueue { get; set; }
         public DbSet<StreamHistory> StreamHistory { get; set; }
 
+        public DbSet<PersistenceManagerEntry> PersistenceManagerEntries { get; set; }
+
         private readonly IConfiguration _configuration;
 
         public SegnoSharpDbContext(DbContextOptions<SegnoSharpDbContext> options, IConfiguration configuration) : base(options)
@@ -50,6 +52,11 @@ namespace Whitestone.SegnoSharp.Database
                 default:
                     throw new ArgumentException($"Unsupported database type: {databaseType}");
             }
+
+            //modelBuilder
+            //    .Entity<PlaylistMetadataView>()
+            //    .ToView("v_playlistmetadata")
+            //    .HasKey(v => v.TrackStreamInfoId);
 
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 1, Type = PersonGroupType.Album, Name = "Artist", SortOrder = 1 });
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 2, Type = PersonGroupType.Track, Name = "Artist", SortOrder = 1 });
