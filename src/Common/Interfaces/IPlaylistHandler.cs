@@ -1,11 +1,8 @@
-﻿using System.Threading;
-using Microsoft.Extensions.Hosting;
-using Whitestone.SegnoSharp.Common.Models;
+﻿using Microsoft.Extensions.Hosting;
 
 namespace Whitestone.SegnoSharp.Common.Interfaces
 {
     public interface IPlaylistHandler : IHostedService
     {
-        Track GetNextTrack(CancellationToken cancellationToken = default);
     }
 }

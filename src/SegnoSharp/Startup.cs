@@ -11,6 +11,7 @@ using Whitestone.SegnoSharp.Configuration.Extensions;
 using Whitestone.SegnoSharp.Playlist.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Whitestone.SegnoSharp.Common.Extensions;
 using Whitestone.SegnoSharp.HealthChecks;
 using Whitestone.SegnoSharp.Models.States;
 using Whitestone.SegnoSharp.PersistenceManager.Extensions;
@@ -37,6 +38,7 @@ namespace Whitestone.SegnoSharp
             services.AddOidcAuthorizaton(_configuration);
             services.AddCambion()
                 .UseMessagePackSerializer();
+            services.AddCommon();
             services.AddPersistenceManager();
             services.AddPlaylistHandler(_configuration);
             services.AddBassService(_configuration);
