@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +10,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
+using Whitestone.Cambion.Extensions;
+using Whitestone.Cambion.Serializer.MessagePack;
+using Whitestone.SegnoSharp.BassService.Extensions;
+using Whitestone.SegnoSharp.Common.Extensions;
+using Whitestone.SegnoSharp.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Configuration.Extensions;
 using Whitestone.SegnoSharp.Database;
+using Whitestone.SegnoSharp.HealthChecks;
+using Whitestone.SegnoSharp.Models.States;
+using Whitestone.SegnoSharp.PersistenceManager.Extensions;
+using Whitestone.SegnoSharp.Playlist.Extensions;
 
 namespace Whitestone.SegnoSharp
 {
@@ -26,85 +37,122 @@ namespace Whitestone.SegnoSharp
 
             try
             {
-                IHostBuilder builder = CreateHostBuilder(args);
+                WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-                builder.ConfigureWebHostDefaults(webBuilder =>
-                    {
-                        webBuilder.UseStartup<Startup>();
-                    })
-                    .UseSerilog((context, services, configuration) =>
-                    {
-                        configuration
-                            .ReadFrom.Services(services)
-                            .MinimumLevel.Override("Whitestone.SegnoSharp", LogEventLevel.Verbose)
+                builder.Configuration.AddJsonFile("appsettings.json");
+                builder.Configuration.AddUserSecrets(typeof(Bootstrapper).Assembly);
+                builder.Configuration.AddEnvironmentVariables("SegnoSharp_");
+                builder.Configuration.AddCommandLine(args);
+
+                builder.Services.AddSerilog((services, config) =>
+                {
+                    config
+                        .ReadFrom.Services(services)
+                        .MinimumLevel.Override("Whitestone.SegnoSharp", LogEventLevel.Verbose)
                             .Enrich.FromLogContext()
                             .WriteTo.Console()
                             .WriteTo.File(
-                                Path.Combine(context.Configuration["CommonConfig:DataPath"], "logs", "SegnoSharp.log"),
+                                Path.Combine(builder.Configuration["CommonConfig:DataPath"] ?? string.Empty, "logs", "SegnoSharp.log"),
                                 rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true);
-                    });
+                });
 
-                IHost host = builder.Build();
+                builder.ConfigureServices();
 
-                using (IServiceScope scope = host.Services.CreateScope())
+                WebApplication app = builder.Build();
+                app.Configure();
+
+                using (IServiceScope scope = app.Services.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetService<SegnoSharpDbContext>();
                     await dbContext?.Database.MigrateAsync()!;
                 }
 
-                await host.RunAsync();
+                await app.RunAsync();
             }
             catch (Exception ex)
+                when (ex is not HostAbortedException &&
+                      ex.Source != "Microsoft.EntityFrameworkCore.Design") // see https://github.com/dotnet/efcore/issues/29923
             {
                 Log.Fatal(ex, "Host terminated unexpectedly");
             }
             finally
             {
-                Log.CloseAndFlush();
+                await Log.CloseAndFlushAsync();
             }
         }
+    }
 
-        // This method is run instead of Main() when doing EF migrations. Keep it as simple as possible (database settings only)
-        public static IHostBuilder CreateHostBuilder(string[] args)
+    public static class StartupExtensions
+    {
+        public static void ConfigureServices(this WebApplicationBuilder builder)
         {
-            return Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(conf =>
-                {
-                    conf.AddJsonFile("appsettings.json");
-                    conf.AddUserSecrets("ef2b06ee-7634-4a6e-9cce-5ad721a03d65");
-                    conf.AddEnvironmentVariables("SegnoSharp_");
-                    conf.AddCommandLine(args);
-                })
-                .ConfigureServices((context, services) =>
-                {
-                    string databaseType = context.Configuration.GetSection("Database").GetValue<string>("Type").ToLower();
+            string databaseType = builder.Configuration.GetSection("Database").GetValue<string>("Type").ToLower();
 
-                    switch (databaseType)
-                    {
-                        case "sqlite":
-                            string connSqlite = context.Configuration.GetConnectionString("SegnoSharpDatabaseSqlite");
-                            SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
-                            connectionStringBuilder.DataSource = Path.Combine(context.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
+            switch (databaseType)
+            {
+                case "sqlite":
+                    string connSqlite = builder.Configuration.GetConnectionString("SegnoSharpDatabaseSqlite");
+                    SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
+                    connectionStringBuilder.DataSource = Path.Combine(builder.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
 
-                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")));
+                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")));
 
-                            services.AddHealthChecks().AddSqlite(connectionStringBuilder.ConnectionString, name: "Database");
+                    builder.Services.AddHealthChecks().AddSqlite(connectionStringBuilder.ConnectionString, name: "Database");
 
-                            break;
-                        case "mysql":
-                            string connMysql = context.Configuration.GetConnectionString("SegnoSharpDatabaseMysql");
+                    break;
+                case "mysql":
+                    string connMysql = builder.Configuration.GetConnectionString("SegnoSharpDatabaseMysql");
 
-                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")));
+                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")));
 
-                            services.AddHealthChecks().AddMySql(connMysql ?? string.Empty, name: "Database");
+                    builder.Services.AddHealthChecks().AddMySql(connMysql ?? string.Empty, name: "Database");
 
-                            break;
-                        default:
-                            throw new ArgumentException($"Unsupported database type: {databaseType}");
-                    }
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported database type: {databaseType}");
+            }
 
-                    services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
-                });
+            builder.Services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
+
+            builder.Services.Configure<CommonConfig>(builder.Configuration.GetSection(CommonConfig.Section));
+            builder.Services.Configure<StreamingServer>(builder.Configuration.GetSection(StreamingServer.Section));
+
+            builder.Services.AddControllers();
+            builder.Services.AddRazorPages();
+            builder.Services.AddServerSideBlazor();
+            builder.Services.AddOidcAuthorizaton(builder.Configuration);
+            builder.Services.AddCambion()
+                .UseMessagePackSerializer();
+            builder.Services.AddCommon();
+            builder.Services.AddPersistenceManager();
+            builder.Services.AddPlaylistHandler(builder.Configuration);
+            builder.Services.AddBassService(builder.Configuration);
+
+            builder.Services.AddScoped<ImportState>();
+            builder.Services.AddSingleton(builder.Services);
+        }
+
+        public static void Configure(this WebApplication app)
+        {
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseSerilogRequestLogging();
+
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+
+            app.UseAuthorization();
+
+            app.MapHealthChecks("/health", new HealthCheckOptions { ResponseWriter = HealthCheckResponseWriter.WriteResponse });
+            app.MapControllers();
+            app.MapBlazorHub();
+            app.MapFallbackToPage("/_Host");
         }
     }
 }
