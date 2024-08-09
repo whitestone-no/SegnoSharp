@@ -15,6 +15,7 @@ using Whitestone.Cambion.Serializer.MessagePack;
 using Whitestone.SegnoSharp.BassService.Extensions;
 using Whitestone.SegnoSharp.Common.Extensions;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Components;
 using Whitestone.SegnoSharp.Configuration.Extensions;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.HealthChecks;
@@ -118,8 +119,8 @@ namespace Whitestone.SegnoSharp
             builder.Services.Configure<StreamingServer>(builder.Configuration.GetSection(StreamingServer.Section));
 
             builder.Services.AddControllers();
-            builder.Services.AddRazorPages();
-            builder.Services.AddServerSideBlazor();
+            builder.Services.AddRazorComponents()
+                .AddInteractiveServerComponents();
             builder.Services.AddOidcAuthorizaton(builder.Configuration);
             builder.Services.AddCambion()
                 .UseMessagePackSerializer();
@@ -145,14 +146,16 @@ namespace Whitestone.SegnoSharp
 
             app.UseRouting();
 
+            app.UseAntiforgery();
+
             app.UseAuthentication();
 
             app.UseAuthorization();
 
             app.MapHealthChecks("/health", new HealthCheckOptions { ResponseWriter = HealthCheckResponseWriter.WriteResponse });
             app.MapControllers();
-            app.MapBlazorHub();
-            app.MapFallbackToPage("/_Host");
+            app.MapRazorComponents<App>()
+                .AddInteractiveServerRenderMode();
         }
     }
 }

@@ -18,7 +18,7 @@ using Whitestone.SegnoSharp.Models.States;
 using Whitestone.SegnoSharp.Models.ViewModels;
 using Track = Whitestone.SegnoSharp.Database.Models.Track;
 
-namespace Whitestone.SegnoSharp.Pages.Admin.Importer
+namespace Whitestone.SegnoSharp.Components.Pages.Admin.Importer
 {
     public partial class Step3
     {

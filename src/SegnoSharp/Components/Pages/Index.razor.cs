@@ -2,7 +2,7 @@
 using Whitestone.Cambion.Interfaces;
 using Whitestone.SegnoSharp.Common.Events;
 
-namespace Whitestone.SegnoSharp.Pages
+namespace Whitestone.SegnoSharp.Components.Pages
 {
     public partial class Index
     {

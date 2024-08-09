@@ -6,11 +6,12 @@ using System.Timers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.JSInterop;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 
-namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
+namespace Whitestone.SegnoSharp.Components.Pages.Admin.AlbumEditor
 {
     public partial class Persons : IDisposable
     {
@@ -31,6 +32,23 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
 
         private async Task SaveChanges()
         {
+            List<EntityEntry<Person>> entityEntries = DbContext.ChangeTracker.Entries<Person>().ToList();
+            foreach (EntityEntry<Person> entityEntry in entityEntries)
+            {
+                if (entityEntry.State is EntityState.Modified or EntityState.Added)
+                {
+                    ushort? maxVersion = await DbContext.Persons.AsNoTracking().Where(p => p.FirstName == entityEntry.Entity.FirstName && p.LastName == entityEntry.Entity.LastName).MaxAsync(p => (ushort?) p.Version);
+                    var oldVersion = (ushort)(entityEntry.State == EntityState.Modified ? entityEntry.Entity.Version : 0);
+                    var newVersion = (ushort)(maxVersion.HasValue ? maxVersion + 1 : 0);
+                    entityEntry.Entity.Version = newVersion;
+
+                    if (entityEntry.State == EntityState.Modified)
+                    {
+                        //entityEntries.Where(p => p.Entity.FirstName == entityEntry.OriginalValues.
+                    }
+                }
+            }
+
             await DbContext.SaveChangesAsync();
         }
 
@@ -135,6 +153,18 @@ namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
             {
                 existingPerson.Version = (ushort)(existingPerson.Version - 1);
             }
+        }
+
+        private void Add()
+        {
+            Person person = new()
+            {
+                FirstName = "New Firstname",
+                LastName = "New Lastname"
+            };
+
+            PersonResults.Add(person);
+            DbContext.Persons.Add(person);
         }
     }
 }

@@ -11,7 +11,7 @@ using Microsoft.JSInterop;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 
-namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
+namespace Whitestone.SegnoSharp.Components.Pages.Admin.AlbumEditor
 {
     public partial class EditAlbum : IDisposable
     {

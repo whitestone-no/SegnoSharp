@@ -29,7 +29,7 @@
                         <td>@person.Id</td>
                         <td><input @bind="@person.FirstName" /></td>
                         <td><input @bind="@person.LastName" /></td>
-                        <td><input @bind="@person.Version" /></td>
+                        <td>@person.Version</td>
                         <td><button @onclick="() => RemovePerson(person)"><span class="fa-regular fa-circle-xmark"></span></button></td>
                     </tr>
                 }
@@ -40,6 +40,9 @@
     {
         <span>No persons found that matches search criteria</span>
     }
+    <div>
+        <button @onclick="Add">Add</button>
+    </div>
 </div>
 
 <div style="margin-top: 20px;">

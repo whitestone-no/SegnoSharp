@@ -2,10 +2,10 @@
 using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Components;
-using Whitestone.SegnoSharp.Models.States;
 using Whitestone.SegnoSharp.Common.Extensions;
+using Whitestone.SegnoSharp.Models.States;
 
-namespace Whitestone.SegnoSharp.Pages.Admin.Importer
+namespace Whitestone.SegnoSharp.Components.Pages.Admin.Importer
 {
     public partial class Step2
     {
@@ -60,9 +60,9 @@ namespace Whitestone.SegnoSharp.Pages.Admin.Importer
                 .Where(f => extensions.Contains(f.Extension))
                 .ToList();
 
-            if (files.Count > 100)
+            if (files.Count > 1000)
             {
-                ErrorMessage = "More than 100 files in selected folder. Please select a folder with fewer files.";
+                ErrorMessage = "More than 1000 files in selected folder. Please select a folder with fewer files.";
                 base.OnInitialized();
                 return;
             }

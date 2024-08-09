@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Options;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
 
-namespace Whitestone.SegnoSharp.Shared
+namespace Whitestone.SegnoSharp.Components.Layout
 {
     public partial class MainLayout
     {

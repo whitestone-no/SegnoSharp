@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Whitestone.SegnoSharp.Models.States;
 
-namespace Whitestone.SegnoSharp.Pages.Admin
+namespace Whitestone.SegnoSharp.Components.Pages.Admin
 {
     public partial class Import
     {

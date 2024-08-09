@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
-using System.Linq;
-using System.Threading.Tasks;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 using Whitestone.SegnoSharp.Models.States;
 using Whitestone.SegnoSharp.Models.ViewModels;
 
-namespace Whitestone.SegnoSharp.Pages.Admin.Importer
+namespace Whitestone.SegnoSharp.Components.Pages.Admin.Importer
 {
     public partial class Step4
     {

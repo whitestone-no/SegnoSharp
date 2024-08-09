@@ -10,7 +10,7 @@ using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 using Whitestone.SegnoSharp.Models.ViewModels;
 
-namespace Whitestone.SegnoSharp.Pages.Admin.AlbumEditor
+namespace Whitestone.SegnoSharp.Components.Pages.Admin.AlbumEditor
 {
     public partial class PersonGroups : IDisposable
     {

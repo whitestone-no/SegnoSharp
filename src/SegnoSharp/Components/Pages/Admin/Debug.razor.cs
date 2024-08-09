@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
 
-namespace Whitestone.SegnoSharp.Pages.Admin
+namespace Whitestone.SegnoSharp.Components.Pages.Admin
 {
     public partial class Debug
     {
