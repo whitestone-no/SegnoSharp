@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -14,12 +17,14 @@ using Whitestone.Cambion.Extensions;
 using Whitestone.Cambion.Serializer.MessagePack;
 using Whitestone.SegnoSharp.BassService.Extensions;
 using Whitestone.SegnoSharp.Common.Extensions;
+using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Components;
 using Whitestone.SegnoSharp.Configuration.Extensions;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.HealthChecks;
 using Whitestone.SegnoSharp.Models.States;
+using Whitestone.SegnoSharp.Modules;
 using Whitestone.SegnoSharp.PersistenceManager.Extensions;
 using Whitestone.SegnoSharp.Playlist.Extensions;
 
@@ -118,7 +123,15 @@ namespace Whitestone.SegnoSharp
             builder.Services.Configure<CommonConfig>(builder.Configuration.GetSection(CommonConfig.Section));
             builder.Services.Configure<StreamingServer>(builder.Configuration.GetSection(StreamingServer.Section));
 
-            builder.Services.AddControllers();
+            IEnumerable<IModule> modules = builder.AddModules();
+
+            IMvcBuilder controllerBuilder = builder.Services.AddControllers();
+
+            foreach (IModule module in modules)
+            {
+                controllerBuilder.AddApplicationPart(module.GetType().Assembly);
+            }
+
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
             builder.Services.AddOidcAuthorizaton(builder.Configuration);
@@ -154,7 +167,14 @@ namespace Whitestone.SegnoSharp
 
             app.MapHealthChecks("/health", new HealthCheckOptions { ResponseWriter = HealthCheckResponseWriter.WriteResponse });
             app.MapControllers();
+
+            Assembly[] moduleAssemblies = app.Services.GetServices<IModule>()
+                .Select(p => p.GetType().Assembly)
+                .Distinct()
+                .ToArray();
+
             app.MapRazorComponents<App>()
+                .AddAdditionalAssemblies(moduleAssemblies)
                 .AddInteractiveServerRenderMode();
         }
     }

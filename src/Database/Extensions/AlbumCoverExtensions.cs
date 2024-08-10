@@ -1,5 +1,4 @@
 ﻿using System;
-using Whitestone.SegnoSharp.Common.Extensions;
 using Whitestone.SegnoSharp.Database.Models;
 
 namespace Whitestone.SegnoSharp.Database.Extensions

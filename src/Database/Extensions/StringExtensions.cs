@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Whitestone.SegnoSharp.Common.Extensions
+namespace Whitestone.SegnoSharp.Database.Extensions
 {
     public static class StringExtensions
     {
