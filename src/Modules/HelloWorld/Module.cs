@@ -7,9 +7,6 @@ namespace HelloWorld
 {
     public class Module : IModule
     {
-        public string FriendlyName => "Hello SegnoSharp!";
-        public int Priority => 100;
-
         public void ConfigureServices(IServiceCollection services, IHostEnvironment environment, IConfiguration configuration)
         {
         }

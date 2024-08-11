@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using Whitestone.SegnoSharp.Models.ViewModels
+@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
 <PageTitle>BlazorApp1</PageTitle>
@@ -32,6 +33,12 @@
         <li>
             <NavLink href="/queue"><span class="fa-solid fa-list"></span>Queue</NavLink>
         </li>
+        @foreach (MenuNavigationModel nav in ModuleNavItems.Where(n => !n.IsAdmin).OrderBy(n => n.SortOrder))
+        {
+            <li>
+                <NavLink href="@nav.Path"><span class="fa-solid fa-list"></span>@nav.MenuTitle</NavLink>
+            </li>
+        }
         <AuthorizeView>
             <Authorized>
                 <li>
@@ -54,6 +61,27 @@
                         @if (CommonConfig.Value.EnableDebugPage)
                         {
                             <li><NavLink href="/admin/debug"><span class="fa-solid fa-code"></span>Debug</NavLink></li>
+                        }
+                        @foreach (MenuNavigationModel nav in ModuleNavItems.Where(n => n.IsAdmin).OrderBy(n => n.SortOrder))
+                        {
+                            if (nav.Children.Any())
+                            {
+                                <li class="Submenu">
+                                    <NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink>
+                                    <input id="submenu-@(nav.Id)-button" type="checkbox" role="button" /> <!-- checked="checked" -->
+                                    <label id="submenu-@(nav.Id)-icon" for="submenu-@(nav.Id)-button"><span class="fa-solid fa-caret-right"></span></label>
+                                    <ul>
+                                        @foreach (var navChild in nav.Children.OrderBy(c => c.SortOrder))
+                                        {
+                                            <li><NavLink href="@navChild.Path">@navChild.MenuTitle</NavLink></li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <li><NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink></li>
+                            }
                         }
                     </ul>
                 </li>

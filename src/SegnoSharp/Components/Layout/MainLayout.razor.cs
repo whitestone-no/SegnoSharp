@@ -1,9 +1,15 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Options;
+using Whitestone.SegnoSharp.Common.Attributes;
+using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Models.ViewModels;
 
 namespace Whitestone.SegnoSharp.Components.Layout
 {
@@ -11,8 +17,10 @@ namespace Whitestone.SegnoSharp.Components.Layout
     {
         [Inject] private AuthenticationStateProvider AuthState { get; set; } = null!;
         [Inject] private IOptions<CommonConfig> CommonConfig { get; set; }
+        [Inject] private IEnumerable<IModule> Modules { get; set; }
 
         private string _loggedInAs = null!;
+        private List<MenuNavigationModel> ModuleNavItems { get; set; } = [];
 
         protected override async Task OnInitializedAsync()
         {
@@ -22,6 +30,63 @@ namespace Whitestone.SegnoSharp.Components.Layout
                 .Where(c => c.Type.Equals("preferred_username"))
                 .Select(c => c.Value)
                 .FirstOrDefault() ?? "[Unknown username]";
+
+            foreach (IModule module in Modules)
+            {
+                foreach (Type moduleType in module.GetType().Assembly.GetTypes())
+                {
+                    if (!moduleType.IsAssignableTo(typeof(IComponent)))
+                    {
+                        continue;
+                    }
+
+                    if (moduleType.GetCustomAttribute<RouteAttribute>() is not { } route ||
+                        moduleType.GetCustomAttribute<ModuleMenuAttribute>() is not { Parent: null } moduleMenu)
+                    {
+                        continue;
+                    }
+
+                    // This is a legitimate @page
+
+                    MenuNavigationModel nav = new()
+                    {
+                        Id = Guid.NewGuid(),
+                        MenuTitle = moduleMenu.MenuTitle,
+                        Path = route.Template,
+                        Icon = moduleMenu.Icon ?? "fa-file",
+                        IsAdmin = moduleMenu.IsAdmin,
+                        SortOrder = moduleMenu.SortOrder
+                    };
+
+                    // Find all menu childs
+                    
+                    foreach (Type childModuleType in module.GetType().Assembly.GetTypes())
+                    {
+                        if (!childModuleType.IsAssignableTo(typeof(IComponent)))
+                        {
+                            continue;
+                        }
+
+                        if (childModuleType.GetCustomAttribute<RouteAttribute>() is not { } childRoute ||
+                            childModuleType.GetCustomAttribute<ModuleMenuAttribute>() is not { } childModuleMenu ||
+                            childModuleMenu.Parent != moduleType)
+                        {
+                            continue;
+                        }
+
+                        BaseMenuNavigation childNav = new()
+                        {
+                            MenuTitle = childModuleMenu.MenuTitle,
+                            Path = childRoute.Template,
+                            SortOrder = childModuleMenu.SortOrder
+                        };
+
+                        nav.Children.Add(childNav);
+                    }
+
+                    ModuleNavItems.Add(nav);
+                }
+            }
 
             await base.OnInitializedAsync();
         }

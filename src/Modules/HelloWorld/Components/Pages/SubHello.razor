@@ -1,7 +1,7 @@
-﻿@page "/hello"
+﻿@page "/hello/sub"
 @using Whitestone.SegnoSharp.Common.Attributes
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
-@attribute [ModuleMenu("Hello", true)]
+@attribute [ModuleMenu("Hello submenu", typeof(Hello))]
 
-<h1>Hello module!</h1>
+<h1>Hello module sub!</h1>
