@@ -50,7 +50,7 @@ namespace Whitestone.SegnoSharp.Components.Layout
 
                     MenuNavigationModel nav = new()
                     {
-                        Id = Guid.NewGuid(),
+                        Id = module.Id,
                         MenuTitle = moduleMenu.MenuTitle,
                         Path = route.Template,
                         Icon = moduleMenu.Icon ?? "fa-file",

@@ -143,7 +143,6 @@ namespace Whitestone.SegnoSharp
             builder.Services.AddBassService(builder.Configuration);
 
             builder.Services.AddScoped<ImportState>();
-            builder.Services.AddSingleton(builder.Services);
         }
 
         public static void Configure(this WebApplication app)

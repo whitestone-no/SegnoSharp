@@ -1,0 +1,52 @@
+﻿@page "/admin/appinspector"
+@using Whitestone.SegnoSharp.Common.Attributes
+@using Microsoft.AspNetCore.Authorization
+@using Whitestone.SegnoSharp.Modules.AppInspector.ViewModels
+@attribute [Authorize]
+@attribute [ModuleMenu("AppInspector", "fa-code", true)]
+
+<h1>App Inspector</h1>
+
+<h2>Configuration</h2>
+
+<table class="Standard" style="font-size: 12px; width: 100%;">
+    <thead>
+    <tr>
+        <th>Key</th>
+        <th style="max-width: 500px;">Value</th>
+        <th>Provider</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (ConfigurationViewModel configuration in _configurations)
+    {
+        <tr>
+            <td>@configuration.Key</td>
+            <td style="max-width: 500px; word-wrap: break-word;">@configuration.Value</td>
+            <td>@configuration.Provider</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<h2>Dependency Injection</h2>
+
+<table class="Standard" style="font-size: 12px;">
+    <thead>
+    <tr>
+        <th>Lifetime</th>
+        <th>Service</th>
+        <th>Implementation</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (DependencyViewModel dependency in _dependencies)
+    {
+        <tr>
+            <td>@dependency.Lifetime</td>
+            <td>@dependency.ServiceType</td>
+            <td>@dependency.ImplementationType</td>
+        </tr>
+    }
+    </tbody>
+</table>

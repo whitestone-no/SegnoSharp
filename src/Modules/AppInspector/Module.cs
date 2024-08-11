@@ -1,10 +1,10 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using Whitestone.SegnoSharp.Common.Interfaces;
 
-namespace HelloWorld
+namespace Whitestone.SegnoSharp.Modules.AppInspector
 {
     public class Module : IModule
     {
@@ -12,6 +12,7 @@ namespace HelloWorld
 
         public void ConfigureServices(IServiceCollection services, IHostEnvironment environment, IConfiguration configuration)
         {
+            
         }
     }
 }

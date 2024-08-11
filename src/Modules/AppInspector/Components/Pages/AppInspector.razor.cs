@@ -1,38 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Linq;
+using Whitestone.SegnoSharp.Modules.AppInspector.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Whitestone.SegnoSharp.Common.Models.Configuration;
+using System.Reflection;
+using Whitestone.SegnoSharp.Modules.AppInspector.Extensions;
 
-namespace Whitestone.SegnoSharp.Components.Pages.Admin
+namespace Whitestone.SegnoSharp.Modules.AppInspector.Components.Pages
 {
-    public partial class Debug
+    public partial class AppInspector
     {
-        [Inject] private IServiceCollection ServiceCollection { get; set; }
         [Inject] private IConfiguration Configuration { get; set; }
-        [Inject] private IOptions<CommonConfig> CommonConfig { get; set; }
+        [Inject] private IServiceProvider ServiceProvider { get; set; }
 
-        private List<DependencyViewModel> _dependencies = new();
-        private List<ConfigurationViewModel> _configurations = new();
+        private List<ConfigurationViewModel> _configurations = [];
+        private List<DependencyViewModel> _dependencies = [];
 
         protected override void OnInitialized()
         {
-            _dependencies = ServiceCollection
-                .Select(s => new DependencyViewModel
-                {
-                    ServiceType = s.ServiceType.GetTypeName(),
-                    ImplementationType = s.ImplementationType?.GetTypeName(),
-                    Lifetime = s.Lifetime.ToString()
-                })
-                .OrderBy(d => d.Lifetime)
-                .ThenBy(d => d.ServiceType)
-                .ThenBy(d => d.ImplementationType)
-                .ToList();
-
             _configurations = AllConfigurations(Configuration);
+            _dependencies = AllDependencies(ServiceProvider);
         }
 
         private static List<ConfigurationViewModel> AllConfigurations(IConfiguration root)
@@ -79,46 +68,23 @@ namespace Whitestone.SegnoSharp.Components.Pages.Admin
             }
         }
 
-        private class DependencyViewModel
+        private List<DependencyViewModel> AllDependencies(IServiceProvider provider)
         {
-            public string Lifetime { get; init; }
-            public string ServiceType { get; init; }
-            public string ImplementationType { get; init; }
-        }
+            var rootProvider = provider.GetType().GetProperty("RootProvider", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(provider);
+            var callSiteFactory = rootProvider.GetType().GetProperty("CallSiteFactory", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(rootProvider);
+            var serviceDescriptors = callSiteFactory.GetType().GetProperty("Descriptors", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(callSiteFactory) as ServiceDescriptor[];
 
-        private class ConfigurationViewModel
-        {
-            public string Key { get; init; }
-            public string Value { get; init; }
-            public string Provider { get; init; }
-        }
-    }
-
-    internal static class CustomExtensions
-    {
-        internal static string GetTypeName(this Type type)
-        {
-            string typeName = type.Namespace + "." + type.Name;
-            if (typeName.Contains('`'))
-            {
-                typeName = typeName[..typeName.LastIndexOf('`')];
-            }
-
-            if (!type.IsGenericType)
-            {
-                return typeName;
-            }
-
-            typeName += "<";
-
-            if (type.GenericTypeArguments.Any())
-            {
-                typeName += type.GenericTypeArguments[0].GetTypeName();
-            }
-            
-            typeName += ">";
-
-            return typeName;
+            return serviceDescriptors
+                .Select(s => new DependencyViewModel
+                {
+                    ServiceType = s.ServiceType.GetTypeName(),
+                    ImplementationType = s.ImplementationType?.GetTypeName(),
+                    Lifetime = s.Lifetime.ToString()
+                })
+                .OrderBy(d => d.Lifetime)
+                .ThenBy(d => d.ServiceType)
+                .ThenBy(d => d.ImplementationType)
+                .ToList();
         }
     }
 }
