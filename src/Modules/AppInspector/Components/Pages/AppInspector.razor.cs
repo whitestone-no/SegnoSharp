@@ -2,11 +2,14 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Whitestone.SegnoSharp.Modules.AppInspector.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Modules.AppInspector.Extensions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Whitestone.SegnoSharp.Modules.AppInspector.Components.Pages
 {
@@ -14,14 +17,34 @@ namespace Whitestone.SegnoSharp.Modules.AppInspector.Components.Pages
     {
         [Inject] private IConfiguration Configuration { get; set; }
         [Inject] private IServiceProvider ServiceProvider { get; set; }
+        [Inject] private IEnumerable<IModule> Modules { get; set; }
 
         private List<ConfigurationViewModel> _configurations = [];
         private List<DependencyViewModel> _dependencies = [];
+        private List<ModulesViewModel> _modules = [];
 
         protected override void OnInitialized()
         {
             _configurations = AllConfigurations(Configuration);
             _dependencies = AllDependencies(ServiceProvider);
+            _modules = AllModules(Modules);
+        }
+
+        private List<ModulesViewModel> AllModules(IEnumerable<IModule> modules)
+        {
+            return modules
+                .Select(m =>
+                {
+                    Assembly moduleAssembly = m.GetType().Assembly;
+                    var moduleDllFile = new FileInfo(moduleAssembly.Location);
+
+                    return new ModulesViewModel
+                    {
+                        DllFile = Path.Combine(moduleDllFile.Directory?.Name ?? string.Empty, moduleDllFile.Name),
+                        Version = moduleAssembly.GetName().Version?.ToString(),
+                    };
+                })
+                .ToList();
         }
 
         private static List<ConfigurationViewModel> AllConfigurations(IConfiguration root)

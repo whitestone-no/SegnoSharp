@@ -1,31 +1,93 @@
 ﻿@page "/admin/appinspector"
-@using Whitestone.SegnoSharp.Common.Attributes
 @using Microsoft.AspNetCore.Authorization
+@using System.Runtime.InteropServices
+@using Whitestone.SegnoSharp.Common.Attributes
 @using Whitestone.SegnoSharp.Modules.AppInspector.ViewModels
 @attribute [Authorize]
 @attribute [ModuleMenu("AppInspector", "fa-code", true)]
 
 <h1>App Inspector</h1>
 
+<h2>Environment</h2>
+
+<table class="Standard" style="font-size: 12px; width: 100%;">
+    <tbody>
+        <tr>
+            <td>Framework</td>
+            <td>@RuntimeInformation.FrameworkDescription</td>
+        </tr>
+        <tr>
+            <td>Platform</td>
+            <td>
+                @if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+                {
+                    <span>FreeBSD</span>
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    <span>Linux</span>
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    <span>OSX</span>
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    <span>Windows</span>
+                }
+            </td>
+        </tr>
+        <tr>
+            <td>Operating System</td>
+            <td>@RuntimeInformation.OSDescription</td>
+        </tr>
+        <tr>
+            <td>Architecture</td>
+            <td>@RuntimeInformation.ProcessArchitecture</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Modules</h2>
+
+<table class="Standard" style="font-size: 12px; width: 100%;">
+    <thead>
+        <tr>
+            <th>DLL file</th>
+            <th>Version</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (ModulesViewModel module in _modules)
+        {
+            <tr>
+                <td>@module.DllFile</td>
+                <td>@module.Version</td>
+            </tr>
+
+        }
+    </tbody>
+</table>
+
 <h2>Configuration</h2>
 
 <table class="Standard" style="font-size: 12px; width: 100%;">
     <thead>
-    <tr>
-        <th>Key</th>
-        <th style="max-width: 500px;">Value</th>
-        <th>Provider</th>
-    </tr>
+        <tr>
+            <th>Key</th>
+            <th style="max-width: 500px;">Value</th>
+            <th>Provider</th>
+        </tr>
     </thead>
     <tbody>
-    @foreach (ConfigurationViewModel configuration in _configurations)
-    {
-        <tr>
-            <td>@configuration.Key</td>
-            <td style="max-width: 500px; word-wrap: break-word;">@configuration.Value</td>
-            <td>@configuration.Provider</td>
-        </tr>
-    }
+        @foreach (ConfigurationViewModel configuration in _configurations)
+        {
+            <tr>
+                <td>@configuration.Key</td>
+                <td style="max-width: 500px; word-wrap: break-word;">@configuration.Value</td>
+                <td>@configuration.Provider</td>
+            </tr>
+        }
     </tbody>
 </table>
 
@@ -33,20 +95,20 @@
 
 <table class="Standard" style="font-size: 12px;">
     <thead>
-    <tr>
-        <th>Lifetime</th>
-        <th>Service</th>
-        <th>Implementation</th>
-    </tr>
+        <tr>
+            <th>Lifetime</th>
+            <th>Service</th>
+            <th>Implementation</th>
+        </tr>
     </thead>
     <tbody>
-    @foreach (DependencyViewModel dependency in _dependencies)
-    {
-        <tr>
-            <td>@dependency.Lifetime</td>
-            <td>@dependency.ServiceType</td>
-            <td>@dependency.ImplementationType</td>
-        </tr>
-    }
+        @foreach (DependencyViewModel dependency in _dependencies)
+        {
+            <tr>
+                <td>@dependency.Lifetime</td>
+                <td>@dependency.ServiceType</td>
+                <td>@dependency.ImplementationType</td>
+            </tr>
+        }
     </tbody>
 </table>

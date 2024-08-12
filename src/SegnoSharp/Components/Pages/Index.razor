@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject IBassWrapper BassWrapper
 @inject IOptions<BassRegistration> BassRegistration
-@using System.Runtime.InteropServices
 @using BassService.Interfaces
 @using BassService.Models.Config
 @using Microsoft.Extensions.Options
@@ -12,38 +11,7 @@
     <h1 style="font-size: 3em">Welcome to SegnoSharp</h1>
 </div>
 <div>
-    FrameworkDescription: @RuntimeInformation.FrameworkDescription<br />
-    OSDescription: @RuntimeInformation.OSDescription<br />
-    ProcessArchitecture: @RuntimeInformation.ProcessArchitecture<br />
-    OSArchitecture: @RuntimeInformation.OSArchitecture<br />
-</div>
-<div>
-    @if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
-    {
-        <span>FreeBSD</span>
-    }
-    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-    {
-        <span>Linux</span>
-    }
-    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-    {
-        <span>OSX</span>
-    }
-    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-    {
-        <span>Windows</span>
-    }
-</div>
-<div>
     <h2>BASS Information</h2>
-    <div>
-        <h3>Registration</h3>
-        <div>
-            Email: @BassRegistration.Value.Email<br />
-            Key: @BassRegistration.Value.Key
-        </div>
-    </div>
     <div>
         <h3>Components</h3>
         <table>
