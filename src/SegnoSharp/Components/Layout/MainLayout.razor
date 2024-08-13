@@ -30,21 +30,32 @@
         <li>
             <NavLink href="/" Match="NavLinkMatch.All"><span class="fa-solid fa-house"></span>Home</NavLink>
         </li>
-        <li>
-            <NavLink href="/queue"><span class="fa-solid fa-list"></span>Queue</NavLink>
-        </li>
         @foreach (MenuNavigationModel nav in ModuleNavItems.Where(n => !n.IsAdmin).OrderBy(n => n.SortOrder))
         {
-            <li>
-                <NavLink href="@nav.Path"><span class="fa-solid fa-list"></span>@nav.MenuTitle</NavLink>
-            </li>
+            if (nav.Children.Any())
+            {
+                <li class="Submenu">
+                    <NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink>
+                    <input id="submenu-@(nav.Id)-button" type="checkbox" role="button" /> <!-- checked="checked" -->
+                    <label id="submenu-@(nav.Id)-icon" for="submenu-@(nav.Id)-button"><span class="fa-solid fa-caret-right"></span></label>
+                    <ul>
+                        @foreach (var navChild in nav.Children.OrderBy(c => c.SortOrder))
+                        {
+                            <li><NavLink href="@navChild.Path">@navChild.MenuTitle</NavLink></li>
+                        }
+                    </ul>
+                </li>
+            }
+            else
+            {
+                <li><NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink></li>
+            }
         }
         <AuthorizeView>
             <Authorized>
                 <li>
                     <span class="@(NavigationManager.ToBaseRelativePath(NavigationManager.Uri).StartsWith("admin/") ? "active" : "")"><span class="fa-solid fa-screwdriver-wrench"></span>Admin</span>
                     <ul>
-                        <li><NavLink href="/admin/queue"><span class="fa-solid fa-list-check"></span>Queue admin</NavLink></li>
                         <li class="Submenu">
                             <NavLink href="/admin/albums"><span class="fa-solid fa-compact-disc"></span>Albums</NavLink>
                             <input id="submenu-albums-button" type="checkbox" role="button" checked="checked" /> <!-- checked="checked" -->
