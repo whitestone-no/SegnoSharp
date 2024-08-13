@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 
-namespace Whitestone.SegnoSharp.PersistenceManager.Interfaces
+namespace Whitestone.SegnoSharp.Common.Interfaces
 {
     public interface IPersistenceManager : IHostedService
     {

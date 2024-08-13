@@ -13,7 +13,6 @@ using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
-using Whitestone.SegnoSharp.PersistenceManager.Interfaces;
 using Whitestone.SegnoSharp.Playlist.Models;
 using Track = Whitestone.SegnoSharp.Common.Models.Track;
 

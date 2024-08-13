@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Whitestone.SegnoSharp.PersistenceManager.Interfaces;
-using Whitestone.SegnoSharp.PersistenceManager.Models;
-using Microsoft.Extensions.Hosting;
-using System.Reflection;
-using Whitestone.SegnoSharp.Database.Models;
-using Whitestone.SegnoSharp.PersistenceManager.Attributes;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
+using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Common.Models.PersistenceManager;
 using Whitestone.SegnoSharp.Database;
-using System.Globalization;
+using Whitestone.SegnoSharp.Database.Models;
 
-namespace Whitestone.SegnoSharp.PersistenceManager
+namespace Whitestone.SegnoSharp.Common.Helpers
 {
     public class PersistenceHandler(
         IDbContextFactory<SegnoSharpDbContext> dbContextFactory,

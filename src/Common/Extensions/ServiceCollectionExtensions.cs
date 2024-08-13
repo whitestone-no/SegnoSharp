@@ -10,6 +10,9 @@ namespace Whitestone.SegnoSharp.Common.Extensions
         {
             services.AddTransient<ISystemClock, SystemClock>();
 
+            services.AddSingleton<IPersistenceManager, PersistenceHandler>();
+            services.AddHostedService(p => p.GetRequiredService<IPersistenceManager>());
+
             return services;
         }
     }

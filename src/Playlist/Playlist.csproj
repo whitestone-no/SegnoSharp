@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
-    <ProjectReference Include="..\PersistenceManager\PersistenceManager.csproj" />
   </ItemGroup>
 
 </Project>
