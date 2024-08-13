@@ -25,7 +25,6 @@ using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.HealthChecks;
 using Whitestone.SegnoSharp.Models.States;
 using Whitestone.SegnoSharp.Modules;
-using Whitestone.SegnoSharp.Playlist.Extensions;
 
 namespace Whitestone.SegnoSharp
 {
@@ -137,7 +136,6 @@ namespace Whitestone.SegnoSharp
             builder.Services.AddCambion()
                 .UseMessagePackSerializer();
             builder.Services.AddCommon();
-            builder.Services.AddPlaylistHandler(builder.Configuration);
             builder.Services.AddBassService(builder.Configuration);
 
             builder.Services.AddScoped<ImportState>();

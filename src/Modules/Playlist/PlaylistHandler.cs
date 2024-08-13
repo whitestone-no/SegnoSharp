@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Whitestone.Cambion.Interfaces;
@@ -13,12 +14,12 @@ using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
-using Whitestone.SegnoSharp.Playlist.Models;
+using Whitestone.SegnoSharp.Modules.Playlist.Models;
 using Track = Whitestone.SegnoSharp.Common.Models.Track;
 
-namespace Whitestone.SegnoSharp.Playlist
+namespace Whitestone.SegnoSharp.Modules.Playlist
 {
-    public class PlaylistHandler : IPlaylistHandler, IEventHandler<PlayerReady>, IEventHandler<PlayNextTrack>
+    public class PlaylistHandler : IHostedService, IEventHandler<PlayerReady>, IEventHandler<PlayNextTrack>
     {
         private readonly ITagReader _tagReader;
         private readonly IDbContextFactory<SegnoSharpDbContext> _dbContextFactory;
