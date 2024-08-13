@@ -10,6 +10,9 @@ COPY . .
 WORKDIR "/src/SegnoSharp"
 RUN dotnet publish "SegnoSharp.csproj" -c Release -o /app/publish
 
+WORKDIR "/src/Modules"
+RUN find . -type f -name '*.csproj' -printf "dotnet publish %p -c Release -o /app/publish/modules/%h\n" | sh
+
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
