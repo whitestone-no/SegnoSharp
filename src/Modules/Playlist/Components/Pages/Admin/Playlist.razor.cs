@@ -1,6 +1,6 @@
-﻿namespace HelloWorld.Components.Pages
+﻿namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
 {
-    public partial class SubHello
+    public partial class Playlist
     {
         protected override void OnInitialized()
         {
