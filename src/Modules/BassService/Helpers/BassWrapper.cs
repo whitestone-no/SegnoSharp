@@ -1,19 +1,21 @@
-﻿using Whitestone.SegnoSharp.BassService.Interfaces;
-using System;
+﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
+using Un4seen.Bass.AddOn.EncMp3;
 using Un4seen.Bass.AddOn.Mix;
 using Un4seen.Bass.AddOn.Tags;
 using Un4seen.Bass.Misc;
 using Whitestone.SegnoSharp.Common.Models;
+using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
 using StreamingServer = Whitestone.SegnoSharp.Common.Models.Configuration.StreamingServer;
-using Un4seen.Bass.AddOn.EncMp3;
 
-namespace Whitestone.SegnoSharp.BassService.Helpers
+namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
 {
     public class BassWrapper : IBassWrapper
     {
@@ -183,13 +185,19 @@ namespace Whitestone.SegnoSharp.BassService.Helpers
                 return;
             }
 
-            string executingFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string encoderPath = Path.Combine(executingFolder ?? Directory.GetCurrentDirectory(), "encoder");
+            FileInfo fi = new(GetType().Assembly.Location);
+            string encoderPath = Path.Combine(fi.DirectoryName ?? Directory.GetCurrentDirectory(), "encoder");
+
+            var ffmpegExecutable = "ffmpeg";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                ffmpegExecutable = "ffmpeg.exe";
+            }
 
             EncoderCMDLN encoder = new(channel)
             {
                 EncoderDirectory = encoderPath,
-                CMDLN_Executable = "ffmpeg.exe",
+                CMDLN_Executable = ffmpegExecutable,
                 CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a mp3 -b:a ${kbps}k -vn -f mp3 ${output}", // Remember to use "-f adts" for AAC streaming
                 CMDLN_EncoderType = BASSChannelType.BASS_CTYPE_STREAM_MP3,
                 CMDLN_DefaultOutputExtension = ".mp3",

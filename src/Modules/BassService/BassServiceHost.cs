@@ -1,18 +1,19 @@
 ﻿using System;
-using Whitestone.SegnoSharp.BassService.Interfaces;
-using Whitestone.SegnoSharp.BassService.Models.Config;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Threading;
-using System.Threading.Tasks;
 using Un4seen.Bass;
-using Whitestone.SegnoSharp.Common.Events;
 using Whitestone.Cambion.Interfaces;
-using Whitestone.SegnoSharp.BassService.Models;
-using System.Runtime.InteropServices;
+using Whitestone.SegnoSharp.Common.Events;
+using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
+using Whitestone.SegnoSharp.Modules.BassService.Models;
+using Whitestone.SegnoSharp.Modules.BassService.Models.Config;
 
-namespace Whitestone.SegnoSharp.BassService
+namespace Whitestone.SegnoSharp.Modules.BassService
 {
     public class BassServiceHost : IHostedService, IEventHandler<PlayTrack>, IEventHandler<StartStreaming>, IEventHandler<StopStreaming>
     {
@@ -66,7 +67,7 @@ namespace Whitestone.SegnoSharp.BassService
                 await _cambion.PublishEventAsync(new PlayerReady());
 
                 // Start encoding and streaming to server
-                await _cambion.PublishEventAsync(new StartStreaming());
+                //await _cambion.PublishEventAsync(new StartStreaming());
             }
             catch (Exception e)
             {
@@ -115,9 +116,12 @@ namespace Whitestone.SegnoSharp.BassService
             {
                 flacLib = "libbassflac.so";
             }
-            if (_bassWrapper.BassLoadPlugin(flacLib) == 0)
+
+            FileInfo fi = new(GetType().Assembly.Location);
+
+            if (_bassWrapper.BassLoadPlugin(Path.Combine(fi.DirectoryName ?? string.Empty, flacLib)) == 0)
             {
-                _log.LogCritical("Could not load {libName}", flacLib);
+                _log.LogCritical("Could not load {libName} from {path}", flacLib, fi.DirectoryName);
             }
 
             _log.LogInformation("BASS Version: {bassVersion}", _bassWrapper.GetBassVersion());
@@ -145,7 +149,7 @@ namespace Whitestone.SegnoSharp.BassService
                 }
 
                 // Convert track to extended object
-                TrackExt track = new (input.Track);
+                TrackExt track = new(input.Track);
 
                 // Load music file
                 track.ChannelHandle = _bassWrapper.CreateFileStream(track.File, 0L, 0L, BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE);

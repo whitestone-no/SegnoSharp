@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.Extensions.Options;
-using Whitestone.SegnoSharp.BassService.Interfaces;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
 
-namespace Whitestone.SegnoSharp.BassService.Helpers
+namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
 {
     public class TagReader : ITagReader
     {

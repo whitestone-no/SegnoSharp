@@ -1,6 +1,6 @@
 ﻿using Whitestone.SegnoSharp.Common.Models;
 
-namespace Whitestone.SegnoSharp.BassService.Models
+namespace Whitestone.SegnoSharp.Modules.BassService.Models
 {
     internal class TrackExt : Track
     {

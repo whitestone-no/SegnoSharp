@@ -15,7 +15,6 @@ using Serilog;
 using Serilog.Events;
 using Whitestone.Cambion.Extensions;
 using Whitestone.Cambion.Serializer.MessagePack;
-using Whitestone.SegnoSharp.BassService.Extensions;
 using Whitestone.SegnoSharp.Common.Extensions;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
@@ -136,7 +135,6 @@ namespace Whitestone.SegnoSharp
             builder.Services.AddCambion()
                 .UseMessagePackSerializer();
             builder.Services.AddCommon();
-            builder.Services.AddBassService(builder.Configuration);
 
             builder.Services.AddScoped<ImportState>();
         }

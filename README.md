@@ -15,9 +15,9 @@ In order to use this project you manually have to download the BASS libraries, a
 - BASSenc_MP3
 - Bass.Net
 
-Put the .dll and .so files in the corresponding "windows" and "linux" folders inside the "lib/BASS" folder. Each folder also includes a list of files it should contain.
+Put the .dll and .so files in the corresponding "windows" and "linux" folders inside the "modules/BassService/lib/BASS" folder. Each folder also includes a list of files it should contain.
 
-Put your registration email and key in the User Secrets file, and/or create an `.env` file if you intend to use Docker Compose. The `.env` file is ignored by Git so it is same to put sensitive data in it (unless the `.gitignore` file is edited to include it).
+Put your registration email and key in the User Secrets file for BassService, and/or create an `.env` file if you intend to use Docker Compose. The `.env` file is ignored by Git so it is same to put sensitive data in it (unless the `.gitignore` file is edited to include it).
 
 ### Example User Secrets
 

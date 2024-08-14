@@ -2,7 +2,7 @@
 using Un4seen.Bass;
 using Whitestone.SegnoSharp.Common.Models;
 
-namespace Whitestone.SegnoSharp.BassService.Interfaces
+namespace Whitestone.SegnoSharp.Modules.BassService.Interfaces
 {
     public interface IBassWrapper
     {

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using StreamingServer = Whitestone.SegnoSharp.Common.Models.Configuration.StreamingServer;
 
-namespace Whitestone.SegnoSharp.BassService.HealthChecks
+namespace Whitestone.SegnoSharp.Modules.BassService.HealthChecks
 {
     public class StreamingServerHealthCheck : IHealthCheck
     {
