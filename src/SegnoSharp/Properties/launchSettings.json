@@ -22,7 +22,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SegnoSharp_CommonConfig__DataPath": "/var/segnosharp",
         "SegnoSharp_CommonConfig__MusicPath": "/var/music",
-        "SegnoSharp_StreamingServer__Address": "host.docker.internal" 
+        "SegnoSharp_StreamingServer__Address": "host.docker.internal",
+        "SegnoSharp_ConnectionStrings__SegnoSharpDatabaseSqlite": "Data Source=SegnoSharpDocker.db"
       }
     },
     "WSL": {
@@ -33,7 +34,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000",
         "SegnoSharp_CommonConfig__DataPath": "../../data",
-        "SegnoSharp_CommonConfig__MusicPath": "../../music"
+        "SegnoSharp_CommonConfig__MusicPath": "../../music",
+        "SegnoSharp_ConnectionStrings__SegnoSharpDatabaseSqlite": "Data Source=SegnoSharpWsl.db"
       },
       "distributionName": ""
     }
