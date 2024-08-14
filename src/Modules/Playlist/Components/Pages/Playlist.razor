@@ -1,7 +1,28 @@
 ﻿@page "/playlist"
 @using Whitestone.SegnoSharp.Common.Attributes
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
+@using Whitestone.SegnoSharp.Modules.Playlist.Models
 @attribute [ModuleMenu("Playlist", 10, "fa-list")]
 
 <h1>Playlist</h1>
+
+<table class="Standard">
+    <thead>
+        <tr>
+            <th>Album</th>
+            <th>Track</th>
+            <th>Artist(s)</th>
+            <th>Duration</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (PlaylistViewModel playlistItem in PlaylistItems)
+        {
+            <tr>
+                <td>@playlistItem.Album</td>
+                <td>@playlistItem.Track</td>
+                <td>@playlistItem.Artist</td>
+                <td>@playlistItem.Duration</td>
+            </tr>
+        }
+    </tbody>
+</table>
