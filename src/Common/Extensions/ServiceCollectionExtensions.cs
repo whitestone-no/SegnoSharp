@@ -9,6 +9,7 @@ namespace Whitestone.SegnoSharp.Common.Extensions
         public static IServiceCollection AddCommon(this IServiceCollection services)
         {
             services.AddTransient<ISystemClock, SystemClock>();
+            services.AddTransient<IRandomGenerator, RandomGenerator>();
 
             services.AddSingleton<IPersistenceManager, PersistenceHandler>();
             services.AddHostedService(p => p.GetRequiredService<IPersistenceManager>());
