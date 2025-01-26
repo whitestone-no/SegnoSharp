@@ -8,6 +8,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Processors
 {
     public class OtherProcessor : IPlaylistProcessor
     {
+        public string Name => "Some other processor";
         public PlaylistProcessorSettings Settings { get; set; } = new OtherProcessorSettings();
 
         public Task<TrackStreamInfo> GetNextTrackAsync(CancellationToken cancellationToken)

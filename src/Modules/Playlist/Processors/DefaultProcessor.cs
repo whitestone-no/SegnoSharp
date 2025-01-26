@@ -15,6 +15,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Processors
         IRandomGenerator randomGenerator,
         IDbContextFactory<SegnoSharpDbContext> dbContextFactory) : IPlaylistProcessor
     {
+        public string Name => "Default";
         public PlaylistProcessorSettings Settings { get; set; } = new DefaultProcessorSettings();
 
         public async Task<TrackStreamInfo> GetNextTrackAsync(CancellationToken cancellationToken)
