@@ -1,0 +1,28 @@
+﻿@page "/admin/playlist/processors"
+@rendermode InteractiveServer
+@using Whitestone.SegnoSharp.Common.Attributes
+@using Whitestone.SegnoSharp.Common.Interfaces
+@attribute [Authorize]
+@attribute [ModuleMenu("Processors", typeof(Playlist), true)]
+
+<h1>Playlist processors</h1>
+
+<div>Warning: Changes are saved immediately</div>
+
+<div>
+    @foreach (IPlaylistProcessor processor in PlaylistProcessors.OrderByDescending(p => p.Settings.SortOrder))
+    {
+        <h2>@processor.Name</h2>
+        <label for="@(processor.Name.ToLower().Replace(" ", "_"))-enabled">Enabled:</label>
+        <input id="@(processor.Name.ToLower().Replace(" ", "_"))-enabled" type="checkbox" @bind="processor.Settings.Enabled" />
+
+        @if (processor.Settings.SortOrder > 0 && processor.Settings.SortOrder < PlaylistProcessors.Count() - 1)
+        {
+            <button @onclick="() => MoveProcessorUp(processor)">Move up</button>
+        }
+        @if (processor.Settings.SortOrder > 1)
+        {
+            <button @onclick="() => MoveProcessorDown(processor)">Move down</button>
+        }
+    }
+</div>
