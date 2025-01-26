@@ -187,6 +187,11 @@ namespace Whitestone.SegnoSharp.Common.Helpers
                 persistenceEntries = _entries
                     .Where(e =>
                     {
+                        if (e.Owner != persistence)
+                        {
+                            return false;
+                        }
+
                         object objValue = e.PropertyInfo.GetValue(persistence);
                         return e.Owner == persistence &&
                                (((objValue != null && objValue.ToString()?.Replace(',', '.') != e.Value?.Replace(',', '.')) &&
@@ -266,6 +271,10 @@ namespace Whitestone.SegnoSharp.Common.Helpers
             else if (key.PropertyInfo.PropertyType == typeof(decimal))
             {
                 key.PropertyInfo.SetValue(configuration, decimal.Parse(value, CultureInfo.InvariantCulture));
+            }
+            else if (key.PropertyInfo.PropertyType == typeof(ushort))
+            {
+                key.PropertyInfo.SetValue(configuration, ushort.Parse(value, CultureInfo.InvariantCulture));
             }
             else if (key.PropertyInfo.PropertyType == typeof(DateTime))
             {
