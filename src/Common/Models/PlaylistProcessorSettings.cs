@@ -6,7 +6,7 @@ namespace Whitestone.SegnoSharp.Common.Models
     {
         [Persist]
         [DefaultValue(false)]
-        public bool Enabled { get; set; }
+        public virtual bool Enabled { get; set; }
 
         [Persist]
         public ushort SortOrder { get; set; }

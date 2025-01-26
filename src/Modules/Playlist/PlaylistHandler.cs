@@ -56,22 +56,21 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
         {
             await _persistenceManager.RegisterAsync(_settings);
 
-            IEnumerable<IPlaylistProcessor> playlistProcessors = _playlistProcessors
-                .Where(playlistProcessor => playlistProcessor.Settings != null);
-
-            foreach (IPlaylistProcessor playlistProcessor in playlistProcessors)
+            foreach (IPlaylistProcessor playlistProcessor in _playlistProcessors)
             {
+                if (playlistProcessor.Settings == null)
+                {
+                    throw new Exception($"Invalid playlist processor. Processor {playlistProcessor.GetType().FullName} is missing a Settings object");
+                }
+
                 await _persistenceManager.RegisterAsync(playlistProcessor.Settings);
             }
 
             // All playlist processors should now have values from database injected into the settings objects
             // Normalize the sort orders, and make sure that the `DefaultProcessor` always has the lowest sort order
             ushort counter = 1;
-            playlistProcessors = _playlistProcessors
-                .Where(p => p.Settings != null)
-                .OrderBy(p => p.Settings.SortOrder);
 
-            foreach (IPlaylistProcessor playlistProcessor in playlistProcessors)
+            foreach (IPlaylistProcessor playlistProcessor in _playlistProcessors.OrderBy(p => p.Settings.SortOrder))
             {
                 if (playlistProcessor is DefaultProcessor)
                 {

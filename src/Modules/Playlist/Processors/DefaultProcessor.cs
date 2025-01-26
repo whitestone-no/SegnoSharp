@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
-using Whitestone.SegnoSharp.Common.Helpers;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Database;
@@ -53,6 +51,10 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Processors
 
     public class DefaultProcessorSettings : PlaylistProcessorSettings
     {
+        [Persist]
+        [DefaultValue(true)]
+        public override bool Enabled { get; set; }
+
         [Persist]
         [DefaultValue(false)]
         public bool UseWeightedRandom { get; set; }
