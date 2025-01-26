@@ -75,8 +75,8 @@
                             {
                                 <li class="Submenu">
                                     <NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink>
-                                    <input id="submenu-@(nav.Id)-button" type="checkbox" role="button" /> <!-- checked="checked" -->
-                                    <label id="submenu-@(nav.Id)-icon" for="submenu-@(nav.Id)-button"><span class="fa-solid fa-caret-right"></span></label>
+                                    <input id="submenu-@(nav.Id)-admin-button" type="checkbox" role="button" /> <!-- checked="checked" -->
+                                    <label id="submenu-@(nav.Id)-admin-icon" for="submenu-@(nav.Id)-admin-button"><span class="fa-solid fa-caret-right"></span></label>
                                     <ul>
                                         @foreach (var navChild in nav.Children.OrderBy(c => c.SortOrder))
                                         {
