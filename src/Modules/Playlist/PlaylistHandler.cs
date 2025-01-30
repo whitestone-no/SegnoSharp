@@ -19,14 +19,13 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
 {
     public class PlaylistHandler : IHostedService, IEventHandler<PlayerReady>, IEventHandler<PlayNextTrack>
     {
-        private readonly ITagReader _tagReader;
         private readonly IDbContextFactory<SegnoSharpDbContext> _dbContextFactory;
         private readonly IPersistenceManager _persistenceManager;
         private readonly ISystemClock _systemClock;
         private readonly ICambion _cambion;
         private readonly ILogger<PlaylistHandler> _log;
         private readonly List<IPlaylistProcessor> _playlistProcessors;
-        private readonly PlaylistSettings _settings = new();
+        private readonly PlaylistSettings _settings;
         // Ensure that the tasks for reading the playlist and updating the playlist don't step on each other's toes
         private readonly SemaphoreSlim _queueMutex = new(1);
         private readonly CancellationTokenSource _autoplaylistTaskCancellationTokenSource = new();
@@ -39,15 +38,16 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
             ISystemClock systemClock,
             ICambion cambion,
             ILogger<PlaylistHandler> log,
-            IEnumerable<IPlaylistProcessor> playlistProcessors)
+            IEnumerable<IPlaylistProcessor> playlistProcessors,
+            PlaylistSettings playlistSettings)
         {
-            _tagReader = tagReader;
             _dbContextFactory = dbContextFactory;
             _persistenceManager = persistenceManager;
             _systemClock = systemClock;
             _cambion = cambion;
             _log = log;
             _playlistProcessors = playlistProcessors.ToList();
+            _settings = playlistSettings;
 
             cambion.Register(this);
         }

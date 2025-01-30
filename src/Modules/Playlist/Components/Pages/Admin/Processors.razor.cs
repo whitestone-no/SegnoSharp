@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Modules.Playlist.Models;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
 {
     public partial class Processors
     {
         [Inject] private IEnumerable<IPlaylistProcessor> PlaylistProcessors { get; set; }
+        [Inject] private PlaylistSettings PlaylistSettings { get; set; }
 
         protected override void OnInitialized()
         {

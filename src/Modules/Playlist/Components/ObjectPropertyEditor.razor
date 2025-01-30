@@ -1,0 +1,19 @@
+﻿<label>@Description</label>
+@{
+    if (ObjectProperty.PropertyType == typeof(string))
+    {
+        <input type="text" @bind="Value" />
+    }
+    else if (ObjectProperty.PropertyType == typeof(int))
+    {
+        <input type="number" min="@int.MinValue" max="@int.MaxValue" @bind="Value" />
+    }
+    else if (ObjectProperty.PropertyType == typeof(ushort))
+    {
+        <input type="number" min="@ushort.MinValue" max="@ushort.MaxValue" @bind="Value" />
+    }
+    else if (ObjectProperty.PropertyType == typeof(bool))
+    {
+        <input type="checkbox" @bind="ValueBool"/>
+    }
+}

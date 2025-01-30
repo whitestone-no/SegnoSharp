@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
+using Whitestone.SegnoSharp.Modules.Playlist.Models;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist.Processors
 {
@@ -48,16 +48,5 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Processors
 
             return track?.TrackStreamInfo;
         }
-    }
-
-    public class DefaultProcessorSettings : PlaylistProcessorSettings
-    {
-        [Persist]
-        [DefaultValue(true)]
-        public override bool Enabled { get; set; }
-
-        [Persist]
-        [DefaultValue(false)]
-        public bool UseWeightedRandom { get; set; }
     }
 }
