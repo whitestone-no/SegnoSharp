@@ -1,4 +1,13 @@
 ﻿:root {
+    --primary-color: #ffd700;
+    --secondary-color: #1a1a1a;
+    --hover-color: #ffed4a;
+    --text-color: #333;
+    --light-text: #fff;
+    --hover-bg: rgba(255, 215, 0, 0.1);
+    --active-bg: rgba(255, 215, 0, 0.25); /* Darker than hover */
+    --submenu-bg: #000; /* More distinct submenu background */
+    --submenu-lighter: rgba(255, 255, 255, 0.1); /* More distinct submenu background */
     --text-white: #f8f8f8;
     --text-black: #222222;
     --bg-yellow: #ffce10;
@@ -11,178 +20,206 @@
     --bg-lightyellow: #f8e496;
 }
 
-*,
-*:before,
-*:after {
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
-input {
-    font-size: 15px;
-}
-
-th {
-    text-align: right;
-}
-
 body {
-    margin: 0;
-    padding: 0;
-    font-family: Tahoma, Arial, Sans-serif;
-    background-color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
 }
 
-    body > input[type=checkbox] {
-        display: none;
+/* Header Styles */
+header {
+    background-color: var(--secondary-color);
+    color: var(--light-text);
+    padding: 0.5rem 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Identity Section */
+.identity a {
+    color: var(--primary-color);
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+    .identity a:hover {
+        color: var(--hover-color);
+        text-decoration: underline;
     }
 
-    body > header {
-        position: fixed;
-        width: 100%;
-        height: 40px;
-        top: 0;
-        left: 0;
-        background-color: var(--bg-black);
-        color: var(--text-white);
+.identity .user .username {
+    font-style: italic;
+}
+
+/* Navigation Styles */
+.admin-nav {
+    background-color: var(--secondary-color);
+    width: 250px;
+    position: fixed;
+    height: calc(100vh - 40px);
+    top: 40px;
+}
+
+.menu {
+    list-style: none;
+}
+
+    .menu a,
+    .menu li > span {
+        color: var(--light-text);
+        text-decoration: none;
+        padding: 10px 20px;
+        display: block;
+        border-left: 4px solid transparent;
+    }
+
+        .menu a:hover,
+        .menu a.active,
+        .submenu-label:hover a {
+            background-color: var(--hover-bg);
+            border-left-color: var(--primary-color);
+        }
+
+        .menu a.active {
+            background-color: var(--active-bg);
+            border-left-color: var(--primary-color);
+        }
+
+        .menu a span,
+        .menu li > span > span {
+            width: 27px; /* As wide as the mini logo so that everything is centered */
+        }
+
+    .menu li > span {
+        margin-top: 40px;
+        text-transform: uppercase;
+        background-color: var(--submenu-lighter);
+    }
+
+/* Checkbox Hack Styles */
+.submenu-toggle {
+    display: none;
+}
+
+.submenu-label {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+    /* Make the link fill the label space */
+    .submenu-label a {
+        flex: 1;
+    }
+
+    /* Create a clickable area for the arrow */
+    .submenu-label::before {
+        content: "";
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+
+    .submenu-label:hover::before {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .submenu-label::after {
+        content: "►";
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: transform 0.2s ease;
+        color: var(--light-text);
+        font-size: 0.8rem;
+        pointer-events: none;
         z-index: 1;
     }
 
-        body > header > div.auth {
-            text-align: right;
-            line-height: 40px;
-            margin-right: 50px;
-        }
+.submenu-toggle:checked + .submenu-label::before {
+    background-color: rgba(255, 255, 255, 0.15);
+}
 
-            body > header > div.auth > a,
-            body > header > div.auth > a:visited,
-            body > header > div.auth > a:active,
-            body > header > div.auth > a:focus {
-                margin-left: 10px;
-            }
+/* Rotate arrow when expanded */
+.submenu-toggle:checked + .submenu-label::after {
+    transform: translateY(-50%) rotate(90deg);
+}
 
-                body > header > div.auth > a:hover {
-                    text-decoration: none;
-                }
-
-        body > header > div.headerLogo {
-            position: fixed;
-            top: 5px;
-            right: 5px;
-        }
-
-    body > nav {
-        position: fixed;
-        background-color: var(--bg-darkgray);
-        color: var(--text-white);
-        width: 250px;
-        height: calc(100vh - 40px);
-        top: 40px;
-        left: -250px;
-        transition: left 0.5s ease;
-        box-sizing: border-box;
-    }
-
-    body > main {
-        position: absolute;
-        left: 0;
-        top: 40px;
-        box-sizing: border-box;
-        transition: margin-left 0.5s ease;
-        width: calc(100vw - 250px);
-        max-width: 100vw;
-        height: calc(100vh - 40px);
-        overflow-y: auto;
-        padding: 10px;
-        z-index: 5;
-    }
-
-        body > main > div.welcome {
-            text-align: center;
-        }
-
-#menu-toggle-icon {
-    position: fixed;
-    top: 2.5px;
-    left: 2.5px;
-    z-index: 2;
-    width: 30px;
-    height: 30px;
-    border: solid 2px #000000;
-    border-radius: 15px;
-    text-align: center;
-    line-height: 30px;
+.submenu {
+    list-style: none;
+    background-color: var(--submenu-bg);
+    display: none;
     overflow: hidden;
-    background-color: #ffffff;
-    font-size: 20px;
-    cursor: pointer;
-    transition: transform 0.5s ease;
+    max-height: 0;
+    transition: max-height 0.3s ease-out;
 }
 
-#menu-toggle-button:checked ~ #menu-toggle-icon {
-    transform: rotateY(180deg);
-}
-
-#menu-toggle-button:checked ~ nav {
-    left: 0;
-}
-
-#menu-toggle-button:checked ~ main {
-    margin-left: 250px;
-}
-
-nav ul {
-    margin: 0;
-    padding: 0;
-}
-
-    nav ul li {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
+    .submenu a {
+        padding-left: 47px;
     }
 
-        nav ul li > span,
-        nav ul li a {
-            display: inline-block;
-            box-sizing: border-box;
-            width: 100%;
-            height: 40px;
-            line-height: 40px;
-            text-transform: uppercase;
-            font-weight: bold;
-            padding-left: 10px;
-        }
-
-        nav ul li > a.active {
-            background-color: #555555;
-        }
-
-        nav ul li > span {
-            margin-top: 20px;
-            background-color: #333333;
-            font-weight: bold;
-        }
-
-            nav ul li > span > span[class~=fa-solid] {
-                margin-right: 10px;
-            }
-
-        nav ul li a:hover {
-            background-color: #666666;
-        }
-
-        nav ul li a > span {
-            margin-right: 10px;
-        }
-
-
-nav a {
-    text-decoration: none;
+/* Show submenu when checkbox is checked */
+.submenu-toggle:checked ~ .submenu {
+    display: block;
+    max-height: 500px;
+    transition: max-height 0.3s ease-in;
 }
 
-a, a:visited, a:active, a:focus {
-    color: inherit;
+/* Main Content */
+.content {
+    margin-left: 250px;
+    padding: 2rem;
+    margin-top: 40px;
 }
+
+/* Add new styles for the hamburger menu */
+.nav-toggle {
+    display: none;
+}
+
+.nav-toggle-label {
+    display: none;
+    cursor: pointer;
+    height: 24px;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-right: 1rem;
+}
+
+
+
 
 
 
@@ -589,77 +626,25 @@ table.DraggableTable {
         display: none;
     }
 
-nav li.Submenu ul a {
-    font-size: 0.8em;
-    margin-left: 30px;
-    width: calc(100% - 30px);
-}
 
-.Submenu a div {
-    display: inline-block;
-}
-
-.Submenu input[type=checkbox] {
-    display: none;
-}
-
-.Submenu label {
-    display: block;
-    float: right;
-}
-
-.Submenu label {
-    display: flex;
-    width: 20px;
-    height: 40px;
-    background-color: var(--bg-darkgray);
-    cursor: pointer;
-    z-index: 20;
-}
-
-    .Submenu label span {
-        display: inline-block;
-        margin: auto;
-        transform: rotateZ(-90deg);
-    }
-
-.Submenu input[type=checkbox]:checked ~ label span {
-    transform: rotateZ(90deg);
-}
-
-.Submenu > a {
-    width: calc(100% - 20px);
-}
-
-
-    .Submenu > a:hover ~ label,
-    .Submenu label:hover {
-        background-color: var(--bg-gray);
-    }
-
-
-.Submenu input[type=checkbox] ~ ul {
-    display: none
-}
-
-.Submenu input[type=checkbox]:checked ~ ul {
-    display: block;
-}
 
 
 table.Standard {
     border-collapse: collapse;
 }
+
     table.Standard th {
         text-align: left;
         background-color: var(--bg-lightgray);
         padding: 5px;
     }
+
     table.Standard td {
         border: solid 1px var(--bg-lightergray);
         padding: 1px 5px;
         vertical-align: top;
     }
+
     table.Standard tr:hover td {
         background-color: var(--bg-lightergray);
     }

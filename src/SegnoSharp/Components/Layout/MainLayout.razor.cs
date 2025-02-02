@@ -18,6 +18,7 @@ namespace Whitestone.SegnoSharp.Components.Layout
         [Inject] private AuthenticationStateProvider AuthState { get; set; } = null!;
         [Inject] private IOptions<CommonConfig> CommonConfig { get; set; }
         [Inject] private IEnumerable<IModule> Modules { get; set; }
+        [Inject] private NavigationManager NavigationManager { get; set; }
 
         private string _loggedInAs = null!;
         private List<MenuNavigationModel> ModuleNavItems { get; set; } = [];
@@ -52,7 +53,7 @@ namespace Whitestone.SegnoSharp.Components.Layout
                     {
                         Id = module.Id,
                         MenuTitle = moduleMenu.MenuTitle,
-                        Path = route.Template,
+                        Path = route.Template.TrimStart('/'),
                         Icon = moduleMenu.Icon ?? "fa-file",
                         IsAdmin = moduleMenu.IsAdmin,
                         SortOrder = moduleMenu.SortOrder
@@ -77,7 +78,7 @@ namespace Whitestone.SegnoSharp.Components.Layout
                         BaseMenuNavigation childNav = new()
                         {
                             MenuTitle = childModuleMenu.MenuTitle,
-                            Path = childRoute.Template,
+                            Path = childRoute.Template.TrimStart('/'),
                             SortOrder = childModuleMenu.SortOrder
                         };
 
@@ -90,5 +91,12 @@ namespace Whitestone.SegnoSharp.Components.Layout
 
             await base.OnInitializedAsync();
         }
+
+        private bool IsExpanded(string path)
+        {
+            return NavigationManager.ToBaseRelativePath(NavigationManager.Uri).StartsWith(path) &&
+                   !NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Equals(path);
+        }
+
     }
 }

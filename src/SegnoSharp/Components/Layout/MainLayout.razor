@@ -1,17 +1,17 @@
 ﻿@using Whitestone.SegnoSharp.Models.ViewModels
 @inherits LayoutComponentBase
-@inject NavigationManager NavigationManager
 
-<PageTitle>BlazorApp1</PageTitle>
+<PageTitle>SegnoSharp</PageTitle>
 
-<input id="menu-toggle-button" type="checkbox" role="button" checked="checked" /> <!-- checked="checked" -->
-<label id="menu-toggle-icon" for="menu-toggle-button"><span class="fa-solid fa-angles-right"></span></label>
 <header>
-    <div class="auth">
+    <div class="logo"><img src="/img/logoHeader.png" alt="SegnoSharp Logo" /><span>SegnoSharp</span></div>
+    <div class="identity">
         <AuthorizeView Policy="IgnoreRole">
             <Authorized>
-                Logged in as <em>@_loggedInAs</em>
-                <NavLink href="/auth/logout">Logout</NavLink>
+                <div class="user">
+                    Logged in as <span class="username">@_loggedInAs</span>
+                    <NavLink href="/auth/logout">Logout</NavLink>
+                </div>
             </Authorized>
             <Authorizing>
                 Please wait while logging in
@@ -21,25 +21,22 @@
             </NotAuthorized>
         </AuthorizeView>
     </div>
-    <div class="headerLogo">
-        <img src="/img/logoHeader.png" alt="SegnoSharp Logo" />
-    </div>
 </header>
-<nav>
-    <ul>
-        <li>
-            <NavLink href="/" Match="NavLinkMatch.All"><span class="fa-solid fa-house"></span>Home</NavLink>
-        </li>
+
+<nav class="admin-nav">
+    <ul class="menu">
+        <li><NavLink href="/" Match="NavLinkMatch.All"><span class="fa-solid fa-house"></span>Home</NavLink></li>
         @foreach (MenuNavigationModel nav in ModuleNavItems.Where(n => !n.IsAdmin).OrderBy(n => n.SortOrder))
         {
             if (nav.Children.Any())
             {
-                <li class="Submenu">
-                    <NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink>
-                    <input id="submenu-@(nav.Id)-button" type="checkbox" role="button" /> <!-- checked="checked" -->
-                    <label id="submenu-@(nav.Id)-icon" for="submenu-@(nav.Id)-button"><span class="fa-solid fa-caret-right"></span></label>
-                    <ul>
-                        @foreach (var navChild in nav.Children.OrderBy(c => c.SortOrder))
+                <li class="has-submenu">
+                    <input id="submenu-@(nav.Id)" type="checkbox" role="button" class="submenu-toggle" checked="@(IsExpanded(nav.Path))" />
+                    <label for="submenu-@(nav.Id)" class="submenu-label">
+                        <NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink>
+                    </label>
+                    <ul class="submenu">
+                        @foreach (BaseMenuNavigation navChild in nav.Children.OrderBy(c => c.SortOrder))
                         {
                             <li><NavLink href="@navChild.Path">@navChild.MenuTitle</NavLink></li>
                         }
@@ -53,50 +50,48 @@
         }
         <AuthorizeView>
             <Authorized>
-                <li>
-                    <span class="@(NavigationManager.ToBaseRelativePath(NavigationManager.Uri).StartsWith("admin/") ? "active" : "")"><span class="fa-solid fa-screwdriver-wrench"></span>Admin</span>
-                    <ul>
-                        <li class="Submenu">
-                            <NavLink href="/admin/albums"><span class="fa-solid fa-compact-disc"></span>Albums</NavLink>
-                            <input id="submenu-albums-button" type="checkbox" role="button" checked="checked" /> <!-- checked="checked" -->
-                            <label id="submenu-albums-icon" for="submenu-albums-button"><span class="fa-solid fa-caret-right"></span></label>
-                            <ul>
-                                <li><NavLink href="/admin/albums/people">Persons</NavLink></li>
-                                <li><NavLink href="/admin/albums/persongroups">Person groups</NavLink></li>
-                                <li><NavLink href="/admin/albums/mediatypes">Media types</NavLink></li>
-                                <li><NavLink href="/admin/albums/genres">Genres</NavLink></li>
-                                <li><NavLink href="/admin/albums/recordlabels">Record labels</NavLink></li>
-                            </ul>
-                        </li>
-                        <li><NavLink href="/admin/import"><span class="fa-solid fa-file-import"></span>Import</NavLink></li>
-                        @foreach (MenuNavigationModel nav in ModuleNavItems.Where(n => n.IsAdmin).OrderBy(n => n.SortOrder))
-                        {
-                            if (nav.Children.Any())
-                            {
-                                <li class="Submenu">
-                                    <NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink>
-                                    <input id="submenu-@(nav.Id)-admin-button" type="checkbox" role="button" /> <!-- checked="checked" -->
-                                    <label id="submenu-@(nav.Id)-admin-icon" for="submenu-@(nav.Id)-admin-button"><span class="fa-solid fa-caret-right"></span></label>
-                                    <ul>
-                                        @foreach (var navChild in nav.Children.OrderBy(c => c.SortOrder))
-                                        {
-                                            <li><NavLink href="@navChild.Path">@navChild.MenuTitle</NavLink></li>
-                                        }
-                                    </ul>
-                                </li>
-                            }
-                            else
-                            {
-                                <li><NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink></li>
-                            }
-                        }
+                <li><span><span class="fa-solid fa-screwdriver-wrench"></span>Admin</span></li>
+                <li class="has-submenu">
+                    <input id="submenu-albums-admin" type="checkbox" role="button" class="submenu-toggle" checked="@(IsExpanded("admin/albums"))" /> <!-- checked="checked" -->
+                    <label for="submenu-albums-admin" class="submenu-label">
+                        <NavLink href="/admin/albums"><span class="fa-solid fa-compact-disc"></span>Albums</NavLink>
+                    </label>
+                    <ul class="submenu">
+                        <li><NavLink href="/admin/albums/people">Persons</NavLink></li>
+                        <li><NavLink href="/admin/albums/persongroups">Person groups</NavLink></li>
+                        <li><NavLink href="/admin/albums/mediatypes">Media types</NavLink></li>
+                        <li><NavLink href="/admin/albums/genres">Genres</NavLink></li>
+                        <li><NavLink href="/admin/albums/recordlabels">Record labels</NavLink></li>
                     </ul>
                 </li>
+                <li><NavLink href="/admin/import"><span class="fa-solid fa-file-import"></span>Import</NavLink></li>
+                @foreach (MenuNavigationModel nav in ModuleNavItems.Where(n => n.IsAdmin).OrderBy(n => n.SortOrder))
+                {
+                    if (nav.Children.Any())
+                    {
+                        <li class="has-submenu">
+                            <input id="submenu-@(nav.Id)-admin" type="checkbox" role="button" class="submenu-toggle" checked="@(IsExpanded(nav.Path))" />
+                            <label for="submenu-@(nav.Id)-admin" class="submenu-label">
+                                <NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink>
+                            </label>
+                            <ul class="submenu">
+                                @foreach (var navChild in nav.Children.OrderBy(c => c.SortOrder))
+                                {
+                                    <li><NavLink href="@navChild.Path">@navChild.MenuTitle</NavLink></li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li><NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink></li>
+                    }
+                }
             </Authorized>
         </AuthorizeView>
     </ul>
 </nav>
 
-<main>
+<main class="content">
     @Body
 </main>
