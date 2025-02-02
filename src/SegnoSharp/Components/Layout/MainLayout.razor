@@ -64,7 +64,6 @@
                         <li><NavLink href="/admin/albums/recordlabels">Record labels</NavLink></li>
                     </ul>
                 </li>
-                <li><NavLink href="/admin/import"><span class="fa-solid fa-file-import"></span>Import</NavLink></li>
                 @foreach (MenuNavigationModel nav in ModuleNavItems.Where(n => n.IsAdmin).OrderBy(n => n.SortOrder))
                 {
                     if (nav.Children.Any())

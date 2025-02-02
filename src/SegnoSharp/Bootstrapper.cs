@@ -22,7 +22,6 @@ using Whitestone.SegnoSharp.Components;
 using Whitestone.SegnoSharp.Configuration.Extensions;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.HealthChecks;
-using Whitestone.SegnoSharp.Models.States;
 using Whitestone.SegnoSharp.Modules;
 
 namespace Whitestone.SegnoSharp
@@ -135,8 +134,6 @@ namespace Whitestone.SegnoSharp
             builder.Services.AddCambion()
                 .UseMessagePackSerializer();
             builder.Services.AddCommon();
-
-            builder.Services.AddScoped<ImportState>();
         }
 
         public static void Configure(this WebApplication app)
