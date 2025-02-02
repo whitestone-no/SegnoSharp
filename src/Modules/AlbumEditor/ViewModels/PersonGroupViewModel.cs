@@ -1,7 +1,7 @@
 ﻿using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 
-namespace Whitestone.SegnoSharp.Models.ViewModels
+namespace Whitestone.SegnoSharp.Modules.AlbumEditor.ViewModels
 {
     public class PersonGroupViewModel : PersonGroup
     {

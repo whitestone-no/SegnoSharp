@@ -1,7 +1,9 @@
 ﻿@page "/admin/albums/mediatypes"
 @rendermode InteractiveServer
+@using Whitestone.SegnoSharp.Common.Attributes
 @using Whitestone.SegnoSharp.Database.Models
 @attribute [Authorize]
+@attribute [ModuleMenu("Media types", typeof(Albums), true)]
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 <h1>Media Types</h1>

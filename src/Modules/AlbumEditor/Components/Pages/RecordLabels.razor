@@ -1,37 +1,33 @@
-﻿@page "/admin/albums/people"
+﻿@page "/admin/albums/recordlabels"
 @rendermode InteractiveServer
+@using Whitestone.SegnoSharp.Common.Attributes
 @using Whitestone.SegnoSharp.Database.Models
 @attribute [Authorize]
+@attribute [ModuleMenu("Record labels", typeof(Albums), true)]
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
-<h1>Persons</h1>
+<h1>Record labels</h1>
 
 <div>
     Search: <input @bind="SearchQuery" @bind:event="oninput" @bind:after="StartSearchTimer" placeholder="Name" disabled="@DbContext.ChangeTracker.HasChanges()" />
 </div>
 
 <div>
-    @if (PersonResults.Any())
+    @if (DbResults.Any())
     {
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Firstname</th>
-                    <th>Lastname</th>
-                    <th>Version</th>
+                    <th>Record label</th>
                     <th>&nbsp;</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (Person person in PersonResults)
+                @foreach (RecordLabel recordLabel in DbResults)
                 {
                     <tr>
-                        <td>@person.Id</td>
-                        <td><input @bind="@person.FirstName" /></td>
-                        <td><input @bind="@person.LastName" /></td>
-                        <td>@person.Version</td>
-                        <td><button @onclick="() => RemovePerson(person)"><span class="fa-regular fa-circle-xmark"></span></button></td>
+                        <td><input @bind="@recordLabel.Name" /></td>
+                        <td><button @onclick="() => Remove(recordLabel)"><span class="fa-regular fa-circle-xmark"></span></button></td>
                     </tr>
                 }
             </tbody>

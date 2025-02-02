@@ -51,19 +51,6 @@
         <AuthorizeView>
             <Authorized>
                 <li><span><span class="fa-solid fa-screwdriver-wrench"></span>Admin</span></li>
-                <li class="has-submenu">
-                    <input id="submenu-albums-admin" type="checkbox" role="button" class="submenu-toggle" checked="@(IsExpanded("admin/albums"))" /> <!-- checked="checked" -->
-                    <label for="submenu-albums-admin" class="submenu-label">
-                        <NavLink href="/admin/albums"><span class="fa-solid fa-compact-disc"></span>Albums</NavLink>
-                    </label>
-                    <ul class="submenu">
-                        <li><NavLink href="/admin/albums/people">Persons</NavLink></li>
-                        <li><NavLink href="/admin/albums/persongroups">Person groups</NavLink></li>
-                        <li><NavLink href="/admin/albums/mediatypes">Media types</NavLink></li>
-                        <li><NavLink href="/admin/albums/genres">Genres</NavLink></li>
-                        <li><NavLink href="/admin/albums/recordlabels">Record labels</NavLink></li>
-                    </ul>
-                </li>
                 @foreach (MenuNavigationModel nav in ModuleNavItems.Where(n => n.IsAdmin).OrderBy(n => n.SortOrder))
                 {
                     if (nav.Children.Any())

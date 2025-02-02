@@ -1,7 +1,9 @@
 ﻿@page "/admin/albums"
 @rendermode InteractiveServer
+@using Whitestone.SegnoSharp.Common.Attributes
 @using Whitestone.SegnoSharp.Database.Models
 @attribute [Authorize]
+@attribute [ModuleMenu("Albums", "fa-compact-disc", true)]
 
 <h1>Album Editor</h1>
 

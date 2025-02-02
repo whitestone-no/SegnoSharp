@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
-using Whitestone.SegnoSharp.Models.ViewModels;
+using Whitestone.SegnoSharp.Modules.AlbumEditor.ViewModels;
 
-namespace Whitestone.SegnoSharp.Components.Pages.Admin.AlbumEditor
+namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
 {
     public partial class PersonGroups : IDisposable
     {

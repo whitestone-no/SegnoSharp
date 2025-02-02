@@ -10,7 +10,7 @@ using Microsoft.JSInterop;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 
-namespace Whitestone.SegnoSharp.Components.Pages.Admin.AlbumEditor
+namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
 {
     public partial class RecordLabels : IDisposable
     {

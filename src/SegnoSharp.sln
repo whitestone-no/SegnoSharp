@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainPlaylistProcessor", "Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaImporter", "Modules\MediaImporter\MediaImporter.csproj", "{4CF3F500-0811-4DC1-9940-3709A7912766}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlbumEditor", "Modules\AlbumEditor\AlbumEditor.csproj", "{B4FCD448-0CDC-456F-BA95-B59E6FEA2E1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{4CF3F500-0811-4DC1-9940-3709A7912766}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CF3F500-0811-4DC1-9940-3709A7912766}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CF3F500-0811-4DC1-9940-3709A7912766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4FCD448-0CDC-456F-BA95-B59E6FEA2E1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4FCD448-0CDC-456F-BA95-B59E6FEA2E1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4FCD448-0CDC-456F-BA95-B59E6FEA2E1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4FCD448-0CDC-456F-BA95-B59E6FEA2E1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +97,7 @@ Global
 		{30191038-130C-4541-8D2E-538C727D1AF0} = {040029A3-F9F5-4412-B884-C15902ACAE69}
 		{E51598A6-78FA-490A-81ED-2738ECD2B6F3} = {040029A3-F9F5-4412-B884-C15902ACAE69}
 		{4CF3F500-0811-4DC1-9940-3709A7912766} = {040029A3-F9F5-4412-B884-C15902ACAE69}
+		{B4FCD448-0CDC-456F-BA95-B59E6FEA2E1C} = {040029A3-F9F5-4412-B884-C15902ACAE69}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A999698-FC6F-44C8-8C54-9343DE0128CD}

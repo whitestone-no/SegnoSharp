@@ -1,7 +1,9 @@
 ﻿@page "/admin/albums/genres"
 @rendermode InteractiveServer
+@using Whitestone.SegnoSharp.Common.Attributes
 @using Whitestone.SegnoSharp.Database.Models
 @attribute [Authorize]
+@attribute [ModuleMenu("Genres", typeof(Albums), true)]
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 <h1>Genres</h1>

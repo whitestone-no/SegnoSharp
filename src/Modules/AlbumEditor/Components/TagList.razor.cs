@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Components;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Microsoft.AspNetCore.Components;
 using Whitestone.SegnoSharp.Database.Interfaces;
 
-namespace Whitestone.SegnoSharp.Components
+namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components
 {
     public partial class TagList<TItem> where TItem : ITag, new()
     {
