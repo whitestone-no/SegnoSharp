@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
-    <ProjectReference Include="..\Components\Components.csproj" />
     <ProjectReference Include="..\Database\Database.csproj" />
     <ProjectReference Include="..\Migrations\MySQL\MySQL.csproj" />
     <ProjectReference Include="..\Migrations\SQLite\SQLite.csproj" />
