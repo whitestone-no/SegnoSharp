@@ -22,6 +22,7 @@ using Whitestone.SegnoSharp.Components;
 using Whitestone.SegnoSharp.Configuration.Extensions;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.HealthChecks;
+using Whitestone.SegnoSharp.Middleware;
 using Whitestone.SegnoSharp.Modules;
 
 namespace Whitestone.SegnoSharp
@@ -146,6 +147,8 @@ namespace Whitestone.SegnoSharp
             app.UseSerilogRequestLogging();
 
             app.UseStaticFiles();
+
+            app.UseModuleEmbeddedResource();
 
             app.UseRouting();
 
