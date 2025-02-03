@@ -19,6 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\styles.css" />
+    <EmbeddedResource Include="wwwroot\styles.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Common\Common.csproj">
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>

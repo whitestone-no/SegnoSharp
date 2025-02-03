@@ -5,14 +5,9 @@
 @attribute [Authorize]
 @attribute [ModuleMenu("Media importer", "fa-file-import", true)]
 <HeadContent>
-
-    @{
-        string assyName = GetType().Assembly.GetName().Name;
-    }
-    <link rel="stylesheet" type="text/css" href="_content/@(assyName)/@(assyName).bundle.scp.css" />
-    <link rel="stylesheet" type="text/css" href="_content/@(assyName)/styles2.css" />
+    <link rel="stylesheet" type="text/css" href="_moduleresource/@(GetType().Assembly.GetName().Name)/styles.css" />
 </HeadContent>
-<h1 class="someelement">Media Importer</h1>
+<h1>Media Importer</h1>
 
 <div class="Import">
     <ul class="Steps">
