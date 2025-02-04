@@ -1,0 +1,55 @@
+﻿
+
+.FileList th {
+    text-align: right;
+    border-right: solid 1px #ccc;
+    padding: 10px;
+    background-color: #eee;
+}
+
+    .FileList th:first-child {
+        text-align: left;
+    }
+
+.FileList tbody tr:hover {
+    background-color: #fff;
+}
+
+.FileList tbody td {
+    padding: 5px;
+    cursor: default;
+}
+
+    .FileList tbody td:not(:first-child) {
+        text-align: right;
+        padding-right: 10px;
+    }
+
+.TinyDelete {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin-right: 3px;
+    cursor: pointer;
+}
+
+table.Editor th {
+    text-align: left;
+    padding-right: 5px;
+}
+
+table.DraggableTable {
+    border-spacing: 0;
+}
+
+    table.DraggableTable tr td {
+        padding: 2px 5px;
+    }
+
+    table.DraggableTable tr.drag-on td {
+        border-top: solid 25px var(--bg-lightyellow);
+    }
+
+    table.DraggableTable tr.drag-current {
+        display: none;
+    }

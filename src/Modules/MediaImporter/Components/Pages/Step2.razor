@@ -1,6 +1,9 @@
 ﻿@page "/admin/mediaimporter/step2"
 @rendermode InteractiveServer
 @attribute [Authorize]
+<HeadContent>
+    <link rel="stylesheet" type="text/css" href="_moduleresource/@(GetType().Assembly.GetName().Name)/styles.css" />
+</HeadContent>
 
 <div class="Import">
     <ul class="Steps">

@@ -2,6 +2,9 @@
 @rendermode InteractiveServer
 @using Whitestone.SegnoSharp.Database.Models
 @attribute [Authorize]
+<HeadContent>
+    <link rel="stylesheet" type="text/css" href="_moduleresource/@(GetType().Assembly.GetName().Name)/styles.css" />
+</HeadContent>
 
 @if (Track == null)
 {
