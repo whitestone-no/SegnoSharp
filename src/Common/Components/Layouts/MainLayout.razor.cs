@@ -9,9 +9,9 @@ using Microsoft.Extensions.Options;
 using Whitestone.SegnoSharp.Common.Attributes;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
-using Whitestone.SegnoSharp.Models.ViewModels;
+using Whitestone.SegnoSharp.Common.ViewModels;
 
-namespace Whitestone.SegnoSharp.Components.Layout
+namespace Whitestone.SegnoSharp.Common.Components.Layouts
 {
     public partial class MainLayout
     {

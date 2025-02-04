@@ -1,12 +1,11 @@
 ﻿@page "/admin/mediaimporter/step1"
+@layout InnerLayout
 @rendermode InteractiveServer
 @using System.IO
 @using Whitestone.SegnoSharp.Common.Attributes
+@using Whitestone.SegnoSharp.Modules.MediaImporter.Components.Layouts
 @attribute [Authorize]
 @attribute [ModuleMenu("Media importer", "fa-file-import", true)]
-<HeadContent>
-    <link rel="stylesheet" type="text/css" href="_moduleresource/@(GetType().Assembly.GetName().Name)/styles.css" />
-</HeadContent>
 <h1>Media Importer</h1>
 
 <div class="Import">

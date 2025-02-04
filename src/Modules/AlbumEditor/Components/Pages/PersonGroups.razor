@@ -1,13 +1,12 @@
 ﻿@page "/admin/albums/persongroups"
 @rendermode InteractiveServer
+@layout InnerLayout
+@using Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Layouts
 @using Whitestone.SegnoSharp.Common.Attributes
 @using Whitestone.SegnoSharp.Database.Models
 @using Whitestone.SegnoSharp.Modules.AlbumEditor.ViewModels
 @attribute [Authorize]
 @attribute [ModuleMenu("Person groups", typeof(Albums), true)]
-<HeadContent>
-    <link rel="stylesheet" type="text/css" href="_moduleresource/@(GetType().Assembly.GetName().Name)/styles.css" />
-</HeadContent>
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 <h1>Person Groups</h1>

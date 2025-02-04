@@ -1,9 +1,7 @@
 ﻿@page "/admin/mediaimporter/step4"
+@layout InnerLayout
 @rendermode InteractiveServer
-<HeadContent>
-    <link rel="stylesheet" type="text/css" href="_moduleresource/@(GetType().Assembly.GetName().Name)/styles.css" />
-</HeadContent>
-
+@using Whitestone.SegnoSharp.Modules.MediaImporter.Components.Layouts
 @attribute [Authorize]
 
 <div class="Import">

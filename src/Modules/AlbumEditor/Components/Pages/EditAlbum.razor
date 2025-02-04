@@ -1,11 +1,10 @@
 ﻿@page "/admin/albums/{Id:int}"
 @rendermode InteractiveServer
+@layout InnerLayout
+@using Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Layouts
 @using Whitestone.SegnoSharp.Database.Models
 @using Whitestone.SegnoSharp.Database.Extensions
 @attribute [Authorize]
-<HeadContent>
-    <link rel="stylesheet" type="text/css" href="_moduleresource/@(GetType().Assembly.GetName().Name)/styles.css" />
-</HeadContent>
 
 @if (Album == null)
 {
