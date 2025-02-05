@@ -6,7 +6,7 @@ using Whitestone.SegnoSharp.Modules.Playlist.Models;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
 {
-    public partial class Processors
+    public partial class Settings
     {
         [Inject] private IEnumerable<IPlaylistProcessor> PlaylistProcessors { get; set; }
         [Inject] private PlaylistSettings PlaylistSettings { get; set; }

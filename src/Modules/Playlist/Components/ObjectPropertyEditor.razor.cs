@@ -26,6 +26,8 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components
             set => SetValue(ObjectProperty, value.ToString(), Object);
         }
 
+        public string Identifier => Object.GetType().Name.Replace('.', '-') + "-" + @ObjectProperty.Name;
+
         public string Description
         {
             get

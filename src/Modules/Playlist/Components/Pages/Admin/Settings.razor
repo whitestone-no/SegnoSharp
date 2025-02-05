@@ -1,0 +1,70 @@
+﻿@page "/admin/playlist/settings"
+@rendermode InteractiveServer
+@layout InnerLayout
+@using Whitestone.SegnoSharp.Modules.Playlist.Components.Layouts
+@using System.Reflection
+@using Whitestone.SegnoSharp.Common.Attributes
+@using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager
+@using Whitestone.SegnoSharp.Common.Interfaces
+@using Whitestone.SegnoSharp.Common.Models
+@attribute [Authorize]
+@attribute [ModuleMenu("Settings", typeof(Playlist), true)]
+
+<h1>Playlist rules</h1>
+
+<div class="alert alert-warning">Warning: Changes are saved immediately</div>
+
+<div class="playlist-settings">
+    <div class="setting-group">
+        <ObjectPropertyEditor Object="PlaylistSettings" ObjectProperty="PlaylistSettings.GetType().GetProperty(nameof(PlaylistSettings.MinimumNumberOfSongs))!" />
+    </div>
+    <div class="setting-group">
+        <ObjectPropertyEditor Object="PlaylistSettings" ObjectProperty="PlaylistSettings.GetType().GetProperty(nameof(PlaylistSettings.MinimumTotalDuration))!" />
+    </div>
+</div>
+
+<h2>Playlist processors</h2>
+
+<div class="processors">
+    @foreach (IPlaylistProcessor processor in PlaylistProcessors.OrderByDescending(p => p.Settings.SortOrder))
+    {
+        <div class="playlist-settings @(processor.Settings.Enabled ? "" : "disabled")">
+            <div class="settings-header">
+                @if (processor.Settings.SortOrder > 0)
+                {
+                    <input type="checkbox" title="@(processor.Settings.Enabled ? "Enabled" : "Disabled")" @bind="processor.Settings.Enabled"/>
+                }
+                <span>@processor.Name</span>
+
+                @if (processor.Settings.SortOrder > 0 && processor.Settings.SortOrder < PlaylistProcessors.Count() - 1)
+                {
+                    <button @onclick="() => MoveProcessorUp(processor)">Move up</button>
+                }
+
+                @if (processor.Settings.SortOrder > 1)
+                {
+                    <button @onclick="() => MoveProcessorDown(processor)">Move down</button>
+                }
+            </div>
+
+            @foreach (PropertyInfo property in processor.Settings.GetType().GetProperties())
+            {
+                if (property.Name is nameof(PlaylistProcessorSettings.Enabled)
+                or nameof(PlaylistProcessorSettings.SortOrder))
+                {
+                    continue;
+                }
+
+                foreach (object attribute in property.GetCustomAttributes(true))
+                {
+                    if (attribute is PersistAttribute)
+                    {
+                        <div class="setting-group">
+                            <ObjectPropertyEditor Object="processor.Settings" ObjectProperty="property" />
+                        </div>
+                    }
+                }
+            }
+        </div>
+    }
+</div>

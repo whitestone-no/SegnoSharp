@@ -1,0 +1,83 @@
+﻿.playlist-settings {
+    background-color: var(--bg-darkergray); /* Lighter than secondary-color */
+    border-radius: 8px;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    color: var(--light-text);
+    overflow: hidden;
+}
+
+
+.setting-group {
+    display: flex;
+    grid-template-columns: 1fr 150px;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+    align-items: center;
+}
+
+    .setting-group:first-child {
+        padding-top: 1rem;
+    }
+
+    .setting-group:last-child {
+        padding-bottom: 1rem;
+    }
+
+    .setting-group label {
+        flex: 1;
+        font-weight: 500;
+    }
+
+    .setting-group input {
+        padding: 0.5rem;
+        border: 1px solid var(--bg-darkgray);
+        border-radius: 4px;
+        background-color: var(--bg-darkergray);
+        color: var(--light-text);
+    }
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary-color);
+}
+
+
+
+
+.settings-header {
+    background-color: var(--bg-darkgray); /* Slightly darker than processor bg */
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--light-text);
+    margin-bottom: 0.25rem;
+}
+
+    .settings-header span {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-right: auto;
+    }
+
+    .settings-header button {
+        background-color: var(--bg-darkgray);
+        color: var(--light-text);
+        border: 1px solid var(--bg-gray);
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .settings-header button:hover {
+            background-color: var(--bg-gray);
+        }
+
+.playlist-settings[class~=disabled] .settings-header span {
+    color: var(--bg-lightgray)
+}
