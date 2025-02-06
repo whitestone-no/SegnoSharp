@@ -8,6 +8,10 @@
     {
         <input id="@Identifier" type="number" min="@int.MinValue" max="@int.MaxValue" @bind="Value" />
     }
+    else if (ObjectProperty.PropertyType == typeof(uint))
+    {
+        <input id="@Identifier" type="number" min="@uint.MinValue" max="@uint.MaxValue" @bind="Value" />
+    }
     else if (ObjectProperty.PropertyType == typeof(ushort))
     {
         <input id="@Identifier" type="number" min="@ushort.MinValue" max="@ushort.MaxValue" @bind="Value" />

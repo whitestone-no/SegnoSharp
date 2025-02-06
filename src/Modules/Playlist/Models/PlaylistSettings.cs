@@ -6,11 +6,11 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Models
     {
         [Persist]
         [DefaultValue(3)]
-        public int MinimumNumberOfSongs { get; set; }
+        public ushort MinimumNumberOfSongs { get; set; }
 
         [Persist]
         [DefaultValue(15)]
-        public int MinimumTotalDuration { get; set; }
+        public ushort MinimumTotalDuration { get; set; }
 
     }
 }

@@ -73,6 +73,10 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components
             {
                 ObjectProperty.SetValue(configuration, int.Parse(value));
             }
+            else if (ObjectProperty.PropertyType == typeof(uint))
+            {
+                ObjectProperty.SetValue(configuration, int.Parse(value));
+            }
             else if (ObjectProperty.PropertyType == typeof(float))
             {
                 ObjectProperty.SetValue(configuration, float.Parse(value, CultureInfo.InvariantCulture));

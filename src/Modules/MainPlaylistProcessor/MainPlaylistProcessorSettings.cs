@@ -8,17 +8,17 @@ namespace Whitestone.SegnoSharp.Modules.MainPlaylistProcessor
         [Persist]
         [DefaultValue(5)]
         [Description("Minimum number of minutes to wait before repeating an album.")]
-        public int MinutesBetweenAlbumRepeat { get; set; }
+        public uint MinutesBetweenAlbumRepeat { get; set; }
         
         [Persist]
         [DefaultValue(105)]
         [Description("Minimum number of minutes to wait before repeating a track.")]
-        public int MinutesBetweenTrackRepeat { get; set; }
+        public uint MinutesBetweenTrackRepeat { get; set; }
 
         [Persist]
         [DefaultValue(10)]
         [Description("Minimum number of minutes to wait before repeating an artist.")]
-        public int MinutesBetweenArtistRepeat { get; set; }
+        public uint MinutesBetweenArtistRepeat { get; set; }
 
         [Persist]
         [DefaultValue(true)]

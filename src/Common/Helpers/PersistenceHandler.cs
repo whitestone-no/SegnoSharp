@@ -259,6 +259,10 @@ namespace Whitestone.SegnoSharp.Common.Helpers
             {
                 key.PropertyInfo.SetValue(configuration, int.Parse(value));
             }
+            else if (key.PropertyInfo.PropertyType == typeof(uint))
+            {
+                key.PropertyInfo.SetValue(configuration, uint.Parse(value));
+            }
             else if (key.PropertyInfo.PropertyType == typeof(float))
             {
                 key.PropertyInfo.SetValue(configuration, float.Parse(value, CultureInfo.InvariantCulture));
