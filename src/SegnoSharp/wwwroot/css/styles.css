@@ -218,31 +218,6 @@ header {
     margin-right: 1rem;
 }
 
-
-
-
-
-table.Standard {
-    border-collapse: collapse;
-}
-
-    table.Standard th {
-        text-align: left;
-        background-color: var(--bg-lightgray);
-        padding: 5px;
-    }
-
-    table.Standard td {
-        border: solid 1px var(--bg-lightergray);
-        padding: 1px 5px;
-        vertical-align: top;
-    }
-
-    table.Standard tr:hover td {
-        background-color: var(--bg-lightergray);
-    }
-
-
 /* Typography */
 h1 {
     font-size: 2.5rem;
@@ -420,31 +395,30 @@ button[class~="outline"]:focus {
         margin-bottom: 0.5rem;
     }
 
-    .form-group input[type="text"],
-    .form-group input[type="number"],
-    .form-group select,
-    .form-group textarea {
-        width: 100%;
-        padding: 0.5rem;
-        border: 1px solid var(--bg-lightgray);
-        border-radius: 4px;
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    padding: 0.5rem;
+    border: 1px solid var(--bg-lightgray);
+    border-radius: 4px;
+}
+
+    input[type="text"]:hover,
+    input[type="number"]:hover,
+    select:hover,
+    textarea:hover {
+        border-color: var(--bg-darkgray);
     }
 
-        .form-group input[type="text"]:hover,
-        .form-group input[type="number"]:hover,
-        .form-group select:hover,
-        .form-group textarea:hover {
-            border-color: var(--bg-darkgray);
-        }
-
-        .form-group input[type="text"]:focus,
-        .form-group input[type="number"]:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
-        }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus,
+    textarea:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+    }
 
 .checkbox-label,
 .radio-label {
@@ -469,13 +443,12 @@ button[class~="outline"]:focus {
 
 /* Tables */
 table {
-    width: 100%;
     border-collapse: collapse;
     margin: 1rem 0;
 }
 
     table th, table td {
-        padding: 0.75rem;
+        padding: 0.5rem;
         border: 1px solid var(--bg-lightgray);
     }
 
