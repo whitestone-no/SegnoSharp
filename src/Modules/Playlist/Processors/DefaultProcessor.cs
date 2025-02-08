@@ -20,10 +20,28 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Processors
 
         public async Task<TrackStreamInfo> GetNextTrackAsync(CancellationToken cancellationToken)
         {
+            await using SegnoSharpDbContext dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+            if (Settings is DefaultProcessorSettings { UseWeightedRandom: false })
+            {
+                int totalTracks = dbContext.TrackStreamInfos
+                    .AsNoTracking()
+                    .Where(t => t.IncludeInAutoPlaylist)
+                    .OrderBy(t => t.Id)
+                    .Count();
+
+                int randomNumber = randomGenerator.GetInt(totalTracks);
+
+                return await dbContext.TrackStreamInfos
+                    .AsNoTracking()
+                    .Where(t => t.IncludeInAutoPlaylist)
+                    .OrderBy(t => t.Id)
+                    .Skip(randomNumber)
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+
             // EFCore doesn't have support for window functions yet, so in order to get a running total need to get all
             // rows and then do the running total calculation (instead of using SUM OVER)
-
-            await using SegnoSharpDbContext dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
             int weightsSum = await dbContext.TrackStreamInfos
                 .AsNoTracking()
