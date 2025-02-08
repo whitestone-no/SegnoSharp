@@ -1,0 +1,21 @@
+mode: ContinuousDelivery
+major-version-bump-message: '\[(breaking|major)\]'
+minor-version-bump-message: '\[(feature|minor)\]'
+patch-version-bump-message: '\[(fix|patch)\]'
+branches:
+  main:
+    label: preview
+    increment: Patch
+  feature:
+    label: alpha.{BranchName}
+    increment: Patch
+    regex: ^feature[\/-](?<BranchName>.+)
+  prerelease:
+    label: beta
+    increment: Patch
+    regex: ^release[\/-]
+  release:
+    increment: Patch
+    regex: ^tags[\/-]
+ignore:
+  sha: []
