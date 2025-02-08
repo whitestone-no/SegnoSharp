@@ -1,8 +1,7 @@
 ﻿@using System.Globalization
-@using Microsoft.AspNetCore.Components.Forms
 @typeparam TItem
 
-<div class="TagList">
+<div class="TagList @Class">
     @if (Items != null)
     {
         @foreach (TItem item in Items.OrderBy(i => i.TagName))

@@ -6,188 +6,193 @@
 @using Whitestone.SegnoSharp.Database.Extensions
 @attribute [Authorize]
 
-@if (Album == null)
-{
-    <h1 style="color: red">Album not found</h1>
-    return;
-}
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+
 <h1>Edit album</h1>
 
-<div>
-    Added: <em>@Album.Added</em>
+<div class="text-right">
+    Album added on: <em>@Album.Added</em>
 </div>
 
-<div style="float: left;margin-right: 20px;">
-    <h2>Album data</h2>
-    <table class="Editor">
-        <tr>
-            <th>Title:</th>
-            <td><input @bind="Album.Title" /></td>
-        </tr>
-        <tr>
-            <th>Published:</th>
-            <td><input @bind="Album.Published" /></td>
-        </tr>
-        <tr>
-            <th>Genres:</th>
-            <td>
+<div class="card-grid">
+    <div class="card card-span-8">
+        <div class="card-header">Album data</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="album-data-title">Title</label>
+                <input id="album-data-title" type="text" @bind="Album.Title" />
+            </div>
+            <div class="form-group">
+                <label for="album-data-published">Published</label>
+                <input id="album-data-published" type="text" @bind="Album.Published" />
+            </div>
+            <div class="form-group">
+                <label>Genres</label>
                 <TagList Items="Album.Genres" ExecuteSearch="ExecuteGenreSearch" />
-            </td>
-        </tr>
-        <tr>
-            <th>Record labels:</th>
-            <td>
+            </div>
+            <div class="form-group">
+                <label>Record labels</label>
                 <TagList Items="Album.RecordLabels" ExecuteSearch="ExecuteRecordLabelSearch" />
-            </td>
-        </tr>
-        <tr>
-            <th>UPC:</th>
-            <td><input @bind="Album.Upc" /></td>
-        </tr>
-        <tr>
-            <th>Catalogue Number:</th>
-            <td><input @bind="Album.CatalogueNumber" /></td>
-        </tr>
-        <tr>
-            <th>Public:</th>
-            <td><input type="checkbox" @bind="Album.IsPublic" /></td>
-        </tr>
-    </table>
-</div>
-<div style="float: left; margin-right: 20px;">
-    <h2>People</h2>
+            </div>
+            <div class="form-group">
+                <label for="album-data-upc">Upc</label>
+                <input id="album-data-upc" type="text" @bind="Album.Upc" />
+            </div>
+            <div class="form-group">
+                <label for="album-data-cataloguenumber">Catalogue Number</label>
+                <input id="album-data-cataloguenumber" type="text" @bind="Album.CatalogueNumber" />
+            </div>
+            <div class="form-group">
+                <label for="album-data-ispublic" class="checkbox-label">Is public</label>
+                <input id="album-data-ispublic" type="checkbox" @bind="Album.IsPublic" />
+            </div>
+        </div>
+        <div class="card-header">People</div>
+        <div class="card-body">
 
-    <table class="Editor">
-        @foreach (AlbumPersonGroupPersonRelation personGroupRelation in Album.AlbumPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
-        {
-            <tr>
-                <th>@personGroupRelation.PersonGroup.Name <button title="Remove @personGroupRelation.PersonGroup.Name group" class="TinyDelete" @onclick="() => RemovePersonGroup(personGroupRelation)"><span class="fa-regular fa-circle-xmark"></span></button>:</th>
-                <td>
-                    <TagList Items="@personGroupRelation.Persons" ExecuteSearch="ExecutePersonSearch" />
-                </td>
-            </tr>
-        }
-
-        @{
-            List<PersonGroup> personGroups = PersonGroups
-            .Where(pg => Album.AlbumPersonGroupPersonRelations.All(apg => apg.PersonGroup.Id != pg.Id))
-            .ToList();
-
-            if (personGroups.Any())
+            @foreach (AlbumPersonGroupPersonRelation personGroupRelation in Album.AlbumPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
             {
-                <tr>
-                    <th>Add group:</th>
-                    <td>
-                        <select @bind="SelectedPersonGroupId">
-                            <option value="-1"></option>
-                            @foreach (PersonGroup personGroup in personGroups)
-                            {
-                                <option value="@personGroup.Id">@personGroup.Name</option>
-                            }
-                        </select>
-                        <button @onclick="AddPersonGroup" disabled="@(SelectedPersonGroupId <= 0)">Add</button>
-                    </td>
-                </tr>
+                <div class="form-group">
+                    <label>
+                        @personGroupRelation.PersonGroup.Name
+                        <button title="Remove @personGroupRelation.PersonGroup.Name group" class="tiny" @onclick="() => RemovePersonGroup(personGroupRelation)"><span class="fa-regular fa-circle-xmark"></span></button>
+                    </label>
+                    <TagList Items="@personGroupRelation.Persons" ExecuteSearch="ExecutePersonSearch" />
+                </div>
             }
-        }
-    </table>
-</div>
-<div style="float: left;">
-    <h2>Cover</h2>
-    @if (Album.AlbumCover != null)
-    {
-        <div>
-            <img style="max-width: 250px;" src="@Album.AlbumCover.ToInlineBase64()" alt="Album cover" />
+
+            @{
+                List<PersonGroup> personGroups = PersonGroups
+                .Where(pg => Album.AlbumPersonGroupPersonRelations.All(apg => apg.PersonGroup.Id != pg.Id))
+                .ToList();
+
+                if (personGroups.Any())
+                {
+                    <div class="form-group">
+                        <label>Add group</label>
+                        <div class="card-grid card-span-9">
+                            <select class="card-span-11" @bind="SelectedPersonGroupId">
+                                <option value="-1"></option>
+                                @foreach (PersonGroup personGroup in personGroups)
+                                {
+                                    <option value="@personGroup.Id">@personGroup.Name</option>
+                                }
+                            </select>
+                            <button class="secondary card-span-1" @onclick="AddPersonGroup" disabled="@(SelectedPersonGroupId <= 0)">Add</button>
+                        </div>
+                    </div>
+                }
+            }
         </div>
-        <div>
-            <button @onclick="RemoveAlbumCover">Remove</button>
+    </div>
+
+    <div class="album-cover card card-span-4">
+        <div class="card-header">Cover</div>
+        <div class="card-body">
+
+            @if (Album.AlbumCover != null)
+            {
+                <div>
+                    <img src="@Album.AlbumCover.ToInlineBase64()" class="bordered" alt="Album cover" />
+                    <button class="tertiary" @onclick="RemoveAlbumCover">Remove</button>
+                </div>
+            }
+            else
+            {
+                <div>
+                    <InputFile OnChange="AddAlbumCover" accept=".jpg,.jpeg,image/jpeg,.png,image/png" />
+                </div>
+                @if (AlbumCoverFileSizeError)
+                {
+                    <div class="Error">Image is too large. Max image size is 5MB.</div>
+                }
+            }
         </div>
-    }
-    else
-    {
-        <div>
-            <InputFile OnChange="AddAlbumCover" accept=".jpg,.jpeg,image/jpeg,.png,image/png" />
-        </div>
-        @if (AlbumCoverFileSizeError)
-        {
-            <div class="Error">Image is too large. Max image size is 5MB.</div>
-        }
-    }
+    </div>
 </div>
 
-<div style="clear: both;">
-    @foreach (Disc disc in Album.Discs)
-    {
-        <div>
-            <table class="Editor">
-                <tr>
-                    <th>Disc:</th>
-                    <td><input type="number" min="1" max="@(byte.MaxValue)" @bind="disc.DiscNumber" /></td>
-                </tr>
-                <tr>
-                    <th>Title:</th>
-                    <td><input @bind="disc.Title" /></td>
-                </tr>
-                <tr>
-                    <th>Media types:</th>
-                    <td><TagList Items="disc.MediaTypes" Selection="MediaTypes"></TagList></td>
-                </tr>
-                <tr>
-                    <th>&nbsp;</th>
-                    <td>
-                        <button @onclick="() => AddTrackGroup(disc)">Add track group</button>
-                        <button style="margin-left: 20px;" @onclick="() => DeleteDisc(disc)">Delete disc</button>
-                    </td>
-                </tr>
-            </table>
-            <table class="DraggableTable">
-                <thead>
-                    <tr>
-                        <th>&nbsp;</th>
-                        <th>Track #</th>
-                        <th>Length</th>
-                        <th>Title</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (Track track in disc.Tracks.OrderBy(t => t.TrackNumber))
-                    {
-                        TrackGroup trackGroup = disc.TrackGroups.FirstOrDefault(tg => tg.GroupBeforeTrackNumber == track.TrackNumber);
-                        if (trackGroup != null)
-                        {
-                            <tr draggable="true"
-                                ondragover="event.preventDefault();"
-                            @ondragstart="() => DragStart(trackGroup)"
-                            @ondragend="HandleDragEnd">
-                                <td><span class="fa-solid fa-grip"></span></td>
-                                <td colspan="3">
-                                    <input @bind="@trackGroup.Name" />
-                                    <button @onclick="() => RemoveTrackGroup(trackGroup)"><span class="fa-regular fa-circle-xmark"></span></button>
-                                </td>
-                            </tr>
-                        }
-                        <tr draggable="true"
-                            ondragover="event.preventDefault();"
-                        @ondragstart="() => DragStart(track)"
-                        @ondrop="() => HandleDrop(track)"
-                        @ondragend="HandleDragEnd"
-                        @ondragenter="() => HandleDragEnter(track)"
-                            class="@(_currentlyDraggingTrack == track ? "drag-current" : _currentlyDraggingOverTrack == track ? "drag-on" : null)">
-                            <td><span class="fa-solid fa-grip"></span></td>
-                            <td>@track.TrackNumber</td>
-                            <td>@track.Duration</td>
-                            <td><NavLink href="@($"/admin/albums/track/{track.Id}")">@track.Title</NavLink></td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<div class="card-grid">
+    <div class="card card-span-12">
+        <div class="card-header">Discs</div>
+        <div class="card-body card-grid">
+
+            @foreach (Disc disc in Album.Discs)
+            {
+                <div class="card card-span-12">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="card-span-2">Disc number</label>
+                            <input class="card-span-1" type="number" min="1" max="@(byte.MaxValue)" @bind="disc.DiscNumber" />
+                        </div>
+                        <div class="form-group">
+                            <label class="card-span-2">Disc title</label>
+                            <input class="card-span-10" type="text" @bind="disc.Title" />
+                        </div>
+                        <div class="form-group">
+                            <label class="card-span-2">Media types</label>
+                            <TagList Class="card-span-10" Items="disc.MediaTypes" Selection="MediaTypes"></TagList>
+                        </div>
+                        <div>
+                            <button class="tertiary" @onclick="() => DeleteDisc(disc)">Delete disc</button>
+                        </div>
+                    </div>
+                    <div class="card-header">Tracks</div>
+                    <div class="card-body">
+
+                        <button class="secondary" @onclick="() => AddTrackGroup(disc)">Add track group</button>
+
+                        <table class="DraggableTable">
+                            <thead>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th>Track #</th>
+                                    <th>Length</th>
+                                    <th>Title</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (Track track in disc.Tracks.OrderBy(t => t.TrackNumber))
+                                {
+                                    TrackGroup trackGroup = disc.TrackGroups.FirstOrDefault(tg => tg.GroupBeforeTrackNumber == track.TrackNumber);
+                                    if (trackGroup != null)
+                                    {
+                                        <tr draggable="true"
+                                            ondragover="event.preventDefault();"
+                                            @ondragstart="() => DragStart(trackGroup)"
+                                            @ondragend="HandleDragEnd">
+                                            <td><span class="fa-solid fa-grip"></span></td>
+                                            <td colspan="3">
+                                                <input @bind="@trackGroup.Name" />
+                                                <button class="tiny" @onclick="() => RemoveTrackGroup(trackGroup)"><span class="fa-regular fa-circle-xmark"></span></button>
+                                            </td>
+                                        </tr>
+                                    }
+
+                                    <tr draggable="true"
+                                        ondragover="event.preventDefault();"
+                                        @ondragstart="() => DragStart(track)"
+                                        @ondrop="() => HandleDrop(track)"
+                                        @ondragend="HandleDragEnd"
+                                        @ondragenter="() => HandleDragEnter(track)"
+                                        class="@(_currentlyDraggingTrack == track ? "drag-current" : _currentlyDraggingOverTrack == track ? "drag-on" : null)">
+                                        <td><span class="fa-solid fa-grip"></span></td>
+                                        <td>@track.TrackNumber</td>
+                                        <td>@track.Duration</td>
+                                        <td><NavLink href="@($"/admin/albums/track/{track.Id}")">@track.Title</NavLink></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
         </div>
-    }
+    </div>
 </div>
 
 <div>
-    <button @onclick="() => Close()">Close</button>
-    <button @onclick="() => Close(true)">Close & Save</button>
-    <button style="margin-left: 20px;" @onclick="DeleteTrack">Delete</button>
+    <button class="primary" @onclick="() => Close()">Close</button>
+    <button class="primary" @onclick="() => Close(true)">Close & Save</button>
+    <button class="secondary" @onclick="Save">Save</button>
+    <button class="tertiary" @onclick="DeleteTrack">Delete</button>
 </div>

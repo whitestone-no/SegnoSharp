@@ -1,6 +1,8 @@
 ﻿:root {
     --primary-color: #ffd700;
     --secondary-color: #1a1a1a;
+    --tertiary-color: #f8a9a9;
+    --tertiary-hover: #ffd5d5;
     --hover-color: #ffed4a;
     --text-color: #333;
     --light-text: #fff;
@@ -121,7 +123,7 @@ header {
 
 /* Checkbox Hack Styles */
 .submenu-toggle {
-    display: none;
+    display: none !important;
 }
 
 .submenu-label {
@@ -310,6 +312,7 @@ blockquote {
 /* Buttons */
 button[class~="primary"],
 button[class~="secondary"],
+button[class~="tertiary"],
 button[class~="outline"],
 button[class~="small"],
 button[class~="large"] {
@@ -339,6 +342,17 @@ button[class~="secondary"] {
 
     button[class~="secondary"]:hover {
         background-color: var(--bg-darkergray);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+button[class~="tertiary"] {
+    background-color: var(--tertiary-color);
+    color: var(--text-black);
+}
+
+    button[class~="tertiary"]:hover {
+        background-color: var(--tertiary-hover);
         transform: translateY(-1px);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
@@ -385,14 +399,28 @@ button[class~="outline"]:focus {
     box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
 }
 
+button[class~=tiny] {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin-right: 3px;
+    cursor: pointer;
+}
+
+
 /* Forms */
 .form-group {
     margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
 }
 
     .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
+        grid-column: span 3;
+    }
+
+    .form-group .form-radio {
+        grid-column: span 9;
     }
 
 input[type="text"],
@@ -402,6 +430,7 @@ textarea {
     padding: 0.5rem;
     border: 1px solid var(--bg-lightgray);
     border-radius: 4px;
+    grid-column: span 9;
 }
 
     input[type="text"]:hover,
@@ -422,10 +451,9 @@ textarea {
 
 .checkbox-label,
 .radio-label {
+    gap: 0.5rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
 }
 
     .checkbox-label:hover,
@@ -434,10 +462,22 @@ textarea {
         cursor: pointer;
     }
 
-    .checkbox-label input[type="checkbox"]:hover,
-    .radio-label input[type="radio"]:hover {
-        cursor: pointer;
-    }
+input[type="checkbox"],
+input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary-color);
+}
+
+input[type="checkbox"] {
+    outline: 1px solid var(--bg-darkgray);
+    margin-top: 0.25rem;
+}
+
+.checkbox-label input[type="checkbox"]:hover,
+.radio-label input[type="radio"]:hover {
+    cursor: pointer;
+}
 
 
 
@@ -493,14 +533,64 @@ img[class~="rounded"] {
 /* Cards */
 .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(12, 1fr);
     gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .card {
     border: 1px solid var(--bg-lightgray);
     border-radius: 4px;
     overflow: hidden;
+    padding: 10px;
+}
+
+.card-span-1 {
+    grid-column: span 1 !important;
+}
+
+.card-span-2 {
+    grid-column: span 2 !important;
+}
+
+.card-span-3 {
+    grid-column: span 3 !important;
+}
+
+.card-span-4 {
+    grid-column: span 4 !important;
+}
+
+.card-span-5 {
+    grid-column: span 5 !important;
+}
+
+.card-span-6 {
+    grid-column: span 6 !important;
+}
+
+.card-span-7 {
+    grid-column: span 7 !important;
+}
+
+.card-span-8 {
+    grid-column: span 8 !important;
+}
+
+.card-span-9 {
+    grid-column: span 9 !important;
+}
+
+.card-span-10 {
+    grid-column: span 10 !important;
+}
+
+.card-span-11 {
+    grid-column: span 11 !important;
+}
+
+.card-span-12 {
+    grid-column: span 12 !important;
 }
 
 .card-header {

@@ -17,10 +17,10 @@
             margin: 1rem 0;
         }
 
-        .example-block img {
-            width: 200px;
-            background-color: #888;
-        }
+            .example-block img {
+                width: 200px;
+                background-color: #888;
+            }
 
         .color-grid {
             display: grid;
@@ -123,21 +123,22 @@
         </div>
 
         <div class="form-group">
-            <label class="checkbox-label">
-                <input type="checkbox" checked>
-                Checkbox Option
-            </label>
+            <label>Checkbox Option</label>
+            <input type="checkbox" checked>
         </div>
 
         <div class="form-group">
-            <label class="radio-label">
-                <input type="radio" name="radio-group" checked>
-                Radio Option 1
-            </label>
-            <label class="radio-label">
-                <input type="radio" name="radio-group">
-                Radio Option 2
-            </label>
+            <label>Radio Options</label>
+            <div class="form-radio">
+                <label class="radio-label">
+                    <input type="radio" name="radio-group" checked>
+                    Radio Option 1
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="radio-group">
+                    Radio Option 2
+                </label>
+            </div>
         </div>
 
         <div class="form-group">
@@ -177,7 +178,7 @@
     <h2>Cards</h2>
 
     <div class="card-grid">
-        <div class="card">
+        <div class="card card-span-4">
             <div class="card-header">Card Header</div>
             <div class="card-body">
                 <p>Card content goes here. This is a basic card layout.</p>
@@ -185,7 +186,7 @@
             <div class="card-footer">Card Footer</div>
         </div>
 
-        <div class="card">
+        <div class="card card-span-4">
             <div class="card-header">Interactive Card</div>
             <div class="card-body">
                 <p>Cards can contain various elements:</p>

@@ -37,14 +37,6 @@
         color: var(--light-text);
     }
 
-input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--primary-color);
-}
-
-
-
 
 .settings-header {
     background-color: var(--bg-darkgray); /* Slightly darker than processor bg */

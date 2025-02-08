@@ -27,9 +27,9 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         private bool AlbumCoverFileSizeError { get; set; }
         private List<MediaType> MediaTypes { get; set; }
 
-        private Track _currentlyDraggingTrack = null;
-        private TrackGroup _currentlyDraggingTrackGroup = null;
-        private Track _currentlyDraggingOverTrack = null;
+        private Track _currentlyDraggingTrack;
+        private TrackGroup _currentlyDraggingTrackGroup;
+        private Track _currentlyDraggingOverTrack;
 
         protected override async Task OnInitializedAsync()
         {
@@ -131,36 +131,41 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         {
             if (save)
             {
-                foreach (AlbumPersonGroupPersonRelation personRelation in Album.AlbumPersonGroupPersonRelations)
-                {
-                    List<Person> persons = new();
-
-                    foreach (Person person in personRelation.Persons)
-                    {
-                        if (person.Id != 0)
-                        {
-                            persons.Add(person);
-                            continue;
-                        }
-
-                        // Check if the person already exists in the database. If it does replace the dummy entry with the existing entry
-                        Person existingPerson = await DbContext.Persons.FirstOrDefaultAsync(p => p.FirstName == person.FirstName && p.LastName == person.LastName && p.Version == person.Version);
-                        if (existingPerson == null)
-                        {
-                            persons.Add(person);
-                            continue;
-                        }
-
-                        persons.Add(existingPerson);
-                    }
-
-                    personRelation.Persons = persons;
-                }
-
-                await DbContext.SaveChangesAsync();
+                await Save();
             }
 
             NavigationManager.NavigateTo("/admin/albums");
+        }
+
+        private async Task Save()
+        {
+            foreach (AlbumPersonGroupPersonRelation personRelation in Album.AlbumPersonGroupPersonRelations)
+            {
+                List<Person> persons = new();
+
+                foreach (Person person in personRelation.Persons)
+                {
+                    if (person.Id != 0)
+                    {
+                        persons.Add(person);
+                        continue;
+                    }
+
+                    // Check if the person already exists in the database. If it does replace the dummy entry with the existing entry
+                    Person existingPerson = await DbContext.Persons.FirstOrDefaultAsync(p => p.FirstName == person.FirstName && p.LastName == person.LastName && p.Version == person.Version);
+                    if (existingPerson == null)
+                    {
+                        persons.Add(person);
+                        continue;
+                    }
+
+                    persons.Add(existingPerson);
+                }
+
+                personRelation.Persons = persons;
+            }
+
+            await DbContext.SaveChangesAsync();
         }
 
         public void Dispose()

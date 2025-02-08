@@ -14,6 +14,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components
 
         [Parameter] public Func<string, Task<IEnumerable<TItem>>> ExecuteSearch { get; set; }
         [Parameter] public IList<TItem> Selection { get; set; }
+        [Parameter] public string Class { get; set; }
 
         private string Search { get; set; } = string.Empty;
         private IEnumerable<TItem> SearchResults { get; set; } = new List<TItem>();
