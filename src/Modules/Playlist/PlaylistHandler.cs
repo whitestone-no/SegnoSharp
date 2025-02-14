@@ -196,6 +196,8 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                 {
                     break;
                 }
+
+                _log.LogDebug("Playlist processor {processor} did not return a track", playlistProcessor.Name);
             }
 
             return nextTrack;
