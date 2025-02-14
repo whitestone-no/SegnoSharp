@@ -128,7 +128,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                         int tracksInQueue = await dbContext.StreamQueue.CountAsync(cancellationToken);
                         int totalQueueDuration = await dbContext.StreamQueue.SumAsync(q => q.TrackStreamInfo.Track.Length, cancellationToken);
 
-                        while (tracksInQueue < _settings.MinimumNumberOfSongs && totalQueueDuration < _settings.MinimumTotalDuration * 60)
+                        while (!(tracksInQueue >= _settings.MinimumNumberOfSongs && totalQueueDuration >= _settings.MinimumTotalDuration * 60))
                         {
                             _log.LogDebug("Currently {tracksInQueue} tracks in queue (less than {minimumNumberOfSongs}) with a total duration of {totalQueueDuration} seconds (less than {minimumTotalDuration})", tracksInQueue, _settings.MinimumNumberOfSongs, totalQueueDuration, _settings.MinimumTotalDuration * 60);
 
