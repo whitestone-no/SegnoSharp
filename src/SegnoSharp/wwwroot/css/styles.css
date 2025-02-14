@@ -649,8 +649,16 @@ img[class~="rounded"] {
     border: 1px solid #f5c6cb;
 }
 
+    .alert-error::before {
+        content: "⚠️";
+    }
+
 .alert-info {
     background-color: #cce5ff;
     color: #004085;
     border: 1px solid #b8daff;
 }
+
+    .alert-info::before {
+        content: "ⓘ";
+    }
