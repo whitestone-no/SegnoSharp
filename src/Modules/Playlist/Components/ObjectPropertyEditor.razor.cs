@@ -75,7 +75,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components
             }
             else if (ObjectProperty.PropertyType == typeof(uint))
             {
-                ObjectProperty.SetValue(configuration, int.Parse(value));
+                ObjectProperty.SetValue(configuration, uint.Parse(value));
             }
             else if (ObjectProperty.PropertyType == typeof(float))
             {
