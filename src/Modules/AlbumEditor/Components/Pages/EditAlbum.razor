@@ -47,7 +47,7 @@
                 <input id="album-data-ispublic" type="checkbox" @bind="Album.IsPublic" />
             </div>
         </div>
-        <div class="card-header">People</div>
+        <div class="card-header">Credits</div>
         <div class="card-body">
 
             @foreach (AlbumPersonGroupPersonRelation personGroupRelation in Album.AlbumPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
