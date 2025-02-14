@@ -24,6 +24,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
         private int NewAlbumTracksCount { get; set; }
         private int ExistingAlbumTracksCount { get; set; }
         private bool ImportComplete { get; set; }
+        private bool ImportInProgress { get; set; }
 
         protected override void OnInitialized()
         {
@@ -53,6 +54,8 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
             {
                 return;
             }
+
+            ImportInProgress = true;
 
             await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
@@ -222,6 +225,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 }
             }
 
+            ImportInProgress = false;
             ImportComplete = true;
 
             ImporterState.AlbumsToImport = null;

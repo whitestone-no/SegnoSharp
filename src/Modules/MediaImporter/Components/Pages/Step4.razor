@@ -26,6 +26,13 @@
                 }
             </div>
 
+            @if (ImportInProgress)
+            {
+                <div>
+                    Import in progress. Please wait.
+                </div>
+            }
+
             @if (ImportComplete)
             {
                 <div>
