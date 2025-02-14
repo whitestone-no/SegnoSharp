@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,49 +21,57 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Processors
         {
             await using SegnoSharpDbContext dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
+            // Only get tracks that are included in auto playlist
+            // This can be a lot, but this is so far only the queryable.
+            // Always order by the track id to ensure consistent results
+            IQueryable<TrackStreamInfo> query = dbContext.TrackStreamInfos
+                .AsNoTracking()
+                .Where(t => t.IncludeInAutoPlaylist)
+                .OrderBy(t => t.TrackId);
+
             if (Settings is DefaultProcessorSettings { UseWeightedRandom: false })
             {
-                int totalTracks = dbContext.TrackStreamInfos
-                    .AsNoTracking()
-                    .Where(t => t.IncludeInAutoPlaylist)
-                    .OrderBy(t => t.Id)
-                    .Count();
+                // For non-weighted random selection, get count and use skip
+                // This uses the queryable and only gets the count
+                int totalTracks = await query.CountAsync(cancellationToken);
+                
+                if (totalTracks == 0)
+                {
+                    return null;
+                }
 
                 int randomNumber = randomGenerator.GetInt(totalTracks);
 
-                return await dbContext.TrackStreamInfos
-                    .AsNoTracking()
-                    .Where(t => t.IncludeInAutoPlaylist)
-                    .OrderBy(t => t.Id)
+                // Finally get the actual track. Everything above was performed in memory
+                return await query
                     .Skip(randomNumber)
                     .FirstOrDefaultAsync(cancellationToken);
             }
 
-            // EFCore doesn't have support for window functions yet, so in order to get a running total need to get all
-            // rows and then do the running total calculation (instead of using SUM OVER)
-
-            int weightsSum = await dbContext.TrackStreamInfos
-                .AsNoTracking()
-                .Where(t => t.IncludeInAutoPlaylist)
-                .SumAsync(t => t.Weight, cancellationToken);
-            int rnd = randomGenerator.GetInt(weightsSum);
-
-            var runningTotal = 0;
-
-            List<TrackStreamInfo> list = await dbContext.TrackStreamInfos
-                .AsNoTracking()
-                .Where(t => t.IncludeInAutoPlaylist)
+            // For weighted random selection
+            // This performs an actual query, but it only specifically gets the track id and weight so as efficient as possible
+            var eligibleTracks = await query
+                .Select(t => new { t.TrackId, t.Weight })
                 .ToListAsync(cancellationToken);
 
-            var track = list
-                .Select(ts => new
-                {
-                    TrackStreamInfo = ts,
-                    RunningTotal = runningTotal += ts.Weight
-                })
-                .FirstOrDefault(ts => ts.RunningTotal >= rnd);
+            if (eligibleTracks.Count == 0){
+            {
+                return null;
+            }}
 
-            return track?.TrackStreamInfo;
+            int weightSum = eligibleTracks.Sum(t => t.Weight);
+            int rnd = randomGenerator.GetInt(weightSum);
+
+            var runningTotal = 0;
+            int selectedTrackId = eligibleTracks
+                .Select(t => new { t.TrackId, RunningTotal = runningTotal += t.Weight })
+                .First(t => t.RunningTotal >= rnd)
+                .TrackId;
+
+            // Finally get the actual track. Everything above was performed in memory
+            return await dbContext.TrackStreamInfos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.TrackId == selectedTrackId, cancellationToken);
         }
     }
 }
