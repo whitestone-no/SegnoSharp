@@ -2,6 +2,29 @@
 @layout InnerLayout
 @using Whitestone.SegnoSharp.Modules.Playlist.Components.Layouts
 @using Whitestone.SegnoSharp.Common.Attributes
+@using Whitestone.SegnoSharp.Modules.Playlist.Models
 @attribute [ModuleMenu("History", typeof(Playlist))]
 
 <h1>History</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Album</th>
+            <th>Track</th>
+            <th>Artist(s)</th>
+            <th>Duration</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (HistoryViewModel historyItem in HistoryItems)
+        {
+            <tr>
+                <td>@historyItem.Album</td>
+                <td>@historyItem.Track</td>
+                <td>@historyItem.Artist</td>
+                <td>@historyItem.Played.ToString("yyyy-MM-dd HH:mm:ss")</td>
+            </tr>
+        }
+    </tbody>
+</table>
