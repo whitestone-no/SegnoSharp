@@ -92,8 +92,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    LastName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    FirstName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    LastName = table.Column<string>(type: "TEXT COLLATE NOCASE", maxLength: 100, nullable: false),
+                    FirstName = table.Column<string>(type: "TEXT COLLATE NOCASE", maxLength: 100, nullable: true),
                     Version = table.Column<ushort>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
