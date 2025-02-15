@@ -132,8 +132,11 @@
                             <label class="card-span-2">Media types</label>
                             <TagList Class="card-span-10" Items="disc.MediaTypes" Selection="MediaTypes"></TagList>
                         </div>
-                        <div>
-                            <button class="tertiary" @onclick="() => DeleteDisc(disc)">Delete disc</button>
+                        <div class="form-group">
+                            <div class="card-span-2"></div>
+                            <div class="card-span-10">
+                                <button class="tertiary" @onclick="() => DeleteDisc(disc)">Delete disc</button>
+                            </div>
                         </div>
                     </div>
                     <div class="card-header">Tracks</div>
