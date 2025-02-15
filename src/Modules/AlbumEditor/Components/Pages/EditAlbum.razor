@@ -141,7 +141,7 @@
 
                         <button class="secondary" @onclick="() => AddTrackGroup(disc)">Add track group</button>
 
-                        <table class="DraggableTable">
+                        <table class="tracks">
                             <thead>
                                 <tr>
                                     <th>&nbsp;</th>
@@ -158,12 +158,15 @@
                                     {
                                         <tr draggable="true"
                                             ondragover="event.preventDefault();"
+                                            class="track-group"
                                             @ondragstart="() => DragStart(trackGroup)"
                                             @ondragend="HandleDragEnd">
-                                            <td><span class="fa-solid fa-grip"></span></td>
+                                            <td class="text-center"><span class="fa-solid fa-grip"></span></td>
                                             <td colspan="3">
-                                                <input @bind="@trackGroup.Name" />
-                                                <button class="tiny" @onclick="() => RemoveTrackGroup(trackGroup)"><span class="fa-regular fa-circle-xmark"></span></button>
+                                                <div class="form-group">
+                                                    <input type="text" class="card-span-11" @bind="@trackGroup.Name" />
+                                                    <button class="tiny card-span-1" @onclick="() => RemoveTrackGroup(trackGroup)"><span class="fa-regular fa-circle-xmark"></span></button>
+                                                </div>
                                             </td>
                                         </tr>
                                     }
@@ -175,9 +178,9 @@
                                         @ondragend="HandleDragEnd"
                                         @ondragenter="() => HandleDragEnter(track)"
                                         class="@(_currentlyDraggingTrack == track ? "drag-current" : _currentlyDraggingOverTrack == track ? "drag-on" : null)">
-                                        <td><span class="fa-solid fa-grip"></span></td>
-                                        <td>@track.TrackNumber</td>
-                                        <td>@track.Duration</td>
+                                        <td class="text-center"><span class="fa-solid fa-grip"></span></td>
+                                        <td class="text-center">@track.TrackNumber</td>
+                                        <td class="text-center">@track.Duration</td>
                                         <td><NavLink href="@($"/admin/albums/track/{track.Id}")">@track.Title</NavLink></td>
                                     </tr>
                                 }
