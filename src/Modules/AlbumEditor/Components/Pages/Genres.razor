@@ -10,34 +10,28 @@
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 <h1>Genres</h1>
 
-<div>
-    @if (DbGenres.Any())
-    {
-        <table>
-            <tbody>
-                @foreach (Genre genre in DbGenres)
-                {
-                    <tr>
-                        <td><input @bind="@genre.Name" /></td>
-                        <td><button @onclick="() => RemoveGenre(genre)"><span class="fa-regular fa-circle-xmark"></span></button></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <span>No genres found</span>
-    }
-    <div>
-        <button @onclick="AddGenre">Add</button>
+@if (DbGenres.Count == 0)
+{
+    <div class="alert alert-info">No genres found</div>
+}
+else
+{
+    <div class="card-grid">
+        <div class="card card-span-12">
+            @foreach (Genre genre in DbGenres)
+            {
+                <div class="form-group">
+                    <input type="text" class="card-span-11" @bind="@genre.Name" />
+                    <div class="card-span-1 text-center">
+                        <button class="tertiary" @onclick="() => RemoveGenre(genre)"><span class="fa-regular fa-circle-xmark"></span></button>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
-</div>
-
-<div style="margin-top: 20px;">
-    @if (DbContext.ChangeTracker.HasChanges())
-    {
-        <button @onclick="SaveChanges">Save</button>
-        <button @onclick="DiscardChanges">Discard changes</button>
-    }
+}
+<div>
+    <button class="secondary" @onclick="AddGenre">Add new genre</button>
+    <button class="primary" @onclick="SaveChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Save</button>
+    <button class="primary" @onclick="DiscardChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Discard changes</button>
 </div>

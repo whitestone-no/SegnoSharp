@@ -114,46 +114,60 @@
             }
 
 
-table.tracks {
+.album-editor table {
     width: 100%;
 }
 
-    table.tracks tr th:nth-child(1) {
-        width: 40px;
+table.tracks tr th:nth-child(1) {
+    width: 40px;
+}
+
+table.tracks tr th:nth-child(2) {
+    width: 75px;
+}
+
+table.tracks tr th:nth-child(3) {
+    width: 80px;
+}
+
+table.tracks tr.drag-on td {
+    border-top: solid 2.5rem var(--hover-color) !important;
+}
+
+table.tracks tr.drag-current {
+    display: none;
+}
+
+table.tracks tr.track-group {
+    background-color: var(--bg-lightyellow);
+}
+
+    table.tracks tr.track-group div.form-group {
+        margin-bottom: 0 !important;
     }
 
-    table.tracks tr th:nth-child(2) {
-        width: 75px;
+    table.tracks tr.track-group input {
+        font-weight: bold;
     }
-
-    table.tracks tr th:nth-child(3) {
-        width: 80px;
-    }
-
-    table.tracks tr.drag-on td {
-        border-top: solid 2.5rem var(--hover-color) !important;
-    }
-
-    table.tracks tr.drag-current {
-        display: none;
-    }
-
-    table.tracks tr.track-group {
-        background-color: var(--bg-lightyellow);
-    }
-
-        table.tracks tr.track-group div.form-group {
-            margin-bottom: 0 !important;
-        }
-
-        table.tracks tr.track-group input {
-            font-weight: bold;
-        }
 
 
 .album-cover {
     text-align: center;
 }
-.album-cover img {
-    max-width: 100%;
+
+    .album-cover img {
+        max-width: 100%;
+    }
+
+.form-group[class~="drag-on"] {
+    border-top: solid 40px var(--hover-color) !important;
+    padding-top: 1rem;
+}
+
+.form-group[class~="drag-current"] {
+    display: none;
+}
+
+span[class~="fa-grip"] {
+    cursor: grab
 }

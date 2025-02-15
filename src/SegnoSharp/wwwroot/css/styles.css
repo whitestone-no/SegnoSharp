@@ -664,3 +664,13 @@ img[class~="rounded"] {
     .alert-info::before {
         content: "ⓘ";
     }
+
+/* Overrides */
+.no-margin {
+    margin: 0 !important;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+}

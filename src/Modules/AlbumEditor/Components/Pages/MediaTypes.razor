@@ -8,44 +8,41 @@
 @attribute [ModuleMenu("Media types", typeof(Albums), true)]
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+
 <h1>Media Types</h1>
 
-<div>
-    @if (DbTypes.Any())
-    {
-        <table class="DraggableTable">
-            <tbody>
-                @foreach (MediaType type in DbTypes.OrderBy(t => t.SortOrder))
-                {
-                    <tr draggable="true"
-                        ondragover="event.preventDefault();"
-                    @ondragstart="() => HandleDragStart(type)"
-                    @ondrop="() => HandleDrop(type)"
-                    @ondragend="HandleDragEnd"
-                    @ondragenter="() => HandleDragEnter(type)"
-                        class="@(_currentlyDraggingType == type ? "drag-current" : _currentlyDraggingOverType == type ? "drag-on" : null)">
-                        <td><span class="fa-solid fa-grip"></span></td>
-                        <td>@type.SortOrder</td>
-                        <td><input @bind="@type.Name" /></td>
-                        <td><button @onclick="() => RemoveType(type)"><span class="fa-regular fa-circle-xmark"></span></button></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <span>No media types found</span>
-    }
-    <div>
-        <button @onclick="AddType">Add</button>
+@if (DbTypes.Count == 0)
+{
+    <div class="alert alert-info">No media types found</div>
+}
+else
+{
+    <div class="card-grid">
+        <div class="card card-span-12">
+            @foreach (MediaType type in DbTypes.OrderBy(t => t.SortOrder))
+            {
+                <div draggable="true"
+                     ondragover="event.preventDefault();"
+                     @ondragstart="() => HandleDragStart(type)"
+                     @ondrop="() => HandleDrop(type)"
+                     @ondragend="HandleDragEnd"
+                     @ondragenter="() => HandleDragEnter(type)"
+                     class="form-group @(_currentlyDraggingType == type ? "drag-current" : _currentlyDraggingOverType == type ? "drag-on" : null)">
+                    <div class="card-span-1 text-center">
+                        <span class="fa-solid fa-grip"></span>
+                    </div>
+                    <input type="text" class="card-span-10" @bind="@type.Name" />
+                    <div class="card-span-1 text-center">
+                        <button class="tertiary" @onclick="() => RemoveType(type)"><span class="fa-regular fa-circle-xmark"></span></button>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
-</div>
+}
 
-<div style="margin-top: 20px;">
-    @if (DbContext.ChangeTracker.HasChanges())
-    {
-        <button @onclick="SaveChanges">Save</button>
-        <button @onclick="DiscardChanges">Discard changes</button>
-    }
+<div>
+    <button class="secondary" @onclick="AddType">Add new media type</button>
+    <button class="primary" @onclick="SaveChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Save</button>
+    <button class="primary" @onclick="DiscardChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Discard changes</button>
 </div>

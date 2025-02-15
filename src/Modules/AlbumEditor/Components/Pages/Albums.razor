@@ -9,11 +9,15 @@
 
 <h1>Album Editor</h1>
 
-<div style="margin-bottom: 10px;">
+<div class="card">
     <EditForm Model="@SearchModel" OnSubmit="DoSearch">
-        <span>Search:</span>
-        <InputText @bind-Value="SearchModel.SearchString" />
-        <button type="submit"><span class="fa-solid fa-magnifying-glass"></span></button>
+        <div class="form-group no-margin">
+            <label for="album-search" class="card-span-1 flex-center">Search</label>
+            <InputText type="text" id="album-search" class="card-span-10" @bind-Value="SearchModel.SearchString" />
+            <div class="card-span-1 text-center">
+                <button class="primary" type="submit"><span class="fa-solid fa-magnifying-glass"></span></button>
+            </div>
+        </div>
     </EditForm>
 </div>
 
