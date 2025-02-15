@@ -1,4 +1,119 @@
 ﻿
+
+.taglist {
+    border: 1px solid var(--bg-lightgray);
+    padding: 10px;
+    border-radius: 4px;
+    grid-column: span 9;
+}
+
+    .taglist:hover {
+        border-color: var(--bg-darkgray);
+    }
+
+    .taglist:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+    }
+
+    .taglist .selected {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+        .taglist .selected .tag {
+            background: var(--bg-lightyellow);
+            padding: 5px 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .taglist .selected .tag button {
+                border: none;
+                background-color: transparent;
+                color: var(--text-color);
+                margin-top: 3px;
+                cursor: pointer;
+            }
+
+                .taglist .selected .tag button:focus {
+                    outline: none;
+                }
+
+                    .taglist .selected .tag button:focus span {
+                        font-weight: 800;
+                    }
+
+    .taglist input[type="text"] {
+        border: none;
+        outline: none;
+        padding: 0;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+        .taglist input[type="text"]:focus {
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+
+
+    .taglist .tag-suggestions {
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+        position: absolute;
+        background-color: var(--bg-lightestgray);
+        box-shadow: 0 0 5px 0 var(--bg-lightergray);
+    }
+
+        .taglist .tag-suggestions .suggestion {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            cursor: pointer;
+            text-align: left;
+            border: none;
+            outline: none;
+            background-color: transparent;
+        }
+
+            .taglist .tag-suggestions .suggestion:hover {
+                background-color: var(--bg-lightergray);
+            }
+
+            .taglist .tag-suggestions .suggestion[class~="new"] {
+                font-style: italic;
+                color: var(--bg-gray);
+            }
+
+                .taglist .tag-suggestions .suggestion[class~="new"] span {
+                    margin-left: 0.3rem;
+                }
+
+    .taglist .tag-input select {
+        width: 100%;
+        font-size: 1rem;
+        color: var(--bg-midgray);
+    }
+
+        .taglist .tag-input select option {
+            color: black;
+        }
+
+            .taglist .tag-input select option[value="0"] {
+                color: var(--bg-midgray);
+                display: none;
+            }
+
+
 table.tracks {
     width: 100%;
 }
@@ -34,84 +149,6 @@ table.tracks {
         table.tracks tr.track-group input {
             font-weight: bold;
         }
-
-
-
-.TagList {
-    font-size: 15px;
-    padding: 3px;
-    outline: solid 1px #767676;
-    grid-column: span 9;
-}
-
-    .TagList:focus-within {
-        outline: solid 2px black;
-    }
-
-    .TagList > span {
-        display: inline-flex;
-        margin-right: 5px;
-        padding: 2px 3px 2px 5px;
-        border: solid 1px black;
-        border-radius: 5px;
-        background-color: #f8e496;
-    }
-
-    .TagList span button {
-        display: flex;
-        justify-content: center;
-        padding: 0;
-        margin: 3px 0 0 3px;
-        cursor: pointer;
-        background-color: transparent;
-        border: 0;
-    }
-
-        .TagList span button span {
-            border-radius: 15px;
-        }
-
-        .TagList span button:hover span {
-            background-color: var(--bg-yellow);
-        }
-
-    .TagList input {
-        font-size: 15px;
-        padding: 2px 4px 2px 5px;
-        border: none;
-    }
-
-        .TagList input:focus-visible {
-            outline: none;
-        }
-
-    .TagList > div {
-        position: absolute;
-        background-color: white;
-        border: solid 1px black;
-        border-radius: 5px;
-    }
-
-        .TagList > div:empty {
-            border: none;
-        }
-
-        .TagList > div > button {
-            display: block;
-            background-color: #f8e496;
-            border: solid 1px black;
-            border-radius: 5px;
-            padding: 2px 3px 2px 5px;
-            margin: 5px;
-            cursor: pointer;
-        }
-
-            .TagList > div > button.New {
-                background-color: white;
-                margin-left: 3px;
-            }
-
-
 
 
 .album-cover {

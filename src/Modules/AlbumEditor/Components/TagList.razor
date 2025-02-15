@@ -1,39 +1,43 @@
 ﻿@using System.Globalization
 @typeparam TItem
 
-<div class="TagList @Class">
-    @if (Items != null)
-    {
-        @foreach (TItem item in Items.OrderBy(i => i.TagName))
+<div class="taglist @Class">
+    <div class="tag-input">
+        @if (Items is { Count: > 0 })
         {
-            <span>@item.TagName<button @onclick="() => RemoveItem(item)"><span class="fa-regular fa-circle-xmark"></span></button></span>
-        }
-    }
-    @if (Selection != null)
-    {
-        <select @bind="SelectionSelected">
-            <option value="0"></option>
-            @if (Items != null)
-            {
-                @foreach (TItem item in Selection.Where(i => !Items.Contains(i)))
+            <div class="selected">
+                @foreach (TItem item in Items.OrderBy(i => i.TagName))
                 {
-                    <option value="@item.Id">@item.TagName</option>
+                    <span class="tag">@item.TagName<button @onclick="() => RemoveItem(item)"><span class="fa-regular fa-circle-xmark"></span></button></span>
                 }
-            }
-        </select>
-    }
-    else
-    {
-        <input @bind="Search" @bind:event="oninput" @bind:after="StartSearchTimer" @onblur="OnBlur" />
-    }
+            </div>
+        }
+        @if (Selection != null)
+        {
+            <select @bind="SelectionSelected">
+                <option value="0">Add a value...</option>
+                @if (Items != null)
+                {
+                    @foreach (TItem item in Selection.Where(i => !Items.Contains(i)))
+                    {
+                        <option value="@item.Id">@item.TagName</option>
+                    }
+                }
+            </select>
+        }
+        else
+        {
+            <input type="text" @bind="Search" @bind:event="oninput" @bind:after="StartSearchTimer" @onblur="OnBlur" placeholder="Type to search..." />
+        }
+    </div>
     @if (Search.Trim().Length > 0)
     {
-        <div>
+        <div class="tag-suggestions">
             @if (SearchResults.Any())
             {
                 @foreach (TItem searchResultItem in SearchResults)
                 {
-                    <button @onmousedown="() => AddItem(searchResultItem)">@searchResultItem.TagName</button>
+                    <button class="suggestion" @onmousedown="() => AddItem(searchResultItem)">@searchResultItem.TagName</button>
                 }
             }
             @{
@@ -41,12 +45,13 @@
                 var item = new TItem { TagName = newName };
                 if (SearchResults.All(i => i.TagName != item.TagName))
                 {
-                    if (Items.All(g => g.TagName != item.TagName))
+                    if (Items != null && Items.All(g => g.TagName != item.TagName))
                     {
-                        <button class="New" title="Create new" @onmousedown="() => AddNewItem(newName)">@newName<span class="fa-solid fa-plus-circle"></span></button>
+                        <button class="suggestion new" title="Create new" @onmousedown="() => AddNewItem(newName)">@newName<span class="fa-solid fa-plus-circle"></span></button>
                     }
                 }
             }
+
         </div>
     }
 </div>
