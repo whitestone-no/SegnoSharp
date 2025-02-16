@@ -95,7 +95,7 @@
             }
 
                 .taglist .tag-suggestions .suggestion[class~="new"] span {
-                    margin-left: 0.3rem;
+                    margin-right: 0.3rem;
                 }
 
     .taglist .tag-input select {

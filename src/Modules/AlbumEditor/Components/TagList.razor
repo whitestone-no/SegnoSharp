@@ -47,7 +47,7 @@
                 {
                     if (Items != null && Items.All(g => g.TagName != item.TagName))
                     {
-                        <button class="suggestion new" title="Create new" @onmousedown="() => AddNewItem(newName)">@newName<span class="fa-solid fa-plus-circle"></span></button>
+                        <button class="suggestion new" title="Create new" @onmousedown="() => AddNewItem(newName)"><span class="fa-solid fa-plus-circle"></span>Create new: "@newName"</button>
                     }
                 }
             }
