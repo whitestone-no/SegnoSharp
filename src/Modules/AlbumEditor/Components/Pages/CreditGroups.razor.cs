@@ -12,7 +12,7 @@ using Whitestone.SegnoSharp.Modules.AlbumEditor.ViewModels;
 
 namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
 {
-    public partial class PersonGroups : IDisposable
+    public partial class CreditGroups : IDisposable
     {
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
         [Inject] private IJSRuntime JsRuntime { get; set; }
