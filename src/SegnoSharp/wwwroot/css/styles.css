@@ -65,7 +65,7 @@ header {
 /* Identity Section */
 .identity a,
 .identity a:visited,
-.identity a:active{
+.identity a:active {
     color: var(--primary-color);
     text-decoration: none;
     margin-left: 20px;
@@ -700,6 +700,21 @@ nav a:visited {
     text-decoration: none;
 }
 
+/* Pagination */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination .info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0 8px;
+}
+
+
 /* Overrides */
 .no-margin {
     margin: 0 !important;
@@ -712,4 +727,12 @@ nav a:visited {
 
 .fullwidth {
     width: 100%;
+}
+
+.inline {
+    display: inline-block;
+}
+
+.hidden {
+    visibility: hidden;
 }

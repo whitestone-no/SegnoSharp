@@ -17,35 +17,55 @@
 
 <div class="card-grid">
     <div class="card card-span-12">
-        <EditForm Model="@SearchModel" OnSubmit="DoSearch">
-            <div class="form-group no-margin">
-                <label for="album-search" class="card-span-1 flex-center">Search</label>
-                <InputText type="text" id="album-search" class="card-span-10" @bind-Value="SearchModel.SearchString" />
-                <div class="card-span-1 text-center">
-                    <button class="primary" type="submit"><span class="fa-solid fa-magnifying-glass"></span></button>
+        <div class="card-body">
+            <EditForm Model="@SearchModel" OnSubmit="DoSearch">
+                <div class="form-group no-margin">
+                    <label for="album-search" class="card-span-1 flex-center">Search</label>
+                    <InputText type="text" id="album-search" class="card-span-10" @bind-Value="SearchModel.SearchString" />
+                    <div class="card-span-1 text-center">
+                        <button class="primary" type="submit"><span class="fa-solid fa-magnifying-glass"></span></button>
+                    </div>
                 </div>
-            </div>
-        </EditForm>
+            </EditForm>
+        </div>
     </div>
     <div class="card card-span-12">
-        <table>
-            <thead>
-                <tr>
-                    <th class="text-left">Title</th>
-                    <th class="text-left">Number of tracks</th>
-                    <th class="text-left">Added</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (Album album in AlbumList)
-                {
+        <div class="card-body">
+            <table>
+                <thead>
                     <tr>
-                        <td><NavLink href="@GetAlbumUrl(album.Id)">@album.Title</NavLink></td>
-                        <td>@album.Discs.SelectMany(d => d.Tracks).Count()</td>
-                        <td>@album.Added</td>
+                        <th class="text-left">Title</th>
+                        <th class="text-left">Number of tracks</th>
+                        <th class="text-left">Added</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (Album album in AlbumList)
+                    {
+                        <tr>
+                            <td><NavLink href="@GetAlbumUrl(album.Id)">@album.Title</NavLink></td>
+                            <td>@album.Discs.SelectMany(d => d.Tracks).Count()</td>
+                            <td>@album.Added</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (TotalPages > 1)
+        {
+            <div class="card-footer">
+                <div class="pagination">
+                    <button class="secondary @(CurrentPage == 1 ? "hidden" : "")" @onclick="() => OnPageChanged(1)" title="First page">&lt;&lt;</button>
+                    <button class="secondary @(CurrentPage == 1 ? "hidden" : "")" @onclick ="() => OnPageChanged(CurrentPage - 1)" title="Previous page">&lt;</button>
+                    <div class="info">
+                        <span>Page</span>
+                        <input type="number" min="1" max="@TotalPages" @bind="CurrentPage" @bind:after="() => OnPageChanged(CurrentPage)" />
+                        <span>of @TotalPages</span>
+                    </div>
+                    <button class="secondary @(CurrentPage == TotalPages ? "hidden" : "")" @onclick="() => OnPageChanged(CurrentPage + 1)" title="Next page">&gt;</button>
+                    <button class="secondary @(CurrentPage == TotalPages ? "hidden" : "")" @onclick="() => OnPageChanged(TotalPages)" title="Last page">&gt;&gt;</button>
+                </div>
+            </div>
+        }
     </div>
 </div>
