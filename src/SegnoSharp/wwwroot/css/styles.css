@@ -63,7 +63,9 @@ header {
 }
 
 /* Identity Section */
-.identity a {
+.identity a,
+.identity a:visited,
+.identity a:active{
     color: var(--primary-color);
     text-decoration: none;
     margin-left: 20px;
@@ -415,6 +417,7 @@ button[class~=tiny] {
     margin-bottom: 1rem;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
 }
 
     .form-group label {
@@ -500,7 +503,7 @@ table {
     }
 
     table tr:nth-child(even) {
-        background-color: var(--bg-lightergray);
+        background-color: var(--bg-lightestgray);
     }
 
     table tr:hover {
@@ -665,6 +668,38 @@ img[class~="rounded"] {
         content: "ⓘ";
     }
 
+
+/* Links */
+
+a {
+    color: #6B4D00; /* Darker brown-gold for better contrast */
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    transition: color 0.2s ease;
+}
+
+    a:hover {
+        color: #8B6300; /* Lighter brown-gold */
+        text-decoration: underline;
+        text-decoration-style: dashed;
+    }
+
+    a:active {
+        color: #B88A00; /* Your button color */
+    }
+
+    a:visited {
+        color: #6B4D00; /* Darker muted gold */
+    }
+
+nav a,
+nav a:hover,
+nav a:active,
+nav a:visited {
+    color: white;
+    text-decoration: none;
+}
+
 /* Overrides */
 .no-margin {
     margin: 0 !important;
@@ -673,4 +708,8 @@ img[class~="rounded"] {
 .flex-center {
     display: flex;
     align-items: center;
+}
+
+.fullwidth {
+    width: 100%;
 }
