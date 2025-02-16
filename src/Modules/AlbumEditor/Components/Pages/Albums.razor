@@ -9,42 +9,43 @@
 
 <h1>Album Editor</h1>
 
-<div class="card">
-    <EditForm Model="@SearchModel" OnSubmit="DoSearch">
-        <div class="form-group no-margin">
-            <label for="album-search" class="card-span-1 flex-center">Search</label>
-            <InputText type="text" id="album-search" class="card-span-10" @bind-Value="SearchModel.SearchString" />
-            <div class="card-span-1 text-center">
-                <button class="primary" type="submit"><span class="fa-solid fa-magnifying-glass"></span></button>
-            </div>
-        </div>
-    </EditForm>
-</div>
-
 @if (!AlbumList.Any())
 {
-    <div>No albums found</div>
+    <div class="alert alert-info">No albums found</div>
     return;
 }
 
-<div>
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Number of tracks</th>
-                <th>Added</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (Album album in AlbumList)
-            {
+<div class="card-grid">
+    <div class="card card-span-12">
+        <EditForm Model="@SearchModel" OnSubmit="DoSearch">
+            <div class="form-group no-margin">
+                <label for="album-search" class="card-span-1 flex-center">Search</label>
+                <InputText type="text" id="album-search" class="card-span-10" @bind-Value="SearchModel.SearchString" />
+                <div class="card-span-1 text-center">
+                    <button class="primary" type="submit"><span class="fa-solid fa-magnifying-glass"></span></button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+    <div class="card card-span-12">
+        <table>
+            <thead>
                 <tr>
-                    <td><NavLink href="@GetAlbumUrl(album.Id)">@album.Title</NavLink></td>
-                    <td>@album.Discs.SelectMany(d => d.Tracks).Count()</td>
-                    <td>@album.Added</td>
+                    <th class="text-left">Title</th>
+                    <th class="text-left">Number of tracks</th>
+                    <th class="text-left">Added</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (Album album in AlbumList)
+                {
+                    <tr>
+                        <td><NavLink href="@GetAlbumUrl(album.Id)">@album.Title</NavLink></td>
+                        <td>@album.Discs.SelectMany(d => d.Tracks).Count()</td>
+                        <td>@album.Added</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
