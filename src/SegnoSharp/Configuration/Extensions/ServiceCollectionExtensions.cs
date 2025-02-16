@@ -24,13 +24,25 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                 options.Authority = configuration.GetSection("OpenIdConnect").GetValue<string>("Authority");
                 options.ClientId = configuration.GetSection("OpenIdConnect").GetValue<string>("ClientId");
                 options.ClientSecret = configuration.GetSection("OpenIdConnect").GetValue<string>("ClientSecret");
-                options.Scope.Add("roles");
+                var additionalScopes = configuration.GetSection("OpenIdConnect").GetValue<string>("AdditionalScopes");
+                if (!string.IsNullOrEmpty(additionalScopes))
+                {
+                    foreach (string scope in additionalScopes.Split(","))
+                    {
+                        options.Scope.Add(scope);
+                    }
+                }
                 options.ResponseType = "code";
                 options.SaveTokens = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
-                options.ClaimActions.MapUniqueJsonKey("role", "role");
-                options.ClaimActions.MapUniqueJsonKey("preferred_username", "preferred_username");
-                
+                options.ClaimActions.MapUniqueJsonKey("preferred_username", configuration.GetSection("OpenIdConnect").GetValue<string>("UsernameClaimKey"));
+                // If the admin claim key is part of the access token, then this is not necessary
+                // but if it is part of the userinfo endpoint then it must be mapped into the regular claims
+                // This ensures that "AdminClaimKey" will always be available whether it comes from access token or user info
+                options.ClaimActions.MapUniqueJsonKey(
+                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey"),
+                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey"));
+
                 options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
 
@@ -41,19 +53,30 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                         context.HandleResponse();
                         context.Response.Redirect("/");
                         return Task.CompletedTask;
+                    },
+                    OnRedirectToIdentityProviderForSignOut = context =>
+                    {
+                        if (!configuration.GetSection("OpenIdConnect").GetValue<bool>("SupportsEndSession"))
+                        {
+                            context.HandleResponse();
+                        }
+                        return Task.CompletedTask;
                     }
                 };
             });
 
             services.AddAuthorization(options =>
             {
+                var adminClaimKey = configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey");
+                var adminClaimValue = configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimValue");
+
                 options.DefaultPolicy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     // Would love to use .RequireRole() here, but somehow the "role" claims from IDP is not mapped to user roles.
                     .RequireAssertion(ctx =>
                     {
-                        Claim claim = ctx.User.FindFirst("role");
-                        return claim != null && claim.Value.Contains(configuration.GetSection("OpenIdConnect").GetValue<string>("AdminRoleId"));
+                        Claim claim = ctx.User.FindFirst(adminClaimKey);
+                        return claim != null && claim.Value.Contains(adminClaimValue);
                     })
                     .Build();
                 options.AddPolicy("IgnoreRole",
