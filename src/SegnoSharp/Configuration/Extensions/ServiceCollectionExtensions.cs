@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Whitestone.SegnoSharp.Configuration.Authentication;
 
 namespace Whitestone.SegnoSharp.Configuration.Extensions
 {
@@ -13,57 +14,22 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
     {
         public static IServiceCollection AddOidcAuthorizaton(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = "SegnoSharpAuthCookies";
-                options.DefaultChallengeScheme = "oidc";
-            })
-            .AddCookie("SegnoSharpAuthCookies")
-            .AddOpenIdConnect("oidc", options =>
-            {
-                options.Authority = configuration.GetSection("OpenIdConnect").GetValue<string>("Authority");
-                options.ClientId = configuration.GetSection("OpenIdConnect").GetValue<string>("ClientId");
-                options.ClientSecret = configuration.GetSection("OpenIdConnect").GetValue<string>("ClientSecret");
-                var additionalScopes = configuration.GetSection("OpenIdConnect").GetValue<string>("AdditionalScopes");
-                if (!string.IsNullOrEmpty(additionalScopes))
+            AuthenticationBuilder authenticationBuilder = services
+                .AddAuthentication(options =>
                 {
-                    foreach (string scope in additionalScopes.Split(","))
-                    {
-                        options.Scope.Add(scope);
-                    }
-                }
-                options.ResponseType = "code";
-                options.SaveTokens = true;
-                options.GetClaimsFromUserInfoEndpoint = true;
-                options.ClaimActions.MapUniqueJsonKey("preferred_username", configuration.GetSection("OpenIdConnect").GetValue<string>("UsernameClaimKey"));
-                // If the admin claim key is part of the access token, then this is not necessary
-                // but if it is part of the userinfo endpoint then it must be mapped into the regular claims
-                // This ensures that "AdminClaimKey" will always be available whether it comes from access token or user info
-                options.ClaimActions.MapUniqueJsonKey(
-                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey"),
-                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey"));
+                    options.DefaultScheme = "SegnoSharpAuthCookies";
+                    options.DefaultChallengeScheme = "oidc";
+                })
+                .AddCookie("SegnoSharpAuthCookies");
 
-                options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
-
-                options.Events = new OpenIdConnectEvents
-                {
-                    OnAccessDenied = context =>
-                    {
-                        context.HandleResponse();
-                        context.Response.Redirect("/");
-                        return Task.CompletedTask;
-                    },
-                    OnRedirectToIdentityProviderForSignOut = context =>
-                    {
-                        if (!configuration.GetSection("OpenIdConnect").GetValue<bool>("SupportsEndSession"))
-                        {
-                            context.HandleResponse();
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
-            });
+            if (configuration.GetSection("OpenIdConnect").GetValue<bool>("UseOidc"))
+            {
+                authenticationBuilder.AddOidc(configuration);
+            }
+            else
+            {
+                authenticationBuilder.AddScheme<AuthenticationSchemeOptions, FakeAuthHandler>("oidc", null);
+            }
 
             services.AddAuthorization(options =>
             {
@@ -86,6 +52,60 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
             });
 
             return services;
+        }
+
+        private static void AddOidc(this AuthenticationBuilder builder, IConfiguration configuration)
+        {
+            builder.AddOpenIdConnect("oidc", options =>
+            {
+                options.Authority = configuration.GetSection("OpenIdConnect").GetValue<string>("Authority");
+                options.ClientId = configuration.GetSection("OpenIdConnect").GetValue<string>("ClientId");
+                options.ClientSecret = configuration.GetSection("OpenIdConnect").GetValue<string>("ClientSecret");
+                var additionalScopes =
+                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdditionalScopes");
+                if (!string.IsNullOrEmpty(additionalScopes))
+                {
+                    foreach (string scope in additionalScopes.Split(","))
+                    {
+                        options.Scope.Add(scope);
+                    }
+                }
+
+                options.ResponseType = "code";
+                options.SaveTokens = true;
+                options.GetClaimsFromUserInfoEndpoint = true;
+                options.ClaimActions.MapUniqueJsonKey("preferred_username",
+                    configuration.GetSection("OpenIdConnect").GetValue<string>("UsernameClaimKey"));
+                // If the admin claim key is part of the access token, then this is not necessary
+                // but if it is part of the userinfo endpoint then it must be mapped into the regular claims
+                // This ensures that "AdminClaimKey" will always be available whether it comes from access token or user info
+                options.ClaimActions.MapUniqueJsonKey(
+                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey"),
+                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey"));
+
+                options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
+
+                options.Events = new OpenIdConnectEvents
+                {
+                    OnAccessDenied = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.Redirect("/");
+
+                        return Task.CompletedTask;
+                    },
+                    OnRedirectToIdentityProviderForSignOut = context =>
+                    {
+                        if (!configuration.GetSection("OpenIdConnect").GetValue<bool>("SupportsEndSession"))
+                        {
+                            context.HandleResponse();
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
+            });
         }
     }
 }
