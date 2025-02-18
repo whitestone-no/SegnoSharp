@@ -64,5 +64,22 @@
                 }
             }
         </div>
+        @if (SearchTotalPages > 1)
+        {
+            <div class="card-footer">
+                <div class="pagination">
+                    <button class="secondary @(SearchCurrentPage == 1 ? "hidden" : "")" @onclick="() => OnSearchPageChanged(1)" title="First page">&lt;&lt;</button>
+                    <button class="secondary @(SearchCurrentPage == 1 ? "hidden" : "")" @onclick="() => OnSearchPageChanged(SearchCurrentPage - 1)" title="Previous page">&lt;</button>
+                    <div class="info">
+                        <span>Page</span>
+                        <input type="number" min="1" max="@SearchTotalPages" @bind="SearchCurrentPage" @bind:after="() => OnSearchPageChanged(SearchCurrentPage)" />
+                        <span>of @SearchTotalPages</span>
+                    </div>
+                    <button class="secondary @(SearchCurrentPage == SearchTotalPages ? "hidden" : "")" @onclick="() => OnSearchPageChanged(SearchCurrentPage + 1)" title="Next page">&gt;</button>
+                    <button class="secondary @(SearchCurrentPage == SearchTotalPages ? "hidden" : "")" @onclick="() => OnSearchPageChanged(SearchTotalPages)" title="Last page">&gt;&gt;</button>
+                </div>
+            </div>
+        }
+
     </div>
 </div>

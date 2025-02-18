@@ -17,7 +17,10 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
         public SearchViewModel SearchModel { get; set; } = new();
         public List<SearchResultViewModel> SearchResults { get; set; } = [];
 
-        private const int SearchResultPageSize = 20;
+        private const int SearchPageSize = 20;
+        private int SearchTotalPages { get; set; }
+        private int SearchCurrentPage { get; set; } = 1;
+
 
         protected override void OnInitialized()
         {
@@ -28,30 +31,32 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
         {
             if (string.IsNullOrEmpty(SearchModel.SearchTerm))
             {
-                return;
+                SearchResults = [];
+                SearchTotalPages = 1;
+                SearchCurrentPage = 1;
             }
 
             await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
-            SearchResults = await dbContext.TrackStreamInfos
+            SearchTotalPages = (int)Math.Ceiling(await dbContext.TrackStreamInfos
                 .AsNoTracking()
-                .Where(tsi => 
+                .Where(tsi =>
                     // Public/AutoPlaylist filters
                     (!SearchModel.OnlyPublic || (SearchModel.OnlyPublic && tsi.Track.Disc.Album.IsPublic)) &&
                     (!SearchModel.OnlyAutoPlaylist || (SearchModel.OnlyAutoPlaylist && tsi.IncludeInAutoPlaylist)) &&
-                    
+
                     // Search criteria
                     (
-                        (SearchModel.SearchForFilename && 
+                        (SearchModel.SearchForFilename &&
                             EF.Functions.Like(tsi.FilePath, "%" + SearchModel.SearchTerm + "%")) ||
-                        
-                        (SearchModel.SearchForAlbum && 
+
+                        (SearchModel.SearchForAlbum &&
                             EF.Functions.Like(tsi.Track.Disc.Album.Title, "%" + SearchModel.SearchTerm + "%")) ||
-                        
-                        (SearchModel.SearchForTrack && 
+
+                        (SearchModel.SearchForTrack &&
                             EF.Functions.Like(tsi.Track.Title, "%" + SearchModel.SearchTerm + "%")) ||
-                        
-                        (SearchModel.SearchForArtist && 
+
+                        (SearchModel.SearchForArtist &&
                             (
                                 // Search in track artists
                                 (tsi.Track.TrackPersonGroupPersonRelations.Any(r =>
@@ -75,27 +80,81 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                         )
                     )
                 )
-                .Take(SearchResultPageSize)
+                .CountAsync() / (double)SearchPageSize);
+
+            await OnSearchPageChanged(1);
+        }
+
+        private async Task OnSearchPageChanged(int page)
+        {
+            SearchCurrentPage = page;
+
+            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+            SearchResults = await dbContext.TrackStreamInfos
+                .AsNoTracking()
+                .Where(tsi =>
+                    // Public/AutoPlaylist filters
+                    (!SearchModel.OnlyPublic || (SearchModel.OnlyPublic && tsi.Track.Disc.Album.IsPublic)) &&
+                    (!SearchModel.OnlyAutoPlaylist || (SearchModel.OnlyAutoPlaylist && tsi.IncludeInAutoPlaylist)) &&
+
+                    // Search criteria
+                    (
+                        (SearchModel.SearchForFilename &&
+                            EF.Functions.Like(tsi.FilePath, "%" + SearchModel.SearchTerm + "%")) ||
+
+                        (SearchModel.SearchForAlbum &&
+                            EF.Functions.Like(tsi.Track.Disc.Album.Title, "%" + SearchModel.SearchTerm + "%")) ||
+
+                        (SearchModel.SearchForTrack &&
+                            EF.Functions.Like(tsi.Track.Title, "%" + SearchModel.SearchTerm + "%")) ||
+
+                        (SearchModel.SearchForArtist &&
+                            (
+                                // Search in track artists
+                                (tsi.Track.TrackPersonGroupPersonRelations.Any(r =>
+                                    r.PersonGroup.PersonGroupStreamInfo != null &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist &&
+                                    r.Persons.Any(p =>
+                                        EF.Functions.Like(p.FirstName, "%" + SearchModel.SearchTerm + "%") ||
+                                        EF.Functions.Like(p.LastName, "%" + SearchModel.SearchTerm + "%")
+                                    )
+                                )) ||
+                                // Search in album artists
+                                (tsi.Track.Disc.Album.AlbumPersonGroupPersonRelations.Any(r =>
+                                    r.PersonGroup.PersonGroupStreamInfo != null &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist &&
+                                    r.Persons.Any(p =>
+                                        EF.Functions.Like(p.FirstName, "%" + SearchModel.SearchTerm + "%") ||
+                                        EF.Functions.Like(p.LastName, "%" + SearchModel.SearchTerm + "%")
+                                    )
+                                ))
+                            )
+                        )
+                    )
+                )
+                .Skip(SearchPageSize * (SearchCurrentPage - 1))
+                .Take(SearchPageSize)
                 .Select(tsi => new SearchResultViewModel
                 {
                     AlbumTitle = tsi.Track.Disc.Album.Title,
                     TrackTitle = tsi.Track.Title,
                     Length = tsi.Track.Length,
-                    TrackArtists = string.Join(", ", 
+                    TrackArtists = string.Join(", ",
                         tsi.Track.TrackPersonGroupPersonRelations
-                            .Where(r => 
+                            .Where(r =>
                                 r.PersonGroup.PersonGroupStreamInfo != null &&
                                 r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
-                            .SelectMany(r => 
-                                r.Persons.Select(p => 
+                            .SelectMany(r =>
+                                r.Persons.Select(p =>
                                     p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName))),
-                    AlbumArtists = string.Join(", ", 
+                    AlbumArtists = string.Join(", ",
                         tsi.Track.Disc.Album.AlbumPersonGroupPersonRelations
-                            .Where(r => 
+                            .Where(r =>
                                 r.PersonGroup.PersonGroupStreamInfo != null &&
                                 r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
-                            .SelectMany(r => 
-                                r.Persons.Select(p => 
+                            .SelectMany(r =>
+                                r.Persons.Select(p =>
                                     p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName)))
                 })
                 .ToListAsync();
