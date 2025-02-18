@@ -1,8 +1,68 @@
 ﻿@page "/admin/playlist"
+@rendermode InteractiveServer
 @layout InnerLayout
 @using Whitestone.SegnoSharp.Modules.Playlist.Components.Layouts
 @using Whitestone.SegnoSharp.Common.Attributes
+@using Whitestone.SegnoSharp.Modules.Playlist.ViewModels
 @attribute [Authorize]
 @attribute [ModuleMenu("Playlist", "fa-list-check", true)]
 
 <h1>Playlist admin</h1>
+
+<div class="card-grid">
+    <div class="card card-span-12">
+        <div class="card-header">Playlist</div>
+        <div class="card-body"></div>
+    </div>
+    <div class="card card-span-4">
+        <div class="card-header">Search</div>
+        <div class="card-body">
+            <EditForm Model="@SearchModel" OnSubmit="DoSearchAsync" class="card-grid">
+                <div class="form-group card-span-12">
+                    <InputText type="text" id="search-text" class="card-span-9" @bind-Value="SearchModel.SearchTerm" />
+                    <button type="submit" class="secondary card-span-3">Search</button>
+                </div>
+                <div class="form-group card-span-6">
+                    <label for="search-for-album" class="card-span-5">Album</label>
+                    <InputCheckbox type="checkbox" id="search-for-album" @bind-Value="SearchModel.SearchForAlbum" />
+                </div>
+                <div class="form-group card-span-6">
+                    <label for="search-for-track" class="card-span-5">Track</label>
+                    <InputCheckbox type="checkbox" id="search-for-track" @bind-Value="SearchModel.SearchForTrack" />
+                </div>
+                <div class="form-group card-span-6">
+                    <label for="search-for-artist" class="card-span-5">Artist</label>
+                    <InputCheckbox type="checkbox" id="search-for-artist" @bind-Value="SearchModel.SearchForArtist" />
+                </div>
+                <div class="form-group card-span-6">
+                    <label for="search-for-filename" class="card-span-5">Filename</label>
+                    <InputCheckbox type="checkbox" id="search-for-filename" @bind-Value="SearchModel.SearchForFilename" />
+                </div>
+                <div class="form-group card-span-12">
+                    <label for="search-for-onlypublic" class="card-span-5">Only public albums</label>
+                    <InputCheckbox type="checkbox" id="search-for-onlypublic" @bind-Value="SearchModel.OnlyPublic" />
+                </div>
+                <div class="form-group card-span-12">
+                    <label for="search-for-onlyautoplaylist" class="card-span-5">Only auto playlist</label>
+                    <InputCheckbox type="checkbox" id="search-for-onlyautoplaylist" @bind-Value="SearchModel.OnlyAutoPlaylist" />
+                </div>
+            </EditForm>
+        </div>
+    </div>
+    <div class="card card-span-8">
+        <div class="card-header">Search results</div>
+        <div class="card-body">
+            @if (SearchResults.Count == 0)
+            {
+                <div class="alert alert-info">No results for current search</div>
+            }
+            else
+            {
+                @foreach (SearchResultViewModel result in SearchResults)
+                {
+                    <div>@result.AlbumTitle - @result.TrackTitle (@result.Artists)</div>
+                }
+            }
+        </div>
+    </div>
+</div>
