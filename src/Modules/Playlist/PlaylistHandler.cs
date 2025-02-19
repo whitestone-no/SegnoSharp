@@ -99,6 +99,8 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
 
         public void HandleEvent(PlayerReady input)
         {
+            _log.LogDebug("Player is ready. Starting playback of tracks from StreamQueue");
+
             // Start timer that counts down from track.Duration and sends a new track to the player when current track reaches zero.
             // Do not await it as this should run in the background.
 
@@ -127,8 +129,10 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                     {
                         int tracksInQueue = await dbContext.StreamQueue.CountAsync(cancellationToken);
                         int totalQueueDuration = await dbContext.StreamQueue.SumAsync(q => q.TrackStreamInfo.Track.Length, cancellationToken);
+                        bool playlistUpdated = false;
 
-                        while (!(tracksInQueue >= _settings.MinimumNumberOfSongs && totalQueueDuration >= _settings.MinimumTotalDuration * 60))
+                        while (!(tracksInQueue >= _settings.MinimumNumberOfSongs &&
+                                 totalQueueDuration >= _settings.MinimumTotalDuration * 60))
                         {
                             _log.LogDebug("Currently {tracksInQueue} tracks in queue (less than {minimumNumberOfSongs}) with a total duration of {totalQueueDuration} seconds (less than {minimumTotalDuration})", tracksInQueue, _settings.MinimumNumberOfSongs, totalQueueDuration, _settings.MinimumTotalDuration * 60);
 
@@ -157,6 +161,13 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
 
                             tracksInQueue = await dbContext.StreamQueue.CountAsync(cancellationToken);
                             totalQueueDuration = await dbContext.StreamQueue.SumAsync(q => q.TrackStreamInfo.Track.Length, cancellationToken);
+
+                            playlistUpdated = true;
+                        }
+
+                        if (playlistUpdated)
+                        {
+                            await _cambion.PublishEventAsync(new PlaylistUpdated());
                         }
                     }
                     else
@@ -263,6 +274,8 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                             await dbContext.StreamQueue.ForEachAsync(q => q.SortOrder--, cancellationToken);
 
                             await dbContext.SaveChangesAsync(cancellationToken);
+
+                            await _cambion.PublishEventAsync(new PlaylistUpdated());
                         }
                     }
                     finally
