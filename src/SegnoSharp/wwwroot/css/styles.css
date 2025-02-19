@@ -430,6 +430,7 @@ button[class~=tiny] {
 
 input[type="text"],
 input[type="number"],
+input[type="date"],
 select,
 textarea {
     padding: 0.5rem;
@@ -440,6 +441,7 @@ textarea {
 
     input[type="text"]:hover,
     input[type="number"]:hover,
+    input[type="date"]:hover,
     select:hover,
     textarea:hover {
         border-color: var(--bg-darkgray);
@@ -447,6 +449,7 @@ textarea {
 
     input[type="text"]:focus,
     input[type="number"]:focus,
+    input[type="date"]:focus,
     select:focus,
     textarea:focus {
         border-color: var(--primary-color);
