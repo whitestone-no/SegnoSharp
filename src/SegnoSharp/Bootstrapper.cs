@@ -116,6 +116,8 @@ namespace Whitestone.SegnoSharp
             }
 
             builder.Services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
+            builder.Services.AddCambion()
+                .UseMessagePackSerializer();
 
             builder.Services.Configure<CommonConfig>(builder.Configuration.GetSection(CommonConfig.Section));
             builder.Services.Configure<StreamingServer>(builder.Configuration.GetSection(StreamingServer.Section));
@@ -132,8 +134,6 @@ namespace Whitestone.SegnoSharp
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
             builder.Services.AddOidcAuthorizaton(builder.Configuration);
-            builder.Services.AddCambion()
-                .UseMessagePackSerializer();
             builder.Services.AddCommon();
         }
 
