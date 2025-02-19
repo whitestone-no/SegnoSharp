@@ -26,20 +26,21 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
         private readonly ILogger<PlaylistHandler> _log;
         private readonly List<IPlaylistProcessor> _playlistProcessors;
         private readonly PlaylistSettings _settings;
+        private readonly PlaylistQueueLocker _queueLocker;
+
         // Ensure that the tasks for reading the playlist and updating the playlist don't step on each other's toes
-        private readonly SemaphoreSlim _queueMutex = new(1);
         private readonly CancellationTokenSource _autoplaylistTaskCancellationTokenSource = new();
         private CancellationTokenSource _currentlyPlayingTaskCancellationTokenSource;
 
         public PlaylistHandler(
-            ITagReader tagReader,
             IDbContextFactory<SegnoSharpDbContext> dbContextFactory,
             IPersistenceManager persistenceManager,
             ISystemClock systemClock,
             ICambion cambion,
             ILogger<PlaylistHandler> log,
             IEnumerable<IPlaylistProcessor> playlistProcessors,
-            PlaylistSettings playlistSettings)
+            PlaylistSettings playlistSettings,
+            PlaylistQueueLocker queueLocker)
         {
             _dbContextFactory = dbContextFactory;
             _persistenceManager = persistenceManager;
@@ -48,6 +49,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
             _log = log;
             _playlistProcessors = playlistProcessors.ToList();
             _settings = playlistSettings;
+            _queueLocker = queueLocker;
 
             cambion.Register(this);
         }
@@ -121,7 +123,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
             {
                 try
                 {
-                    await _queueMutex.WaitAsync(cancellationToken);
+                    await _queueLocker.LockQueueAsync(cancellationToken);
 
                     await using SegnoSharpDbContext dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -181,7 +183,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                 }
                 finally
                 {
-                    _queueMutex.Release();
+                    _queueLocker.UnlockQueue();
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(15), cancellationToken);
@@ -227,7 +229,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                     {
                         await using SegnoSharpDbContext dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-                        await _queueMutex.WaitAsync(cancellationToken);
+                        await _queueLocker.LockQueueAsync(cancellationToken);
 
                         queuetrack = await dbContext.StreamQueue
                             .Include(t => t.TrackStreamInfo)
@@ -280,7 +282,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                     }
                     finally
                     {
-                        _queueMutex.Release();
+                        _queueLocker.UnlockQueue();
                     }
 
                     if (queuetrack == null)

@@ -17,6 +17,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
             services.AddHostedService<PlaylistHandler>();
             services.AddSingleton<IPlaylistProcessor, DefaultProcessor>();
             services.AddSingleton<PlaylistSettings>();
+            services.AddSingleton<PlaylistQueueLocker>();
         }
     }
 }
