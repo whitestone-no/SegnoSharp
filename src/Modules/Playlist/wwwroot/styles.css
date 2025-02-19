@@ -73,3 +73,90 @@
 .playlist-settings[class~=disabled] .settings-header span {
     color: var(--bg-lightgray)
 }
+
+div.drag-on {
+    border-top: solid 51px var(--hover-color) !important;
+    padding-top: 1rem;
+}
+
+div.drag-current {
+    display: none;
+}
+
+span[class~="fa-grip"] {
+    cursor: grab
+}
+
+.center-all {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.search-result {
+    margin: 0;
+    padding: 0.5rem;
+}
+
+    .search-result:hover {
+        background-color: var(--hover-bg);
+    }
+
+.search-result > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+    .search-result > div:first-child {
+        display: block;
+    }
+
+
+.playlist-search-actions div.handle {
+    display: flex;
+    text-align: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 5px;
+    background-color: var(--bg-lightestgray);
+    border: solid 1px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.playlist-search-actions div.actions {
+    display: none;
+}
+
+    .playlist-search-actions div.handle:hover ~ div.actions,
+    .playlist-search-actions div.actions:hover {
+        display: block;
+        position: absolute;
+        margin-left: -165px; /* width - handle.width - borderradius */
+        margin-top: 84px; /* Don't know how this value adds up */
+        width: 200px;
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: #fff;
+        border: solid 1px var(--bg-lightgray);
+        box-shadow: 0 0 10px var(--bg-lightgray);
+    }
+
+    .playlist-search-actions div.actions button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: none;
+        background-color: transparent;
+        font-size: 1rem;
+        color: black;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+        .playlist-search-actions div.actions button:hover {
+            color: #fff;
+            background-color: #3265cb;
+        }

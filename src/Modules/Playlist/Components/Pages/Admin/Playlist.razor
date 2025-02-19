@@ -12,7 +12,32 @@
 <div class="card-grid">
     <div class="card card-span-12">
         <div class="card-header">Playlist</div>
-        <div class="card-body"></div>
+        <div class="card-body">
+            @foreach (PlaylistViewModel playlistItem in PlaylistModel)
+            {
+                <div draggable="true"
+                     ondragover="event.preventDefault();"
+                     @ondragstart="() => HandleDragStart(playlistItem)"
+                     @ondrop="() => HandleDrop(playlistItem)"
+                     @ondragend="HandleDragEnd"
+                     @ondragenter="() => HandleDragEnter(playlistItem)"
+                     class="card-grid @(_currentlyDraggingPlaylistItem == playlistItem ? "drag-current" : _currentlyDraggingOverPlaylistItem == playlistItem ? "drag-on" : null)">
+                    <div class="card-span-1 center-all">
+                        <span class="fa-solid fa-grip"></span>
+                    </div>
+                    <div class="card-span-1 center-all">
+                        @playlistItem.SortOrder
+                    </div>
+                    <div class="card-span-9">
+                        <div>
+                            <b>@playlistItem.AlbumTitle</b> <em>(@playlistItem.Artists)</em><br />
+                            @playlistItem.TrackTitle
+                        </div>
+                    </div>
+                    <div class="card-span-1 center-all">@playlistItem.Length</div>
+                </div>
+            }
+        </div>
     </div>
     <div class="card card-span-4">
         <div class="card-header">Search</div>
@@ -60,7 +85,22 @@
             {
                 @foreach (SearchResultViewModel result in SearchResults)
                 {
-                    <div>@result.AlbumTitle - @result.TrackTitle (@result.Artists)</div>
+                    <div class="card-grid search-result">
+                        <div class="card-span-9">
+                            <b>@result.AlbumTitle</b> <em>(@result.Artists)</em><br />
+                            @result.TrackTitle
+                        </div>
+                        <div class="card-span-2">
+                            @result.Length
+                        </div>
+                        <div class="card-span-1 playlist-search-actions">
+                            <div class="handle"><span class="fa-solid fa-caret-down"></span></div>
+                            <div class="actions">
+                                <button @onclick="() => AddTrackToQueueTop(result.TrackStreamInfoId)">Add to top of queue</button>
+                                <button @onclick="() => AddTrackToQueueBottom(result.TrackStreamInfoId)">Add to bottom of queue</button>
+                            </div>
+                        </div>
+                    </div>
                 }
             }
         </div>

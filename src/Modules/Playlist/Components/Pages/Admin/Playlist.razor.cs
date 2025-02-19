@@ -5,14 +5,20 @@ using Microsoft.AspNetCore.Components;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Modules.Playlist.ViewModels;
 using System.Linq;
-using Whitestone.SegnoSharp.Database.Models;
 using System;
+using Whitestone.Cambion.Interfaces;
+using Whitestone.SegnoSharp.Common.Events;
+using Whitestone.SegnoSharp.Database.Models;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
 {
-    public partial class Playlist
+    public partial class Playlist : IEventHandler<PlaylistUpdated>
     {
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
+        [Inject] private ICambion Cambion { get; set; }
+        [Inject] private PlaylistQueueLocker QueueLocker { get; set; }
+
+        private List<PlaylistViewModel> PlaylistModel { get; set; } = [];
 
         public SearchViewModel SearchModel { get; set; } = new();
         public List<SearchResultViewModel> SearchResults { get; set; } = [];
@@ -21,10 +27,14 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
         private int SearchTotalPages { get; set; }
         private int SearchCurrentPage { get; set; } = 1;
 
+        private PlaylistViewModel _currentlyDraggingPlaylistItem;
+        private PlaylistViewModel _currentlyDraggingOverPlaylistItem;
 
         protected override void OnInitialized()
         {
-            base.OnInitialized();
+            Cambion.Register(this);
+
+            HandleEvent(new PlaylistUpdated());
         }
 
         private async Task DoSearchAsync()
@@ -36,7 +46,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                 SearchCurrentPage = 1;
             }
 
-            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+            SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
             SearchTotalPages = (int)Math.Ceiling(await dbContext.TrackStreamInfos
                 .AsNoTracking()
@@ -89,7 +99,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
         {
             SearchCurrentPage = page;
 
-            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+            SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
             SearchResults = await dbContext.TrackStreamInfos
                 .AsNoTracking()
@@ -137,9 +147,10 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                 .Take(SearchPageSize)
                 .Select(tsi => new SearchResultViewModel
                 {
+                    TrackStreamInfoId = tsi.Id,
                     AlbumTitle = tsi.Track.Disc.Album.Title,
                     TrackTitle = tsi.Track.Title,
-                    Length = tsi.Track.Length,
+                    Length = tsi.Track.Duration,
                     TrackArtists = string.Join(", ",
                         tsi.Track.TrackPersonGroupPersonRelations
                             .Where(r =>
@@ -158,6 +169,168 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                                     p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName)))
                 })
                 .ToListAsync();
+        }
+
+        // ReSharper disable once AsyncVoidMethod
+        public async void HandleEvent(PlaylistUpdated input)
+        {
+            try
+            {
+                await QueueLocker.LockQueueAsync();
+
+                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+                PlaylistModel = await dbContext.StreamQueue
+                    .AsNoTracking()
+                    .OrderBy(q => q.SortOrder)
+                    .Select(q => new PlaylistViewModel
+                    {
+                        AlbumTitle = q.TrackStreamInfo.Track.Disc.Album.Title,
+                        TrackTitle = q.TrackStreamInfo.Track.Title,
+                        Length = q.TrackStreamInfo.Track.Duration,
+                        QueueId = q.Id,
+                        SortOrder = q.SortOrder,
+                        TrackArtists = string.Join(", ",
+                            q.TrackStreamInfo.Track.TrackPersonGroupPersonRelations
+                                .Where(r =>
+                                    r.PersonGroup.PersonGroupStreamInfo != null &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                .SelectMany(r =>
+                                    r.Persons.Select(p =>
+                                        p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName))),
+                        AlbumArtists = string.Join(", ",
+                            q.TrackStreamInfo.Track.Disc.Album.AlbumPersonGroupPersonRelations
+                                .Where(r =>
+                                    r.PersonGroup.PersonGroupStreamInfo != null &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                .SelectMany(r =>
+                                    r.Persons.Select(p =>
+                                        p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName)))
+                    })
+                    .ToListAsync();
+
+                await InvokeAsync(StateHasChanged);
+            }
+            finally
+            {
+                QueueLocker.UnlockQueue();
+            }
+
+        }
+
+        private void HandleDragStart(PlaylistViewModel item)
+        {
+            _currentlyDraggingPlaylistItem = item;
+        }
+
+        private async Task HandleDrop(PlaylistViewModel targetPlaylistItem)
+        {
+            try
+            {
+                await QueueLocker.LockQueueAsync();
+
+                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+                ushort newSortOrder = targetPlaylistItem.SortOrder;
+                ushort oldSortOrder = _currentlyDraggingPlaylistItem.SortOrder;
+
+                // If moving "down"
+                if (newSortOrder > oldSortOrder)
+                {
+                    newSortOrder = (ushort)(newSortOrder - 1);
+                    foreach (StreamQueue moveQueue in await dbContext.StreamQueue.Where(q => q.SortOrder <= newSortOrder && q.SortOrder > oldSortOrder && q.Id != _currentlyDraggingPlaylistItem.QueueId).ToListAsync())
+                    {
+                        moveQueue.SortOrder = (ushort)(moveQueue.SortOrder - 1);
+                    }
+                }
+                // If moving "up"
+                else if (newSortOrder < oldSortOrder)
+                {
+                    foreach (StreamQueue moveGroup in await dbContext.StreamQueue.Where(g => g.SortOrder < oldSortOrder && g.SortOrder >= newSortOrder && g.Id != _currentlyDraggingPlaylistItem.QueueId).ToListAsync())
+                    {
+                        moveGroup.SortOrder = (ushort)(moveGroup.SortOrder + 1);
+                    }
+                }
+
+                StreamQueue currentlyDragging = await dbContext.StreamQueue.FirstAsync(q => q.Id == _currentlyDraggingPlaylistItem.QueueId);
+                currentlyDragging.SortOrder = newSortOrder;
+
+                await dbContext.SaveChangesAsync();
+
+                await Cambion.PublishEventAsync(new PlaylistUpdated());
+            }
+            finally
+            {
+                QueueLocker.UnlockQueue();
+            }
+        }
+
+        private void HandleDragEnd()
+        {
+            _currentlyDraggingPlaylistItem = null;
+            _currentlyDraggingOverPlaylistItem = null;
+        }
+
+        private void HandleDragEnter(PlaylistViewModel item)
+        {
+            _currentlyDraggingOverPlaylistItem = item;
+        }
+
+        private async Task AddTrackToQueueTop(int trackStreamInfoId)
+        {
+            try
+            {
+                await QueueLocker.LockQueueAsync();
+
+                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+                List<StreamQueue> queue = await dbContext.StreamQueue.ToListAsync();
+                
+                foreach (StreamQueue queueItem in queue)
+                {
+                    queueItem.SortOrder++;
+                }
+                
+                dbContext.StreamQueue.Add(new StreamQueue
+                {
+                    SortOrder = 1,
+                    TrackStreamInfo = await dbContext.TrackStreamInfos.FirstAsync(tsi => tsi.Id == trackStreamInfoId)
+                });
+
+                await dbContext.SaveChangesAsync();
+
+                await Cambion.PublishEventAsync(new PlaylistUpdated());
+            }
+            finally
+            {
+                QueueLocker.UnlockQueue();
+            }
+        }
+
+        private async Task AddTrackToQueueBottom(int trackStreamInfoId)
+        {
+            try
+            {
+                await QueueLocker.LockQueueAsync();
+
+                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+                ushort maxSortOrder = await dbContext.StreamQueue.MaxAsync(q => q.SortOrder);
+
+                dbContext.StreamQueue.Add(new StreamQueue
+                {
+                    SortOrder = (ushort)(maxSortOrder + 1),
+                    TrackStreamInfo = await dbContext.TrackStreamInfos.FirstAsync(tsi => tsi.Id == trackStreamInfoId)
+                });
+
+                await dbContext.SaveChangesAsync();
+
+                await Cambion.PublishEventAsync(new PlaylistUpdated());
+            }
+            finally
+            {
+                QueueLocker.UnlockQueue();
+            }
         }
     }
 }
