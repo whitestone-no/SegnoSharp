@@ -29,6 +29,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
 
         private PlaylistViewModel _currentlyDraggingPlaylistItem;
         private PlaylistViewModel _currentlyDraggingOverPlaylistItem;
+        private bool _currentlyDraggingOverPlaylistEnd;
 
         protected override void OnInitialized()
         {
@@ -231,7 +232,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
 
                 SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
-                ushort newSortOrder = targetPlaylistItem.SortOrder;
+                ushort newSortOrder = (ushort)(targetPlaylistItem?.SortOrder ?? PlaylistModel.Max(p => p.SortOrder) + 1);
                 ushort oldSortOrder = _currentlyDraggingPlaylistItem.SortOrder;
 
                 // If moving "down"
@@ -269,11 +270,13 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
         {
             _currentlyDraggingPlaylistItem = null;
             _currentlyDraggingOverPlaylistItem = null;
+            _currentlyDraggingOverPlaylistEnd = false;
         }
 
         private void HandleDragEnter(PlaylistViewModel item)
         {
             _currentlyDraggingOverPlaylistItem = item;
+            _currentlyDraggingOverPlaylistEnd = item == null;
         }
 
         private async Task AddTrackToQueueTop(int trackStreamInfoId)

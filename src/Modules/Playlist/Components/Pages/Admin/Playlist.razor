@@ -21,7 +21,7 @@
                      @ondrop="() => HandleDrop(playlistItem)"
                      @ondragend="HandleDragEnd"
                      @ondragenter="() => HandleDragEnter(playlistItem)"
-                     class="card-grid @(_currentlyDraggingPlaylistItem == playlistItem ? "drag-current" : _currentlyDraggingOverPlaylistItem == playlistItem ? "drag-on" : null)">
+                     class="card-grid playlist-item @(_currentlyDraggingPlaylistItem == playlistItem ? "drag-current" : _currentlyDraggingOverPlaylistItem == playlistItem ? "drag-on" : null)">
                     <div class="card-span-1 center-all">
                         <span class="fa-solid fa-grip"></span>
                     </div>
@@ -37,6 +37,14 @@
                     <div class="card-span-1 center-all">@playlistItem.Length</div>
                 </div>
             }
+            <div ondragover="event.preventDefault();"
+                 @ondragenter="() => HandleDragEnter(null)"
+                 @ondrop="() => HandleDrop(null)"
+                 class="card-grid @(_currentlyDraggingOverPlaylistEnd ? "drag-on" : null)">
+                <div class="card-span-12">
+                    <em>End of playlist</em>
+                </div>
+            </div>
         </div>
     </div>
     <div class="card card-span-4">
