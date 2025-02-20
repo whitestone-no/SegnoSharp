@@ -28,6 +28,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
         private int SearchCurrentPage { get; set; } = 1;
 
         private PlaylistViewModel _currentlyDraggingPlaylistItem;
+        private SearchResultViewModel _currentlyDraggingSearchItem;
         private PlaylistViewModel _currentlyDraggingOverPlaylistItem;
         private bool _currentlyDraggingOverPlaylistEnd;
 
@@ -224,6 +225,11 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
             _currentlyDraggingPlaylistItem = item;
         }
 
+        private void HandleDragStart(SearchResultViewModel item)
+        {
+            _currentlyDraggingSearchItem = item;
+        }
+
         private async Task HandleDrop(PlaylistViewModel targetPlaylistItem)
         {
             try
@@ -232,33 +238,58 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
 
                 SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
-                ushort newSortOrder = (ushort)(targetPlaylistItem?.SortOrder ?? PlaylistModel.Max(p => p.SortOrder) + 1);
-                ushort oldSortOrder = _currentlyDraggingPlaylistItem.SortOrder;
-
-                // If moving "down"
-                if (newSortOrder > oldSortOrder)
+                if (_currentlyDraggingSearchItem != null)
                 {
-                    newSortOrder = (ushort)(newSortOrder - 1);
-                    foreach (StreamQueue moveQueue in await dbContext.StreamQueue.Where(q => q.SortOrder <= newSortOrder && q.SortOrder > oldSortOrder && q.Id != _currentlyDraggingPlaylistItem.QueueId).ToListAsync())
+                    var newSortOrder = (ushort)(targetPlaylistItem?.SortOrder ?? PlaylistModel.Max(p => p.SortOrder) + 1);
+
+                    foreach (StreamQueue moveQueue in await dbContext.StreamQueue.Where(q => q.SortOrder >= newSortOrder).ToListAsync())
                     {
-                        moveQueue.SortOrder = (ushort)(moveQueue.SortOrder - 1);
+                        moveQueue.SortOrder = (ushort)(moveQueue.SortOrder + 1);
                     }
+
+                    dbContext.StreamQueue.Add(new StreamQueue
+                    {
+                        SortOrder = newSortOrder,
+                        TrackStreamInfo = await dbContext.TrackStreamInfos
+                            .FirstOrDefaultAsync(tsi => tsi.Id == _currentlyDraggingSearchItem.TrackStreamInfoId)
+                    });
+
+                    await dbContext.SaveChangesAsync();
+
+                    await Cambion.PublishEventAsync(new PlaylistUpdated());
                 }
-                // If moving "up"
-                else if (newSortOrder < oldSortOrder)
+                else if (_currentlyDraggingPlaylistItem != null)
                 {
-                    foreach (StreamQueue moveGroup in await dbContext.StreamQueue.Where(g => g.SortOrder < oldSortOrder && g.SortOrder >= newSortOrder && g.Id != _currentlyDraggingPlaylistItem.QueueId).ToListAsync())
+
+
+                    var newSortOrder = (ushort)(targetPlaylistItem?.SortOrder ?? PlaylistModel.Max(p => p.SortOrder) + 1);
+                    ushort oldSortOrder = _currentlyDraggingPlaylistItem.SortOrder;
+
+                    // If moving "down"
+                    if (newSortOrder > oldSortOrder)
                     {
-                        moveGroup.SortOrder = (ushort)(moveGroup.SortOrder + 1);
+                        newSortOrder = (ushort)(newSortOrder - 1);
+                        foreach (StreamQueue moveQueue in await dbContext.StreamQueue.Where(q => q.SortOrder <= newSortOrder && q.SortOrder > oldSortOrder && q.Id != _currentlyDraggingPlaylistItem.QueueId).ToListAsync())
+                        {
+                            moveQueue.SortOrder = (ushort)(moveQueue.SortOrder - 1);
+                        }
                     }
+                    // If moving "up"
+                    else if (newSortOrder < oldSortOrder)
+                    {
+                        foreach (StreamQueue moveGroup in await dbContext.StreamQueue.Where(g => g.SortOrder < oldSortOrder && g.SortOrder >= newSortOrder && g.Id != _currentlyDraggingPlaylistItem.QueueId).ToListAsync())
+                        {
+                            moveGroup.SortOrder = (ushort)(moveGroup.SortOrder + 1);
+                        }
+                    }
+
+                    StreamQueue currentlyDragging = await dbContext.StreamQueue.FirstAsync(q => q.Id == _currentlyDraggingPlaylistItem.QueueId);
+                    currentlyDragging.SortOrder = newSortOrder;
+
+                    await dbContext.SaveChangesAsync();
+
+                    await Cambion.PublishEventAsync(new PlaylistUpdated());
                 }
-
-                StreamQueue currentlyDragging = await dbContext.StreamQueue.FirstAsync(q => q.Id == _currentlyDraggingPlaylistItem.QueueId);
-                currentlyDragging.SortOrder = newSortOrder;
-
-                await dbContext.SaveChangesAsync();
-
-                await Cambion.PublishEventAsync(new PlaylistUpdated());
             }
             finally
             {
@@ -269,6 +300,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
         private void HandleDragEnd()
         {
             _currentlyDraggingPlaylistItem = null;
+            _currentlyDraggingSearchItem = null;
             _currentlyDraggingOverPlaylistItem = null;
             _currentlyDraggingOverPlaylistEnd = false;
         }
@@ -288,12 +320,12 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                 SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
                 List<StreamQueue> queue = await dbContext.StreamQueue.ToListAsync();
-                
+
                 foreach (StreamQueue queueItem in queue)
                 {
                     queueItem.SortOrder++;
                 }
-                
+
                 dbContext.StreamQueue.Add(new StreamQueue
                 {
                     SortOrder = 1,

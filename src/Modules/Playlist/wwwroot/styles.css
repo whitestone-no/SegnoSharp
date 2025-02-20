@@ -108,23 +108,27 @@ span[class~="fa-grip"] {
     align-items: center;
     justify-content: center;
 }
-    .search-result > div:first-child {
+    .search-result > div:nth-child(2) {
         display: block;
     }
 
+    .search-result[class~="drag-search"] {
+        background-color: var(--bg-lightyellow);
+    }
 
-.playlist-search-actions div.handle {
-    display: flex;
-    text-align: center;
-    width: 25px;
-    height: 25px;
-    border-radius: 5px;
-    background-color: var(--bg-lightestgray);
-    border: solid 1px;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
+
+    .playlist-search-actions div.handle {
+        display: flex;
+        text-align: center;
+        width: 25px;
+        height: 25px;
+        border-radius: 5px;
+        background-color: var(--bg-lightestgray);
+        border: solid 1px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
 
 .playlist-search-actions div.actions {
     display: none;

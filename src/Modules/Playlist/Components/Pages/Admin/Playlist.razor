@@ -93,15 +93,22 @@
             {
                 @foreach (SearchResultViewModel result in SearchResults)
                 {
-                    <div class="card-grid search-result">
-                        <div class="card-span-9">
+                    <div draggable="true"
+                         ondragover="event.preventDefault();"
+                         @ondragstart="() => HandleDragStart(result)"
+                         @ondragend="HandleDragEnd"
+                         class="card-grid search-result @(_currentlyDraggingSearchItem == result ? "drag-search" : null)">
+                        <div class="card-span-1 center-all">
+                            <span class="fa-solid fa-grip"></span>
+                        </div>
+                        <div class="card-span-8">
                             <b>@result.AlbumTitle</b> <em>(@result.Artists)</em><br />
                             @result.TrackTitle
                         </div>
                         <div class="card-span-2">
                             @result.Length
                         </div>
-                        <div class="card-span-1 playlist-search-actions">
+                        <div class="card-span-1 playlist-search-actions center-all">
                             <div class="handle"><span class="fa-solid fa-caret-down"></span></div>
                             <div class="actions">
                                 <button @onclick="() => AddTrackToQueueTop(result.TrackStreamInfoId)">Add to top of queue</button>
