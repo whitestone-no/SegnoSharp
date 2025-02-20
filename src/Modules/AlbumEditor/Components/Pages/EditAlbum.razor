@@ -99,7 +99,7 @@
             @if (Album.AlbumCover != null)
             {
                 <div>
-                    <img src="@Album.AlbumCover.ToInlineBase64()" class="bordered" alt="Album cover" />
+                    <a href="@HashingUtil.GetAlbumCoverUri(Album.Id, 0)" target="_blank"><img src="@HashingUtil.GetAlbumCoverUri(Album.Id)" class="bordered" alt="Album cover"/></a>
                     <button class="tertiary" @onclick="RemoveAlbumCover">Remove</button>
                 </div>
             }

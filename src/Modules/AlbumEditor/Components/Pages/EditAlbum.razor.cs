@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
+using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 
@@ -19,6 +20,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
         [Inject] private NavigationManager NavigationManager { get; set; }
         [Inject] private IJSRuntime JsRuntime { get; set; }
+        [Inject] private IHashingUtil HashingUtil { get; set; }
 
         private SegnoSharpDbContext DbContext { get; set; }
         private Album Album { get; set; }

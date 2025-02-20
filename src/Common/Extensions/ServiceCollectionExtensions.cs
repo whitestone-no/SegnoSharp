@@ -10,6 +10,7 @@ namespace Whitestone.SegnoSharp.Common.Extensions
         {
             services.AddTransient<ISystemClock, SystemClock>();
             services.AddTransient<IRandomGenerator, RandomGenerator>();
+            services.AddTransient<IHashingUtil, HashingUtil>();
 
             services.AddSingleton<IPersistenceManager, PersistenceHandler>();
             services.AddHostedService(p => p.GetRequiredService<IPersistenceManager>());

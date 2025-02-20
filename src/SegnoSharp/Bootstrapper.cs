@@ -116,6 +116,7 @@ namespace Whitestone.SegnoSharp
             }
 
             builder.Services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
+            builder.Services.AddDistributedMemoryCache();
             builder.Services.AddCambion()
                 .UseMessagePackSerializer();
 
