@@ -439,6 +439,10 @@ textarea {
     grid-column: span 9;
 }
 
+input[type="date"] {
+    min-width: 120px;
+}
+
     input[type="text"]:hover,
     input[type="number"]:hover,
     input[type="date"]:hover,
