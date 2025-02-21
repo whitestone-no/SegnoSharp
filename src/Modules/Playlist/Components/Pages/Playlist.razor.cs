@@ -1,108 +1,114 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Whitestone.Cambion.Interfaces;
+using Whitestone.SegnoSharp.Common.Events;
+using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Database;
-using Whitestone.SegnoSharp.Database.Models;
-using Whitestone.SegnoSharp.Modules.Playlist.Models;
+using Whitestone.SegnoSharp.Modules.Playlist.ViewModels;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages
 {
-    public partial class Playlist : IDisposable
+    public partial class Playlist : IEventHandler<PlaylistUpdated>
     {
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
+        [Inject] private ICambion Cambion { get; set; }
+        [Inject] private IHashingUtil HashingUtil { get; set; }
+        [Inject] private ISystemClock SystemClock { get; set; }
+        [Inject] private ILogger<Playlist> Logger { get; set; }
 
         private List<PlaylistViewModel> PlaylistItems { get; set; } = [];
+        private PlaylistViewModel CurrentlyPlaying { get; set; }
 
-        private SegnoSharpDbContext _dbContext;
-
-        protected override async Task OnInitializedAsync()
+        protected override void OnInitialized()
         {
-            _dbContext = await DbFactory.CreateDbContextAsync();
+            Cambion.Register(this);
 
-            List<StreamQueue> playlist = await _dbContext.StreamQueue
-                .Include(t => t.TrackStreamInfo)
-                .ThenInclude(t => t.Track)
-                .ThenInclude(t => t.TrackPersonGroupPersonRelations)
-                .ThenInclude(r => r.Persons)
-                .Include(t => t.TrackStreamInfo)
-                .ThenInclude(t => t.Track)
-                .ThenInclude(t => t.TrackPersonGroupPersonRelations)
-                .ThenInclude(r => r.PersonGroup)
-                .ThenInclude(g => g.PersonGroupStreamInfo)
-                .Include(t => t.TrackStreamInfo)
-                .ThenInclude(t => t.Track)
-                .ThenInclude(t => t.Disc)
-                .ThenInclude(d => d.Album)
-                .ThenInclude(a => a.AlbumPersonGroupPersonRelations)
-                .ThenInclude(r => r.Persons)
-                .Include(t => t.TrackStreamInfo)
-                .ThenInclude(t => t.Track)
-                .ThenInclude(t => t.Disc)
-                .ThenInclude(d => d.Album)
-                .ThenInclude(a => a.AlbumPersonGroupPersonRelations)
-                .ThenInclude(r => r.PersonGroup)
-                .ThenInclude(g => g.PersonGroupStreamInfo)
-                .OrderBy(t => t.SortOrder)
-                .AsSplitQuery()
-                .ToListAsync();
+            HandleEvent(new PlaylistUpdated());
+        }
 
-            foreach (StreamQueue playlistItem in playlist)
+        // ReSharper disable once AsyncVoidMethod
+        public async void HandleEvent(PlaylistUpdated input)
+        {
+
+            try
             {
+                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
-                var artists = string.Empty;
-
-                string[] trackPeople = playlistItem.TrackStreamInfo.Track.TrackPersonGroupPersonRelations
-                    .Where(g => g.PersonGroup.PersonGroupStreamInfo is { IncludeInAutoPlaylist: true })
-                    .SelectMany(g => g.Persons)
-                    .Distinct()
-                    .Select(p => (p.FirstName + " " + p.LastName).Trim())
-                    .ToArray();
-
-                if (trackPeople.Length > 0)
-                {
-                    artists = string.Join(", ", trackPeople);
-                }
-                else
-                {
-                    string[] albumPeople = playlistItem.TrackStreamInfo.Track.Disc.Album.AlbumPersonGroupPersonRelations
-                        .Where(g => g.PersonGroup.PersonGroupStreamInfo is { IncludeInAutoPlaylist: true })
-                        .SelectMany(g => g.Persons)
-                        .Distinct()
-                        .Select(p => (p.FirstName + " " + p.LastName).Trim())
-                        .ToArray();
-
-                    if (albumPeople.Length > 0)
+                PlaylistItems = await dbContext.StreamQueue
+                    .AsNoTracking()
+                    .OrderBy(q => q.SortOrder)
+                    .Select(q => new PlaylistViewModel
                     {
-                        artists = string.Join(", ", albumPeople);
-                    }
-                }
+                        
+                        AlbumTitle = q.TrackStreamInfo.Track.Disc.Album.Title,
+                        TrackTitle = q.TrackStreamInfo.Track.Title,
+                        Length = q.TrackStreamInfo.Track.Duration,
+                        QueueId = q.Id,
+                        AlbumId = q.TrackStreamInfo.Track.Disc.Album.Id,
+                        HasAlbumCover = q.TrackStreamInfo.Track.Disc.Album.AlbumCover != null,
+                        SortOrder = q.SortOrder,
+                        TrackArtists = string.Join(", ",
+                            q.TrackStreamInfo.Track.TrackPersonGroupPersonRelations
+                                .Where(r =>
+                                    r.PersonGroup.PersonGroupStreamInfo != null &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                .SelectMany(r =>
+                                    r.Persons.Select(p =>
+                                        p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName))),
+                        AlbumArtists = string.Join(", ",
+                            q.TrackStreamInfo.Track.Disc.Album.AlbumPersonGroupPersonRelations
+                                .Where(r =>
+                                    r.PersonGroup.PersonGroupStreamInfo != null &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                .SelectMany(r =>
+                                    r.Persons.Select(p =>
+                                        p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName)))
+                    })
+                    .ToListAsync();
 
-                PlaylistViewModel vm = new()
-                {
-                    Album = playlistItem.TrackStreamInfo.Track.Disc.Album.Title,
-                    Track = playlistItem.TrackStreamInfo.Track.Title,
-                    Artist = artists,
-                    Duration = playlistItem.TrackStreamInfo.Track.Duration
-                };
+                DateTime now = SystemClock.Now;
 
-                PlaylistItems.Add(vm);
+                CurrentlyPlaying = await dbContext.StreamHistory
+                    .AsNoTracking()
+                    .Where(h => h.Played.AddSeconds(h.TrackStreamInfo.Track.Length) > now)
+                    .OrderByDescending(h => h.Played)
+                    .Select(h => new PlaylistViewModel
+                    {
+
+                        AlbumTitle = h.TrackStreamInfo.Track.Disc.Album.Title,
+                        TrackTitle = h.TrackStreamInfo.Track.Title,
+                        Length = h.TrackStreamInfo.Track.Duration,
+                        QueueId = h.Id,
+                        AlbumId = h.TrackStreamInfo.Track.Disc.Album.Id,
+                        HasAlbumCover = h.TrackStreamInfo.Track.Disc.Album.AlbumCover != null,
+                        TrackArtists = string.Join(", ",
+                            h.TrackStreamInfo.Track.TrackPersonGroupPersonRelations
+                                .Where(r =>
+                                    r.PersonGroup.PersonGroupStreamInfo != null &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                .SelectMany(r =>
+                                    r.Persons.Select(p =>
+                                        p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName))),
+                        AlbumArtists = string.Join(", ",
+                            h.TrackStreamInfo.Track.Disc.Album.AlbumPersonGroupPersonRelations
+                                .Where(r =>
+                                    r.PersonGroup.PersonGroupStreamInfo != null &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                .SelectMany(r =>
+                                    r.Persons.Select(p =>
+                                        p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName)))
+                    })
+                    .FirstOrDefaultAsync();
+
+                await InvokeAsync(StateHasChanged);
             }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
+            catch (Exception e)
             {
-                _dbContext?.Dispose();
+                Logger.LogError(e, "{exceptionMessage}", e.Message);
             }
         }
     }

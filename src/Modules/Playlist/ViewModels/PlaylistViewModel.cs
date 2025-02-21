@@ -10,6 +10,8 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.ViewModels
         public string TrackArtists { get; set; }
         public TimeSpan Length { get; set; }
         public uint QueueId { get; set; }
+        public int AlbumId { get; set; }
+        public bool HasAlbumCover { get; set; }
         public ushort SortOrder { get; set; }
         public string Artists => string.IsNullOrEmpty(TrackArtists) ? AlbumArtists : TrackArtists;
     }
