@@ -7,12 +7,12 @@
 @attribute [ModuleMenu("Playlist", 10, "fa-list")]
 
 <div class="card-grid">
-    @if (CurrentlyPlaying != null)
-    {
-        <div class="card card-span-12">
-            <div class="card-header">Currently playing</div>
-            <div class="card-body">
-                <div class="card-grid playlist-item">
+    <div class="card card-span-12">
+        <div class="card-header">Playlist</div>
+        <div class="card-body">
+            @if (CurrentlyPlaying != null)
+            {
+                <div class="card-grid playlist-item currently-playing">
                     <div class="card-span-1 center-all">
                         <span class="fa-solid fa-play"></span>
                     </div>
@@ -30,12 +30,7 @@
                     </div>
                     <div class="card-span-1 center-all">@CurrentlyPlaying.Length</div>
                 </div>
-            </div>
-        </div>
-    }
-    <div class="card card-span-12">
-        <div class="card-header">Playlist</div>
-        <div class="card-body">
+            }
             @foreach (PlaylistViewModel playlistItem in PlaylistItems)
             {
                 <div class="card-grid playlist-item">

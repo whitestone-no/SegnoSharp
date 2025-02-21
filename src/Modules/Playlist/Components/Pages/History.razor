@@ -1,30 +1,68 @@
 ﻿@page "/playlist/history"
+@rendermode InteractiveServer
 @layout InnerLayout
-@using Whitestone.SegnoSharp.Modules.Playlist.Components.Layouts
 @using Whitestone.SegnoSharp.Common.Attributes
-@using Whitestone.SegnoSharp.Modules.Playlist.Models
+@using Whitestone.SegnoSharp.Modules.Playlist.Components.Layouts
+@using Whitestone.SegnoSharp.Modules.Playlist.ViewModels
 @attribute [ModuleMenu("History", typeof(Playlist))]
 
-<h1>History</h1>
+<div class="card-grid">
+    <div class="card card-span-12">
+        <div class="card-header card-grid">
+            <div class="card-span-8">
+                History
+            </div>
+            <div class="card-span-4 text-right">
+                <label for="date-selector">Select date</label>
+                <input type="date" id="date-selector" min="@MinDate.ToString("yyyy-MM-dd")" max="@SystemClock.Now.ToString("yyyy-MM-dd")" @bind="SelectedDate" @bind:after="OnDateChanged" />
+            </div>
+        </div>
+        <div class="card-body">
+            @foreach (HistoryViewModel playlistItem in HistoryItems)
+            {
+                <div class="card-grid playlist-item @(playlistItem.CurrentlyPlaying ? "currently-playing" : null)">
+                    <div class="card-span-2 center-all">
+                        <div>
+                            @playlistItem.Played.ToString("yyyy-MM-dd HH:mm:ss")
+                            @if (playlistItem.CurrentlyPlaying)
+                            {
+                                <br />
+                                <em>Currently playing</em>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-span-1 center-all">
+                        @if (playlistItem.HasAlbumCover)
+                        {
+                            <img src="@HashingUtil.GetAlbumCoverUri(playlistItem.AlbumId, 50)" alt="@(playlistItem.AlbumTitle) - Cover" class="bordered" />
+                        }
+                    </div>
+                    <div class="card-span-8 flex-center">
+                        <div>
+                            <b>@playlistItem.AlbumTitle</b> <em>(@playlistItem.Artists)</em><br />
+                            @playlistItem.TrackTitle
+                        </div>
+                    </div>
+                    <div class="card-span-1 center-all">@playlistItem.Length</div>
+                </div>
+            }
+        </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Album</th>
-            <th>Track</th>
-            <th>Artist(s)</th>
-            <th>Duration</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (HistoryViewModel historyItem in HistoryItems)
+        @if (HistoryTotalPages > 1)
         {
-            <tr>
-                <td>@historyItem.Album</td>
-                <td>@historyItem.Track</td>
-                <td>@historyItem.Artist</td>
-                <td>@historyItem.Played.ToString("yyyy-MM-dd HH:mm:ss")</td>
-            </tr>
+            <div class="card-footer">
+                <div class="pagination">
+                    <button class="secondary @(HistoryCurrentPage == 1 ? "hidden" : "")" @onclick="() => OnHistoryPageChanged(1)" title="First page">&lt;&lt;</button>
+                    <button class="secondary @(HistoryCurrentPage == 1 ? "hidden" : "")" @onclick="() => OnHistoryPageChanged(HistoryCurrentPage - 1)" title="Previous page">&lt;</button>
+                    <div class="info">
+                        <span>Page</span>
+                        <input type="number" min="1" max="@HistoryTotalPages" @bind="HistoryCurrentPage" @bind:after="() => OnHistoryPageChanged(HistoryCurrentPage)" />
+                        <span>of @HistoryTotalPages</span>
+                    </div>
+                    <button class="secondary @(HistoryCurrentPage == HistoryTotalPages ? "hidden" : "")" @onclick="() => OnHistoryPageChanged(HistoryCurrentPage + 1)" title="Next page">&gt;</button>
+                    <button class="secondary @(HistoryCurrentPage == HistoryTotalPages ? "hidden" : "")" @onclick="() => OnHistoryPageChanged(HistoryTotalPages)" title="Last page">&gt;&gt;</button>
+                </div>
+            </div>
         }
-    </tbody>
-</table>
+    </div>
+</div>
