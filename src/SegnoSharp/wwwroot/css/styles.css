@@ -714,13 +714,75 @@ nav a:visited {
     justify-content: center;
 }
 
-.pagination .info {
+    .pagination .info {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0 8px;
+    }
+
+/* Wizard steps */
+
+.wizard-steps ul {
+    list-style: none;
     display: flex;
-    align-items: center;
-    gap: 4px;
-    margin: 0 8px;
+    justify-content: space-around;
+    counter-reset: item;
+    margin-bottom: 1rem;
 }
 
+
+    .wizard-steps ul li {
+        counter-increment: item;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-grow: 1;
+        flex-basis: 0;
+        position: relative;
+        text-align: center;
+    }
+
+        .wizard-steps ul li::before {
+            content: counter(item);
+            color: var(--text-black);
+            background-color: var(--bg-lightergray);
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .wizard-steps ul li::after {
+            content: '';
+            position: absolute;
+            top: 1.25rem;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background-color: var(--bg-lightgray);
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .wizard-steps ul li.active {
+            font-weight: bold;
+        }
+
+            .wizard-steps ul li.active::before {
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
+            }
+
+        .wizard-steps ul li span {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--bg-midgray);
+        }
 
 /* Overrides */
 .no-margin {
