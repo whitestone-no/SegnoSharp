@@ -33,21 +33,21 @@
         <div class="card-body">
             <table>
                 <thead>
-                    <tr>
-                        <th class="text-left">Title</th>
-                        <th class="text-left">Number of tracks</th>
-                        <th class="text-left">Added</th>
-                    </tr>
+                <tr>
+                    <th class="text-left">Title</th>
+                    <th class="text-left">Number of tracks</th>
+                    <th class="text-left">Added</th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (Album album in AlbumList)
-                    {
-                        <tr>
-                            <td><NavLink href="@GetAlbumUrl(album.Id)">@album.Title</NavLink></td>
-                            <td>@album.Discs.SelectMany(d => d.Tracks).Count()</td>
-                            <td>@album.Added</td>
-                        </tr>
-                    }
+                @foreach (Album album in AlbumList)
+                {
+                    <tr>
+                        <td><NavLink href="@GetAlbumUrl(album.Id)">@album.Title</NavLink></td>
+                        <td>@album.Discs.SelectMany(d => d.Tracks).Count()</td>
+                        <td>@album.Added</td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
@@ -68,4 +68,8 @@
             </div>
         }
     </div>
+</div>
+
+<div>
+    <button class="secondary" @onclick="NewAlbum">New album</button>
 </div>

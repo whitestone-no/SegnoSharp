@@ -21,6 +21,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         [Inject] private NavigationManager NavigationManager { get; set; }
         [Inject] private IJSRuntime JsRuntime { get; set; }
         [Inject] private IHashingUtil HashingUtil { get; set; }
+        [Inject] private ISystemClock SystemClock { get; set; }
 
         private SegnoSharpDbContext DbContext { get; set; }
         private Album Album { get; set; }
@@ -28,6 +29,8 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         private int SelectedPersonGroupId { get; set; }
         private bool AlbumCoverFileSizeError { get; set; }
         private List<MediaType> MediaTypes { get; set; }
+
+        private EditContext _editContext;
 
         private Track _currentlyDraggingTrack;
         private TrackGroup _currentlyDraggingTrackGroup;
@@ -37,16 +40,33 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         {
             DbContext = await DbFactory.CreateDbContextAsync();
 
-            Album = await DbContext.Albums
-                .Include(a => a.Genres)
-                .Include(a => a.RecordLabels)
-                .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.Persons)
-                .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.PersonGroup)
-                .Include(a => a.AlbumCover).ThenInclude(c => c.AlbumCoverData)
-                .Include(a => a.Discs).ThenInclude(d => d.Tracks)
-                .Include(a => a.Discs).ThenInclude(d => d.MediaTypes)
-                .Include(a => a.Discs).ThenInclude(d => d.TrackGroups)
-                .FirstOrDefaultAsync(a => a.Id == Id);
+            if (Id == 0)
+            {
+                Album = new Album
+                {
+                    AlbumPersonGroupPersonRelations = [],
+                    Discs = [],
+                    Genres = [],
+                    RecordLabels = [],
+                    Added = SystemClock.Now
+                };
+                DbContext.Albums.Add(Album);
+            }
+            else
+            {
+                Album = await DbContext.Albums
+                    .Include(a => a.Genres)
+                    .Include(a => a.RecordLabels)
+                    .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.Persons)
+                    .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.PersonGroup)
+                    .Include(a => a.AlbumCover).ThenInclude(c => c.AlbumCoverData)
+                    .Include(a => a.Discs).ThenInclude(d => d.Tracks)
+                    .Include(a => a.Discs).ThenInclude(d => d.MediaTypes)
+                    .Include(a => a.Discs).ThenInclude(d => d.TrackGroups)
+                    .FirstOrDefaultAsync(a => a.Id == Id);
+            }
+
+            _editContext = new EditContext(Album);
 
             PersonGroups = await DbContext.PersonGroups
                 .Where(g => g.Type == PersonGroupType.Album)
@@ -133,6 +153,11 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         {
             if (save)
             {
+                if (!_editContext.Validate())
+                {
+                    return;
+                }
+
                 await Save();
             }
 
@@ -141,6 +166,11 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
 
         private async Task Save()
         {
+            if (!_editContext.Validate())
+            {
+                return;
+            }
+
             foreach (AlbumPersonGroupPersonRelation personRelation in Album.AlbumPersonGroupPersonRelations)
             {
                 List<Person> persons = new();
@@ -334,6 +364,27 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
             }
 
             disc.Album.Discs.Remove(disc);
+        }
+
+        private void AddDisc()
+        {
+            Album.Discs.Add(new Disc
+            {
+                MediaTypes = [],
+                TrackGroups = [],
+                Tracks = [],
+                DiscNumber = (byte)(Album.Discs.Count + 1)
+            });
+        }
+
+        private static void AddTrack(Disc disc)
+        {
+            disc.Tracks.Add(new Track
+            {
+                Title = "<Untitled>",
+                TrackPersonGroupPersonRelations = [],
+                TrackNumber = (ushort)(disc.Tracks.Count + 1)
+            });
         }
     }
 }

@@ -461,6 +461,31 @@ input[type="date"] {
         box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
     }
 
+input.invalid[type="text"],
+input.invalid[type="number"],
+input.invalid[type="date"] {
+    border-color: #f5c6cb;
+    border-width: 2px;
+}
+
+label .invalid {
+    display: inline;
+    font-weight: bold;
+    color: #721c24;
+    margin-left: 0.5rem;
+}
+
+.validation-errors {
+    color: rgb(114, 28, 36);
+    font-weight: bold;
+    border: 1px solid var(--bg-lightgray);
+    border-radius: 4px;
+    overflow: hidden;
+    padding: 10px;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
 .checkbox-label,
 .radio-label {
     gap: 0.5rem;
@@ -636,6 +661,10 @@ img[class~="rounded"] {
     .alert::before {
         margin-right: 0.75rem;
         font-size: 1.1rem;
+    }
+
+    .alert ul {
+        margin-left: 1rem;
     }
 
 .alert-success {

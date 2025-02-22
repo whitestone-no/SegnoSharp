@@ -12,6 +12,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
     public partial class Albums
     {
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
+        [Inject] private NavigationManager NavigationManager { get; set; }
 
         private List<Album> AlbumList { get; set; } = [];
         private SearchModel SearchModel { get; } = new();
@@ -80,6 +81,11 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         private static string GetAlbumUrl(int id)
         {
             return $"/admin/albums/{id}";
+        }
+
+        private void NewAlbum()
+        {
+            NavigationManager.NavigateTo($"/admin/albums/0");
         }
     }
 
