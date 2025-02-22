@@ -6,94 +6,110 @@
 @using Whitestone.SegnoSharp.Modules.MediaImporter.Components.Layouts
 @attribute [Authorize]
 @attribute [ModuleMenu("Media importer", "fa-file-import", true)]
-<h1>Media Importer</h1>
 
-<div class="Import">
-    <ul class="Steps">
-        <li class="active">Select Folder</li>
-        <li>Select Files</li>
-        <li>Verify Metadata</li>
-        <li>Import</li>
-    </ul>
+<div class="card-grid">
+    <div class="card card-span-12">
+        <div class="card-body">
+            <div class="wizard-steps">
+                <ul>
+                    <li class="active">Select Folder</li>
+                    <li>Select Files</li>
+                    <li>Verify Metadata</li>
+                    <li>Import</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="form-group">
+                    <label>Folders</label>
+                    <div class="folder-list">
+                        <div class="folder-list-header">
+                            <div class="card-span-10">Name</div>
+                            <div class="card-span-2">Modified</div>
+                        </div>
+                        <div class="folder-list-body">
 
-    <div class="ImportSelectFolder">
-        <div class="SelectedFolder">
-            <span>Currently selected folder:</span>
-            <div>@RenderPath()</div>
-        </div>
+                            @if (ImporterState.SelectedFolder == null)
+                            {
+                                foreach (DriveInfo drive in DriveInfo.GetDrives())
+                                {
+                                    <button class="card-grid card-span-12 text-left" @onclick="() => OnPathClick(drive.RootDirectory)">
+                                        <div class="card-span-12">
+                                            <span class="fa-solid fa-hard-drive"></span>
+                                            @if (string.IsNullOrEmpty(drive.VolumeLabel))
+                                            {
+                                                <i>Local Disk</i>
+                                            }
+                                            else
+                                            {
+                                                @drive.VolumeLabel
+                                            }
+                                            (@drive.Name)
+                                        </div>
+                                    </button>
+                                }
 
-        <div class="AvailableFolders">
-            <table>
-                @if (ImporterState.SelectedFolder == null)
-                {
-                    foreach (DriveInfo drive in DriveInfo.GetDrives())
-                    {
-                        <tr>
-                            <td colspan="2">
-                                <button @onclick="() => OnPathClick(drive.RootDirectory)">
-                                    @if (string.IsNullOrEmpty(drive.VolumeLabel))
+                                if (ImporterState.MusicFolder != null)
+                                {
+                                    <button @onclick="() => OnPathClick(ImporterState.MusicFolder)">
+                                        <div class="card-span-12">
+                                            <span class="fa-solid fa-music"></span>
+                                            <i>Music folder</i>
+                                        </div>
+                                    </button>
+                                }
+                            }
+                            else
+                            {
+                                @try
+                                {
+                                    DirectoryInfo[] subfolders = ImporterState.SelectedFolder.GetDirectories();
+                                    if (ImporterState.SelectedFolder != null)
                                     {
-                                        <i>Local Disk</i>
+                                        <button @onclick="() => OnPathClick(ImporterState.SelectedFolder.Parent)">
+                                            <div class="card-span-12">
+                                                <span class="fa-solid fa-arrow-up"></span>
+                                                ..
+                                            </div>
+                                        </button>
                                     }
-                                    else
-                                    {
-                                        @drive.VolumeLabel
-                                    }
-                                    (@drive.Name)
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                    if (ImporterState.MusicFolder != null)
-                    {
-                        <tr>
-                            <td colspan="2">
-                                <button @onclick="() => OnPathClick(ImporterState.MusicFolder)">
-                                    <i>Music folder</i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    @try
-                    {
-                        DirectoryInfo[] subfolders = ImporterState.SelectedFolder.GetDirectories();
-                        if (ImporterState.SelectedFolder != null)
-                        {
-                            <tr>
-                                <td colspan="2">
-                                    <button @onclick="() => OnPathClick(ImporterState.SelectedFolder.Parent)">..</button>
-                                </td>
-                            </tr>
-                        }
-                        foreach (DirectoryInfo directory in subfolders)
-                        {
-                            <tr>
-                                <td>
-                                    <button @onclick="() => OnPathClick(directory)">@directory.Name</button>
-                                </td>
-                                <td>
-                                    @directory.LastWriteTime.ToString("g")
-                                </td>
-                            </tr>
-                        }
-                    }
-                    catch
-                    {
-                        <tr>
-                            <td class="NoPermission" colspan="2">Application does not have permissions for this folder</td>
-                        </tr>
-                    }
-                }
-            </table>
-        </div>
 
-        <div class="NextBack">
-            <label for="chkImportSubfolders">Include subfolders</label>
-            <input id="chkImportSubfolders" type="checkbox" @bind="ImporterState.ImportSubfolders" />
-            <button @onclick="OnNextClick">Next &gt;</button>
+                                    foreach (DirectoryInfo directory in subfolders)
+                                    {
+                                        <button @onclick="() => OnPathClick(directory)">
+                                            <div class="card-span-10">
+                                                <span class="fa-solid fa-folder"></span>
+                                                @directory.Name
+                                            </div>
+                                            <div class="card-span-2">
+                                                @directory.LastWriteTime.ToString("g")
+                                            </div>
+                                        </button>
+                                    }
+                                }
+                                catch
+                                {
+                                    <div class="card-span-12">
+                                        <div class="alert alert-warning">Application does not have permissions for this folder</div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Selected path</label>
+                    <div class="path-list">
+                        @RenderPath()
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="chkImportSubfolders2" class="checkbox-label">Include subfolders</label>
+                    <input id="chkImportSubfolders2" type="checkbox" @bind="ImporterState.ImportSubfolders" />
+                </div>
+                <div class="text-right">
+                    <button class="primary" @onclick="OnNextClick">Continue &gt;</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

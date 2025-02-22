@@ -1,4 +1,126 @@
-﻿.Import {
+﻿
+
+.path-list {
+    padding: 5px 0.5rem;
+    border: 1px solid var(--bg-lightgray);
+    border-radius: 4px;
+    grid-column: span 9;
+}
+
+    .path-list:hover {
+        border-color: var(--bg-darkgray);
+    }
+
+    .path-list:focus-within {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+    }
+
+    .path-list ul {
+        list-style: none;
+        display: flex;
+    }
+
+    .path-list li button {
+        display: block;
+        padding: 4px 0;
+        outline: none;
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+    }
+
+        .path-list li button:hover {
+            background-color: var(--bg-lightyellow);
+        }
+
+        .path-list li button::after {
+            content: '\\';
+        }
+
+    .path-list li:first-child button {
+        padding-right: 5px;
+    }
+
+        .path-list li:first-child button::after {
+            content: '>';
+            margin-left: 5px;
+        }
+
+.folder-list {
+    border: 1px solid var(--bg-lightgray) !important;
+    border-radius: 4px;
+    grid-column: span 9;
+    border: solid 1px
+}
+
+    .folder-list:hover {
+        border-color: var(--bg-darkgray) !important;
+    }
+
+    .folder-list:focus-within {
+        border-color: var(--primary-color) !important;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+    }
+
+.folder-list-header,
+.folder-list-body {
+    padding: 0.25rem 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+}
+
+.folder-list-header {
+    font-weight: bold;
+    background-color: var(--bg-lightergray);
+    margin-bottom: 0.5rem;
+}
+
+.folder-list-body {
+    margin: 0;
+}
+
+    .folder-list-body button {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-column: span 12;
+        text-align: left;
+        margin: 0;
+        padding: 0.5rem 0;
+        cursor: pointer;
+        background-color: transparent;
+        border: none;
+        outline: none;
+    }
+
+        .folder-list-body button:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .folder-list-body button span.fa-solid {
+            margin-right: 0.5rem;
+        }
+
+.folder-list .card-grid {
+    gap: 0;
+}
+
+
+
+
+
+
+
+
+
+
+/* Everything below to be deleted */
+
+
+
+.Import {
     background-color: #f8f8f8;
     border: solid 1px #bbb;
     display: inline-block;

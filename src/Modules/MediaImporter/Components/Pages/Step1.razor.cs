@@ -43,7 +43,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
             builder.OpenElement(1, "li");
             builder.OpenElement(2, "button");
             builder.AddAttribute(3, "onclick", EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this, () => OnPathClick(di)));
-            builder.AddContent(3, di.Name);
+            builder.AddContent(3, di.Name.TrimEnd('\\'));
             builder.CloseElement();
             builder.CloseElement();
         }
