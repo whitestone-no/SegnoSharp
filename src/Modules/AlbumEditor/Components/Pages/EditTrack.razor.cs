@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
@@ -24,6 +25,8 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         private int SelectedPersonGroupId { get; set; }
         private bool Invalid => string.IsNullOrEmpty(Track.Title) || (Track.TrackStreamInfo != null && string.IsNullOrEmpty(Track.TrackStreamInfo.FilePath));
 
+        private EditContext _editContext;
+
         private int _originalTrackNumber = 0;
 
         protected override async Task OnInitializedAsync()
@@ -42,12 +45,19 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
                 .ToListAsync();
 
             _originalTrackNumber = Track.TrackNumber;
+
+            _editContext = new EditContext(Track);
         }
 
         private async Task Close(bool save = false)
         {
             if (save)
             {
+                if (!_editContext.Validate())
+                {
+                    return;
+                }
+
                 await DbContext.SaveChangesAsync();
 
                 if (Track.TrackNumber != _originalTrackNumber)

@@ -15,106 +15,112 @@
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 
 <h1>Edit track</h1>
-
-<div class="card-grid">
-    <div class="card card-span-12">
-        <div class="card-header">Track data</div>
-        <div class="card-body">
-            <div class="form-group">
-                <label for="track-number">Track #</label>
-                <input id="track-number" type="number" min="1" max="@(ushort.MaxValue)" @bind="Track.TrackNumber" />
-            </div>
-            <div class="form-group">
-                <label for="track-title">Title</label>
-                <input id="track-title" type="text" @bind="Track.Title" />
-            </div>
-            <div class="form-group">
-                <label for="track-length">Length</label>
-                <input id="track-length" type="text" @bind="Track.Duration" />
-            </div>
-            <div class="form-group">
-                <label for="track-notes">Notes</label>
-                <InputTextArea @bind-Value="Track.Notes" />
-            </div>
-        </div>
-        <div class="card-header">Credits</div>
-        <div class="card-body">
-            @foreach (TrackPersonGroupPersonRelation personGroupRelation in Track.TrackPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
-            {
+<EditForm EditContext="_editContext">
+    <DataAnnotationsValidator />
+    <div class="card-grid">
+        <div class="card card-span-12">
+            <div class="card-header">Track data</div>
+            <div class="card-body">
                 <div class="form-group">
-                    <label>
-                        @personGroupRelation.PersonGroup.Name
-                        <button title="Remove @personGroupRelation.PersonGroup.Name group" class="tiny" @onclick="() => RemovePersonGroup(personGroupRelation)"><span class="fa-regular fa-circle-xmark"></span></button>
-                    </label>
-                    <TagList Items="@personGroupRelation.Persons" ExecuteSearch="ExecutePersonSearch" />
+                    <label for="track-number">Track #</label>
+                    <input id="track-number" type="number" min="1" max="@(ushort.MaxValue)" @bind="Track.TrackNumber" />
                 </div>
-            }
-            @{
-                List<PersonGroup> personGroups = PersonGroups
-                .Where(pg => Track.TrackPersonGroupPersonRelations.All(apg => apg.PersonGroup.Id != pg.Id))
-                .ToList();
-
-                if (personGroups.Any())
+                <div class="form-group">
+                    <label for="track-title">Title<ValidationCustomMessage For="() => Track.Title"><span class="invalid fa-solid fa-triangle-exclamation"></span></ValidationCustomMessage></label>
+                    <InputText id="track-title" type="text" @bind-Value="Track.Title"></InputText>
+                </div>
+                <div class="form-group">
+                    <label for="track-length">Length</label>
+                    <input id="track-length" type="text" @bind="Track.Duration" />
+                </div>
+                <div class="form-group">
+                    <label for="track-notes">Notes</label>
+                    <InputTextArea @bind-Value="Track.Notes" />
+                </div>
+            </div>
+            <div class="card-header">Credits</div>
+            <div class="card-body">
+                @foreach (TrackPersonGroupPersonRelation personGroupRelation in Track.TrackPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
                 {
                     <div class="form-group">
-                        <label>Add group</label>
-                        <div class="card-grid card-span-9">
-                            <select class="card-span-11" @bind="SelectedPersonGroupId">
-                                <option value="-1"></option>
-                                @foreach (PersonGroup personGroup in personGroups)
-                                {
-                                    <option value="@personGroup.Id">@personGroup.Name</option>
-                                }
-                            </select>
-                            <button class="secondary card-span-1" @onclick="AddPersonGroup" disabled="@(SelectedPersonGroupId <= 0)">Add</button>
+                        <label>
+                            @personGroupRelation.PersonGroup.Name
+                            <button title="Remove @personGroupRelation.PersonGroup.Name group" class="tiny" @onclick="() => RemovePersonGroup(personGroupRelation)"><span class="fa-regular fa-circle-xmark"></span></button>
+                        </label>
+                        <TagList Items="@personGroupRelation.Persons" ExecuteSearch="ExecutePersonSearch" />
+                    </div>
+                }
+                @{
+                    List<PersonGroup> personGroups = PersonGroups
+                    .Where(pg => Track.TrackPersonGroupPersonRelations.All(apg => apg.PersonGroup.Id != pg.Id))
+                    .ToList();
+
+                    if (personGroups.Any())
+                    {
+                        <div class="form-group">
+                            <label>Add group</label>
+                            <div class="card-grid card-span-9">
+                                <select class="card-span-11" @bind="SelectedPersonGroupId">
+                                    <option value="-1"></option>
+                                    @foreach (PersonGroup personGroup in personGroups)
+                                    {
+                                        <option value="@personGroup.Id">@personGroup.Name</option>
+                                    }
+                                </select>
+                                <button class="secondary card-span-1" @onclick="AddPersonGroup" disabled="@(SelectedPersonGroupId <= 0)">Add</button>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        <div class="card card-span-12">
+            <div class="card-header card-grid">
+                <div class="card-span-11">
+                    Stream info
+                </div>
+                @if (Track?.TrackStreamInfo != null)
+                {
+                    <div class="card-span-1">
+                        <button class="tertiary" title="Remove Stream Info" @onclick="RemoveStreamInfo">Remove</button>
+                    </div>
+                }
+            </div>
+            <div class="card-body">
+                @if (Track?.TrackStreamInfo == null)
+                {
+                    <button class="secondary" type="button" @onclick="AddStreamInfo">Add stream info</button>
+                }
+                else
+                {
+                    <div class="form-group">
+                        <label for="track-stream-include">Include in auto playlist</label>
+                        <input id="track-stream-include" type="checkbox" @bind="Track.TrackStreamInfo.IncludeInAutoPlaylist" />
+                    </div>
+                    <div class="form-group">
+                        <label for="track-stream-file">File path<ValidationCustomMessage For="() => Track.TrackStreamInfo.FilePath"><span class="invalid fa-solid fa-triangle-exclamation"></span></ValidationCustomMessage></label>
+                        <InputText id="track-stream-file" type="text" @bind-Value="Track.TrackStreamInfo.FilePath"></InputText>
+
+                    </div>
+                    <div class="form-group">
+                        <label for="track-stream-weight">Weight</label>
+                        <input id="track-stream-weight" type="number" @bind="Track.TrackStreamInfo.Weight" />
+                        <div class="card-span-3"></div>
+                        <div class="alert alert-info card-span-9">
+                            Weight is a whole number where 0 equals no playlist rotation. Default rotation should be 100.
                         </div>
                     </div>
                 }
-            }
-        </div>
-    </div>
-    <div class="card card-span-12">
-        <div class="card-header card-grid">
-            <div class="card-span-11">
-                Stream info
             </div>
-            @if (Track?.TrackStreamInfo != null)
-            {
-                <div class="card-span-1">
-                    <button class="tertiary" title="Remove Stream Info" @onclick="RemoveStreamInfo">Remove</button>
-                </div>
-            }
-        </div>
-        <div class="card-body">
-            @if (Track?.TrackStreamInfo == null)
-            {
-                <button class="secondary" type="button" @onclick="AddStreamInfo">Add stream info</button>
-            }
-            else
-            {
-                <div class="form-group">
-                    <label for="track-stream-include">Include in auto playlist</label>
-                    <input id="track-stream-include" type="checkbox" @bind="Track.TrackStreamInfo.IncludeInAutoPlaylist" />
-                </div>
-                <div class="form-group">
-                    <label for="track-stream-file">File path</label>
-                    <input id="track-stream-file" type="text" @bind="Track.TrackStreamInfo.FilePath" />
-                </div>
-                <div class="form-group">
-                    <label for="track-stream-weight">Weight</label>
-                    <input id="track-stream-weight" type="number" @bind="Track.TrackStreamInfo.Weight" />
-                    <div class="card-span-3"></div>
-                    <div class="alert alert-info card-span-9">
-                        Weight is a whole number where 0 equals no playlist rotation. Default rotation should be 100.
-                    </div>
-                </div>
-            }
         </div>
     </div>
-</div>
 
-<div>
-    <button class="primary" @onclick="() => Close()">Close</button>
-    <button class="primary" @onclick="() => Close(true)" disabled="@Invalid">Close & Save</button>
-    <button class="tertiary" @onclick="DeleteTrack">Delete</button>
-</div>
+    <ValidationSummaryAlert></ValidationSummaryAlert>
+
+    <div>
+        <button class="primary" @onclick="() => Close()">Close</button>
+        <button class="primary" @onclick="() => Close(true)" disabled="@Invalid">Close & Save</button>
+        <button class="tertiary" @onclick="DeleteTrack">Delete</button>
+    </div>
+
+</EditForm>
