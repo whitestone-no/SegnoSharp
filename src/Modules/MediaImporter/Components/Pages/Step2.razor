@@ -4,72 +4,72 @@
 @using Whitestone.SegnoSharp.Modules.MediaImporter.Components.Layouts
 @attribute [Authorize]
 
-<div class="Import">
-    <ul class="Steps">
-        <li>Select Folder</li>
-        <li class="active">Select Files</li>
-        <li>Verify Metadata</li>
-        <li>Import</li>
-    </ul>
-    <div class="ImportSelectFiles">
-        @if (!string.IsNullOrEmpty(ErrorMessage))
-        {
-            <div class="Error">@ErrorMessage</div>
-        }
-        else
-        {
-            <div class="FileListProperties">
-                <table>
-                    <tr>
-                        <th>Selected folder:</th>
-                        <td>@ImporterState.SelectedFolder?.FullName</td>
-                    </tr>
-                    <tr>
-                        <th>Import subfolders:</th>
-                        <td>
-                            @if (ImporterState.ImportSubfolders)
-                            {
-                                <span>Yes</span>
-                            }
-                            else
-                            {
-                                <span>No</span>
-                            }
-                        </td>
-                    </tr>
-                </table>
+<div class="card-grid">
+    <div class="card card-span-12">
+        <div class="card-header">Media importer</div>
+        <div class="card-body">
+            <div class="wizard-steps">
+                <ul>
+                    <li>Select Folder</li>
+                    <li class="active">Select Files</li>
+                    <li>Verify Metadata</li>
+                    <li>Import</li>
+                </ul>
             </div>
-            <div class="FileList">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Filename</th>
-                            <th>
-                                <label for="chkAllImport">Import file</label>&nbsp;<input id="chkAllImport" type="checkbox" @bind="@AllImport" />
-                            </th>
-                            <th>
-                                <label for="chkAllImportPlaylist">Import to playlist</label>&nbsp;<input id="chkAllImportPlaylist" type="checkbox" @bind="@AllImportPlaylist" />
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (int i = 0; i < ImporterState.SelectedFiles.Length; i++)
-                        {
-                            // Because @bind uses a lambda, and the i variable constantly gets changed, bind to a local variable instead
-                            int localIndex = i;
-                            <tr>
-                                <td>@ImporterState.SelectedFiles[localIndex].Filename</td>
-                                <td><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].Import" /></td>
-                                <td><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].ImportToPlaylist" /></td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+            <div class="card">
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="alert alert-error">@ErrorMessage</div>
+                }
+                else
+                {
+                    <div class="form-group">
+                        <label>Selected path</label>
+                        <input type="text" value="@ImporterState.SelectedFolder?.FullName" disabled="disabled" />
+                    </div>
+                    <div class="form-group">
+                        <label for="chkImportSubfolders2" class="checkbox-label">Include subfolders</label>
+                        <input id="chkImportSubfolders2" type="checkbox" @bind="ImporterState.ImportSubfolders" disabled="disabled" />
+                    </div>
+                    <div class="folder-list">
+                        <div class="folder-list-header">
+                            <div class="card-span-9">Filename</div>
+                            <div class="card-span-1 text-center">
+                                <div>
+                                    <label for="chkAllImport">Import file</label>
+                                </div>
+                                <div>
+                                    <input id="chkAllImport" type="checkbox" @bind="@AllImport" />
+                                </div>
+                            </div>
+                            <div class="card-span-2 text-center">
+                                <div>
+                                    <label for="chkAllImportPlaylist">Import to playlist</label>
+                                </div>
+                                <div>
+                                    <input id="chkAllImportPlaylist" type="checkbox" @bind="@AllImportPlaylist" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="folder-list-body">
+                            @for (var i = 0; i < ImporterState.SelectedFiles.Length; i++)
+                            {
+                                // Because @bind uses a lambda, and the i variable constantly gets changed, bind to a local variable instead
+                                int localIndex = i;
+                                <div class="card-grid">
+                                    <div class="card-span-9">@ImporterState.SelectedFiles[localIndex].Filename</div>
+                                    <div class="card-span-1"><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].Import" /></div>
+                                    <div class="card-span-2"><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].ImportToPlaylist" /></div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                <div class="buttons">
+                    <button class="secondary" @onclick="OnBackClick">&lt; Back</button>
+                    <button class="primary" @onclick="OnNextClick">Continue &gt;</button>
+                </div>
             </div>
-        }
-        <div class="NextBack">
-            <button @onclick="OnNextClick">Next &gt;</button>
-            <button @onclick="OnBackClick">&lt; Back</button>
         </div>
     </div>
 </div>

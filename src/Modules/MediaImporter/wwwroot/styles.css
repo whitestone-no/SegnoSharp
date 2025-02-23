@@ -103,11 +103,33 @@
             margin-right: 0.5rem;
         }
 
+    .folder-list-body .card-grid div {
+        text-align: center;
+    }
+
+        .folder-list-body .card-grid div:first-child {
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
+    .folder-list-body .card-grid {
+        grid-column: span 12 !important;
+        margin-bottom: 0;
+    }
+
+        .folder-list-body .card-grid:hover {
+            background-color: var(--hover-bg);
+        }
+
 .folder-list .card-grid {
     gap: 0;
 }
 
-
+.folder-list ~ .buttons {
+    text-align: right;
+    margin-top: 1rem;
+}
 
 
 
