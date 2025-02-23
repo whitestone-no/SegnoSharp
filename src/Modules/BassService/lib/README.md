@@ -1,2 +1,0 @@
-This folder should contain libraries and binaries that SegnoSharp is depending on that are not available through other channels like NuGet.
-This includes BASS, and (if necessary) external audio decoders that can be used by `bassenc.dll`

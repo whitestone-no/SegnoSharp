@@ -16,59 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="lib\**" />
-    <Content Remove="lib\**" />
-    <EmbeddedResource Remove="lib\**" />
-    <None Remove="lib\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="lib\BASS\linux\libbass.so" Visible="true" Link="libbass.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="lib\BASS\linux\libbassenc.so" Visible="true" Link="libbassenc.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="lib\BASS\linux\libbassenc_mp3.so" Visible="true" Link="libbassenc_mp3.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="lib\BASS\linux\libbassmix.so" Visible="true" Link="libbassmix.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="lib\BASS\linux\libbassflac.so" Visible="true" Link="libbassflac.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="lib\BASS\windows\bass.dll" Visible="true" Link="bass.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="lib\BASS\windows\bassenc.dll" Visible="true" Link="bassenc.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="lib\BASS\windows\bassenc_mp3.dll" Visible="true" Link="bassenc_mp3.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="lib\BASS\windows\bassmix.dll" Visible="true" Link="bassmix.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="lib\BASS\windows\bassflac.dll" Visible="true" Link="bassflac.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="lib\encoder\ffmpeg.exe" Visible="true" Link="encoder\ffmpeg.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="lib\encoder\ffmpeg" Visible="true" Link="encoder\ffmpeg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -84,7 +32,8 @@
 
   <ItemGroup>
     <Reference Include="Bass.Net">
-      <HintPath>lib\BASS\Bass.Net\Bass.Net.dll</HintPath>
+      <HintPath>..\..\..\data\bass\Bass.Net.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
 

@@ -5,8 +5,10 @@ WORKDIR /app
 EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /data
+COPY data .
 WORKDIR /src
-COPY . .
+COPY src .
 WORKDIR "/src/SegnoSharp"
 RUN dotnet publish "SegnoSharp.csproj" -c Release -o /app/publish
 

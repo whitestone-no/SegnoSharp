@@ -1,4 +1,0 @@
-*.dll
-*so
-encoder/*
-!encoder/README.md

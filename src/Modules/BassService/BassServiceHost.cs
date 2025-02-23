@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Un4seen.Bass;
 using Whitestone.Cambion.Interfaces;
 using Whitestone.SegnoSharp.Common.Events;
+using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
 using Whitestone.SegnoSharp.Modules.BassService.Models;
 using Whitestone.SegnoSharp.Modules.BassService.Models.Config;
@@ -18,6 +19,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
     public class BassServiceHost : IHostedService, IEventHandler<PlayTrack>, IEventHandler<StartStreaming>, IEventHandler<StopStreaming>
     {
         private readonly IBassWrapper _bassWrapper;
+        private readonly CommonConfig _commonConfig;
         private readonly ICambion _cambion;
         private readonly ILogger<BassServiceHost> _log;
 
@@ -26,10 +28,12 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 
         public BassServiceHost(IBassWrapper bassWrapper,
             IOptions<BassRegistration> bassRegistration,
+            IOptions<CommonConfig> commonConfig,
             ICambion cambion,
             ILogger<BassServiceHost> log)
         {
             _bassWrapper = bassWrapper;
+            _commonConfig = commonConfig.Value;
             _cambion = cambion;
             _log = log;
 
@@ -111,17 +115,22 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 
         private void LoadAssemblies()
         {
-            var flacLib = "bassflac.dll";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            var flacLib = "libbassflac.so";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                flacLib = "libbassflac.so";
+                flacLib = "bassflac.dll";
             }
 
-            FileInfo fi = new(GetType().Assembly.Location);
+            DirectoryInfo di = new(Path.Combine(_commonConfig.DataPath, "bass"));
 
-            if (_bassWrapper.BassLoadPlugin(Path.Combine(fi.DirectoryName ?? string.Empty, flacLib)) == 0)
+            if (!di.Exists)
             {
-                _log.LogCritical("Could not load {libName} from {path}", flacLib, fi.DirectoryName);
+                _log.LogCritical("Could not find library path {path}", di.FullName);
+            }
+
+            if (_bassWrapper.BassLoadPlugin(Path.Combine(di.FullName, flacLib)) == 0)
+            {
+                _log.LogCritical("Could not load {flaclib} from {path}", flacLib, di.FullName);
             }
 
             _log.LogInformation("BASS Version: {bassVersion}", _bassWrapper.GetBassVersion());

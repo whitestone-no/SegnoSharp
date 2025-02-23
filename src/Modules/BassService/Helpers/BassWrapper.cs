@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -12,7 +10,9 @@ using Un4seen.Bass.AddOn.Mix;
 using Un4seen.Bass.AddOn.Tags;
 using Un4seen.Bass.Misc;
 using Whitestone.SegnoSharp.Common.Models;
+using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
+using Whitestone.SegnoSharp.Modules.BassService.Models.Config;
 using StreamingServer = Whitestone.SegnoSharp.Common.Models.Configuration.StreamingServer;
 
 namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
@@ -21,13 +21,17 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
     {
         private readonly ILogger<BassWrapper> _log;
         private readonly StreamingServer _streamingServerConfig;
+        private readonly Ffmpeg _ffmpegConfig;
+        private readonly CommonConfig _commonConfig;
         private IBaseEncoder _encoder;
         private string _currentTitle = "SegnoSharp";
 
-        public BassWrapper(IOptions<StreamingServer> streamingServerConfig, ILogger<BassWrapper> log)
+        public BassWrapper(IOptions<StreamingServer> streamingServerConfig, IOptions<Ffmpeg> ffmpegConfig, IOptions<CommonConfig> commonConfig, ILogger<BassWrapper> log)
         {
             _log = log;
             _streamingServerConfig = streamingServerConfig.Value;
+            _ffmpegConfig = ffmpegConfig.Value;
+            _commonConfig = commonConfig.Value;
         }
 
         public void Registration(string email, string key)
@@ -175,9 +179,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
             return null;
         }
 
-        // This method must be duplicated between Windows and Linux implementations of IBassWrapper
-        // because they use interfaces defined in two different DLLs. Therefore implementation
-        // can't be shared between the two implementations and they must have their own.
         public void StartStreaming(int channel)
         {
             if (_encoder != null)
@@ -185,8 +186,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
                 return;
             }
 
-            FileInfo fi = new(GetType().Assembly.Location);
-            string encoderPath = Path.Combine(fi.DirectoryName ?? Directory.GetCurrentDirectory(), "encoder");
+            string encoderPath = Path.Combine(_commonConfig.DataPath, _ffmpegConfig.DataFolder);
 
             var ffmpegExecutable = "ffmpeg";
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -255,9 +255,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
             }
         }
 
-        // This method must be duplicated between Windows and Linux implementations of IBassWrapper
-        // because they use interfaces defined in two different DLLs. Therefore implementation
-        // can't be shared between the two implementations and they must have their own.
         public void StopStreaming()
         {
             if (_encoder is { IsActive: true })
