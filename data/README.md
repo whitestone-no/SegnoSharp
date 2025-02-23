@@ -1,7 +1,7 @@
 This folder is used for data storage, like logs. This folder must be present for running SegnoSharp "out-of-the-box", and this README.MD file ensures that.
 Any other files put into this folder will be ignored by Git.
 
-#Special folders
+# Special folders
 
 ## BASS
 
