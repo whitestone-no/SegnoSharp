@@ -10,21 +10,21 @@ The `bass` folder must contain the BASS audio libraries. Download these from htt
 The following files must be present in this folder:
 
 **All operating systems**
-Bass.Net.dll (2.4.17.6)
+- Bass.Net.dll (2.4.17.6)
 
 **Windows**
-bass.dll (2.4.17)
-bassenc.dll (2.4.16.1)
-bassenc_mp3.dll (2.4.1.6)
-bassflac.dll (2.4.5.5)
-bassmix.dll (2.4.12)
+- bass.dll (2.4.17)
+- bassenc.dll (2.4.16.1)
+- bassenc_mp3.dll (2.4.1.6)
+- bassflac.dll (2.4.5.5)
+- bassmix.dll (2.4.12)
 
-** Linux **
-libbass.so (2.4.17)
-libbassenc.so (2.4.16.1)
-libbassenc_mp3.so (2.4.1.6)
-libbassflac.so (2.4.5.5)
-libbassmix.so (2.4.12)
+**Linux**
+- libbass.so (2.4.17)
+- libbassenc.so (2.4.16.1)
+- libbassenc_mp3.so (2.4.1.6)
+- libbassflac.so (2.4.5.5)
+- libbassmix.so (2.4.12)
 
 Version numbers in parantheses are verified to work.
 
@@ -35,10 +35,10 @@ Version numbers in parantheses are verified to work.
 FFMPEG is used as the encoder to convert the raw audio stream from BASS into a compressed format sent to the streaming server.
 Download from https://www.ffmpeg.org/
 
-** Windows **
+**Windows**
 
 - ffmpeg.exe
 
-** Linux **
+**Linux**
 
--- ffmpeg
+- ffmpeg
