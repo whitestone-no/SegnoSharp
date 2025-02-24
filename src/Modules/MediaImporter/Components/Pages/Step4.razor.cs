@@ -56,6 +56,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
             }
 
             ImportInProgress = true;
+            await InvokeAsync(StateHasChanged);
 
             await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 

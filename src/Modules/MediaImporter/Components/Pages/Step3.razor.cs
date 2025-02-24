@@ -30,23 +30,26 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
         [Inject] private IJSRuntime JsRuntime { get; set; }
 
         private TrackViewModel _currentlyDraggingTrack;
+        private TrackViewModel _currentlyDraggingOverTrack;
 
         private List<MediaType> MediaTypes { get; set; }
 
         private readonly char[] _nameSeparators = { ',', '&', '/', '\\', ';' };
+        private bool _loaded;
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
             if (ImporterState.SelectedFiles == null)
             {
                 ImporterState.AlbumsToImport = null;
+                _loaded = true;
                 return;
             }
 
-            using SegnoSharpDbContext dbContext = DbFactory.CreateDbContext();
+            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
-            MediaTypes = dbContext.MediaTypes.ToList();
-
+            MediaTypes = await dbContext.MediaTypes.ToListAsync();
+            
             int albumArtistGroupId = TagReaderConfig.Value.TagMappings["AlbumArtist"];
             int trackArtistGroupId = TagReaderConfig.Value.TagMappings["Artist"];
             int trackComposerGroupId = TagReaderConfig.Value.TagMappings["Composer"];
@@ -60,7 +63,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 })
                 .ToList();
 
-            ImporterState.AlbumsToImport = new List<AlbumViewModel>();
+            ImporterState.AlbumsToImport = [];
 
             foreach (IGrouping<string, Tags> albumGroup in tags.GroupBy(a => a.Album))
             {
@@ -73,7 +76,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                     Discs = new List<Disc>(),
                     TempId = Guid.NewGuid(),
                     PersonGroupMappingId = albumArtistGroupId,
-                    AlbumAlreadyExists = dbContext.Albums.Any(a => a.Title == albumGroup.Key)
+                    AlbumAlreadyExists = await dbContext.Albums.AnyAsync(a => a.Title == albumGroup.Key)
                 };
 
                 Tags firstTagWithCover = albumGroup.FirstOrDefault(t => t.CoverImage != null);
@@ -151,7 +154,8 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                     {
                         DiscNumber = discGroup.Key,
                         Tracks = new List<Track>(),
-                        Album = album
+                        Album = album,
+                        TempId = Guid.NewGuid()
                     };
 
                     album.Discs.Add(disc);
@@ -279,7 +283,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 }
             }
 
-            base.OnInitialized();
+            _loaded = true;
         }
 
         private async Task AlbumNameChanged(AlbumViewModel album)
@@ -383,27 +387,64 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
         private void HandleDrop(TrackViewModel targetTrack)
         {
-            _currentlyDraggingTrack.Disc.Tracks.Remove(_currentlyDraggingTrack);
+            ushort newTrackNumber = targetTrack.TrackNumber;
+            ushort oldTrackNumber = _currentlyDraggingTrack.TrackNumber;
 
-            foreach (Track trackAbove in _currentlyDraggingTrack.Disc.Tracks.Where(t => t.TrackNumber > _currentlyDraggingTrack.TrackNumber))
+            // If dragging track to another disc
+            if (((DiscViewModel)_currentlyDraggingTrack.Disc).TempId != ((DiscViewModel)targetTrack.Disc).TempId)
             {
-                trackAbove.TrackNumber = (ushort)(trackAbove.TrackNumber - 1);
+                // Clean up the track numbers on the previous disc
+                foreach (Track previousDiscTrack in _currentlyDraggingTrack.Disc.Tracks.Where(t => t.TrackNumber > oldTrackNumber))
+                {
+                    previousDiscTrack.TrackNumber = (ushort)(previousDiscTrack.TrackNumber - 1);
+                }
+
+                // Update track numbers greater than the new track number
+                foreach (Track newDiscTrack in targetTrack.Disc.Tracks.Where(t => t.TrackNumber >= newTrackNumber))
+                {
+                    newDiscTrack.TrackNumber = (ushort)(newDiscTrack.TrackNumber + 1);
+                }
+
+                _currentlyDraggingTrack.Disc.Tracks.Remove(_currentlyDraggingTrack);
+                _currentlyDraggingTrack.Disc = targetTrack.Disc;
+                targetTrack.Disc.Tracks.Add(_currentlyDraggingTrack);
+            }
+            // If dragging within same disc
+            else
+            {
+                // If moving "down"
+                if (newTrackNumber > oldTrackNumber)
+                {
+                    newTrackNumber = (ushort)(newTrackNumber - 1);
+
+                    foreach (Track moveTrack in targetTrack.Disc.Tracks.Where(t => t.TrackNumber <= newTrackNumber && t.TrackNumber > oldTrackNumber))
+                    {
+                        moveTrack.TrackNumber = (ushort)(moveTrack.TrackNumber - 1);
+                    }
+
+                }
+                // If moving "up"
+                else if (newTrackNumber < oldTrackNumber)
+                {
+                    foreach (Track moveTrack in targetTrack.Disc.Tracks.Where(t => t.TrackNumber < oldTrackNumber && t.TrackNumber >= newTrackNumber))
+                    {
+                        moveTrack.TrackNumber = (ushort)(moveTrack.TrackNumber + 1);
+                    }
+                }
             }
 
-            foreach (Track destinationTrackBelow in targetTrack.Disc.Tracks.Where(t => t.TrackNumber > targetTrack.TrackNumber))
-            {
-                destinationTrackBelow.TrackNumber = (ushort)(destinationTrackBelow.TrackNumber + 1);
-            }
-
-            _currentlyDraggingTrack.TrackNumber = (ushort)(targetTrack.TrackNumber + 1);
-            _currentlyDraggingTrack.Disc = targetTrack.Disc;
-            targetTrack.Disc.Tracks.Add(_currentlyDraggingTrack);
-            targetTrack.CssClass = string.Empty;
+            _currentlyDraggingTrack.TrackNumber = newTrackNumber;
         }
 
         private void HandleDragEnd()
         {
             _currentlyDraggingTrack = null;
+            _currentlyDraggingOverTrack = null;
+        }
+
+        private void HandleDragEnter(TrackViewModel track)
+        {
+            _currentlyDraggingOverTrack = track;
         }
 
         private void OnNextClick()

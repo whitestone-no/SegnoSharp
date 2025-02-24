@@ -40,17 +40,14 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
         protected override void OnInitialized()
         {
-            if (ImporterState.SelectedFiles != null &&
-                ImporterState.SelectedFiles.Any())
+            if (ImporterState.SelectedFiles is { Length: > 0 })
             {
-                base.OnInitialized();
                 return;
             }
 
             if (ImporterState.SelectedFolder?.Parent == null)
             {
                 ErrorMessage = "No folder selected.";
-                base.OnInitialized();
                 return;
             }
 
@@ -60,10 +57,15 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 .Where(f => extensions.Contains(f.Extension))
                 .ToList();
 
+            if (files.Count == 0)
+            {
+                ErrorMessage = "No music files found in the selected path. Please redo the previous step.";
+                return;
+            }
+
             if (files.Count > 1000)
             {
                 ErrorMessage = "More than 1000 files in selected folder. Please select a folder with fewer files.";
-                base.OnInitialized();
                 return;
             }
 
@@ -72,8 +74,6 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 File = f,
                 Filename = f.FullName.TrimStart(ImporterState.SelectedFolder.FullName).TrimStart('\\')
             }).ToArray();
-
-            base.OnInitialized();
         }
 
         private void OnNextClick()

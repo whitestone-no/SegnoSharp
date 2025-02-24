@@ -4,48 +4,63 @@
 @using Whitestone.SegnoSharp.Modules.MediaImporter.Components.Layouts
 @attribute [Authorize]
 
-<div class="Import">
-    <ul class="Steps">
-        <li>Select Folder</li>
-        <li>Select Files</li>
-        <li>Verify Metadata</li>
-        <li class="active">Import</li>
-    </ul>
-    <div class="ImportDoImport">
-        @if (!ImportComplete && (ImporterState.AlbumsToImport == null || !ImporterState.AlbumsToImport.Any()))
-        {
-            <span>Nothing to import. Please redo the previous steps.</span>
-        }
-        else
-        {
-            <div>
-                <span>You are about to import @NewAlbumCount new album@(NewAlbumCount is > 1 or < 1 ? "s" : string.Empty), with a total of @NewAlbumTracksCount track@(NewAlbumTracksCount is > 1 or < 1 ? "s" : string.Empty)</span>
-                @if (ExistingAlbumCount > 0)
-                {
-                    <span>, and update @ExistingAlbumCount album@(ExistingAlbumCount is > 1 or < 1 ? "s" : string.Empty), with a total of @ExistingAlbumTracksCount track@(ExistingAlbumTracksCount is > 1 or < 1 ? "s" : string.Empty)</span>
-                }
+
+<div class="card-grid">
+    <div class="card card-span-12">
+        <div class="card-header">Media importer</div>
+        <div class="card-body">
+            <div class="wizard-steps">
+                <ul>
+                    <li>Select Folder</li>
+                    <li>Select Files</li>
+                    <li>Verify Metadata</li>
+                    <li class="active">Import</li>
+                </ul>
             </div>
-
-            @if (ImportInProgress)
-            {
-                <div>
-                    Import in progress. Please wait.
-                </div>
+            @{
+                bool importBlocked = !ImportComplete && (ImporterState.AlbumsToImport == null || !ImporterState.AlbumsToImport.Any());
             }
-
-            @if (ImportComplete)
+            @if (importBlocked)
             {
-                <div>
-                    Import complete!
+                <div class="card">
+                    <div class="alert alert-error">Nothing to import. Please redo the previous steps.</div>
                 </div>
             }
             else
             {
-                <div class="NextBack">
-                    <button @onclick="DoImport">Import</button>
-                    <button @onclick="OnBackClick">&lt; Back</button>
+                <div class="card">
+                    @if (!ImportInProgress && !ImportComplete)
+                    {
+                        <div class="alert alert-warning">
+                            <span>You are about to import @NewAlbumCount new album@(NewAlbumCount is > 1 or < 1 ? "s" : string.Empty), with a total of @NewAlbumTracksCount track@(NewAlbumTracksCount is > 1 or < 1 ? "s" : string.Empty)</span>
+                            @if (ExistingAlbumCount > 0)
+                            {
+                                <span>, and update @ExistingAlbumCount album@(ExistingAlbumCount is > 1 or < 1 ? "s" : string.Empty), with a total of @ExistingAlbumTracksCount track@(ExistingAlbumTracksCount is > 1 or < 1 ? "s" : string.Empty)</span>
+                            }
+                        </div>
+                    }
+                    @if (ImportInProgress)
+                    {
+                        <div class="alert alert-info">
+                            Import in progress. Please wait.
+                        </div>
+                    }
+
+                    @if (ImportComplete)
+                    {
+                        <div class="alert alert-info">
+                            Import complete!
+                        </div>
+                    }
                 </div>
             }
-        }
+            @if (!ImportComplete && !ImportInProgress)
+            {
+                <div class="buttons">
+                    <button class="secondary" @onclick="OnBackClick">&lt; Back</button>
+                    <button class="primary" @onclick="DoImport" disabled="@(importBlocked)">Finish &gt;</button>
+                </div>
+            }
+        </div>
     </div>
 </div>

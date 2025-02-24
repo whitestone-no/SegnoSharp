@@ -20,17 +20,6 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
             set => TrackStreamInfo.IncludeInAutoPlaylist = value;
         }
 
-        public string CssClass { get; set; } = string.Empty;
-
-        public void HandleDragEnter()
-        {
-            CssClass = "drag-on";
-        }
-        public void HandleDragLeave()
-        {
-            CssClass = string.Empty;
-        }
-
         public string ArtistString
         {
             get => TrackPersonGroupPersonRelations.GetNameString(ArtistPersonGroupMappingId);

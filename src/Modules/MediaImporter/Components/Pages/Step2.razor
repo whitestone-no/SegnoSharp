@@ -67,7 +67,7 @@
                 }
                 <div class="buttons">
                     <button class="secondary" @onclick="OnBackClick">&lt; Back</button>
-                    <button class="primary" @onclick="OnNextClick">Continue &gt;</button>
+                    <button class="primary" @onclick="OnNextClick" disabled="@(!string.IsNullOrEmpty(ErrorMessage))">Continue &gt;</button>
                 </div>
             </div>
         </div>
