@@ -580,6 +580,7 @@ img[class~="rounded"] {
     border-radius: 4px;
     overflow: hidden;
     padding: 10px;
+    margin-bottom: 1rem;
 }
 
 .card-span-1 {
