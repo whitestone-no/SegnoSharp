@@ -5,7 +5,7 @@
 @using Whitestone.SegnoSharp.Common.Attributes
 @using Whitestone.SegnoSharp.Modules.Playlist.ViewModels
 @attribute [Authorize]
-@attribute [ModuleMenu("Playlist", "fa-list-check", true)]
+@attribute [ModuleMenu("Playlist", 10, "fa-list-check", true)]
 
 <h1>Playlist admin</h1>
 
@@ -35,6 +35,7 @@
                         </div>
                     </div>
                     <div class="card-span-1 center-all">@playlistItem.Length</div>
+                    @* TODO: Add remove button *@
                 </div>
             }
             <div ondragover="event.preventDefault();"
@@ -108,6 +109,9 @@
                         <div class="card-span-2">
                             @result.Length
                         </div>
+                        @* TODO: Show/Hide this popup from Blazor instead of from CSS as it is not clear that an action is
+                                 actually performed when the user clicks an action.
+                        *@
                         <div class="card-span-1 playlist-search-actions center-all">
                             <div class="handle"><span class="fa-solid fa-caret-down"></span></div>
                             <div class="actions">
