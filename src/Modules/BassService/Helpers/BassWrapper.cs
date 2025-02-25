@@ -187,12 +187,16 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
                 ffmpegExecutable = "ffmpeg.exe";
             }
 
-            var format = "mp3";
+            var format1 = "mp3";
+            var format2 = "mp3";
+            var extension = ".mp3";
             var encoderCtype = BASSChannelType.BASS_CTYPE_STREAM_MP3;
             string encoderType = BassEnc.BASS_ENCODE_TYPE_MP3;
             if (settings.AudioFormat == AudioFormat.Aac)
             {
-                format = "adts";
+                format1 = "aac";
+                format2 = "adts";
+                extension = ".aac";
                 encoderCtype = BASSChannelType.BASS_CTYPE_STREAM_AAC;
                 encoderType = BassEnc.BASS_ENCODE_TYPE_AAC;
             }
@@ -201,9 +205,9 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
             {
                 EncoderDirectory = encoderPath,
                 CMDLN_Executable = ffmpegExecutable,
-                CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a " + format + " -b:a ${kbps}k -vn -f " + format + " ${output}", // Remember to use "-f adts" for AAC streaming
+                CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a " + format1 + " -b:a ${kbps}k -vn -f " + format2 + " ${output}", // Remember to use "-f adts" for AAC streaming
                 CMDLN_EncoderType = encoderCtype,
-                CMDLN_DefaultOutputExtension = ".aac",
+                CMDLN_DefaultOutputExtension = extension,
                 CMDLN_Bitrate = (int)settings.Bitrate,
                 CMDLN_SupportsSTDOUT = true,
                 CMDLN_ParamSTDIN = "-",
