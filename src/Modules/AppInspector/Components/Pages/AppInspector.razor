@@ -1,4 +1,5 @@
 ﻿@page "/admin/appinspector"
+@using System.Collections
 @using Microsoft.AspNetCore.Authorization
 @using System.Runtime.InteropServices
 @using Whitestone.SegnoSharp.Common.Attributes
@@ -95,19 +96,39 @@
 
 <table style="font-size: 12px">
     <thead>
+    <tr>
+        <th>Lifetime</th>
+        <th>Service</th>
+        <th>Implementation</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (DependencyViewModel dependency in _dependencies)
+    {
         <tr>
-            <th>Lifetime</th>
-            <th>Service</th>
-            <th>Implementation</th>
+            <td>@dependency.Lifetime</td>
+            <td>@dependency.ServiceType</td>
+            <td>@dependency.ImplementationType</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<h2>Environment variables</h2>
+
+<table style="font-size: 12px">
+    <thead>
+        <tr>
+            <th>Key</th>
+            <th>Value</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (DependencyViewModel dependency in _dependencies)
+        @foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
         {
             <tr>
-                <td>@dependency.Lifetime</td>
-                <td>@dependency.ServiceType</td>
-                <td>@dependency.ImplementationType</td>
+                <td>@de.Key</td>
+                <td>@de.Value</td>
             </tr>
         }
     </tbody>
