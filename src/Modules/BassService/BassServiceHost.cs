@@ -201,15 +201,15 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             }
         }
 
-        public void HandleEvent(StartStreaming input)
+        public void HandleEvent(StartStreaming e)
         {
             try
             {
-                _bassWrapper.StartStreaming(_mixer);
+                _bassWrapper.StartStreaming(_mixer, e.Settings);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _log.LogError(e, "Unknown exceotion during {event}", nameof(StartStreaming));
+                _log.LogError(ex, "Unknown exceotion during {event}", nameof(StartStreaming));
             }
         }
 

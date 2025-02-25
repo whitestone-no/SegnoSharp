@@ -126,7 +126,6 @@ namespace Whitestone.SegnoSharp
                 .UseMessagePackSerializer();
 
             builder.Services.Configure<CommonConfig>(builder.Configuration.GetSection(CommonConfig.Section));
-            builder.Services.Configure<StreamingServer>(builder.Configuration.GetSection(StreamingServer.Section));
 
             IEnumerable<IModule> modules = builder.AddModules();
 

@@ -26,7 +26,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Interfaces
         bool Stop(int handle);
         bool SlideAttribute(int handle, BASSAttribute attribute, float value, int time);
         Tags GetTagFromFile(string file);
-        void StartStreaming(int channel);
+        void StartStreaming(int channel, StreamingSettings settings);
         void StopStreaming();
         void SetStreamingTitle(string title);
     }

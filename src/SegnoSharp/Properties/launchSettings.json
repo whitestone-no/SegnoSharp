@@ -22,7 +22,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SegnoSharp_CommonConfig__DataPath": "/var/segnosharp",
         "SegnoSharp_CommonConfig__MusicPath": "/var/music",
-        "SegnoSharp_StreamingServer__Address": "host.docker.internal",
         "SegnoSharp_ConnectionStrings__SegnoSharpDatabaseSqlite": "Data Source=SegnoSharpDocker.db"
       }
     },
