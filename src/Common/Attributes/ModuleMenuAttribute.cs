@@ -14,7 +14,7 @@ namespace Whitestone.SegnoSharp.Common.Attributes
         public ModuleMenuAttribute(string menuTitle, bool isAdmin = false)
         {
             MenuTitle = menuTitle;
-            SortOrder = 0;
+            SortOrder = 100;
             Icon = null;
             IsAdmin = isAdmin;
             Parent = null;
@@ -22,7 +22,7 @@ namespace Whitestone.SegnoSharp.Common.Attributes
         public ModuleMenuAttribute(string menuTitle, string icon = null, bool isAdmin = false)
         {
             MenuTitle = menuTitle;
-            SortOrder = 0;
+            SortOrder = 100;
             Icon = icon;
             IsAdmin = isAdmin;
             Parent = null;
@@ -47,7 +47,7 @@ namespace Whitestone.SegnoSharp.Common.Attributes
         public ModuleMenuAttribute(string menuTitle, Type parent = null)
         {
             MenuTitle = menuTitle;
-            SortOrder = 0;
+            SortOrder = 100;
             Icon = null;
             IsAdmin = false;
             Parent = parent;
@@ -63,7 +63,7 @@ namespace Whitestone.SegnoSharp.Common.Attributes
         public ModuleMenuAttribute(string menuTitle, Type parent = null, bool isAdmin = false)
         {
             MenuTitle = menuTitle;
-            SortOrder = 0;
+            SortOrder = 100;
             Icon = null;
             IsAdmin = isAdmin;
             Parent = parent;
