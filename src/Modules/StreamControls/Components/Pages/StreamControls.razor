@@ -1,0 +1,10 @@
+﻿@page "/admin/streamcontrols"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@attribute [ModuleMenu("Stream", 20, "fa-radio", true)]
+
+<h3>Streaming</h3>
+
+<button @onclick="FireEvent_PlayNextTrack_Click">Play next track</button>
+<button @onclick="FireEvent_StartStreaming_Click">Start streaming</button>
+<button @onclick="FireEvent_StopStreaming_Click">Stop streaming</button>
