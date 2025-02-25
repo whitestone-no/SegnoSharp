@@ -281,8 +281,11 @@ namespace Whitestone.SegnoSharp.Common.Helpers
             }
             else if (key.PropertyInfo.PropertyType == typeof(DateTime))
             {
-                key.PropertyInfo.SetValue(configuration,
-                    DateTime.ParseExact(value, "s", CultureInfo.InvariantCulture));
+                key.PropertyInfo.SetValue(configuration, DateTime.ParseExact(value, "s", CultureInfo.InvariantCulture));
+            }
+            else if (key.PropertyInfo.PropertyType.IsEnum)
+            {
+                key.PropertyInfo.SetValue(configuration, Enum.Parse(key.PropertyInfo.PropertyType, value));
             }
             else throw new ArgumentException("Unsupported configuration parameter type");
         }
