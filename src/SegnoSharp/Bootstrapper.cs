@@ -45,7 +45,6 @@ namespace Whitestone.SegnoSharp
                 builder.Configuration.AddJsonFile("appsettings.json");
                 builder.Configuration.AddUserSecrets(typeof(Bootstrapper).Assembly);
                 builder.Configuration.AddEnvironmentVariables("SegnoSharp_");
-                builder.Configuration.AddCommandLine(args);
 
                 builder.Services.AddSerilog((services, config) =>
                 {
@@ -60,6 +59,12 @@ namespace Whitestone.SegnoSharp
                 });
 
                 builder.ConfigureServices();
+
+                // Add these again as modules may have overwritten some values
+                // The priority is:
+                // CommandLine arguments > Environment variables > module secrets > module appsettings > SegnoSharp secrets > SegnoSharp appsettings
+                builder.Configuration.AddEnvironmentVariables("SegnoSharp_");
+                builder.Configuration.AddCommandLine(args);
 
                 WebApplication app = builder.Build();
                 app.Configure();
