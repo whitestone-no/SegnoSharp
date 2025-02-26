@@ -28,14 +28,14 @@
                     <div class="card-span-1 center-all">
                         @playlistItem.SortOrder
                     </div>
-                    <div class="card-span-9">
+                    <div class="card-span-8">
                         <div>
                             <b>@playlistItem.AlbumTitle</b> <em>(@playlistItem.Artists)</em><br />
                             @playlistItem.TrackTitle
                         </div>
                     </div>
                     <div class="card-span-1 center-all">@playlistItem.Length</div>
-                    @* TODO: Add remove button *@
+                    <div class="card-span-1 center-all"><button class="tertiary" title="Remove from playlist" @onclick="() => RemoveFromPlaylist(playlistItem)"><span class="fa-solid fa-trash-can"></span></button></div>
                 </div>
             }
             <div ondragover="event.preventDefault();"
@@ -109,15 +109,9 @@
                         <div class="card-span-2">
                             @result.Length
                         </div>
-                        @* TODO: Show/Hide this popup from Blazor instead of from CSS as it is not clear that an action is
-                                 actually performed when the user clicks an action.
-                        *@
                         <div class="card-span-1 playlist-search-actions center-all">
-                            <div class="handle"><span class="fa-solid fa-caret-down"></span></div>
-                            <div class="actions">
-                                <button @onclick="() => AddTrackToQueueTop(result.TrackStreamInfoId)">Add to top of queue</button>
-                                <button @onclick="() => AddTrackToQueueBottom(result.TrackStreamInfoId)">Add to bottom of queue</button>
-                            </div>
+                            <button class="secondary" @onclick="() => AddTrackToQueueTop(result.TrackStreamInfoId)" title="Queue top"><span class="fa-solid fa-arrows-up-to-line"></span></button>
+                            <button class="secondary" @onclick="() => AddTrackToQueueBottom(result.TrackStreamInfoId)" title="Queue bottom"><span class="fa-solid fa-arrows-down-to-line"></span></button>
                         </div>
                     </div>
                 }

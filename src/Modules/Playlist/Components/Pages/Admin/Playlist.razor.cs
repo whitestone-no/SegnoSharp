@@ -367,5 +367,30 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                 QueueLocker.UnlockQueue();
             }
         }
+
+        private async Task RemoveFromPlaylist(PlaylistViewModel playlistItem)
+        {
+            try
+            {
+                await QueueLocker.LockQueueAsync();
+
+                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+
+                StreamQueue queueItem = await dbContext.StreamQueue.FirstOrDefaultAsync(q => q.Id == playlistItem.QueueId);
+
+                dbContext.StreamQueue.Remove(queueItem);
+
+                await dbContext.StreamQueue.Where(q => q.SortOrder > queueItem.SortOrder)
+                    .ForEachAsync(q => q.SortOrder--);
+
+                await dbContext.SaveChangesAsync();
+
+                await Cambion.PublishEventAsync(new PlaylistUpdated());
+            }
+            finally
+            {
+                QueueLocker.UnlockQueue();
+            }
+        }
     }
 }
