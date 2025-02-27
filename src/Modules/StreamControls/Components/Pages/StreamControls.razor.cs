@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
 using Whitestone.Cambion.Interfaces;
 using Whitestone.SegnoSharp.Common.Events;
 using Whitestone.SegnoSharp.Modules.StreamControls.Models;
@@ -10,21 +11,23 @@ namespace Whitestone.SegnoSharp.Modules.StreamControls.Components.Pages
         [Inject] private ICambion Cambion { get; set; }
         [Inject] private Settings Settings { get; set; }
 
-        // ReSharper disable AsyncVoidMethod
-        private async void FireEvent_PlayNextTrack_Click()
+        private async Task FireEvent_PlayNextTrack_Click()
         {
             await Cambion.PublishEventAsync(new PlayNextTrack());
         }
 
-        private async void FireEvent_StartStreaming_Click()
+        private async Task FireEvent_StartStreaming_Click()
         {
             await Cambion.PublishEventAsync(new StartStreaming(Settings));
+
+            Settings.IsStreaming = true;
         }
 
-        private async void FireEvent_StopStreaming_Click()
+        private async Task FireEvent_StopStreaming_Click()
         {
             await Cambion.PublishEventAsync(new StopStreaming());
+
+            Settings.IsStreaming = false;
         }
-        // ReSharper restore AsyncVoidMethod
     }
 }

@@ -7,6 +7,7 @@ namespace Whitestone.SegnoSharp.Modules.StreamControls.Models
     {
         [Persist]
         [DefaultValue(nameof(AudioFormat.Mp3))]
+        [Description("Audio format")]
         public override AudioFormat AudioFormat { get; set; }
 
         [Persist]
@@ -19,10 +20,11 @@ namespace Whitestone.SegnoSharp.Modules.StreamControls.Models
 
         [Persist]
         [DefaultValue(8000)]
-        public override int Port { get; set; }
+        public override ushort Port { get; set; }
         
         [Persist]
         [DefaultValue("/stream")]
+        [Description("Mount point")]
         public override string MountPoint { get; set; }
 
         [Persist]
@@ -31,6 +33,7 @@ namespace Whitestone.SegnoSharp.Modules.StreamControls.Models
 
         [Persist]
         [DefaultValue(false)]
+        [Description("Is public")]
         public override bool IsPublic { get; set; }
 
         [Persist]
@@ -39,6 +42,7 @@ namespace Whitestone.SegnoSharp.Modules.StreamControls.Models
 
         [Persist]
         [DefaultValue("localhost")]
+        [Description("Server URL")]
         public override string ServerUrl { get; set; }
 
         [Persist]
@@ -48,6 +52,10 @@ namespace Whitestone.SegnoSharp.Modules.StreamControls.Models
         [Persist]
         [DefaultValue("SegnoSharp")]
         public override string Description { get; set; }
+
+        [Persist]
+        [DefaultValue(50)]
+        public byte Volume { get; set; }
 
         public bool IsStreaming { get; set; }
     }

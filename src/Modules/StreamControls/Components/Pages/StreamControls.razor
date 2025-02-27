@@ -3,8 +3,38 @@
 @attribute [Authorize]
 @attribute [ModuleMenu("Stream", 20, "fa-radio", true)]
 
-<h3>Streaming</h3>
-
-<button @onclick="FireEvent_PlayNextTrack_Click">Play next track</button>
-<button @onclick="FireEvent_StartStreaming_Click">Start streaming</button>
-<button @onclick="FireEvent_StopStreaming_Click">Stop streaming</button>
+<div class="card-grid">
+    <div class="card card-span-12">
+        <div class="card-header">Stream controls</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label>Playback</label>
+                <div class="card-span-9 flex-center">
+                    <button class="secondary flex-fill" @onclick="FireEvent_PlayNextTrack_Click">
+                        <span class="fa-solid fa-forward-step"></span>
+                        Play next track from playlist
+                    </button>
+                    <button class="secondary flex-fill" @onclick="FireEvent_StartStreaming_Click" disabled="@Settings.IsStreaming">
+                        <span class="fa-solid fa-play"></span>
+                        Start streaming
+                    </button>
+                    <button class="secondary flex-fill" @onclick="FireEvent_StopStreaming_Click" disabled="@(!Settings.IsStreaming)">
+                        <span class="fa-solid fa-stop"></span>
+                        Stop streaming
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Volume</label>
+                <input type="range" class="range" min="0" max="100" @bind="Settings.Volume" @bind:event="oninput" />
+                <input type="number" class="range" min="0" max="100" @bind="Settings.Volume" />
+            </div>
+        </div>
+    </div>
+    <div class="card card-span-12">
+        <div class="card-header">Stream server settings</div>
+        <div class="card-body">
+            <ObjectEditor Object="Settings" Disabled="Settings.IsStreaming" IgnoreProperties="@(["Volume"])" />
+        </div>
+    </div>
+</div>
