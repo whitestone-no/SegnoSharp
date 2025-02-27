@@ -493,12 +493,6 @@ label .invalid {
     align-items: center;
 }
 
-    .checkbox-label:hover,
-    .radio-label:hover {
-        color: var(--text-color);
-        cursor: pointer;
-    }
-
 input[type="checkbox"],
 input[type="radio"] {
     width: 20px;
