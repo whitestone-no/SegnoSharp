@@ -431,6 +431,7 @@ button[class~=tiny] {
 input[type="text"],
 input[type="number"],
 input[type="date"],
+input[type="range"],
 select,
 textarea {
     padding: 0.5rem;
@@ -443,9 +444,42 @@ input[type="date"] {
     min-width: 120px;
 }
 
+input[type="range"] {
+    -webkit-appearance: none; /* Override default CSS styles */
+    appearance: none;
+    height: 10px;
+    padding: 0;
+    margin-top: 11px;
+}
+
+input.range[type="range"] {
+    grid-column: span 8;
+}
+input.range[type="number"] {
+    grid-column: span 1;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        background: var(--primary-color);
+        width: 33px;
+        height: 33px;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+        width: 33px; /* Set a specific slider handle width */
+        height: 33px; /* Slider handle height */
+        background: var(--primary-color); /* Green background */
+        cursor: pointer; /* Cursor on hover */
+    }
+
     input[type="text"]:hover,
     input[type="number"]:hover,
     input[type="date"]:hover,
+    input[type="range"]:hover,
     select:hover,
     textarea:hover {
         border-color: var(--bg-darkgray);
@@ -454,6 +488,7 @@ input[type="date"] {
     input[type="text"]:focus,
     input[type="number"]:focus,
     input[type="date"]:focus,
+    input[type="range"]:focus,
     select:focus,
     textarea:focus {
         border-color: var(--primary-color);
@@ -816,6 +851,11 @@ nav a:visited {
 .flex-center {
     display: flex;
     align-items: center;
+}
+
+.flex-fill {
+    flex-basis: 0;
+    flex-grow: 1;
 }
 
 .fullwidth {
