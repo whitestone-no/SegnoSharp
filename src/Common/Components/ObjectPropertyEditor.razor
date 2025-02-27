@@ -40,20 +40,20 @@ else if (PropertyType.IsEnum)
     if (EnumDisplay == EnumDisplay.RadioButtons)
     {
         <InputRadioGroup id="@Identifier" @bind-Value="Value" Name="@Identifier">
-        <div class="form-radio">
-            @foreach (KeyValuePair<Enum, string> val in EnumValues)
-            {
-                <label class="radio-label">
-                    <InputRadio Value="val.Key.ToString()" Name="@Identifier" />
-                    @val.Value
-                </label>
-            }
-        </div>
+            <div class="form-radio">
+                @foreach (KeyValuePair<Enum, string> val in EnumValues)
+                {
+                    <label class="radio-label">
+                        <InputRadio Value="val.Key.ToString()" Name="@Identifier" disabled="@Disabled" />
+                        @val.Value
+                    </label>
+                }
+            </div>
         </InputRadioGroup>
     }
     else
     {
-        <InputSelect id="@Identifier" @bind-Value="Value">
+        <InputSelect id="@Identifier" @bind-Value="Value" disabled="@Disabled">
             @foreach (KeyValuePair<Enum, string> val in EnumValues)
             {
                 <option value="@val.Key.ToString()">@val.Value</option>
