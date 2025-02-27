@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Whitestone.SegnoSharp.Common.Helpers;
 using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Common.Models;
 
 namespace Whitestone.SegnoSharp.Common.Extensions
 {
@@ -14,6 +15,14 @@ namespace Whitestone.SegnoSharp.Common.Extensions
 
             services.AddSingleton<IPersistenceManager, PersistenceHandler>();
             services.AddHostedService(p => p.GetRequiredService<IPersistenceManager>());
+
+            services.AddSingleton(sp =>
+            {
+                AudioSettings settings = new();
+                var persistence = sp.GetRequiredService<IPersistenceManager>();
+                persistence.RegisterAsync(settings);
+                return settings;
+            });
 
             return services;
         }

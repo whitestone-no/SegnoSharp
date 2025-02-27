@@ -53,10 +53,6 @@ namespace Whitestone.SegnoSharp.Modules.StreamControls.Models
         [DefaultValue("SegnoSharp")]
         public override string Description { get; set; }
 
-        [Persist]
-        [DefaultValue(50)]
-        public byte Volume { get; set; }
-
         public bool IsStreaming { get; set; }
     }
 }

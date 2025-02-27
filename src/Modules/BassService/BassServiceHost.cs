@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Un4seen.Bass;
 using Whitestone.Cambion.Interfaces;
 using Whitestone.SegnoSharp.Common.Events;
+using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
 using Whitestone.SegnoSharp.Modules.BassService.Models;
@@ -16,12 +17,17 @@ using Whitestone.SegnoSharp.Modules.BassService.Models.Config;
 
 namespace Whitestone.SegnoSharp.Modules.BassService
 {
-    public class BassServiceHost : IHostedService, IEventHandler<PlayTrack>, IEventHandler<StartStreaming>, IEventHandler<StopStreaming>
+    public class BassServiceHost : IHostedService,
+        IEventHandler<PlayTrack>,
+        IEventHandler<StartStreaming>,
+        IEventHandler<StopStreaming>,
+        IEventHandler<SetVolume>
     {
         private readonly IBassWrapper _bassWrapper;
         private readonly CommonConfig _commonConfig;
         private readonly ICambion _cambion;
         private readonly ILogger<BassServiceHost> _log;
+        private readonly AudioSettings _audioSettings;
 
         private int _mixer;
         private TrackExt _currentlyPlayingTrack;
@@ -30,12 +36,14 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             IOptions<BassRegistration> bassRegistration,
             IOptions<CommonConfig> commonConfig,
             ICambion cambion,
-            ILogger<BassServiceHost> log)
+            ILogger<BassServiceHost> log,
+            AudioSettings audioSettings)
         {
             _bassWrapper = bassWrapper;
             _commonConfig = commonConfig.Value;
             _cambion = cambion;
             _log = log;
+            _audioSettings = audioSettings;
 
             _cambion.Register(this);
 
@@ -172,7 +180,13 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 // Stop previous track (with 1 second fadeout)
                 if (_currentlyPlayingTrack != null)
                 {
-                    _bassWrapper.SlideAttribute(_currentlyPlayingTrack.ChannelHandle, BASSAttribute.BASS_ATTRIB_VOL, -1f, 1000);
+                    _bassWrapper.SlideAttribute(_currentlyPlayingTrack.ChannelHandle, BASSAttribute.BASS_ATTRIB_VOL, 0f, 1000);
+                }
+
+                // Set playback volume
+                if (!_bassWrapper.SetAttribute(track.ChannelHandle, BASSAttribute.BASS_ATTRIB_VOL, _audioSettings.Volume / 100f))
+                {
+                    _log.LogError("Could not set volume for {file}: {bassError}", track.File, _bassWrapper.GetLastBassError());
                 }
 
                 // Add new track to mixer
@@ -209,7 +223,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             }
             catch (Exception ex)
             {
-                _log.LogError(ex, "Unknown exceotion during {event}", nameof(StartStreaming));
+                _log.LogError(ex, "Unknown exception during {event}", nameof(StartStreaming));
             }
         }
 
@@ -221,7 +235,20 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             }
             catch (Exception e)
             {
-                _log.LogError(e, "Unknown exceotion during {event}", nameof(StopStreaming));
+                _log.LogError(e, "Unknown exception during {event}", nameof(StopStreaming));
+            }
+        }
+
+        public void HandleEvent(SetVolume input)
+        {
+            try
+            {
+                _audioSettings.Volume = input.Volume;
+                _bassWrapper.SlideAttribute(_currentlyPlayingTrack.ChannelHandle, BASSAttribute.BASS_ATTRIB_VOL, _audioSettings.Volume / 100f, 500);
+            }
+            catch (Exception e)
+            {
+                _log.LogError(e, "Unknown exception during {event}", nameof(StopStreaming));
             }
         }
     }

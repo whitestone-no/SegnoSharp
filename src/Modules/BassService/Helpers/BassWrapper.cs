@@ -119,6 +119,11 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
             return Bass.BASS_ChannelStop(handle);
         }
 
+        public bool SetAttribute(int handle, BASSAttribute attribute, float value)
+        {
+            return Bass.BASS_ChannelSetAttribute(handle, attribute, value);
+        }
+
         public bool SlideAttribute(int handle, BASSAttribute attribute, float value, int time)
         {
             return Bass.BASS_ChannelSlideAttribute(handle, attribute, value, time);

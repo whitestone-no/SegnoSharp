@@ -26,8 +26,8 @@
             </div>
             <div class="form-group">
                 <label>Volume</label>
-                <input type="range" class="range" min="0" max="100" @bind="Settings.Volume" @bind:event="oninput" />
-                <input type="number" class="range" min="0" max="100" @bind="Settings.Volume" />
+                <input type="range" class="range" min="0" max="100" @bind="_tempVolume" @bind:event="oninput" @onchange="VolumeChanged" />
+                <input type="number" class="range" min="0" max="100" @bind="_tempVolume" />
             </div>
         </div>
     </div>
