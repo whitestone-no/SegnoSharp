@@ -16,10 +16,10 @@
 
 <div class="playlist-settings">
     <div class="setting-group">
-        <ObjectPropertyEditor Object="PlaylistSettings" ObjectProperty="PlaylistSettings.GetType().GetProperty(nameof(PlaylistSettings.MinimumNumberOfSongs))!" />
+        <ObjectPropertyEditor Object="PlaylistSettings" Property="@nameof(PlaylistSettings.MinimumNumberOfSongs)" />
     </div>
     <div class="setting-group">
-        <ObjectPropertyEditor Object="PlaylistSettings" ObjectProperty="PlaylistSettings.GetType().GetProperty(nameof(PlaylistSettings.MinimumTotalDuration))!" />
+        <ObjectPropertyEditor Object="PlaylistSettings" Property="@nameof(PlaylistSettings.MinimumTotalDuration)" />
     </div>
 </div>
 
@@ -60,7 +60,7 @@
                     if (attribute is PersistAttribute)
                     {
                         <div class="setting-group">
-                            <ObjectPropertyEditor Object="processor.Settings" ObjectProperty="property" />
+                            <ObjectPropertyEditor Object="processor.Settings" Property="@property.Name" />
                         </div>
                     }
                 }

@@ -1,0 +1,63 @@
+﻿@if (PropertyType == typeof(bool))
+{
+    <label class="checkbox-label" for="@Identifier">@Description</label>
+}
+else if (PropertyType == typeof(Enum) && EnumDisplay == EnumDisplay.RadioButtons)
+{
+    <label class="radio-label" for="@Identifier">@Description</label>
+}
+else
+{
+    <label for="@Identifier">@Description</label>
+}
+
+@if (PropertyType == typeof(string))
+{
+    <InputText id="@Identifier" type="text" @bind-Value="Value" disabled="@Disabled" />
+}
+else if (PropertyType == typeof(int))
+{
+    <InputNumber id="@Identifier" min="@int.MinValue" max="@int.MaxValue" @bind-Value="ValueNumber" disabled="@Disabled" />
+}
+else if (PropertyType == typeof(uint))
+{
+    <InputNumber id="@Identifier" min="@uint.MinValue" max="@uint.MaxValue" @bind-Value="ValueNumber" disabled="@Disabled" />
+}
+else if (PropertyType == typeof(ushort))
+{
+    <InputNumber id="@Identifier" min="@ushort.MinValue" max="@ushort.MaxValue" @bind-Value="ValueNumber" disabled="@Disabled" />
+}
+else if (PropertyType == typeof(bool))
+{
+    <InputCheckbox id="@Identifier" @bind-Value="ValueBool" disabled="@Disabled" />
+}
+else if (PropertyType == typeof(DateTime))
+{
+    <InputDate id="@Identifier" @bind-Value="ValueDateTime" disabled="@Disabled" />
+}
+else if (PropertyType.IsEnum)
+{
+    if (EnumDisplay == EnumDisplay.RadioButtons)
+    {
+        <InputRadioGroup id="@Identifier" @bind-Value="Value" Name="@Identifier">
+        <div class="form-radio">
+            @foreach (KeyValuePair<Enum, string> val in EnumValues)
+            {
+                <label class="radio-label">
+                    <InputRadio Value="val.Key.ToString()" Name="@Identifier" />
+                    @val.Value
+                </label>
+            }
+        </div>
+        </InputRadioGroup>
+    }
+    else
+    {
+        <InputSelect id="@Identifier" @bind-Value="Value">
+            @foreach (KeyValuePair<Enum, string> val in EnumValues)
+            {
+                <option value="@val.Key.ToString()">@val.Value</option>
+            }
+        </InputSelect>
+    }
+}
