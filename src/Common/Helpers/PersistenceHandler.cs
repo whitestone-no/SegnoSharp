@@ -279,6 +279,10 @@ namespace Whitestone.SegnoSharp.Common.Helpers
             {
                 key.PropertyInfo.SetValue(configuration, ushort.Parse(value, CultureInfo.InvariantCulture));
             }
+            else if (key.PropertyInfo.PropertyType == typeof(byte))
+            {
+                key.PropertyInfo.SetValue(configuration, byte.Parse(value, CultureInfo.InvariantCulture));
+            }
             else if (key.PropertyInfo.PropertyType == typeof(DateTime))
             {
                 key.PropertyInfo.SetValue(configuration, DateTime.ParseExact(value, "s", CultureInfo.InvariantCulture));
