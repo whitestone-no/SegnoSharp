@@ -2,9 +2,7 @@
 @rendermode InteractiveServer
 @layout InnerLayout
 @using Whitestone.SegnoSharp.Modules.Playlist.Components.Layouts
-@using System.Reflection
 @using Whitestone.SegnoSharp.Common.Attributes
-@using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager
 @using Whitestone.SegnoSharp.Common.Interfaces
 @using Whitestone.SegnoSharp.Common.Models
 @attribute [Authorize]
@@ -15,11 +13,13 @@
 <div class="alert alert-warning">Warning: Changes are saved immediately</div>
 
 <div class="playlist-settings">
-    <div class="setting-group">
-        <ObjectPropertyEditor Object="PlaylistSettings" Property="@nameof(PlaylistSettings.MinimumNumberOfSongs)" />
-    </div>
-    <div class="setting-group">
-        <ObjectPropertyEditor Object="PlaylistSettings" Property="@nameof(PlaylistSettings.MinimumTotalDuration)" />
+    <div class="settings-body">
+        <div class="form-group">
+            <ObjectPropertyEditor Object="PlaylistSettings" Property="@nameof(PlaylistSettings.MinimumNumberOfSongs)" />
+        </div>
+        <div class="form-group">
+            <ObjectPropertyEditor Object="PlaylistSettings" Property="@nameof(PlaylistSettings.MinimumTotalDuration)" />
+        </div>
     </div>
 </div>
 
@@ -32,7 +32,7 @@
             <div class="settings-header">
                 @if (processor.Settings.SortOrder > 0)
                 {
-                    <input type="checkbox" title="@(processor.Settings.Enabled ? "Enabled" : "Disabled")" @bind="processor.Settings.Enabled"/>
+                    <input type="checkbox" title="@(processor.Settings.Enabled ? "Enabled" : "Disabled")" @bind="processor.Settings.Enabled" />
                 }
                 <span>@processor.Name</span>
 
@@ -47,24 +47,9 @@
                 }
             </div>
 
-            @foreach (PropertyInfo property in processor.Settings.GetType().GetProperties())
-            {
-                if (property.Name is nameof(PlaylistProcessorSettings.Enabled)
-                or nameof(PlaylistProcessorSettings.SortOrder))
-                {
-                    continue;
-                }
-
-                foreach (object attribute in property.GetCustomAttributes(true))
-                {
-                    if (attribute is PersistAttribute)
-                    {
-                        <div class="setting-group">
-                            <ObjectPropertyEditor Object="processor.Settings" Property="@property.Name" />
-                        </div>
-                    }
-                }
-            }
+            <div class="settings-body">
+                <ObjectEditor Object="processor.Settings" IgnoreProperties="@([nameof(PlaylistProcessorSettings.Enabled), nameof(PlaylistProcessorSettings.SortOrder)])" />
+            </div>
         </div>
     }
 </div>

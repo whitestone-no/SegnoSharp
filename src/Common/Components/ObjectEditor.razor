@@ -1,0 +1,8 @@
+﻿@using System.Reflection
+
+@foreach (PropertyInfo property in Properties)
+{
+    <div class="form-group">
+        <ObjectPropertyEditor Object="@Object" Property="@property.Name" Disabled="Disabled" EnumDisplay="EnumDisplay" />
+    </div>
+}

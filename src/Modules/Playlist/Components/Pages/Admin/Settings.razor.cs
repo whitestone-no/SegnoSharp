@@ -11,11 +11,6 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
         [Inject] private IEnumerable<IPlaylistProcessor> PlaylistProcessors { get; set; }
         [Inject] private PlaylistSettings PlaylistSettings { get; set; }
 
-        protected override void OnInitialized()
-        {
-            base.OnInitialized();
-        }
-
         private void MoveProcessorUp(IPlaylistProcessor processor)
         {
             IPlaylistProcessor processorAbove = PlaylistProcessors.FirstOrDefault(p => p.Settings.SortOrder == processor.Settings.SortOrder + 1);
