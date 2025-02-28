@@ -10,11 +10,11 @@ using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Common.Models;
-using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Extensions;
 using Whitestone.SegnoSharp.Database.Models;
 using Whitestone.SegnoSharp.Modules.MediaImporter.Models;
+using Whitestone.SegnoSharp.Modules.MediaImporter.Models.Config;
 using Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels;
 using Track = Whitestone.SegnoSharp.Database.Models.Track;
 
@@ -26,7 +26,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
         [Inject] private ImportState ImporterState { get; set; }
         [Inject] private ITagReader TagReader { get; set; }
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
-        [Inject] private IOptions<TagReaderConfig> TagReaderConfig { get; set; }
+        [Inject] private IOptions<MediaImporterConfig> Config { get; set; }
         [Inject] private IJSRuntime JsRuntime { get; set; }
 
         private TrackViewModel _currentlyDraggingTrack;
@@ -50,9 +50,9 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
             MediaTypes = await dbContext.MediaTypes.ToListAsync();
             
-            int albumArtistGroupId = TagReaderConfig.Value.TagMappings["AlbumArtist"];
-            int trackArtistGroupId = TagReaderConfig.Value.TagMappings["Artist"];
-            int trackComposerGroupId = TagReaderConfig.Value.TagMappings["Composer"];
+            int albumArtistGroupId = Config.Value.TagMappings["AlbumArtist"];
+            int trackArtistGroupId = Config.Value.TagMappings["Artist"];
+            int trackComposerGroupId = Config.Value.TagMappings["Composer"];
 
             List<Tags> tags = ImporterState.SelectedFiles
                 .Where(f => f.Import)

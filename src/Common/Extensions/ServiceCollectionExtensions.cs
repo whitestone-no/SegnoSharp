@@ -2,17 +2,14 @@
 using Microsoft.Extensions.DependencyInjection;
 using Whitestone.SegnoSharp.Common.Helpers;
 using Whitestone.SegnoSharp.Common.Interfaces;
-using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Common.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Common.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddCommon(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddCommon(this IServiceCollection services)
         {
-            services.Configure<TagReaderConfig>(configuration.GetSection(TagReaderConfig.Section));
-
             services.AddTransient<ISystemClock, SystemClock>();
             services.AddTransient<IRandomGenerator, RandomGenerator>();
             services.AddTransient<IHashingUtil, HashingUtil>();

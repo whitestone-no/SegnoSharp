@@ -1,16 +1,13 @@
 ﻿using System;
-using Microsoft.Extensions.Logging;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
 using Un4seen.Bass.AddOn.EncMp3;
 using Un4seen.Bass.AddOn.Mix;
-using Un4seen.Bass.AddOn.Tags;
-using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
 
 namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
 {
-    public class BassWrapper(ILogger<BassWrapper> log) : IBassWrapper
+    public class BassWrapper : IBassWrapper
     {
 
         public void Registration(string email, string key)

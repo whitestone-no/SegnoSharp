@@ -14,10 +14,10 @@ namespace Whitestone.SegnoSharp.Modules.TagReader
     internal class TagReader : ITagReader
     {
         private readonly IBassWrapper _bassWrapper;
-        private readonly IOptions<TagReaderConfigExt> _config;
+        private readonly IOptions<TagReaderConfig> _config;
         private readonly ILogger<TagReader> _log;
 
-        public TagReader(IBassWrapper bassWrapper, IOptions<TagReaderConfigExt> config, IOptions<BassRegistration> bassRegistration, ILogger<TagReader> log)
+        public TagReader(IBassWrapper bassWrapper, IOptions<TagReaderConfig> config, IOptions<BassRegistration> bassRegistration, ILogger<TagReader> log)
         {
             _bassWrapper = bassWrapper;
             _config = config;
