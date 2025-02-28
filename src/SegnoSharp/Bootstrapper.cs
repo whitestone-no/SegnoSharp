@@ -139,7 +139,7 @@ namespace Whitestone.SegnoSharp
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
             builder.Services.AddOidcAuthorizaton(builder.Configuration);
-            builder.Services.AddCommon();
+            builder.Services.AddCommon(builder.Configuration);
         }
 
         public static void Configure(this WebApplication app)

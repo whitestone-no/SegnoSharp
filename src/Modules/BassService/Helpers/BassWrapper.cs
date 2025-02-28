@@ -123,55 +123,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
             return Bass.BASS_ChannelRemoveSync(handle, sync);
         }
 
-        // TODO: Move this to a separate module?
-        public Tags GetTagFromFile(string file)
-        {
-            int stream = CreateFileStream(file, 0L, 0L, (int)BASSFlag.BASS_DEFAULT);
-
-            TAG_INFO tags = new(file);
-            if (BassTags.BASS_TAG_GetFromFile(stream, tags))
-            {
-                _ = ushort.TryParse(tags.year, out ushort year);
-                _ = byte.TryParse(tags.disc, out byte disc);
-                _ = ushort.TryParse(tags.track, out ushort trackNo);
-
-                Tags tagsFromFile = new()
-                {
-                    Album = tags.album,
-                    AlbumArtist = tags.albumartist,
-                    Artist = tags.artist,
-                    Composer = tags.composer,
-                    Disc = disc,
-                    Duration = tags.duration,
-                    Genre = tags.genre,
-                    Title = tags.title,
-                    TrackNumber = trackNo,
-                    Year = year,
-                    Notes = tags.comment
-                };
-
-                if (tags.PictureCount <= 0)
-                {
-                    return tagsFromFile;
-                }
-                
-                TagPicture tagPicture = tags.PictureGet(0);
-                if (tagPicture is { PictureStorage: TagPicture.PICTURE_STORAGE.Internal, PictureType: TagPicture.PICTURE_TYPE.FrontAlbumCover })
-                {
-                    tagsFromFile.CoverImage = new TagsImage
-                    {
-                        MimeType = tagPicture.MIMEType,
-                        Data = tagPicture.Data
-                    };
-                }
-
-                return tagsFromFile;
-            }
-
-            log.LogWarning("Could not read tags from {file}", file);
-            return null;
-        }
-
         public bool CastInit(int handle, string server, string pass, string content, string name, string url, string genre, string desc, string headers, int bitrate, BASSEncodeCast flags)
         {
             return BassEnc.BASS_Encode_CastInit(handle, server, pass, content, name, url, genre, desc, headers, bitrate, flags);

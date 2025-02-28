@@ -3,11 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Whitestone.SegnoSharp.Common.Interfaces;
-using Whitestone.SegnoSharp.Modules.BassService.Helpers;
-using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
-using Whitestone.SegnoSharp.Modules.BassService.Models.Config;
+using Whitestone.SegnoSharp.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Modules.TagReader.Helpers;
+using Whitestone.SegnoSharp.Modules.TagReader.Interfaces;
+using Whitestone.SegnoSharp.Modules.TagReader.Models.Config;
 
-namespace Whitestone.SegnoSharp.Modules.BassService
+namespace Whitestone.SegnoSharp.Modules.TagReader
 {
     public class Module : IModule
     {
@@ -15,13 +16,11 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 
         public void ConfigureServices(IServiceCollection services, IHostEnvironment environment, IConfiguration configuration)
         {
-
             services.Configure<BassRegistration>(configuration.GetSection(BassRegistration.Section));
-            services.Configure<Ffmpeg>(configuration.GetSection(Ffmpeg.Section));
+            services.Configure<TagReaderConfigExt>(configuration.GetSection(TagReaderConfig.Section));
 
             services.AddSingleton<IBassWrapper, BassWrapper>();
-            
-            services.AddHostedService<BassServiceHost>();
+            services.AddSingleton<ITagReader, TagReader>(); 
         }
     }
 }
