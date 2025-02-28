@@ -3,8 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Options;
-using Whitestone.SegnoSharp.Modules.StreamControls.Models;
+using Whitestone.SegnoSharp.Common.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Modules.StreamControls.HealthChecks
 {
@@ -12,7 +11,7 @@ namespace Whitestone.SegnoSharp.Modules.StreamControls.HealthChecks
     {
         private readonly HttpClient _httpClient;
 
-        public StreamingServerHealthCheck(HttpClient httpClient, Settings settings)
+        public StreamingServerHealthCheck(HttpClient httpClient, StreamingSettings settings)
         {
             _httpClient = httpClient;
 
