@@ -22,6 +22,8 @@
     --bg-lightergray: #dddddd;
     --bg-lightestgray: #eeeeee;
     --bg-lightyellow: #f8e496;
+    --bg-disabled: rgba(239, 239, 239, 0.3);
+    --text-disabled: rgb(84, 84, 84);
 }
 
 /* Base Styles */
@@ -438,6 +440,7 @@ textarea {
     border: 1px solid var(--bg-lightgray);
     border-radius: 4px;
     grid-column: span 9;
+    height: fit-content;
 }
 
 input[type="date"] {
@@ -545,6 +548,10 @@ input[type="checkbox"] {
     cursor: pointer;
 }
 
+select:disabled {
+    background-color: var(--bg-disabled);
+    color: var(--text-disabled);
+}
 
 
 /* Tables */
