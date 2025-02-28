@@ -118,6 +118,11 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
             return Bass.BASS_ChannelSetSync(handle, type, param, proc, IntPtr.Zero);
         }
 
+        public bool RemoveSync(int handle, int sync)
+        {
+            return Bass.BASS_ChannelRemoveSync(handle, sync);
+        }
+
         // TODO: Move this to a separate module?
         public Tags GetTagFromFile(string file)
         {

@@ -29,6 +29,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Interfaces
         bool SetAttribute(int handle, BASSAttribute attribute, float value);
         bool SlideAttribute(int handle, BASSAttribute attribute, float value, int time);
         int SetSync(int handle, BASSSync type, long param, SYNCPROC proc);
+        bool RemoveSync(int handle, int sync);
         Tags GetTagFromFile(string file);
         bool CastInit(int handle, string server, string pass, string content, string name, string url, string genre, string desc, string headers, int bitrate, BASSEncodeCast flags);
         bool SetStreamingTitle(int handle, string title);

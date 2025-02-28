@@ -29,12 +29,18 @@
                 <input type="range" class="range" min="0" max="100" @bind="_tempVolume" @bind:event="oninput" @onchange="VolumeChanged" />
                 <input type="number" class="range" min="0" max="100" @bind="_tempVolume" />
             </div>
+            <div class="form-group">
+                <ObjectPropertyEditor Object="Settings" Property="@nameof(Settings.TitleFormat)" />
+            </div>
+            <div class="form-group">
+                <ObjectPropertyEditor Object="Settings" Property="@nameof(Settings.StartStreamOnStartup)" />
+            </div>
         </div>
     </div>
     <div class="card card-span-12">
         <div class="card-header">Stream server settings</div>
         <div class="card-body">
-            <ObjectEditor Object="Settings" Disabled="Settings.IsStreaming" IgnoreProperties="@(["Volume"])" />
+            <ObjectEditor Object="Settings" Disabled="Settings.IsStreaming" IgnoreProperties="@([nameof(Settings.IsStreaming), nameof(Settings.StartStreamOnStartup), nameof(Settings.TitleFormat)])" />
         </div>
     </div>
 </div>

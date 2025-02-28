@@ -1,20 +1,87 @@
-﻿using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Components;
+using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
 
 namespace Whitestone.SegnoSharp.Common.Models.Persistent
 {
-    public class StreamingSettings
+    public class StreamingSettings : INotifyPropertyChanged
     {
-        public virtual AudioFormat AudioFormat { get; set; }
-        public virtual Bitrate Bitrate { get; set; }
-        public virtual string Hostname { get; set; }
-        public virtual ushort Port { get; set; }
-        public virtual string MountPoint { get; set; }
-        public virtual string Password { get; set; }
-        public virtual bool IsPublic { get; set; }
-        public virtual string Name { get; set; }
-        public virtual string ServerUrl { get; set; }
-        public virtual string Genre { get; set; }
-        public virtual string Description { get; set; }
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue(nameof(AudioFormat.Mp3))]
+        [Attributes.PersistenceManager.Description("Audio format")]
+        public AudioFormat AudioFormat { get; set; }
+
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue(nameof(Bitrate.Kbps128))]
+        public Bitrate Bitrate { get; set; }
+
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue("localhost")]
+        public string Hostname { get; set; }
+        
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue(8000)]
+        public ushort Port { get; set; }
+        
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue("/stream")]
+        [Attributes.PersistenceManager.Description("Mount point")]
+        public string MountPoint { get; set; }
+
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue("hackme")]
+        public string Password { get; set; }
+
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue(false)]
+        [Attributes.PersistenceManager.Description("Is public")]
+        public bool IsPublic { get; set; }
+
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue("SegnoSharp")]
+        public string Name { get; set; }
+        
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue("localhost")]
+        [Attributes.PersistenceManager.Description("Server URL")]
+        public string ServerUrl { get; set; }
+
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue("Music")]
+        public string Genre { get; set; }
+
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue("SegnoSharp")]
+        public string Description { get; set; }
+
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue("%title% - %artist% (%album%)")]
+        [Attributes.PersistenceManager.Description("Title sent to streaming server. Use a combination of %album%, %title%, and %artist%")]
+        public string TitleFormat { get; set; }
+
+        [Persist]
+        [Attributes.PersistenceManager.DefaultValue(false)]
+        [Attributes.PersistenceManager.Description("Connect and start streaming to server on startup")]
+        public bool StartStreamOnStartup { get; set; }
+
+        private bool _isStreaming;
+        public bool IsStreaming
+        {
+            get => _isStreaming;
+            set
+            {
+                if (_isStreaming == value)
+                {
+                    return;
+                }
+
+                _isStreaming = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsStreaming)));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
     public enum Bitrate

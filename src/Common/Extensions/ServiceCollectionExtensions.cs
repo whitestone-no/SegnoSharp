@@ -24,6 +24,14 @@ namespace Whitestone.SegnoSharp.Common.Extensions
                 return settings;
             });
 
+            services.AddSingleton(sp =>
+            {
+                StreamingSettings settings = new();
+                var persistence = sp.GetRequiredService<IPersistenceManager>();
+                persistence.RegisterAsync(settings);
+                return settings;
+            });
+
             return services;
         }
     }

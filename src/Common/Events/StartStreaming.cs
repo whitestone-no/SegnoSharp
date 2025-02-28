@@ -1,9 +1,6 @@
-﻿using Whitestone.SegnoSharp.Common.Models.Persistent;
-
-namespace Whitestone.SegnoSharp.Common.Events
+﻿namespace Whitestone.SegnoSharp.Common.Events
 {
-    public class StartStreaming(StreamingSettings settings)
+    public class StartStreaming
     {
-        public StreamingSettings Settings { get; set; } = settings;
     }
 }
