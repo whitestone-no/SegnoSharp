@@ -1,31 +1,17 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
 using Un4seen.Bass.AddOn.EncMp3;
 using Un4seen.Bass.AddOn.Mix;
 using Un4seen.Bass.AddOn.Tags;
-using Whitestone.SegnoSharp.Common.Models.Persistent;
 using Whitestone.SegnoSharp.Common.Models;
-using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
-using Whitestone.SegnoSharp.Modules.BassService.Models.Config;
 
 namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
 {
-    public class BassWrapper(
-        IOptions<Ffmpeg> ffmpegConfig,
-        IOptions<CommonConfig> commonConfig,
-        ILogger<BassWrapper> log)
-        : IBassWrapper
+    public class BassWrapper(ILogger<BassWrapper> log) : IBassWrapper
     {
-        private readonly Ffmpeg _ffmpegConfig = ffmpegConfig.Value;
-        private readonly CommonConfig _commonConfig = commonConfig.Value;
-        private IBaseEncoder _encoder;
-        private string _currentTitle = "SegnoSharp";
 
         public void Registration(string email, string key)
         {
@@ -50,8 +36,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
         public int CreateFileStream(string file, long offset, long length, BASSFlag flags)
         {
             return Bass.BASS_StreamCreateFile(file, offset, length, flags);
-
-            //return BassFlac.BASS_FLAC_StreamCreateFile(file, offset, length, flags);
         }
 
         public bool MixerAddStream(int mixerHandle, int streamHandle, BASSFlag flags)
@@ -129,6 +113,12 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
             return Bass.BASS_ChannelSlideAttribute(handle, attribute, value, time);
         }
 
+        public int SetSync(int handle, BASSSync type, long param, SYNCPROC proc)
+        {
+            return Bass.BASS_ChannelSetSync(handle, type, param, proc, IntPtr.Zero);
+        }
+
+        // TODO: Move this to a separate module?
         public Tags GetTagFromFile(string file)
         {
             int stream = CreateFileStream(file, 0L, 0L, (int)BASSFlag.BASS_DEFAULT);
@@ -177,123 +167,14 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
             return null;
         }
 
-        public void StartStreaming(int channel, StreamingSettings settings)
+        public bool CastInit(int handle, string server, string pass, string content, string name, string url, string genre, string desc, string headers, int bitrate, BASSEncodeCast flags)
         {
-            if (_encoder != null)
-            {
-                return;
-            }
-
-            string encoderPath = Path.Combine(_commonConfig.DataPath, _ffmpegConfig.DataFolder);
-
-            var ffmpegExecutable = "ffmpeg";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                ffmpegExecutable = "ffmpeg.exe";
-            }
-
-            var format1 = "mp3";
-            var format2 = "mp3";
-            var extension = ".mp3";
-            var encoderCtype = BASSChannelType.BASS_CTYPE_STREAM_MP3;
-            string encoderType = BassEnc.BASS_ENCODE_TYPE_MP3;
-            if (settings.AudioFormat == AudioFormat.Aac)
-            {
-                format1 = "aac";
-                format2 = "adts";
-                extension = ".aac";
-                encoderCtype = BASSChannelType.BASS_CTYPE_STREAM_AAC;
-                encoderType = BassEnc.BASS_ENCODE_TYPE_AAC;
-            }
-
-            EncoderCMDLN encoder = new(channel)
-            {
-                EncoderDirectory = encoderPath,
-                CMDLN_Executable = ffmpegExecutable,
-                CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a " + format1 + " -b:a ${kbps}k -vn -f " + format2 + " ${output}", // Remember to use "-f adts" for AAC streaming
-                CMDLN_EncoderType = encoderCtype,
-                CMDLN_DefaultOutputExtension = extension,
-                CMDLN_Bitrate = (int)settings.Bitrate,
-                CMDLN_SupportsSTDOUT = true,
-                CMDLN_ParamSTDIN = "-",
-                CMDLN_ParamSTDOUT = "-"
-            };
-
-            if (encoder.EncoderExists)
-            {
-                _encoder = encoder;
-                log.LogDebug("BASS Encoder is set up with the following command line: {commandLine}", encoder.EncoderCommandLine);
-            }
-            else
-            {
-                log.LogCritical("Could not find FFMPEG in {0}", encoder.EncoderDirectory);
-            }
-
-            if (!encoder.Start(null, IntPtr.Zero, false))
-            {
-                log.LogCritical("Could not start encoder");
-            }
-            else
-            {
-                log.LogDebug("Encoder started");
-            }
-
-            bool castInitSuccess = BassEnc.BASS_Encode_CastInit(
-                encoder.EncoderHandle,
-                settings.Hostname + ":" + settings.Port + settings.MountPoint,
-                settings.Password,
-                encoderType,
-                settings.Name,
-                settings.ServerUrl,
-                settings.Genre,
-                settings.Description,
-                null,
-                0,
-                settings.IsPublic ? BASSEncodeCast.BASS_ENCODE_CAST_PUBLIC : BASSEncodeCast.BASS_ENCODE_CAST_DEFAULT
-                );
-
-            if (!castInitSuccess)
-            {
-                log.LogCritical("Could not start casting. {error}", GetLastBassError());
-            }
-            else
-            {
-                log.LogDebug("Casting to {server} started", settings.Hostname + ":" + settings.Port + settings.MountPoint);
-            }
-
-            if (!BassEnc.BASS_Encode_CastSetTitle(encoder.EncoderHandle, _currentTitle, null))
-            {
-                log.LogWarning("Could not update title on streaming server. {error}", GetLastBassError());
-            }
+            return BassEnc.BASS_Encode_CastInit(handle, server, pass, content, name, url, genre, desc, headers, bitrate, flags);
         }
 
-        public void StopStreaming()
+        public bool SetStreamingTitle(int handle, string title)
         {
-            if (_encoder is { IsActive: true })
-            {
-                if (!_encoder.Stop())
-                {
-                    log.LogError("Failed to stop encoder: {error}", GetLastBassError());
-                }
-                else
-                {
-                    log.LogDebug("Encoder stopped");
-                }
-            }
-            _encoder = null;
-        }
-
-        public void SetStreamingTitle(string title)
-        {
-            _currentTitle = title;
-
-            if (_encoder != null)
-            {
-                if (!BassEnc.BASS_Encode_CastSetTitle(_encoder.EncoderHandle, _currentTitle, null))
-                {
-                    log.LogWarning("Could not update title on streaming server");
-                }
-            }
+            return BassEnc.BASS_Encode_CastSetTitle(handle, title, null);
         }
     }
 }

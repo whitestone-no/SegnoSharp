@@ -7,9 +7,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Un4seen.Bass;
+using Un4seen.Bass.AddOn.Enc;
+using Un4seen.Bass.Misc;
 using Whitestone.Cambion.Interfaces;
 using Whitestone.SegnoSharp.Common.Events;
-using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Common.Models.Persistent;
 using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
@@ -26,15 +27,18 @@ namespace Whitestone.SegnoSharp.Modules.BassService
     {
         private readonly IBassWrapper _bassWrapper;
         private readonly CommonConfig _commonConfig;
+        private readonly Ffmpeg _ffmpegConfig;
         private readonly ICambion _cambion;
         private readonly ILogger<BassServiceHost> _log;
         private readonly AudioSettings _audioSettings;
 
         private int _mixer;
         private TrackExt _currentlyPlayingTrack;
+        private IBaseEncoder _encoder;
 
         public BassServiceHost(IBassWrapper bassWrapper,
             IOptions<BassRegistration> bassRegistration,
+            IOptions<Ffmpeg> ffmpegConfig,
             IOptions<CommonConfig> commonConfig,
             ICambion cambion,
             ILogger<BassServiceHost> log,
@@ -42,6 +46,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
         {
             _bassWrapper = bassWrapper;
             _commonConfig = commonConfig.Value;
+            _ffmpegConfig = ffmpegConfig.Value;
             _cambion = cambion;
             _log = log;
             _audioSettings = audioSettings;
@@ -92,7 +97,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
         {
             try
             {
-                _bassWrapper.StopStreaming();
+                HandleEvent(new StopStreaming());
 
                 // Stop playback of BASS Mixer
                 if (!_bassWrapper.Stop(_mixer))
@@ -202,13 +207,19 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                     _log.LogError("Failed to play channel: {bassError}", _bassWrapper.GetLastBassError());
                 }
 
-                _log.LogDebug("Started playing {file}", track.File);
+                int syncHandle = _bassWrapper.SetSync(track.ChannelHandle, BASSSync.BASS_SYNC_ONETIME | BASSSync.BASS_SYNC_END, 0, TrackEnd);
+                if (syncHandle == 0)
+                {
+                    _log.LogError("Failed to set sync: {bassError}", _bassWrapper.GetLastBassError());
+                }
 
-                // Update the title of the broadcaster
-                _bassWrapper.SetStreamingTitle($"{track.Title} - {track.Artist} ({track.Album})");
+                _log.LogDebug("Started playing {file}", track.File);
 
                 // Update which track is currently playing
                 _currentlyPlayingTrack = track;
+
+                // Update the title of the broadcaster
+                UpdateStreamingTitle();
             }
             catch (Exception e)
             {
@@ -216,11 +227,98 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             }
         }
 
+        private void TrackEnd(int handle, int channel, int data, IntPtr user)
+        {
+            _currentlyPlayingTrack = null;
+        }
+
         public void HandleEvent(StartStreaming e)
         {
             try
             {
-                _bassWrapper.StartStreaming(_mixer, e.Settings);
+                if (_encoder != null)
+                {
+                    return;
+                }
+
+                string encoderPath = Path.Combine(_commonConfig.DataPath, _ffmpegConfig.DataFolder);
+
+                var ffmpegExecutable = "ffmpeg";
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    ffmpegExecutable = "ffmpeg.exe";
+                }
+
+                var format1 = "mp3";
+                var format2 = "mp3";
+                var extension = ".mp3";
+                var encoderCtype = BASSChannelType.BASS_CTYPE_STREAM_MP3;
+                string encoderType = BassEnc.BASS_ENCODE_TYPE_MP3;
+                if (e.Settings.AudioFormat == AudioFormat.Aac)
+                {
+                    format1 = "aac";
+                    format2 = "adts";
+                    extension = ".aac";
+                    encoderCtype = BASSChannelType.BASS_CTYPE_STREAM_AAC;
+                    encoderType = BassEnc.BASS_ENCODE_TYPE_AAC;
+                }
+
+                EncoderCMDLN encoder = new(_mixer)
+                {
+                    EncoderDirectory = encoderPath,
+                    CMDLN_Executable = ffmpegExecutable,
+                    CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a " + format1 + " -b:a ${kbps}k -vn -f " + format2 + " ${output}", // Remember to use "-f adts" for AAC streaming
+                    CMDLN_EncoderType = encoderCtype,
+                    CMDLN_DefaultOutputExtension = extension,
+                    CMDLN_Bitrate = (int)e.Settings.Bitrate,
+                    CMDLN_SupportsSTDOUT = true,
+                    CMDLN_ParamSTDIN = "-",
+                    CMDLN_ParamSTDOUT = "-"
+                };
+
+                if (encoder.EncoderExists)
+                {
+                    _encoder = encoder;
+                    _log.LogDebug("BASS Encoder is set up with the following command line: {commandLine}", encoder.EncoderCommandLine);
+                }
+                else
+                {
+                    _log.LogCritical("Could not find FFMPEG in {encoderDir}", encoder.EncoderDirectory);
+                }
+
+                if (!encoder.Start(null, IntPtr.Zero, false))
+                {
+                    _log.LogCritical("Could not start encoder");
+                }
+                else
+                {
+                    _log.LogDebug("Encoder started");
+                }
+
+                bool castInitSuccess = _bassWrapper.CastInit(
+                    encoder.EncoderHandle,
+                    e.Settings.Hostname + ":" + e.Settings.Port + e.Settings.MountPoint,
+                    e.Settings.Password,
+                    encoderType,
+                    e.Settings.Name,
+                    e.Settings.ServerUrl,
+                    e.Settings.Genre,
+                    e.Settings.Description,
+                    null,
+                    0,
+                    e.Settings.IsPublic ? BASSEncodeCast.BASS_ENCODE_CAST_PUBLIC : BASSEncodeCast.BASS_ENCODE_CAST_DEFAULT
+                );
+
+                if (!castInitSuccess)
+                {
+                    _log.LogCritical("Could not start casting. {error}", _bassWrapper.GetLastBassError());
+                }
+                else
+                {
+                    _log.LogDebug("Casting to {server} started", e.Settings.Hostname + ":" + e.Settings.Port + e.Settings.MountPoint);
+                }
+
+                UpdateStreamingTitle();
             }
             catch (Exception ex)
             {
@@ -232,7 +330,19 @@ namespace Whitestone.SegnoSharp.Modules.BassService
         {
             try
             {
-                _bassWrapper.StopStreaming();
+                if (_encoder is { IsActive: true })
+                {
+                    if (!_encoder.Stop())
+                    {
+                        _log.LogError("Failed to stop encoder: {error}", _bassWrapper.GetLastBassError());
+                    }
+                    else
+                    {
+                        _log.LogDebug("Encoder stopped");
+                    }
+                }
+
+                _encoder = null;
             }
             catch (Exception e)
             {
@@ -250,6 +360,23 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             catch (Exception e)
             {
                 _log.LogError(e, "Unknown exception during {event}", nameof(StopStreaming));
+            }
+        }
+
+        private void UpdateStreamingTitle()
+        {
+            if (_currentlyPlayingTrack == null ||
+                _encoder is not { IsActive: true })
+            {
+                return;
+            }
+
+            // TODO: Make this configurable
+            var title = $"{_currentlyPlayingTrack.Title} - {_currentlyPlayingTrack.Artist} ({_currentlyPlayingTrack.Album})";
+
+            if (!_bassWrapper.SetStreamingTitle(_encoder.EncoderHandle, title))
+            {
+                _log.LogWarning("Could not update title on streaming server. {error}", _bassWrapper.GetLastBassError());
             }
         }
     }

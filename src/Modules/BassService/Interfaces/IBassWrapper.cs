@@ -1,6 +1,8 @@
 ﻿using System;
 using Un4seen.Bass;
+using Un4seen.Bass.AddOn.Enc;
 using Whitestone.SegnoSharp.Common.Models;
+using Whitestone.SegnoSharp.Common.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Modules.BassService.Interfaces
 {
@@ -26,9 +28,9 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Interfaces
         bool Stop(int handle);
         bool SetAttribute(int handle, BASSAttribute attribute, float value);
         bool SlideAttribute(int handle, BASSAttribute attribute, float value, int time);
+        int SetSync(int handle, BASSSync type, long param, SYNCPROC proc);
         Tags GetTagFromFile(string file);
-        void StartStreaming(int channel, StreamingSettings settings);
-        void StopStreaming();
-        void SetStreamingTitle(string title);
+        bool CastInit(int handle, string server, string pass, string content, string name, string url, string genre, string desc, string headers, int bitrate, BASSEncodeCast flags);
+        bool SetStreamingTitle(int handle, string title);
     }
 }
