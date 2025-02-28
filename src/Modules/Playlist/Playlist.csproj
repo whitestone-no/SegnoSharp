@@ -12,6 +12,13 @@
     <OutputPath>$(SolutionDir)\SegnoSharp\bin\$(Configuration)\$(TargetFramework)\Modules\$(MSBuildProjectName)</OutputPath>
     <RootNamespace>Whitestone.SegnoSharp.Modules.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <AssemblyName>Module.$(MSBuildProjectName)</AssemblyName>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <PackageId>SegnoSharp-$(AssemblyName)</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>0.0.1-dev</Version>
+    <Product>Whitestone SegnoSharp</Product>
+    <Company>Whitestone</Company>
+    <Authors>Whitestone-NO</Authors>
   </PropertyGroup>
 
   <ItemGroup>

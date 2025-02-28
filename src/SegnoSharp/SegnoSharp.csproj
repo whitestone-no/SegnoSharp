@@ -7,8 +7,15 @@
     <AssemblyName>Whitestone.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>Whitestone.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-	  <DockerfileRunArguments>-v $(SolutionDir)../data:/var/segnosharp:rw -v $(SolutionDir)../music:/var/music:rw</DockerfileRunArguments>
+	<DockerfileRunArguments>-v $(SolutionDir)../data:/var/segnosharp:rw -v $(SolutionDir)../music:/var/music:rw</DockerfileRunArguments>
     <UserSecretsId>ef2b06ee-7634-4a6e-9cce-5ad721a03d65</UserSecretsId>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <PackageId>SegnoSharp-$(AssemblyName)</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>0.0.1-dev</Version>
+    <Product>Whitestone SegnoSharp</Product>
+    <Company>Whitestone</Company>
+    <Authors>Whitestone-NO</Authors>
   </PropertyGroup>
 
   <ItemGroup>

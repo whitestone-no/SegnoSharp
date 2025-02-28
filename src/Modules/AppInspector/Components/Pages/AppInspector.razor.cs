@@ -41,7 +41,7 @@ namespace Whitestone.SegnoSharp.Modules.AppInspector.Components.Pages
                     return new ModulesViewModel
                     {
                         DllFile = Path.Combine(moduleDllFile.Directory?.Name ?? string.Empty, moduleDllFile.Name),
-                        Version = moduleAssembly.GetName().Version?.ToString(),
+                        Version = moduleAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
                     };
                 })
                 .ToList();

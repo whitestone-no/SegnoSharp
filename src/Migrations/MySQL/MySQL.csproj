@@ -6,6 +6,13 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Whitestone.SegnoSharp.Database.Migrations.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>Whitestone.SegnoSharp.Database.Migrations.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <PackageId>SegnoSharp-$(AssemblyName)</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>0.0.1-dev</Version>
+    <Product>Whitestone SegnoSharp</Product>
+    <Company>Whitestone</Company>
+    <Authors>Whitestone-NO</Authors>
   </PropertyGroup>
 
   <ItemGroup>
