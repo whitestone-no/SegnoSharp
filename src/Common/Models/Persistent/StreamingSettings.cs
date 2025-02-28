@@ -1,6 +1,6 @@
 ﻿using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
 
-namespace Whitestone.SegnoSharp.Common.Models
+namespace Whitestone.SegnoSharp.Common.Models.Persistent
 {
     public class StreamingSettings
     {

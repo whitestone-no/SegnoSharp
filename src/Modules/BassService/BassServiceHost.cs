@@ -11,6 +11,7 @@ using Whitestone.Cambion.Interfaces;
 using Whitestone.SegnoSharp.Common.Events;
 using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Common.Models.Persistent;
 using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
 using Whitestone.SegnoSharp.Modules.BassService.Models;
 using Whitestone.SegnoSharp.Modules.BassService.Models.Config;

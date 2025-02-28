@@ -1,5 +1,5 @@
 ﻿using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
-using Whitestone.SegnoSharp.Common.Models;
+using Whitestone.SegnoSharp.Common.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Modules.StreamControls.Models
 {

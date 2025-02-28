@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Whitestone.Cambion.Interfaces;
 using Whitestone.SegnoSharp.Common.Events;
-using Whitestone.SegnoSharp.Common.Models;
+using Whitestone.SegnoSharp.Common.Models.Persistent;
 using Whitestone.SegnoSharp.Modules.StreamControls.Models;
 
 namespace Whitestone.SegnoSharp.Modules.StreamControls.Components.Pages

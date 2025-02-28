@@ -1,4 +1,4 @@
-﻿using Whitestone.SegnoSharp.Common.Models;
+﻿using Whitestone.SegnoSharp.Common.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Common.Events
 {

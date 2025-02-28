@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Whitestone.SegnoSharp.Common.Helpers;
 using Whitestone.SegnoSharp.Common.Interfaces;
-using Whitestone.SegnoSharp.Common.Models;
+using Whitestone.SegnoSharp.Common.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Common.Extensions
 {

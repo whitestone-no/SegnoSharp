@@ -8,7 +8,7 @@ using Un4seen.Bass.AddOn.Enc;
 using Un4seen.Bass.AddOn.EncMp3;
 using Un4seen.Bass.AddOn.Mix;
 using Un4seen.Bass.AddOn.Tags;
-using Un4seen.Bass.Misc;
+using Whitestone.SegnoSharp.Common.Models.Persistent;
 using Whitestone.SegnoSharp.Common.Models;
 using Whitestone.SegnoSharp.Common.Models.Configuration;
 using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
