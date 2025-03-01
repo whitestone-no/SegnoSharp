@@ -6,7 +6,8 @@ using Whitestone.SegnoSharp.Database.Models;
 
 namespace Whitestone.SegnoSharp.Database
 {
-    public class SegnoSharpDbContext : DbContext
+    public class SegnoSharpDbContext(DbContextOptions<SegnoSharpDbContext> options, IConfiguration configuration)
+        : DbContext(options)
     {
         public DbSet<Album> Albums { get; set; }
         public DbSet<Disc> Discs { get; set; }
@@ -28,16 +29,9 @@ namespace Whitestone.SegnoSharp.Database
 
         public DbSet<PersistenceManagerEntry> PersistenceManagerEntries { get; set; }
 
-        private readonly IConfiguration _configuration;
-
-        public SegnoSharpDbContext(DbContextOptions<SegnoSharpDbContext> options, IConfiguration configuration) : base(options)
-        {
-            _configuration = configuration;
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            string databaseType = _configuration.GetSection("Database").GetChildren().FirstOrDefault(c => c.Key == "Type")?.Value?.ToLower();
+            string databaseType = configuration.GetSection("Database").GetChildren().FirstOrDefault(c => c.Key == "Type")?.Value?.ToLower();
 
             switch (databaseType)
             {
@@ -54,11 +48,6 @@ namespace Whitestone.SegnoSharp.Database
                 default:
                     throw new ArgumentException($"Unsupported database type: {databaseType}");
             }
-
-            //modelBuilder
-            //    .Entity<PlaylistMetadataView>()
-            //    .ToView("v_playlistmetadata")
-            //    .HasKey(v => v.TrackStreamInfoId);
 
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 1, Type = PersonGroupType.Album, Name = "Artist", SortOrder = 1 });
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 2, Type = PersonGroupType.Track, Name = "Artist", SortOrder = 1 });
