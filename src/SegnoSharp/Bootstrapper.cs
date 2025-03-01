@@ -128,6 +128,7 @@ namespace Whitestone.SegnoSharp
         public static void ConfigureServices(this WebApplicationBuilder builder)
         {
             string databaseType = builder.Configuration.GetSection("Database").GetValue<string>("Type").ToLower();
+            var sensitiveDataLogging = builder.Configuration.GetSection("Database").GetValue<bool>("SensitiveDataLogging");
 
             switch (databaseType)
             {
@@ -136,7 +137,7 @@ namespace Whitestone.SegnoSharp
                     SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
                     connectionStringBuilder.DataSource = Path.Combine(builder.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
 
-                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")).EnableSensitiveDataLogging(true));
+                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")).EnableSensitiveDataLogging(sensitiveDataLogging));
 
                     builder.Services.AddHealthChecks().AddSqlite(connectionStringBuilder.ConnectionString, name: "Database");
 
@@ -144,7 +145,7 @@ namespace Whitestone.SegnoSharp
                 case "mysql":
                     string connMysql = builder.Configuration.GetConnectionString("SegnoSharpDatabaseMysql");
 
-                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")));
+                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")).EnableSensitiveDataLogging(sensitiveDataLogging));
 
                     builder.Services.AddHealthChecks().AddMySql(connMysql ?? string.Empty, name: "Database");
 
