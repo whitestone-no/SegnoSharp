@@ -6,4 +6,5 @@
 img/
 music/
 data/**
+tmp/**
 !data/bass/**
