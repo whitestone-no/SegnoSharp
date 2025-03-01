@@ -6,9 +6,12 @@ on:
   workflow_dispatch:
 jobs:
   build:
+    name: Build & Deploy
     runs-on: ubuntu-latest
+    environment: GitHub Container Registry
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Download Bass.NET
@@ -39,7 +42,6 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build and push Docker image
-      id: push
       uses: docker/build-push-action@v6
       with:
         file: ./src/SegnoSharp/Dockerfile
