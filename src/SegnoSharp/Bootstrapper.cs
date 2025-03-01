@@ -88,6 +88,39 @@ namespace Whitestone.SegnoSharp
                 await Log.CloseAndFlushAsync();
             }
         }
+
+        // This is used by Entity Framework when running migrations
+        // Keep as minimal as possible
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(c =>
+                {
+                    c.AddJsonFile("appsettings.json");
+                    c.AddUserSecrets(typeof(Bootstrapper).Assembly);
+                    c.AddCommandLine(args);
+                })
+                .ConfigureServices((hostContext, services) =>
+                {
+                    string databaseType = hostContext.Configuration.GetSection("Database").GetValue<string>("Type").ToLower();
+
+                    switch (databaseType)
+                    {
+                        case "sqlite":
+                            string connSqlite = hostContext.Configuration.GetConnectionString("SegnoSharpDatabaseSqlite");
+                            SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
+                            connectionStringBuilder.DataSource = Path.Combine(hostContext.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
+                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")));
+                            break;
+                        case "mysql":
+                            string connMysql = hostContext.Configuration.GetConnectionString("SegnoSharpDatabaseMysql");
+                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")));
+                            break;
+                        default:
+                            throw new ArgumentException($"Unsupported database type: {databaseType}");
+                    }
+                });
+        }
     }
 
     public static class StartupExtensions
@@ -103,7 +136,7 @@ namespace Whitestone.SegnoSharp
                     SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
                     connectionStringBuilder.DataSource = Path.Combine(builder.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
 
-                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")));
+                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")).EnableSensitiveDataLogging(true));
 
                     builder.Services.AddHealthChecks().AddSqlite(connectionStringBuilder.ConnectionString, name: "Database");
 
