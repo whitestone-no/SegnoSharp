@@ -331,7 +331,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
             }
         }
 
-        private async Task DeleteTrack()
+        private async Task DeleteAlbum()
         {
             var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this album and all its media and tracks? This operation cannot be undone!");
             if (!confirmed)
@@ -339,7 +339,23 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
                 return;
             }
 
-            DbContext.Albums.Remove(Album);
+            // Get album with all relations so that cascade deleting will delete without foreign key errors
+            Album album = await DbContext.Albums
+                .Include(a => a.Genres)
+                .Include(a => a.RecordLabels)
+                .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.Persons)
+                .Include(a => a.AlbumPersonGroupPersonRelations).ThenInclude(r => r.PersonGroup)
+                .Include(a => a.AlbumCover).ThenInclude(c => c.AlbumCoverData)
+                .Include(a => a.Discs).ThenInclude(d => d.Tracks).ThenInclude(t => t.TrackStreamInfo).ThenInclude(tsi => tsi.StreamHistory)
+                .Include(a => a.Discs).ThenInclude(d => d.Tracks).ThenInclude(t => t.TrackStreamInfo).ThenInclude(tsi => tsi.StreamQueue)
+                .Include(a => a.Discs).ThenInclude(d => d.Tracks).ThenInclude(t => t.TrackPersonGroupPersonRelations).ThenInclude(r => r.Persons)
+                .Include(a => a.Discs).ThenInclude(d => d.Tracks).ThenInclude(t => t.TrackPersonGroupPersonRelations).ThenInclude(r => r.PersonGroup)
+                .Include(a => a.Discs).ThenInclude(d => d.MediaTypes)
+                .Include(a => a.Discs).ThenInclude(d => d.TrackGroups)
+                .FirstOrDefaultAsync(a => a.Id == Id);
+
+            DbContext.Albums.Remove(album);
+
             await DbContext.SaveChangesAsync();
 
             NavigationManager.NavigateTo($"/admin/albums");
