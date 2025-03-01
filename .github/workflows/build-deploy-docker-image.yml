@@ -40,10 +40,14 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build and push Docker image
       id: push
-      uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+      uses: docker/build-push-action@v6
       with:
+        file: ./src/SegnoSharp/Dockerfile
         context: .
         push: true
+        build-args: |
+          SEGNOSHARP_SEMVER=${{ env.SegnoSharpSemVer }}
+          SEGNOSHARP_SEMVER_FULL=${{ env.SegnoSharpSemVerFull }}
         tags: |
             ghcr.io/gthvidsten/segnosharp:${{ env.SegnoSharpSemVerFull }}
             ghcr.io/gthvidsten/segnosharp:latest  
