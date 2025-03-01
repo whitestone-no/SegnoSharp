@@ -194,7 +194,7 @@ namespace Whitestone.SegnoSharp.Common.Helpers
 
                         object objValue = e.PropertyInfo.GetValue(persistence);
                         return e.Owner == persistence &&
-                               ((objValue != null && objValue.ToString()?.Replace(',', '.') != e.Value?.Replace(',', '.')) ||
+                               ((objValue != null && objValue.ToString() != e.Value) ||
                                 (objValue == null && e.Value != null));
                     })
                     .ToArray();
