@@ -453,7 +453,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         name: "FK_StreamHistory_TrackStreamInfos_TrackStreamInfoId",
                         column: x => x.TrackStreamInfoId,
                         principalTable: "TrackStreamInfos",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -472,7 +473,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         name: "FK_StreamQueue_TrackStreamInfos_TrackStreamInfoId",
                         column: x => x.TrackStreamInfoId,
                         principalTable: "TrackStreamInfos",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(

@@ -713,7 +713,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.HasOne("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", "TrackStreamInfo")
                         .WithMany("StreamHistory")
-                        .HasForeignKey("TrackStreamInfoId");
+                        .HasForeignKey("TrackStreamInfoId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("TrackStreamInfo");
                 });
@@ -722,7 +723,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.HasOne("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", "TrackStreamInfo")
                         .WithMany("StreamQueue")
-                        .HasForeignKey("TrackStreamInfoId");
+                        .HasForeignKey("TrackStreamInfoId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("TrackStreamInfo");
                 });

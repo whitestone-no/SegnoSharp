@@ -11,7 +11,7 @@ using Whitestone.SegnoSharp.Database;
 namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 {
     [DbContext(typeof(SegnoSharpDbContext))]
-    [Migration("20250214204622_Initial")]
+    [Migration("20250301152328_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -716,7 +716,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.HasOne("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", "TrackStreamInfo")
                         .WithMany("StreamHistory")
-                        .HasForeignKey("TrackStreamInfoId");
+                        .HasForeignKey("TrackStreamInfoId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("TrackStreamInfo");
                 });
@@ -725,7 +726,8 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.HasOne("Whitestone.SegnoSharp.Database.Models.TrackStreamInfo", "TrackStreamInfo")
                         .WithMany("StreamQueue")
-                        .HasForeignKey("TrackStreamInfoId");
+                        .HasForeignKey("TrackStreamInfoId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("TrackStreamInfo");
                 });
