@@ -15,14 +15,10 @@ jobs:
       run: wget https://www.un4seen.com/files/z/4/Bass24.Net.zip --directory-prefix=tmp
     - name: Unzip BASS.NET
       run: 7z e tmp/Bass24.Net.zip -o./data/bass core/Bass.Net.dll
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.x
     - name: Setup GitVersion
       uses: gittools/actions/gitversion/setup@v3.0.3
       with:
-        versionSpec: '6.x'
+        versionSpec: '6.0.x'
     - name: Execute GitVersion
       uses: gittools/actions/gitversion/execute@v3.0.3
       with:
