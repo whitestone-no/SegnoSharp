@@ -31,6 +31,13 @@
                         <label for="chkImportSubfolders2" class="checkbox-label">Include subfolders</label>
                         <input id="chkImportSubfolders2" type="checkbox" @bind="ImporterState.ImportSubfolders" disabled="disabled" />
                     </div>
+                    <div class="form-group normalization">
+                        <label for="txtNormalizationArticles">Normalization articles (comma separated)</label>
+                        <input id="txtNormalizationArticles" type="text" @bind="Settings.NormalizationArticles" disabled="@(!Settings.NormalizeAlbumTitles)" />
+                        <div class="flex-center">
+                            <input type="checkbox" @bind="Settings.NormalizeAlbumTitles"/>
+                        </div>
+                    </div>
                     <div class="folder-list">
                         <div class="folder-list-header">
                             <div class="card-span-9">Filename</div>

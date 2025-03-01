@@ -210,3 +210,10 @@ table.track-list input[type="number"]:focus {
     background-color: #fff;
     border-color: var(--primary-color);
 }
+
+.normalization input[type="text"] {
+    grid-column: span 8;
+}
+.normalization div {
+    grid-column: span 1;
+}

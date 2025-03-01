@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Components;
 using Whitestone.SegnoSharp.Database.Extensions;
 using Whitestone.SegnoSharp.Modules.MediaImporter.Models;
+using Whitestone.SegnoSharp.Modules.MediaImporter.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 {
@@ -11,6 +12,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
     {
         [Inject] private NavigationManager NavigationManager { get; set; }
         [Inject] private ImportState ImporterState { get; set; }
+        [Inject] private MediaImporterSettings Settings { get; set; }
 
         private string ErrorMessage { get; set; }
 

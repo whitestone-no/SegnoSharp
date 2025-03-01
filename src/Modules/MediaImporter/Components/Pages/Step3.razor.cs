@@ -15,6 +15,7 @@ using Whitestone.SegnoSharp.Database.Extensions;
 using Whitestone.SegnoSharp.Database.Models;
 using Whitestone.SegnoSharp.Modules.MediaImporter.Models;
 using Whitestone.SegnoSharp.Modules.MediaImporter.Models.Config;
+using Whitestone.SegnoSharp.Modules.MediaImporter.Models.Persistent;
 using Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels;
 using Track = Whitestone.SegnoSharp.Database.Models.Track;
 
@@ -27,6 +28,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
         [Inject] private ITagReader TagReader { get; set; }
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
         [Inject] private IOptions<MediaImporterConfig> Config { get; set; }
+        [Inject] private MediaImporterSettings Settings { get; set; }
         [Inject] private IJSRuntime JsRuntime { get; set; }
 
         private TrackViewModel _currentlyDraggingTrack;
@@ -34,7 +36,8 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
         private List<MediaType> MediaTypes { get; set; }
 
-        private readonly char[] _nameSeparators = { ',', '&', '/', '\\', ';' };
+        private readonly char[] _nameSeparators = [',', '&', '/', '\\', ';'];
+        private List<string> _normalizationArticles = [];
         private bool _loaded;
 
         protected override async Task OnInitializedAsync()
@@ -45,6 +48,11 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 _loaded = true;
                 return;
             }
+
+            _normalizationArticles = Settings.NormalizationArticles
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(a => a.Trim())
+                .ToList();
 
             await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
@@ -59,6 +67,10 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 .Select(file =>
                 {
                     Tags tags = TagReader.ReadTagInfo(file.File.FullName);
+                    if (Settings.NormalizeAlbumTitles)
+                    {
+                        tags.Album = NormalizeAlbumTitle(tags.Album);
+                    }
                     return tags;
                 })
                 .ToList();
@@ -459,6 +471,31 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
             {
                 NavigationManager.NavigateTo("/admin/mediaimporter/step2");
             }
+        }
+
+        private string NormalizeAlbumTitle(string title)
+        {
+            if (!Settings.NormalizeAlbumTitles)
+            {
+                return title;
+            }
+
+            if (!_normalizationArticles.Any(a => title.StartsWith(a + " ")))
+            {
+                return title;
+            }
+
+            int firstSpaceIndex = title.IndexOf(" ", StringComparison.OrdinalIgnoreCase);
+            if (firstSpaceIndex == -1)
+            {
+                return title;
+            }
+
+            string titleWithoutArticle = title.Substring(firstSpaceIndex + 1, title.Length - firstSpaceIndex - 1);
+            string article = title.Substring(0, firstSpaceIndex);
+            title = titleWithoutArticle + ", " + article;
+
+            return title;
         }
     }
 }

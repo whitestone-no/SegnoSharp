@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using System;
-using System.Linq;
 using Microsoft.Extensions.Logging;
 using Un4seen.Bass.AddOn.Tags;
 using Un4seen.Bass;
@@ -14,13 +12,11 @@ namespace Whitestone.SegnoSharp.Modules.TagReader
     internal class TagReader : ITagReader
     {
         private readonly IBassWrapper _bassWrapper;
-        private readonly IOptions<TagReaderConfig> _config;
         private readonly ILogger<TagReader> _log;
 
-        public TagReader(IBassWrapper bassWrapper, IOptions<TagReaderConfig> config, IOptions<BassRegistration> bassRegistration, ILogger<TagReader> log)
+        public TagReader(IBassWrapper bassWrapper, IOptions<BassRegistration> bassRegistration, ILogger<TagReader> log)
         {
             _bassWrapper = bassWrapper;
-            _config = config;
             _log = log;
 
             _bassWrapper.Registration(bassRegistration.Value.Email, bassRegistration.Value.Key);
@@ -30,26 +26,6 @@ namespace Whitestone.SegnoSharp.Modules.TagReader
         {
             Tags tags = ReadFromBass(file);
             tags.File = file;
-
-            if (!_config.Value.AlbumTitleArticleNormalization)
-            {
-                return tags;
-            }
-
-            if (!_config.Value.NormalizationArticles.Any(a => tags.Album.StartsWith(a + " ")))
-            {
-                return tags;
-            }
-
-            int firstSpaceIndex = tags.Album.IndexOf(" ", StringComparison.OrdinalIgnoreCase);
-            if (firstSpaceIndex == -1)
-            {
-                return tags;
-            }
-
-            string titleWithoutArticle = tags.Album.Substring(firstSpaceIndex + 1, tags.Album.Length - firstSpaceIndex - 1);
-            string article = tags.Album.Substring(0, firstSpaceIndex);
-            tags.Album = titleWithoutArticle + ", " + article;
 
             return tags;
         }

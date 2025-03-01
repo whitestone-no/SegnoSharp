@@ -16,7 +16,6 @@ namespace Whitestone.SegnoSharp.Modules.TagReader
         public void ConfigureServices(IServiceCollection services, IHostEnvironment environment, IConfiguration configuration)
         {
             services.Configure<BassRegistration>(configuration.GetSection(BassRegistration.Section));
-            services.Configure<TagReaderConfig>(configuration.GetSection(TagReaderConfig.Section));
 
             services.AddSingleton<IBassWrapper, BassWrapper>();
             services.AddSingleton<ITagReader, TagReader>(); 

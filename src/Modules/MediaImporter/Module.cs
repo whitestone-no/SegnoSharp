@@ -5,6 +5,7 @@ using System;
 using Whitestone.SegnoSharp.Common.Interfaces;
 using Whitestone.SegnoSharp.Modules.MediaImporter.Models;
 using Whitestone.SegnoSharp.Modules.MediaImporter.Models.Config;
+using Whitestone.SegnoSharp.Modules.MediaImporter.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Modules.MediaImporter
 {
@@ -17,6 +18,14 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter
             services.Configure<MediaImporterConfig>(configuration.GetSection(MediaImporterConfig.Section));
 
             services.AddScoped<ImportState>();
+
+            services.AddSingleton(sp =>
+            {
+                MediaImporterSettings settings = new();
+                var pm = sp.GetRequiredService<IPersistenceManager>();
+                pm.RegisterAsync(settings);
+                return settings;
+            });
         }
     }
 }
