@@ -8,7 +8,7 @@ namespace Whitestone.SegnoSharp.Common.Models.PersistenceManager
     {
         public string Key { get; set; }
         public DefaultValueAttribute DefaultValue { get; set; }
-        public string DefaultValueString => DefaultValue?.DefaultValue.ToString()?.Replace(',', '.') ?? string.Empty;
+        public string DefaultValueString => DefaultValue?.DefaultValue.ToString() ?? string.Empty;
         public object Owner { get; set; }
         public string Value { get; set; }
         public PropertyInfo PropertyInfo { get; set; }
