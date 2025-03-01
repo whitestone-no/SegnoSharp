@@ -19,7 +19,11 @@ namespace Whitestone.SegnoSharp.Database.Models
 
         public int TrackId { get; set; }
         public Track Track { get; set; }
+
+        [DeleteBehavior(DeleteBehavior.Cascade)]
         public IList<StreamQueue> StreamQueue { get; set; }
+
+        [DeleteBehavior(DeleteBehavior.Cascade)]
         public IList<StreamHistory> StreamHistory { get; set; }
     }
 }
