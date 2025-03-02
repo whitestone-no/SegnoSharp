@@ -21,3 +21,11 @@ Update-Database -Project PostgreSQL -Args '--Database:Type postgresql'
 Update-Database -Project MSSQL -Args '--Database:Type mssql'
 Update-Database -Project SQLite -Args '--Database:Type sqlite --CommonConfig:DataPath ..\..\data'
 ```
+
+MySQL tables are created with the MyISAM engine by default.
+The InnoDB engine is required, but Pomelo.EntityFrameworkCore.MySql does not support setting the default engine,
+so you need to manually set the engine in every generated migration file at the start of the `Up()` method:
+
+```
+migrationBuilder.Sql("SET default_storage_engine=INNODB");
+```
