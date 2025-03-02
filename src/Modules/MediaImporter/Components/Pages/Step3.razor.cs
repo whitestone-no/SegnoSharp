@@ -38,6 +38,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
         private readonly char[] _nameSeparators = [',', '&', '/', '\\', ';'];
         private List<string> _normalizationArticles = [];
+        private bool _loading;
         private bool _loaded;
 
         protected override async Task OnInitializedAsync()
@@ -48,6 +49,9 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 _loaded = true;
                 return;
             }
+
+            _loading = true;
+            await InvokeAsync(StateHasChanged);
 
             _normalizationArticles = Settings.NormalizationArticles
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -295,6 +299,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 }
             }
 
+            _loading = false;
             _loaded = true;
         }
 

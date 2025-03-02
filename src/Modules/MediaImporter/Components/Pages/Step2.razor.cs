@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Whitestone.SegnoSharp.Database.Extensions;
 using Whitestone.SegnoSharp.Modules.MediaImporter.Models;
@@ -15,6 +17,8 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
         [Inject] private MediaImporterSettings Settings { get; set; }
 
         private string ErrorMessage { get; set; }
+
+        private bool _loading;
 
         private bool AllImport
         {
@@ -40,42 +44,52 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
             }
         }
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
-            if (ImporterState.SelectedFiles is { Length: > 0 })
+            _loading = true;
+            await InvokeAsync(StateHasChanged);
+
+            try
             {
-                return;
+                if (ImporterState.SelectedFiles is { Length: > 0 })
+                {
+                    return;
+                }
+
+                if (ImporterState.SelectedFolder?.Parent == null)
+                {
+                    ErrorMessage = "No folder selected.";
+                    return;
+                }
+
+                string[] extensions = [ ".mp3", ".flac" ];
+                List<FileInfo> files = ImporterState.SelectedFolder.EnumerateFiles("*",
+                        ImporterState.ImportSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                    .Where(f => extensions.Contains(f.Extension))
+                    .ToList();
+
+                if (files.Count == 0)
+                {
+                    ErrorMessage = "No music files found in the selected path. Please redo the previous step.";
+                    return;
+                }
+
+                if (files.Count > 1000)
+                {
+                    ErrorMessage = "More than 1000 files in selected folder. Please select a folder with fewer files.";
+                    return;
+                }
+
+                ImporterState.SelectedFiles = files.Select(f => new SelectedFile
+                {
+                    File = f,
+                    Filename = f.FullName.TrimStart(ImporterState.SelectedFolder.FullName).TrimStart('\\')
+                }).ToArray();
             }
-
-            if (ImporterState.SelectedFolder?.Parent == null)
+            finally
             {
-                ErrorMessage = "No folder selected.";
-                return;
+                _loading = false;
             }
-
-            string[] extensions = { ".wma", ".mp3", ".flac" };
-            List<FileInfo> files = ImporterState.SelectedFolder.EnumerateFiles("*",
-                    ImporterState.ImportSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                .Where(f => extensions.Contains(f.Extension))
-                .ToList();
-
-            if (files.Count == 0)
-            {
-                ErrorMessage = "No music files found in the selected path. Please redo the previous step.";
-                return;
-            }
-
-            if (files.Count > 1000)
-            {
-                ErrorMessage = "More than 1000 files in selected folder. Please select a folder with fewer files.";
-                return;
-            }
-
-            ImporterState.SelectedFiles = files.Select(f => new SelectedFile
-            {
-                File = f,
-                Filename = f.FullName.TrimStart(ImporterState.SelectedFolder.FullName).TrimStart('\\')
-            }).ToArray();
         }
 
         private void OnNextClick()

@@ -17,7 +17,11 @@
                 </ul>
             </div>
             <div class="card">
-                @if (!string.IsNullOrEmpty(ErrorMessage))
+                @if (_loading)
+                {
+                    <div class="alert alert-info">Loading. Please wait.</div>
+                }
+                else if (!string.IsNullOrEmpty(ErrorMessage))
                 {
                     <div class="alert alert-error">@ErrorMessage</div>
                 }
@@ -25,15 +29,15 @@
                 {
                     <div class="form-group">
                         <label>Selected path</label>
-                        <input type="text" value="@ImporterState.SelectedFolder?.FullName" disabled="disabled" />
+                        <input type="text" value="@ImporterState.SelectedFolder?.FullName" disabled="disabled"/>
                     </div>
                     <div class="form-group">
                         <label for="chkImportSubfolders2" class="checkbox-label">Include subfolders</label>
-                        <input id="chkImportSubfolders2" type="checkbox" @bind="ImporterState.ImportSubfolders" disabled="disabled" />
+                        <input id="chkImportSubfolders2" type="checkbox" @bind="ImporterState.ImportSubfolders" disabled="disabled"/>
                     </div>
                     <div class="form-group normalization">
                         <label for="txtNormalizationArticles">Normalization articles (comma separated)</label>
-                        <input id="txtNormalizationArticles" type="text" @bind="Settings.NormalizationArticles" disabled="@(!Settings.NormalizeAlbumTitles)" />
+                        <input id="txtNormalizationArticles" type="text" @bind="Settings.NormalizationArticles" disabled="@(!Settings.NormalizeAlbumTitles)"/>
                         <div class="flex-center">
                             <input type="checkbox" @bind="Settings.NormalizeAlbumTitles"/>
                         </div>
@@ -46,7 +50,7 @@
                                     <label for="chkAllImport">Import file</label>
                                 </div>
                                 <div>
-                                    <input id="chkAllImport" type="checkbox" @bind="@AllImport" />
+                                    <input id="chkAllImport" type="checkbox" @bind="@AllImport"/>
                                 </div>
                             </div>
                             <div class="card-span-2 text-center">
@@ -54,7 +58,7 @@
                                     <label for="chkAllImportPlaylist">Import to playlist</label>
                                 </div>
                                 <div>
-                                    <input id="chkAllImportPlaylist" type="checkbox" @bind="@AllImportPlaylist" />
+                                    <input id="chkAllImportPlaylist" type="checkbox" @bind="@AllImportPlaylist"/>
                                 </div>
                             </div>
                         </div>
@@ -65,8 +69,8 @@
                                 int localIndex = i;
                                 <div class="card-grid">
                                     <div class="card-span-9">@ImporterState.SelectedFiles[localIndex].Filename</div>
-                                    <div class="card-span-1"><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].Import" /></div>
-                                    <div class="card-span-2"><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].ImportToPlaylist" /></div>
+                                    <div class="card-span-1"><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].Import"/></div>
+                                    <div class="card-span-2"><input type="checkbox" @bind="@ImporterState.SelectedFiles[localIndex].ImportToPlaylist"/></div>
                                 </div>
                             }
                         </div>
