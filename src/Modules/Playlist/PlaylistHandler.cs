@@ -74,14 +74,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
 
             foreach (IPlaylistProcessor playlistProcessor in _playlistProcessors.OrderBy(p => p.Settings.SortOrder))
             {
-                if (playlistProcessor is DefaultProcessor)
-                {
-                    playlistProcessor.Settings.SortOrder = 0;
-                }
-                else
-                {
-                    playlistProcessor.Settings.SortOrder = counter++;
-                }
+                playlistProcessor.Settings.SortOrder = playlistProcessor is DefaultProcessor ? (ushort)0 : counter++;
             }
 
             // Start the task to automatically fill the playlist
@@ -90,13 +83,11 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
 
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             // Stop any running tasks
-            _autoplaylistTaskCancellationTokenSource?.Cancel();
-            _currentlyPlayingTaskCancellationTokenSource?.Cancel();
-
-            return Task.CompletedTask;
+            await _autoplaylistTaskCancellationTokenSource?.CancelAsync()!;
+            await _currentlyPlayingTaskCancellationTokenSource?.CancelAsync()!;
         }
 
         public void HandleEvent(PlayerReady input)
