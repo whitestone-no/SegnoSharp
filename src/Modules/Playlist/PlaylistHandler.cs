@@ -146,7 +146,16 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                                 break;
                             }
 
-                            dbContext.TrackStreamInfos.Attach(track);
+                            try
+                            {
+                                dbContext.TrackStreamInfos.Attach(track);
+                            }
+                            catch
+                            {
+                                // Ignored
+                                // Track might already be attached and attaching it again will throw an exception.
+                                // This is fine, as we only need to attach it once.
+                            }
 
                             ushort maxSortOrder = await dbContext.StreamQueue.AnyAsync(cancellationToken)
                                 ? await dbContext.StreamQueue
