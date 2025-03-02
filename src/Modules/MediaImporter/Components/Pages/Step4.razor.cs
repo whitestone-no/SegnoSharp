@@ -178,9 +178,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                             track.TrackStreamInfo = new TrackStreamInfo
                             {
                                 FilePath = trackVm.TrackStreamInfo.FilePath,
-                                IncludeInAutoPlaylist = trackVm.TrackStreamInfo.IncludeInAutoPlaylist,
-                                PlayCount = 0,
-                                Weight = 100
+                                IncludeInAutoPlaylist = trackVm.TrackStreamInfo.IncludeInAutoPlaylist
                             };
                         }
 

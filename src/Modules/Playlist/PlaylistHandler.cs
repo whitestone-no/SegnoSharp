@@ -262,9 +262,6 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                         {
                             DateTime now = _systemClock.Now;
 
-                            queuetrack.TrackStreamInfo.LastPlayed = now;
-                            queuetrack.TrackStreamInfo.PlayCount++;
-
                             await dbContext.StreamHistory.AddAsync(new StreamHistory
                             {
                                 Played = now,

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Whitestone.SegnoSharp.Database.Models
 {
-    [Index(nameof(IncludeInAutoPlaylist), nameof(LastPlayed), nameof(PlayCount))]
+    [Index(nameof(IncludeInAutoPlaylist))]
     public class TrackStreamInfo
     {
         public int Id { get; set; }
@@ -13,8 +13,6 @@ namespace Whitestone.SegnoSharp.Database.Models
         [Required]
         public string FilePath { get; set; }
         public bool IncludeInAutoPlaylist { get; set; }
-        public DateTime? LastPlayed { get; set; }
-        public int PlayCount { get; set; } = 0;
         public int Weight { get; set; } = 100;
 
         public int TrackId { get; set; }

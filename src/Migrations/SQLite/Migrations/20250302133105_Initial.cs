@@ -397,8 +397,6 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     FilePath = table.Column<string>(type: "TEXT", nullable: false),
                     IncludeInAutoPlaylist = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LastPlayed = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    PlayCount = table.Column<int>(type: "INTEGER", nullable: false),
                     Weight = table.Column<int>(type: "INTEGER", nullable: false),
                     TrackId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -627,9 +625,9 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 column: "Title");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TrackStreamInfos_IncludeInAutoPlaylist_LastPlayed_PlayCount",
+                name: "IX_TrackStreamInfos_IncludeInAutoPlaylist",
                 table: "TrackStreamInfos",
-                columns: new[] { "IncludeInAutoPlaylist", "LastPlayed", "PlayCount" });
+                column: "IncludeInAutoPlaylist");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TrackStreamInfos_TrackId",
