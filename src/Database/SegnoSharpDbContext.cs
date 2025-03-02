@@ -39,8 +39,10 @@ namespace Whitestone.SegnoSharp.Database
                     modelBuilder.UseCollation("NOCASE");
                     modelBuilder.Entity<Album>().Property(t => t.Title).HasColumnType("TEXT COLLATE NOCASE");
                     modelBuilder.Entity<Genre>().Property(g => g.Name).HasColumnType("TEXT COLLATE NOCASE");
+                    modelBuilder.Entity<RecordLabel>().Property(g => g.Name).HasColumnType("TEXT COLLATE NOCASE");
                     modelBuilder.Entity<Person>().Property(g => g.FirstName).HasColumnType("TEXT COLLATE NOCASE");
                     modelBuilder.Entity<Person>().Property(g => g.LastName).HasColumnType("TEXT COLLATE NOCASE");
+                    modelBuilder.Entity<Track>().Property(g => g.Title).HasColumnType("TEXT COLLATE NOCASE");
                     break;
                 case "mysql":
                     modelBuilder.UseCollation("utf8mb4_unicode_ci");
