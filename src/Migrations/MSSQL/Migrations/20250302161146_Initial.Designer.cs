@@ -2,30 +2,37 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whitestone.SegnoSharp.Database;
 
 #nullable disable
 
-namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
+namespace Whitestone.SegnoSharp.Database.Migrations.MSSQL.Migrations
 {
     [DbContext(typeof(SegnoSharpDbContext))]
-    partial class SegnoSharpDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250302161146_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .UseCollation("NOCASE")
-                .HasAnnotation("ProductVersion", "9.0.1");
+                .UseCollation("Latin1_General_CI_AI")
+                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("AlbumGenre", b =>
                 {
                     b.Property<int>("AlbumsId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("GenresId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("AlbumsId", "GenresId");
 
@@ -37,10 +44,10 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
             modelBuilder.Entity("AlbumPersonGroupPersonRelationPerson", b =>
                 {
                     b.Property<int>("AlbumPersonGroupPersonRelationsId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("PersonsId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("AlbumPersonGroupPersonRelationsId", "PersonsId");
 
@@ -52,10 +59,10 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
             modelBuilder.Entity("AlbumRecordLabel", b =>
                 {
                     b.Property<int>("AlbumsId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("RecordLabelsId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("AlbumsId", "RecordLabelsId");
 
@@ -67,10 +74,10 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
             modelBuilder.Entity("DiscMediaType", b =>
                 {
                     b.Property<int>("DiscsId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("MediaTypesId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("DiscsId", "MediaTypesId");
 
@@ -82,10 +89,10 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
             modelBuilder.Entity("PersonTrackPersonGroupPersonRelation", b =>
                 {
                     b.Property<int>("PersonsId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("TrackPersonGroupPersonRelationsId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("PersonsId", "TrackPersonGroupPersonRelationsId");
 
@@ -98,26 +105,28 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Added")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("CatalogueNumber")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsPublic")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bit");
 
-                    b.Property<ushort>("Published")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("Published")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("TEXT COLLATE NOCASE");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Upc")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -130,21 +139,23 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AlbumId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Filename")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<uint>("Filesize")
-                        .HasColumnType("INTEGER");
+                    b.Property<long>("Filesize")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Mime")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -158,13 +169,15 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AlbumCoverId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<byte[]>("Data")
-                        .HasColumnType("BLOB");
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("Id");
 
@@ -178,13 +191,15 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ParentId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("PersonGroupId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -199,16 +214,18 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AlbumId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<byte>("DiscNumber")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint");
 
                     b.Property<string>("Title")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -221,11 +238,13 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT COLLATE NOCASE");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -238,14 +257,16 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<byte>("SortOrder")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint");
 
                     b.HasKey("Id");
 
@@ -281,13 +302,13 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.PersistenceManagerEntry", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("DataType")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Value")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Key");
 
@@ -298,19 +319,21 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("FirstName")
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT COLLATE NOCASE");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT COLLATE NOCASE");
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<ushort>("Version")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("Version")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -323,17 +346,19 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<ushort>("SortOrder")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
 
                     b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -344,28 +369,28 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                         {
                             Id = 1,
                             Name = "Artist",
-                            SortOrder = (ushort)1,
+                            SortOrder = 1,
                             Type = 0
                         },
                         new
                         {
                             Id = 2,
                             Name = "Artist",
-                            SortOrder = (ushort)1,
+                            SortOrder = 1,
                             Type = 1
                         },
                         new
                         {
                             Id = 3,
                             Name = "Composer",
-                            SortOrder = (ushort)2,
+                            SortOrder = 2,
                             Type = 0
                         },
                         new
                         {
                             Id = 4,
                             Name = "Composer",
-                            SortOrder = (ushort)2,
+                            SortOrder = 2,
                             Type = 1
                         });
                 });
@@ -374,13 +399,15 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IncludeInAutoPlaylist")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bit");
 
                     b.Property<int>("PersonGroupId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -410,11 +437,13 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT COLLATE NOCASE");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -425,15 +454,17 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.StreamHistory", b =>
                 {
-                    b.Property<uint>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("Played")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("TrackStreamInfoId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -444,15 +475,17 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
 
             modelBuilder.Entity("Whitestone.SegnoSharp.Database.Models.StreamQueue", b =>
                 {
-                    b.Property<uint>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
-                    b.Property<ushort>("SortOrder")
-                        .HasColumnType("INTEGER");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
 
                     b.Property<int?>("TrackStreamInfoId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -465,23 +498,25 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("DiscId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
-                    b.Property<ushort>("Length")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("Length")
+                        .HasColumnType("int");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("TEXT COLLATE NOCASE");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<ushort>("TrackNumber")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("TrackNumber")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -496,17 +531,19 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("DiscId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
-                    b.Property<ushort>("GroupBeforeTrackNumber")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("GroupBeforeTrackNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -519,13 +556,15 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ParentId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("PersonGroupId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -540,20 +579,22 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("FilePath")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IncludeInAutoPlaylist")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bit");
 
                     b.Property<int>("TrackId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("Weight")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

@@ -107,7 +107,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                    Name = table.Column<string>(type: "TEXT COLLATE NOCASE", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -323,7 +323,7 @@ namespace Whitestone.SegnoSharp.Database.Migrations.SQLite.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     TrackNumber = table.Column<ushort>(type: "INTEGER", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
+                    Title = table.Column<string>(type: "TEXT COLLATE NOCASE", nullable: false),
                     Notes = table.Column<string>(type: "TEXT", nullable: true),
                     Length = table.Column<ushort>(type: "INTEGER", nullable: false),
                     DiscId = table.Column<int>(type: "INTEGER", nullable: false)

@@ -47,6 +47,11 @@ namespace Whitestone.SegnoSharp.Database
                 case "mysql":
                     modelBuilder.UseCollation("utf8mb4_unicode_ci");
                     break;
+                case "postgresql":
+                    break;
+                case "mssql":
+                    modelBuilder.UseCollation("Latin1_General_CI_AI");
+                    break;
                 default:
                     throw new ArgumentException($"Unsupported database type: {databaseType}");
             }
