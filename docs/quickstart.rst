@@ -68,6 +68,7 @@ Create a new file called ``docker-compose.yml`` with the following content:
 
 ::
 
+    name: segnosharp
     services:
       segnosharp:
         container_name: segnosharp
