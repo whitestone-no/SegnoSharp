@@ -14,4 +14,4 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
    :hidden:
    :caption: Quickstart
 
-   running/docker
+   quickstart

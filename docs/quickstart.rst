@@ -1,10 +1,12 @@
-Docker
-------
+Quickstart
+----------
 
 The easiest way to run SegnoSharp is through the official Docker image.
 
 Prerequisites
 =============
+
+This assumes you already have Docker Desktop installed.
 
 Before starting the Docker container you need to perform a few additional steps.
 
