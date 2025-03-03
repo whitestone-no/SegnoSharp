@@ -1,7 +1,7 @@
 import time
 
 project = 'SegnoSharp'
-copyright = str(time.localtime().tm_year) + ', Whitestone.'
+copyright = str(time.localtime().tm_year) + ', Whitestone'
 author = 'Whitestone'
 
 extensions = [
