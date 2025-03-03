@@ -51,6 +51,6 @@ jobs:
           SEGNOSHARP_SEMVER=${{ env.SegnoSharpSemVer }}
           SEGNOSHARP_SEMVER_FULL=${{ env.SegnoSharpSemVerFull }}
         tags: |
-            ghcr.io/gthvidsten/segnosharp:${{ env.SegnoSharpSemVerFull }}
-            ghcr.io/gthvidsten/segnosharp:latest  
+            ghcr.io/whitestone-no/segnosharp:${{ env.SegnoSharpSemVerFull }}
+            ghcr.io/whitestone-no/segnosharp:latest  
 
