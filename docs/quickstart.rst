@@ -80,7 +80,7 @@ Create a new file called ``docker-compose.yml`` with the following content:
         environment:
           SegnoSharp_CommonConfig__DataPath: /var/segnosharp
           SegnoSharp_CommonConfig__MusicPath: /var/music
-		  SegnoSharp_OpenIdConnect__UseOidc:false
+          SegnoSharp_OpenIdConnect__UseOidc:false
 
 Replace ``pathToYourDataFolder`` and ``pathToYourMusicFolder`` with the real paths from your computer.
 This file defines a Docker service called ``segnosharp`` with two folders on your computer mapped into the container.
