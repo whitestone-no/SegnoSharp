@@ -20,7 +20,7 @@ BASS
 SegnoSharp uses the BASS audio libraries to play and stream music.
 Create a new folder inside the ``data`` folder called ``bass``.
 
-Download the libraries from `un4seen <https://www.un4seen.com/bass.html/>`_ and extract the files into ``data/bass``.
+Download the libraries from `un4seen <https://www.un4seen.com/bass.html>`_ and extract the files into ``data/bass``.
 The following table contains a list of all libraries and which file to extract into ``data/bass``
 
 +-------------+----------------------+----------------------------+------------------+
