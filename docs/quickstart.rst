@@ -71,7 +71,7 @@ Create a new file called ``docker-compose.yml`` with the following content:
     services:
       segnosharp:
         container_name: segnosharp
-        image: ghcr.io/gthvidsten/segnosharp:latest
+        image: ghcr.io/whitestone-no/segnosharp:latest
         volumes:
           - "pathToYourDataFolder:/var/segnosharp"
           - "pathToYourMusicFolder:/var/music"
