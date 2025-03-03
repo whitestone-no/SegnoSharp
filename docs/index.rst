@@ -11,7 +11,12 @@ SegnoSharp is a music database and audio streaming solution.
 It will stream your music to a Shoutcast/Icecast server following a set of rules.
 
 .. toctree::
-   :hidden:
-   :caption: Quickstart
 
    quickstart
+   
+.. toctree::
+   :hidden:
+   :caption: Advanced
+
+   advanced/configuration
+   advanced/database
