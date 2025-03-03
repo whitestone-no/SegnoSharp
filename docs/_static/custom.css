@@ -10,7 +10,7 @@ div.indexheading h1 {
 
 .wy-menu-vertical header,
 .wy-menu-vertical p.caption {
-	color: #cc5a5a;
+	color: #ffd700;
 }
 
 .wy-nav-top a {
@@ -20,11 +20,12 @@ div.indexheading h1 {
 .wy-nav-content-wrap a,
 .wy-nav-content-wrap a:hover,
 .wy-nav-content-wrap a:visited {
-	color: #c83232;
+	color: #7f6d06;
+	text-decoration: underline;
 }
 
 .rst-content .note {
-	background: #f3e6e6;
+	background: #fff1a3;
 }
 .rst-content .note .admonition-title {
 	background: #1a1a1a;
