@@ -155,7 +155,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 
             _log.LogInformation("BASS Version: {bassVersion}", _bassWrapper.GetBassVersion());
             _log.LogInformation("BASS Enc Version: {bassEncVersion}", _bassWrapper.GetBassEncVersion());
-            _log.LogInformation("BASS Enc MP3 Version: {bassEncMp3Version}", _bassWrapper.GetBassEncMp3Version());
             _log.LogInformation("BASS Mixer Version: {bassMixerVersion}", _bassWrapper.GetBassMixerVersion());
             _log.LogInformation("BASS.NET Version: {bassMixerVersion}", _bassWrapper.GetBassNetVersion());
         }

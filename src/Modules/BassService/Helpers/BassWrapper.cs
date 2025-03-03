@@ -70,11 +70,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
             return BassEnc.BASS_Encode_GetVersion(4);
         }
 
-        public Version GetBassEncMp3Version()
-        {
-            return BassEnc_Mp3.BASS_Encode_MP3_GetVersion(4);
-        }
-
         public Version GetBassMixerVersion()
         {
             return BassMix.BASS_Mixer_GetVersion(4);

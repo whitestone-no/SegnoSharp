@@ -20,7 +20,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Interfaces
         BASSError GetLastBassError();
         Version GetBassVersion();
         Version GetBassEncVersion();
-        Version GetBassEncMp3Version();
         Version GetBassMixerVersion();
         Version GetBassNetVersion();
         bool Play(int handle, bool restart);
