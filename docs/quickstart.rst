@@ -95,5 +95,11 @@ After you have created this file and updated the settings accordingly you can no
 
     docker-compose up -d
 	
-This will download (pull) the image and start the image as a container.
+This will download (pull) the image and start the image as a container running in the background.
 When it says ``Completed`` and returns you to the command line you should be able to start using SegnoSharp on `http://localhost:8080 <http://localhost:8080>`_.
+
+When you don't want the container running anymore you can end it with the following command:
+
+::
+
+    docker-compose down
