@@ -103,26 +103,23 @@ namespace Whitestone.SegnoSharp
                 .ConfigureServices((hostContext, services) =>
                 {
                     string databaseType = hostContext.Configuration.GetSection("Database").GetValue<string>("Type").ToLower();
+                    string connectionString = hostContext.Configuration.GetConnectionString("SegnoSharp");
 
                     switch (databaseType)
                     {
                         case "sqlite":
-                            string connSqlite = hostContext.Configuration.GetConnectionString("SegnoSharpDatabaseSqlite");
-                            SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
+                            SqliteConnectionStringBuilder connectionStringBuilder = new(connectionString);
                             connectionStringBuilder.DataSource = Path.Combine(hostContext.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
                             services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")));
                             break;
                         case "mysql":
-                            string connMysql = hostContext.Configuration.GetConnectionString("SegnoSharpDatabaseMysql");
-                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")));
+                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connectionString ?? string.Empty, ServerVersion.AutoDetect(connectionString), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")));
                             break;
                         case "postgresql":
-                            string connPostgres = hostContext.Configuration.GetConnectionString("SegnoSharpDatabasePostgreSql");
-                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseNpgsql(connPostgres ?? string.Empty, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.PostgreSQL")));
+                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseNpgsql(connectionString ?? string.Empty, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.PostgreSQL")));
                             break;
                         case "mssql":
-                            string connMssql = hostContext.Configuration.GetConnectionString("SegnoSharpDatabaseMsSql");
-                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlServer(connMssql ?? string.Empty, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MSSQL")));
+                            services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlServer(connectionString ?? string.Empty, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MSSQL")));
                             break;
                         default:
                             throw new ArgumentException($"Unsupported database type: {databaseType}");
@@ -136,35 +133,30 @@ namespace Whitestone.SegnoSharp
         public static void ConfigureServices(this WebApplicationBuilder builder)
         {
             string databaseType = builder.Configuration.GetSection("Database").GetValue<string>("Type").ToLower();
+            string connectionString = builder.Configuration.GetConnectionString("SegnoSharp");
             var sensitiveDataLogging = builder.Configuration.GetSection("Database").GetValue<bool>("SensitiveDataLogging");
 
             switch (databaseType)
             {
                 case "sqlite":
-                    string connSqlite = builder.Configuration.GetConnectionString("SegnoSharpDatabaseSqlite");
-                    SqliteConnectionStringBuilder connectionStringBuilder = new(connSqlite);
+                    SqliteConnectionStringBuilder connectionStringBuilder = new(connectionString);
                     connectionStringBuilder.DataSource = Path.Combine(builder.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
 
                     builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")).EnableSensitiveDataLogging(sensitiveDataLogging));
-
                     builder.Services.AddHealthChecks().AddSqlite(connectionStringBuilder.ConnectionString, name: "Database");
 
                     break;
                 case "mysql":
-                    string connMysql = builder.Configuration.GetConnectionString("SegnoSharpDatabaseMysql");
-
-                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connMysql ?? string.Empty, ServerVersion.AutoDetect(connMysql), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")).EnableSensitiveDataLogging(sensitiveDataLogging));
-
-                    builder.Services.AddHealthChecks().AddMySql(connMysql ?? string.Empty, name: "Database");
-
+                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseMySql(connectionString ?? string.Empty, ServerVersion.AutoDetect(connectionString), x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MySQL")).EnableSensitiveDataLogging(sensitiveDataLogging));
+                    builder.Services.AddHealthChecks().AddMySql(connectionString ?? string.Empty, name: "Database");
                     break;
                 case "postgresql":
-                    string connPostgres = builder.Configuration.GetConnectionString("SegnoSharpDatabasePostgreSql");
-                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseNpgsql(connPostgres ?? string.Empty, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.PostgreSQL")).EnableSensitiveDataLogging(sensitiveDataLogging));
+                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseNpgsql(connectionString ?? string.Empty, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.PostgreSQL")).EnableSensitiveDataLogging(sensitiveDataLogging));
+                    builder.Services.AddHealthChecks().AddNpgSql(connectionString ?? string.Empty, name: "Database");
                     break;
                 case "mssql":
-                    string connMssql = builder.Configuration.GetConnectionString("SegnoSharpDatabaseMsSql");
-                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlServer(connMssql ?? string.Empty, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MSSQL")).EnableSensitiveDataLogging(sensitiveDataLogging));
+                    builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlServer(connectionString ?? string.Empty, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.MSSQL")).EnableSensitiveDataLogging(sensitiveDataLogging));
+                    builder.Services.AddHealthChecks().AddSqlServer(connectionString ?? string.Empty, name: "Database");
                     break;
                 default:
                     throw new ArgumentException($"Unsupported database type: {databaseType}");
