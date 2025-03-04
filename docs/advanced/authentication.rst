@@ -1,5 +1,6 @@
 .. _refAuthentication:
+##############
 Authentication
---------------
+##############
 
 TBD!

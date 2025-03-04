@@ -19,7 +19,7 @@ This assumes you already have Docker Desktop installed.
 Before starting the Docker container you need to perform a few additional steps.
 
 First and foremost, SegnoSharp expects a ``data`` folder to be mapped as a volume.
-This is where logs and the SQLite database will be stored.
+This is where the SQLite database will be stored, and where SegnoSharps looks for additional data.
 It can be any existing folder on your harddrive or a new and empty one.
 
 BASS
