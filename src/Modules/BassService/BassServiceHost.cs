@@ -270,24 +270,22 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                     CMDLN_ParamSTDOUT = "-"
                 };
 
-                if (encoder.EncoderExists)
-                {
-                    _encoder = encoder;
-                    _log.LogDebug("BASS Encoder is set up with the following command line: {commandLine}", encoder.EncoderCommandLine);
-                }
-                else
+                if (!encoder.EncoderExists)
                 {
                     _log.LogCritical("Could not find FFMPEG in {encoderDir}", encoder.EncoderDirectory);
+                    return;
                 }
+
+                _encoder = encoder;
+                _log.LogDebug("BASS Encoder is set up with the following command line: {commandLine}", encoder.EncoderCommandLine);
 
                 if (!encoder.Start(null, IntPtr.Zero, false))
                 {
                     _log.LogCritical("Could not start encoder");
+                    return;
                 }
-                else
-                {
-                    _log.LogDebug("Encoder started");
-                }
+
+                _log.LogDebug("Encoder started");
 
                 bool castInitSuccess = _bassWrapper.CastInit(
                     encoder.EncoderHandle,
@@ -306,11 +304,10 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 if (!castInitSuccess)
                 {
                     _log.LogCritical("Could not start casting. {error}", _bassWrapper.GetLastBassError());
+                    return;
                 }
-                else
-                {
-                    _log.LogDebug("Casting to {server} started", _streamingSettings.Hostname + ":" + _streamingSettings.Port + _streamingSettings.MountPoint);
-                }
+
+                _log.LogDebug("Casting to {server} started", _streamingSettings.Hostname + ":" + _streamingSettings.Port + _streamingSettings.MountPoint);
 
                 UpdateStreamingTitle();
 
