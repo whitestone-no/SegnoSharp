@@ -20,3 +20,14 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
 
    advanced/configuration
    advanced/database
+   advanced/authentication
+
+.. toctree::
+   :hidden:
+   :caption: Running SegnoSharp
+   
+   running/prerequisites
+   running/visualstudio
+   running/dotnet
+   running/docker
+   running/k8s
