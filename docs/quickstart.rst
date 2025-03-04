@@ -1,10 +1,18 @@
+##########
 Quickstart
-----------
+##########
 
 The easiest way to run SegnoSharp is through the official Docker image.
 
+::
+
+    docker pull ghcr.io/whitestone-no/segnosharp:latest
+	
+It takes a bit more than just pulling the image to get SegnoSharp running, so please keep reading.
+
+*************
 Prerequisites
-=============
+*************
 
 This assumes you already have Docker Desktop installed.
 
@@ -52,8 +60,9 @@ SegnoSharp uses FFMPEG to encode the raw audio from BASS into a compressed strea
 Create a new folder inside the ``data`` folder called ``ffmpeg``, and download a linux build for linux64/amd64 and extract the ``ffmpeg`` binary
 from the downloaded package into ``data/ffmpeg``. Find a suitable package at `FFMPEG <https://www.ffmpeg.org/>`_.
 
+**********************
 Starting the container
-======================
+**********************
 
 The ``data`` folder needs to be mapped into the container as a volume.
 You must also map a folder containing your music files into the container, otherwise SegnoSharp won't be able to find anything to play.
@@ -88,7 +97,7 @@ This file defines a Docker service called ``segnosharp`` with two folders on you
 It also defines the available network ports, in this case port ``8080`` in the container is mapped to port ``8080`` on your computer.
 Finally it sets a few environment variables into the container. All settings are described in another chapter TODO, but these three are required as a minimum for testing the application.
 
-.. note:: ``UseOidc`` should never be set to ``false`` in a production environment! Setting this to false overrides all security measures!
+.. note:: ``UseOidc`` should never be set to ``false`` in a production environment! Setting this to false overrides all security measures! See the :ref:`Authentication<refAuthentication>` chapter for details on how to properly set this up.
 
 After you have created this file and updated the settings accordingly you can now start the Docker container:
 
@@ -98,6 +107,8 @@ After you have created this file and updated the settings accordingly you can no
 	
 This will download (pull) the image and start the image as a container running in the background.
 When it says ``Completed`` and returns you to the command line you should be able to start using SegnoSharp on `http://localhost:8080 <http://localhost:8080>`_.
+
+.. note:: This does *not* add a Shoutcast/Icecast container, and unless you already have a Shoutcast/Icecast server running you will *not* be able to stream and listen to the output.
 
 When you don't want the container running anymore you can end it with the following command:
 
