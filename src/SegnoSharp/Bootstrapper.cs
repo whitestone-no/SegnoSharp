@@ -37,7 +37,7 @@ namespace Whitestone.SegnoSharp
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .CreateBootstrapLogger();
-
+            
             try
             {
                 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -50,12 +50,7 @@ namespace Whitestone.SegnoSharp
                 {
                     config
                         .ReadFrom.Services(services)
-                        .MinimumLevel.Override("Whitestone.SegnoSharp", LogEventLevel.Verbose)
-                            .Enrich.FromLogContext()
-                            .WriteTo.Console()
-                            .WriteTo.File(
-                                Path.Combine(builder.Configuration["CommonConfig:DataPath"] ?? string.Empty, "logs", "SegnoSharp.log"),
-                                rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true);
+                        .ReadFrom.Configuration(builder.Configuration);
                 });
 
                 builder.ConfigureServices();
@@ -89,6 +84,7 @@ namespace Whitestone.SegnoSharp
             }
         }
 
+        // ReSharper disable once UnusedMember.Global
         // This is used by Entity Framework when running migrations
         // Keep as minimal as possible
         public static IHostBuilder CreateHostBuilder(string[] args)
