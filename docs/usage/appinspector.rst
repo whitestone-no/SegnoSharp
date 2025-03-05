@@ -1,5 +1,5 @@
 #############
-Prerequisites
+App inspector
 #############
 
 TBD!

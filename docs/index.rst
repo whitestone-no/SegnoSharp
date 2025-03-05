@@ -16,11 +16,23 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
    
 .. toctree::
    :hidden:
-   :caption: Advanced
+   :caption: Settings
 
-   advanced/configuration
-   advanced/database
-   advanced/authentication
+   settings/configuration
+   settings/database
+   settings/authentication
+
+.. toctree::
+   :hidden:
+   :caption: Usage
+   
+   usage/introduction
+   usage/importer
+   usage/playlist
+   usage/streamcontrol
+   usage/albumeditor
+   usage/appinspector
+   usage/bass
 
 .. toctree::
    :hidden:
@@ -31,3 +43,10 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
    running/dotnet
    running/docker
    running/k8s
+   
+.. toctree::
+  :hidden:
+  :caption: Extending SegnoSharp
+  
+  extending/modules
+  extending/playlist
