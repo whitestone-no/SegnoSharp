@@ -1,6 +1,0 @@
-.. _refAuthentication:
-##############
-Authentication
-##############
-
-TBD!
