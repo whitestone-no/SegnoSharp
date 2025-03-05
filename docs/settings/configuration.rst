@@ -16,11 +16,11 @@ If you are cloning the SegnoSharp repository, compiling and running it locally t
 
 Configuration of :ref:`database<refDatabase>` and :ref:`authentication<refAuthentication>` are covered in their respective chapters.
 
+:: _refConfigurationDatapath
 ********************
 Common configuration
 ********************
 
-:: _refConfigurationDatapath
 +---------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | CommonConfig.DataPath     | Absolute path or relative to working directory | Directory used for additional persistent data handling, i.e. SQLite database |
 +---------------------------+------------------------------------------------+------------------------------------------------------------------------------+
@@ -51,7 +51,7 @@ Logging
 *******
 
 SegnoSharp logs to console by default, using Serilog. The Serilog configuration can be overridden by setting environment variables, or changing the ``appsettings.json`` in the main application if running it from a cloned repo.
-In the following example the `Serilog.Sinks.File<https://github.com/serilog/serilog-sinks-file>`_ is added to the logging configuration:
+In the following example the `Serilog.Sinks.File <https://github.com/serilog/serilog-sinks-file>`_ is added to the logging configuration:
 
 ::
 
@@ -61,4 +61,4 @@ In the following example the `Serilog.Sinks.File<https://github.com/serilog/seri
 
 You can also overwrite the existing console logger by changing the ``1`` to ``0`` in the above example.
 
-For more settings to override, see the documentation for `Serilog.Settings.Configuration<https://github.com/serilog/serilog-settings-configuration>`_.
+For more settings to override, see the documentation for `Serilog.Settings.Configuration <https://github.com/serilog/serilog-settings-configuration>`_.
