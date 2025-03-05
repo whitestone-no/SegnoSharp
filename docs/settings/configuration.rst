@@ -16,7 +16,7 @@ If you are cloning the SegnoSharp repository, compiling and running it locally t
 
 Configuration of :ref:`database<refDatabase>` and :ref:`authentication<refAuthentication>` are covered in their respective chapters.
 
-:: _refConfigurationDatapath
+:: _refConfigurationDatapath:
 ********************
 Common configuration
 ********************
