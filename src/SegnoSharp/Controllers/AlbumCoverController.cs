@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using SkiaSharp;
-using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 

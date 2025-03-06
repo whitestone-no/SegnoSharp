@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
     <ProjectReference Include="..\Database\Database.csproj" />
     <ProjectReference Include="..\Migrations\MySQL\MySQL.csproj" />
     <ProjectReference Include="..\Migrations\PostgreSQL\PostgreSQL.csproj" />

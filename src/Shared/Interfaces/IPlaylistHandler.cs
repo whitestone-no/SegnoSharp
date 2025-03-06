@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 
-namespace Whitestone.SegnoSharp.Common.Interfaces
+namespace Whitestone.SegnoSharp.Shared.Interfaces
 {
     public interface IPlaylistHandler : IHostedService
     {

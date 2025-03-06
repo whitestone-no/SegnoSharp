@@ -1,4 +1,4 @@
-﻿using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
+﻿using Whitestone.SegnoSharp.Shared.Attributes.PersistenceManager;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist.Models
 {

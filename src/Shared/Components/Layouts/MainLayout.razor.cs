@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Options;
-using Whitestone.SegnoSharp.Common.Attributes;
-using Whitestone.SegnoSharp.Common.Interfaces;
-using Whitestone.SegnoSharp.Common.Models.Configuration;
-using Whitestone.SegnoSharp.Common.ViewModels;
+using Whitestone.SegnoSharp.Shared.Attributes;
+using Whitestone.SegnoSharp.Shared.Interfaces;
+using Whitestone.SegnoSharp.Shared.Models.Configuration;
+using Whitestone.SegnoSharp.Shared.ViewModels;
 
-namespace Whitestone.SegnoSharp.Common.Components.Layouts
+namespace Whitestone.SegnoSharp.Shared.Components.Layouts
 {
     public partial class MainLayout
     {

@@ -5,7 +5,7 @@ using System.Reflection;
 using System;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
-using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Shared.Interfaces;
 using Microsoft.AspNetCore.Builder;
 
 namespace Whitestone.SegnoSharp.Modules
@@ -15,7 +15,7 @@ namespace Whitestone.SegnoSharp.Modules
         internal static IEnumerable<IModule> AddModules(this WebApplicationBuilder builder)
         {
             var modulesConfiguration = builder.Configuration.GetSection(Configuration.Models.Modules.Section).Get<Configuration.Models.Modules>();
-            var commonConfiguration = builder.Configuration.GetSection(Common.Models.Configuration.CommonConfig.Section).Get<Common.Models.Configuration.CommonConfig>();
+            var commonConfiguration = builder.Configuration.GetSection(Shared.Models.Configuration.CommonConfig.Section).Get<Shared.Models.Configuration.CommonConfig>();
             var executingFile = new FileInfo(Assembly.GetExecutingAssembly().Location);
             var modulesFolder = new DirectoryInfo(Path.Combine(executingFile.DirectoryName!, modulesConfiguration.ModulesFolder));
 

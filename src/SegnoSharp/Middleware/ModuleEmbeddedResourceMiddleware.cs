@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.StaticFiles;

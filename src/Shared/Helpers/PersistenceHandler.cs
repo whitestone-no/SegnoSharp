@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
-using Whitestone.SegnoSharp.Common.Interfaces;
-using Whitestone.SegnoSharp.Common.Models.PersistenceManager;
+using Whitestone.SegnoSharp.Shared.Attributes.PersistenceManager;
+using Whitestone.SegnoSharp.Shared.Interfaces;
+using Whitestone.SegnoSharp.Shared.Models.PersistenceManager;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 
-namespace Whitestone.SegnoSharp.Common.Helpers
+namespace Whitestone.SegnoSharp.Shared.Helpers
 {
     public class PersistenceHandler(
         IDbContextFactory<SegnoSharpDbContext> dbContextFactory,

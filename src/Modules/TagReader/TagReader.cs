@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Un4seen.Bass.AddOn.Tags;
 using Un4seen.Bass;
-using Whitestone.SegnoSharp.Common.Interfaces;
-using Whitestone.SegnoSharp.Common.Models;
+using Whitestone.SegnoSharp.Shared.Interfaces;
+using Whitestone.SegnoSharp.Shared.Models;
 using Whitestone.SegnoSharp.Modules.TagReader.Interfaces;
 using Whitestone.SegnoSharp.Modules.TagReader.Models.Config;
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Whitestone.SegnoSharp.Common.Interfaces
+namespace Whitestone.SegnoSharp.Shared.Interfaces
 {
     public interface ISystemClock
     {

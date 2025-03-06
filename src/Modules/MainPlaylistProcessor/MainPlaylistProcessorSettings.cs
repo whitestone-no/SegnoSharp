@@ -1,5 +1,5 @@
-﻿using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
-using Whitestone.SegnoSharp.Common.Models;
+﻿using Whitestone.SegnoSharp.Shared.Attributes.PersistenceManager;
+using Whitestone.SegnoSharp.Shared.Models;
 
 namespace Whitestone.SegnoSharp.Modules.MainPlaylistProcessor
 {

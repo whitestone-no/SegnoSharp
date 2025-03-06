@@ -7,7 +7,7 @@ using Whitestone.SegnoSharp.Modules.Playlist.ViewModels;
 using System.Linq;
 using System;
 using Whitestone.Cambion.Interfaces;
-using Whitestone.SegnoSharp.Common.Events;
+using Whitestone.SegnoSharp.Shared.Events;
 using Whitestone.SegnoSharp.Database.Models;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin

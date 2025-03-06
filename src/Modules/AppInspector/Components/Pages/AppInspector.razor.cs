@@ -7,7 +7,7 @@ using System.Linq;
 using Whitestone.SegnoSharp.Modules.AppInspector.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Modules.AppInspector.Extensions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 

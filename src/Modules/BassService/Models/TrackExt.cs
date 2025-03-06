@@ -1,4 +1,4 @@
-﻿using Whitestone.SegnoSharp.Common.Models;
+﻿using Whitestone.SegnoSharp.Shared.Models;
 
 namespace Whitestone.SegnoSharp.Modules.BassService.Models
 {

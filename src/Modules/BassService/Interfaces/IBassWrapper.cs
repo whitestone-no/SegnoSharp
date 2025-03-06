@@ -1,8 +1,8 @@
 ﻿using System;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
-using Whitestone.SegnoSharp.Common.Models;
-using Whitestone.SegnoSharp.Common.Models.Persistent;
+using Whitestone.SegnoSharp.Shared.Models;
+using Whitestone.SegnoSharp.Shared.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Modules.BassService.Interfaces
 {

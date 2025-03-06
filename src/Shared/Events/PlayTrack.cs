@@ -1,6 +1,6 @@
-﻿using Whitestone.SegnoSharp.Common.Models;
+﻿using Whitestone.SegnoSharp.Shared.Models;
 
-namespace Whitestone.SegnoSharp.Common.Events
+namespace Whitestone.SegnoSharp.Shared.Events
 {
     public class PlayTrack
     {

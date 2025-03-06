@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Modules.TagReader.Helpers;
 using Whitestone.SegnoSharp.Modules.TagReader.Interfaces;
 using Whitestone.SegnoSharp.Modules.TagReader.Models.Config;

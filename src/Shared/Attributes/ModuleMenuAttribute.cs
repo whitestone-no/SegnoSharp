@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Whitestone.SegnoSharp.Common.Attributes
+namespace Whitestone.SegnoSharp.Shared.Attributes
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class ModuleMenuAttribute : Attribute

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Reflection;
-using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
+using Whitestone.SegnoSharp.Shared.Attributes.PersistenceManager;
 
-namespace Whitestone.SegnoSharp.Common.Models.PersistenceManager
+namespace Whitestone.SegnoSharp.Shared.Models.PersistenceManager
 {
     internal class PersistenceEntry
     {

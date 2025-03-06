@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
-using Whitestone.SegnoSharp.Common.Interfaces;
-using Whitestone.SegnoSharp.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Shared.Interfaces;
+using Whitestone.SegnoSharp.Shared.Models.Configuration;
 
-namespace Whitestone.SegnoSharp.Common.Helpers
+namespace Whitestone.SegnoSharp.Shared.Helpers
 {
     internal class HashingUtil(IOptions<CommonConfig> commonConfig) : IHashingUtil
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Options;
-using Whitestone.SegnoSharp.Common.Models.Configuration;
+using Whitestone.SegnoSharp.Shared.Models.Configuration;
 using Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels;
 
 namespace Whitestone.SegnoSharp.Modules.MediaImporter.Models

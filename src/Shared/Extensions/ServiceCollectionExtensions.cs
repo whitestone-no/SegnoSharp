@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Whitestone.SegnoSharp.Common.Helpers;
-using Whitestone.SegnoSharp.Common.Interfaces;
-using Whitestone.SegnoSharp.Common.Models.Persistent;
+using Whitestone.SegnoSharp.Shared.Helpers;
+using Whitestone.SegnoSharp.Shared.Interfaces;
+using Whitestone.SegnoSharp.Shared.Models.Persistent;
 
-namespace Whitestone.SegnoSharp.Common.Extensions
+namespace Whitestone.SegnoSharp.Shared.Extensions
 {
     public static class ServiceCollectionExtensions
     {

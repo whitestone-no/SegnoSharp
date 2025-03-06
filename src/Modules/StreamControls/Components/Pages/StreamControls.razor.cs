@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Whitestone.Cambion.Interfaces;
-using Whitestone.SegnoSharp.Common.Events;
-using Whitestone.SegnoSharp.Common.Models.Persistent;
+using Whitestone.SegnoSharp.Shared.Events;
+using Whitestone.SegnoSharp.Shared.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Modules.StreamControls.Components.Pages
 {

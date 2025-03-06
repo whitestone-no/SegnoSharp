@@ -1,6 +1,6 @@
-﻿using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
+﻿using Whitestone.SegnoSharp.Shared.Attributes.PersistenceManager;
 
-namespace Whitestone.SegnoSharp.Common.Models
+namespace Whitestone.SegnoSharp.Shared.Models
 {
     public abstract class PlaylistProcessorSettings
     {

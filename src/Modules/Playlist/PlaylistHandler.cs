@@ -7,13 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Whitestone.Cambion.Interfaces;
-using Whitestone.SegnoSharp.Common.Events;
-using Whitestone.SegnoSharp.Common.Interfaces;
+using Whitestone.SegnoSharp.Shared.Events;
+using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
 using Whitestone.SegnoSharp.Modules.Playlist.Models;
 using Whitestone.SegnoSharp.Modules.Playlist.Processors;
-using Track = Whitestone.SegnoSharp.Common.Models.Track;
+using Track = Whitestone.SegnoSharp.Shared.Models.Track;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist
 {

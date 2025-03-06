@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Whitestone.SegnoSharp.Common.Attributes.PersistenceManager
+namespace Whitestone.SegnoSharp.Shared.Attributes.PersistenceManager
 {
     [AttributeUsage(AttributeTargets.Field)]
     public class FriendlyNameAttribute(string friendlyName) : Attribute

@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Whitestone.SegnoSharp.Common.Models.Persistent;
+using Whitestone.SegnoSharp.Shared.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Modules.StreamControls.HealthChecks
 {

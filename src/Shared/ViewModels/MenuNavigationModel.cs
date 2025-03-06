@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Whitestone.SegnoSharp.Common.ViewModels
+namespace Whitestone.SegnoSharp.Shared.ViewModels
 {
     public class MenuNavigationModel : BaseMenuNavigation
     {

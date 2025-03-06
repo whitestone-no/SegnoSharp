@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Whitestone.SegnoSharp.Common.Models
+namespace Whitestone.SegnoSharp.Shared.Models
 {
     public class Track
     {

@@ -1,4 +1,4 @@
-﻿namespace Whitestone.SegnoSharp.Common.Models.Configuration
+﻿namespace Whitestone.SegnoSharp.Shared.Models.Configuration
 {
     public class CommonConfig
     {

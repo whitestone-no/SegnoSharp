@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
 
-namespace Whitestone.SegnoSharp.Common.Components
+namespace Whitestone.SegnoSharp.Shared.Components
 {
     public class ValidationCustomMessage<TValue> : ValidationMessage<TValue>
     {

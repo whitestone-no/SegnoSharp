@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Components;
-using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
+using Whitestone.SegnoSharp.Shared.Attributes.PersistenceManager;
 
-namespace Whitestone.SegnoSharp.Common.Components
+namespace Whitestone.SegnoSharp.Shared.Components
 {
     public partial class ObjectEditor
     {

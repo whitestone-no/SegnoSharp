@@ -1,4 +1,4 @@
-﻿namespace Whitestone.SegnoSharp.Common.Events
+﻿namespace Whitestone.SegnoSharp.Shared.Events
 {
     public class PlayerReady
     {

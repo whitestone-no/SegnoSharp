@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Components;
-using Whitestone.SegnoSharp.Common.Attributes.PersistenceManager;
+using Whitestone.SegnoSharp.Shared.Attributes.PersistenceManager;
 
-namespace Whitestone.SegnoSharp.Common.Models.Persistent
+namespace Whitestone.SegnoSharp.Shared.Models.Persistent
 {
     public class StreamingSettings : INotifyPropertyChanged
     {
