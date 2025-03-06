@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Un4seen.Bass;
+﻿using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Tags;
 using Whitestone.SegnoSharp.Modules.TagReader.Interfaces;
 
@@ -20,6 +19,10 @@ namespace Whitestone.SegnoSharp.Modules.TagReader.Helpers
         public bool GetTagsFromFile(int stream, TAG_INFO tags)
         {
             return BassTags.BASS_TAG_GetFromFile(stream, tags);
+        }
+        public BASSError GetLastBassError()
+        {
+            return Bass.BASS_ErrorGetCode();
         }
     }
 }

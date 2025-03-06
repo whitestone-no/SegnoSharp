@@ -71,6 +71,10 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 .Select(file =>
                 {
                     Tags tags = TagReader.ReadTagInfo(file.File.FullName);
+                    if (tags == null)
+                    {
+                        return new Tags();
+                    }
                     if (Settings.NormalizeAlbumTitles)
                     {
                         tags.Album = NormalizeAlbumTitle(tags.Album);

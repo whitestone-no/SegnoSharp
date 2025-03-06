@@ -8,5 +8,6 @@ namespace Whitestone.SegnoSharp.Modules.TagReader.Interfaces
         void Registration(string email, string key);
         int CreateFileStream(string file, long offset, long length, BASSFlag flags);
         bool GetTagsFromFile(int stream, TAG_INFO tags);
+        BASSError GetLastBassError();
     }
 }

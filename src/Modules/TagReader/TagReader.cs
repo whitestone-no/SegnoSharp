@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using Un4seen.Bass.AddOn.Tags;
 using Un4seen.Bass;
@@ -24,15 +25,34 @@ namespace Whitestone.SegnoSharp.Modules.TagReader
 
         public Tags ReadTagInfo(string file)
         {
-            Tags tags = ReadFromBass(file);
-            tags.File = file;
+            try
+            {
+                if (string.IsNullOrEmpty(file))
+                {
+                    throw new ArgumentException("File path cannot be null or empty", nameof(file));
+                }
 
-            return tags;
+                Tags tags = ReadFromBass(file);
+                tags.File = file;
+
+                return tags;
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Error reading tags from {file}", file);
+                return null;
+            }
         }
 
         private Tags ReadFromBass(string file)
         {
             int stream = _bassWrapper.CreateFileStream(file, 0, 0, (int)BASSFlag.BASS_DEFAULT);
+
+            if (stream == 0)
+            {
+                _log.LogError("Could not create stream from {file}: {bassError}", file, _bassWrapper.GetLastBassError());
+                return null;
+            }
 
             TAG_INFO tags = new(file);
             if (_bassWrapper.GetTagsFromFile(stream, tags))
@@ -74,7 +94,7 @@ namespace Whitestone.SegnoSharp.Modules.TagReader
                 return tagsFromFile;
             }
 
-            _log.LogWarning("Could not read tags from {file}", file);
+            _log.LogWarning("Could not read tags from {file}: {bassError}", file, _bassWrapper.GetLastBassError());
 
             return null;
         }
