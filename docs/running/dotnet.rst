@@ -8,13 +8,13 @@ Build the solution:
 
 ::
 
-    dotnet build .\SegnoSharp.sln
+    dotnet build ./SegnoSharp.sln
 	
 And start SegnoSharp with some required arguments:
 
 ::
 
-    dotnet run --project .\SegnoSharp\SegnoSharp.csproj --no-launch-profile CommonConfig:DataPath=../../data CommonConfig:MusicPath=../../music OpenIdConnect:UseOidc=false
+    dotnet run --project ./SegnoSharp/SegnoSharp.csproj --no-launch-profile CommonConfig:DataPath=../../data CommonConfig:MusicPath=../../music OpenIdConnect:UseOidc=false
 	
 The ``DataPath`` and ``MusicPaths`` are relative to the ``src/SegnoSharp`` folder.
 If you do not want to use the ``data`` and ``music`` paths that comes with the repository replace these settings.
