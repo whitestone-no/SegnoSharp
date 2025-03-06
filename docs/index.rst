@@ -38,12 +38,11 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
 
 .. toctree::
    :hidden:
-   :caption: Running SegnoSharp
+   :caption: Alternatives to Docker
    
    running/prerequisites
    running/visualstudio
    running/dotnet
-   running/docker
    running/k8s
    
 .. toctree::
