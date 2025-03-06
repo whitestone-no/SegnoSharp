@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SegnoSharp", "SegnoSharp\SegnoSharp.csproj", "{7D5C13C8-E09F-4B3C-8572-7A4107820F6F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{500968CD-207E-452A-B4C8-41D20738AC40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Shared\Common.csproj", "{500968CD-207E-452A-B4C8-41D20738AC40}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Database", "Database\Database.csproj", "{28914D74-62D3-409A-A302-E359EAE9FF77}"
 EndProject
