@@ -14,7 +14,7 @@ Right-click the ``SegnoSharp`` project and select ``Manage User Secrets``. The `
 
     {
       "OpenIdConnect:UseOidc": false
-	}
+    }
 
 The paths to ``data`` and ``music`` as mentioned in the quickstart is not necessary to specify in Visual Studio. These are already specified in ``SegnoSharp/Properties/launchSettings.json``.
 
