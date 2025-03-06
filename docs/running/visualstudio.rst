@@ -2,7 +2,7 @@
 Visual Studio
 #############
 
-.. note:: This guide is about the regular Visual Studio, *not^ Visual Studio Code
+.. note:: This guide is about the regular Visual Studio, *not* Visual Studio Code
 
 Now that you have the source code you should first make sure that the ``data`` folder in the repository contains the correct files
 
