@@ -131,15 +131,17 @@ Stream Info
 If this track has a corresponding media file you can add information about this here.
 If the stream info doesn't already exist, click the ``Add stream info`` button.
 
-+--------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| Include in auto playlist | Should the :ref:`playlist module<_refUsagePlaylist>` automatically include this track when adding to playlist.        |
-+--------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| File path                | The full path for the media file, including folders and filename.                                                     |
-+--------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| Weight                   | | When the playlist module selects a track it will use this value to determine how often this track should be played. |
-|                          | | The higher the value, the more often the track will be played, and the lower the value the less it will be played.  |
-|                          | | Default value is 100, so a value of 10 means it has 10 times lower chance of being selected.                        |
-+--------------------------+-----------------------------------------------------------------------------------------------------------------------+
++--------------------------+---------------------------------------------------------------------------------------------------------+
+| Include in auto playlist | | Should the :ref:`playlist module<_refUsagePlaylist>` automatically include this track when adding to' |
+|                          | | playlist.                                                                                             |
++--------------------------+---------------------------------------------------------------------------------------------------------+
+| File path                | The full path for the media file, including folders and filename.                                       |
++--------------------------+---------------------------------------------------------------------------------------------------------+
+| Weight                   | | When the playlist module selects a track it will use this value to determine how often this track     |
+|                          | | should be played. The higher the value, the more often the track will be played, and the lower the    |
+|                          | | value the less it will be played.                                                                     |
+|                          | | Default value is 100, so a value of 10 means it has 10 times lower chance of being selected.          |
++--------------------------+---------------------------------------------------------------------------------------------------------+
 
 Delete the stream info by clicking the ``Remove`` button.
 This will only remove the reference to the media file, not the media file itself.
