@@ -26,27 +26,27 @@ and the ``Delete`` button to delete the track.
 
 Album data
 ----------
-+-----------------+--------------------------------------------------------------------------------------------------+
-| Title           | The title of the album.                                                                          |
-+-----------------+--------------------------------------------------------------------------------------------------+
-| Published       | The year the album was published.                                                                |
-+-----------------+--------------------------------------------------------------------------------------------------+
-| Genres          | Which genres the album belongs to.                                                               |
-|                 | This is a special field where it searches for existing genres as you type.                       |
-|                 | Select one of the existing genres that show up, or create a new if it doesn't exist.             |
-|                 | See the :ref:`Genres<_refAlbumEditorGenres>` section on how to manage genres.                    |
-+-----------------+--------------------------------------------------------------------------------------------------+
-| Record labels   | Which record labels published the album.                                                         |
-|                 | Uses the same field handling as the Genres field.                                                |
-|                 | See the :ref:`Record Labels<_refAlbumEditorRecordLabels>` section on how to manage record labels.|
-+-----------------+--------------------------------------------------------------------------------------------------+
-| UPC             | The UPC code (barcode) of the album.                                                             |
-+-----------------+--------------------------------------------------------------------------------------------------+
-| Catalgue number | The catalogue number with the publisher for the album.                                           |
-+-----------------+--------------------------------------------------------------------------------------------------+
-| Is public       | If the album should be included in a list displayed for non-authenticated users.                 |
-|                 | Tracks in the :ref:`playlist<_refUsagePlaylist>` will be displayed regardless of this setting.   |
-+-----------------+--------------------------------------------------------------------------------------------------+
++-----------------+-----------------------------------------------------------------------------------------------------+
+| Title           | The title of the album.                                                                             |
++-----------------+-----------------------------------------------------------------------------------------------------+
+| Published       | The year the album was published.                                                                   |
++-----------------+-----------------------------------------------------------------------------------------------------+
+| Genres          | | Which genres the album belongs to.                                                                |
+|                 | | This is a special field where it searches for existing genres as you type.                        |
+|                 | | Select one of the existing genres that show up, or create a new if it doesn't exist.              |
+|                 | | See the :ref:`Genres<_refAlbumEditorGenres>` section on how to manage genres.                     |
++-----------------+-----------------------------------------------------------------------------------------------------+
+| Record labels   | | Which record labels published the album.                                                          |
+|                 | | Uses the same field handling as the Genres field.                                                 |
+|                 | | See the :ref:`Record Labels<_refAlbumEditorRecordLabels>` section on how to manage record labels. |
++-----------------+-----------------------------------------------------------------------------------------------------+
+| UPC             | The UPC code (barcode) of the album.                                                                |
++-----------------+-----------------------------------------------------------------------------------------------------+
+| Catalgue number | The catalogue number with the publisher for the album.                                              |
++-----------------+-----------------------------------------------------------------------------------------------------+
+| Is public       | | If the album should be included in a list displayed for non-authenticated users.                  |
+|                 | | Tracks in the :ref:`playlist<_refUsagePlaylist>` will be displayed regardless of this setting.    |
++-----------------+-----------------------------------------------------------------------------------------------------+
 
 .. _refAlbumEditorAlbumCredits:
 Credits
@@ -69,15 +69,15 @@ Discs
 
 An album must contain at least one disc, even if this is a digital album.
 
-+-------------+--------------------------------------------------------------------------------------------+
-| Disc number | The number of this disc. Usually ``1``                                                     |
-+-------------+--------------------------------------------------------------------------------------------+
-| Disc title  | An optional title for this disc                                                            |
-+-------------+--------------------------------------------------------------------------------------------+
-| Media types | A disc can be of different types, such as CD, Digital Download, SACD, etc.                 |
-|             | Select zero, one or more media types that apply to this disc.                              |
-|             | See the :ref:`Media Types<_refAlbumEditorMediaTypes>` section on how to manage media types.|
-+-------------+--------------------------------------------------------------------------------------------+
++-------------+-----------------------------------------------------------------------------------------------+
+| Disc number | The number of this disc. Usually ``1``                                                        |
++-------------+-----------------------------------------------------------------------------------------------+
+| Disc title  | An optional title for this disc                                                               |
++-------------+-----------------------------------------------------------------------------------------------+
+| Media types | | A disc can be of different types, such as CD, Digital Download, SACD, etc.                  |
+|             | | Select zero, one or more media types that apply to this disc.                               |
+|             | | See the :ref:`Media Types<_refAlbumEditorMediaTypes>` section on how to manage media types. |
++-------------+-----------------------------------------------------------------------------------------------+
 
 Remove a disc by clicking the ``Delete disc`` button.
 
@@ -108,16 +108,16 @@ and the ``Delete`` button to delete the track.
 Track Data
 """"""""""
 
-+---------+--------------------------------------------------------------------------------------+
-| Track # | The number of this track on the disc                                                 |
-|         | Changing this number will automatically reorder the other tracks on the disc.        |
-+---------+--------------------------------------------------------------------------------------+
-| Title   | The title of the track                                                               |
-+---------+--------------------------------------------------------------------------------------+
-| Length  | The running time of the track. Input in ``hours:minutes:seconds``, i.e. ``00:12:34`` |
-+---------+--------------------------------------------------------------------------------------+
-| Notes   | Any special notes about the track should go here                                     |
-+-----------------+------------------------------------------------------------------------------+
++---------+----------------------------------------------------------------------------------------+
+| Track # | | The number of this track on the disc                                                 |
+|         | | Changing this number will automatically reorder the other tracks on the disc.        |
++---------+----------------------------------------------------------------------------------------+
+| Title   | The title of the track                                                                 |
++---------+----------------------------------------------------------------------------------------+
+| Length  | The running time of the track. Input in ``hours:minutes:seconds``, i.e. ``00:12:34``   |
++---------+----------------------------------------------------------------------------------------+
+| Notes   | Any special notes about the track should go here                                       |
++-----------------+--------------------------------------------------------------------------------+
 
 Credits
 """""""
@@ -131,15 +131,15 @@ Stream Info
 If this track has a corresponding media file you can add information about this here.
 If the stream info doesn't already exist, click the ``Add stream info`` button.
 
-+--------------------------+---------------------------------------------------------------------------------------------------------------------+
-| Include in auto playlist | Should the :ref:`playlist module<_refUsagePlaylist>` automatically include this track when adding to playlist.      |
-+--------------------------+---------------------------------------------------------------------------------------------------------------------+
-| File path                | The full path for the media file, including folders and filename.                                                   |
-+--------------------------+---------------------------------------------------------------------------------------------------------------------+
-| Weight                   | When the playlist module selects a track it will use this value to determine how often this track should be played. |
-|                          | The higher the value, the more often the track will be played, and the lower the value the less it will be played.  |
-|                          | Default value is 100, so a value of 10 means it has 10 times lower chance of being selected.                        |
-+--------------------------+---------------------------------------------------------------------------------------------------------------------+
++--------------------------+-----------------------------------------------------------------------------------------------------------------------+
+| Include in auto playlist | Should the :ref:`playlist module<_refUsagePlaylist>` automatically include this track when adding to playlist.        |
++--------------------------+-----------------------------------------------------------------------------------------------------------------------+
+| File path                | The full path for the media file, including folders and filename.                                                     |
++--------------------------+-----------------------------------------------------------------------------------------------------------------------+
+| Weight                   | | When the playlist module selects a track it will use this value to determine how often this track should be played. |
+|                          | | The higher the value, the more often the track will be played, and the lower the value the less it will be played.  |
+|                          | | Default value is 100, so a value of 10 means it has 10 times lower chance of being selected.                        |
++--------------------------+-----------------------------------------------------------------------------------------------------------------------+
 
 Delete the stream info by clicking the ``Remove`` button.
 This will only remove the reference to the media file, not the media file itself.
