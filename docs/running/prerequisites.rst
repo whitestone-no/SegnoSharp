@@ -2,7 +2,7 @@
 Prerequisites
 #############
 
-The :ref:`quickstart guide<_refQuickstart>` contains all the necessary prerequisites, but we'll briefly go through them here again, and include some other details.
+The :ref:`quickstart guide <refQuickstart>` contains all the necessary prerequisites, but we'll briefly go through them here again, and include some other details.
 
 ***********
 Data folder
@@ -13,7 +13,7 @@ You must have a data folder where SegnoSharp can access additional binaries, and
 BASS
 ====
 
-You must have the BASS libraries from `un4seen <https://www.un4seen.com/bass.html>`_. See the :ref:`BASS section<_refQuickstartBass>` in the :ref:`quickstart guide<_refQuickstart>` for details.
+You must have the BASS libraries from `un4seen <https://www.un4seen.com/bass.html>`_. See the :ref:`BASS section <refQuickstartBass>` in the :ref:`quickstart guide <refQuickstart>` for details.
 
 .. note:: The quickstart guides you to download the Linux libraries. If you are going to run SegnoSharp in a Windows environment you will need the ``Win32`` version of these libraries. See the table below for details:
 

@@ -3,7 +3,7 @@ Database
 ########
 
 The database engine used by SegnoSharp by default is `SQLite <https://sqlite.org/>`_.
-This is written to the ``data`` directory by default (see :ref:`previous chapter<refConfigurationDatapath>`) and the default database name is ``SegnoSharp.db``.
+This is written to the ``data`` directory by default (see :ref:`previous chapter <refConfigurationDatapath>`) and the default database name is ``SegnoSharp.db``.
 
 SegnoSharp also supports `MySQL <https://www.mysql.com/>`_, `Microsoft SQL Server <https://www.microsoft.com/en-us/sql-server/sql-server-downloads>`_, and `PostgreSQL <https://www.postgresql.org/>`_.
 You can switch which database is used by the configuration options described below.

@@ -1,11 +1,12 @@
 .. _refConfiguration:
+
 #############
 Configuration
 #############
 
 SegnoSharp has several runtime configuration options.
 As SegnoSharp is designed to primarily be used as a Docker Container these configuration options are usually set as environment variables.
-Environments supporting Docker containers can usually also use secrets, which are recommended for sensitive configuration options like :ref:`Authentication<refAuthentication>`.
+Environments supporting Docker containers can usually also use secrets, which are recommended for sensitive configuration options like :ref:`Authentication <refAuthentication>`.
 Refer to the documentation for your environment to learn how to use secrets.
 
 If you are cloning the SegnoSharp repository, compiling and running it locally then you should use `User Secrets <https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets>`_.
@@ -14,9 +15,10 @@ If you are cloning the SegnoSharp repository, compiling and running it locally t
 
 .. note:: Configuration options are displayed using dot-notation. For environment variables replace dots with two underscores. For User Secrets either replace dots with colons, or create a corresponding JSON structure.
 
-Configuration of :ref:`database<refDatabase>` and :ref:`authentication<refAuthentication>` are covered in their respective chapters.
+Configuration of :ref:`database <refDatabase>` and :ref:`authentication <refAuthentication>` are covered in their respective chapters.
 
 .. _refConfigurationDatapath:
+
 ********************
 Common configuration
 ********************
@@ -35,7 +37,7 @@ Common configuration
 BASS
 ****
 
-SegnoSharp uses the BASS audio libraries from `un4seen <https://www.un4seen.com/bass.html>`_ (see the corresponding chapter in :ref:`quickstart<refQuickstartBass>`).
+SegnoSharp uses the BASS audio libraries from `un4seen <https://www.un4seen.com/bass.html>`_ (see the corresponding chapter in :ref:`quickstart <refQuickstartBass>`).
 These libraries are not free for all use, so check if you need a license registration.
 This registration can be placed in the following configuration options:
 

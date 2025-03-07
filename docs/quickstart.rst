@@ -1,4 +1,5 @@
 .. _refQuickstart:
+
 ##########
 Quickstart
 ##########
@@ -24,6 +25,7 @@ This is where the SQLite database will be stored, and where SegnoSharps looks fo
 It can be any existing folder on your harddrive or a new and empty one.
 
 .. _refQuickstartBass:
+
 BASS
 ====
 

@@ -49,6 +49,7 @@ Album data
 +-----------------+-----------------------------------------------------------------------------------------------------+
 
 .. _refAlbumEditorAlbumCredits:
+
 Credits
 -------
 
@@ -149,6 +150,7 @@ This will only remove the reference to the media file, not the media file itself
 
 
 .. _refAlbumEditorPersons:
+
 *******
 Persons
 *******
@@ -178,6 +180,7 @@ If a person/artist/group is deleted, variant numbers for other matching persons/
 ``Save`` or ``Discard changes`` by clicking the respective buttons at the bottom of the page.
 
 .. _refAlbumEditorRecordLabels:
+
 *************
 Record Labels
 *************
@@ -195,6 +198,7 @@ Any changes you make won't be saved until you click the ``Save`` button at the b
 You can delete a record label by clicking the ``(X)`` button to the right of the name.
 
 .. _refAlbumEditorGenres:
+
 ******
 Genres
 ******
@@ -210,6 +214,7 @@ Add a new genre by clicking the ``Add new genre`` button.
 Any changes you make won't be saved until you click the ``Save`` button at the bottom of the page.
 
 .. _refAlbumEditorCreditGroups:
+
 *************
 Credit groups
 *************
@@ -226,6 +231,7 @@ Delete a group by clicking the ``(X)`` button to the right of the name.
 if this credit group is eligible for inclusion in the automatically generated playlist.
 
 .. _refAlbumEditorMediaTypes:
+
 ***********
 Media Types
 ***********
