@@ -225,7 +225,7 @@ Delete a group by clicking the ``(X)`` button to the right of the name.
 ``Include in auto playlist`` is used by the :ref:`playlist module<_refUsagePlaylist>` to determine
 if this credit group is eligible for inclusion in the automatically generated playlist.
 
-.. _refAlbumEditorCreditGroups:
+.. _refAlbumEditorMediaTypes:
 ***********
 Media Types
 ***********
