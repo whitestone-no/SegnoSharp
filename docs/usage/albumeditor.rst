@@ -132,7 +132,7 @@ If this track has a corresponding media file you can add information about this 
 If the stream info doesn't already exist, click the ``Add stream info`` button.
 
 +--------------------------+---------------------------------------------------------------------------------------------------------+
-| Include in auto playlist | | Should the :ref:`playlist module<_refUsagePlaylist>` automatically include this track when adding to' |
+| Include in auto playlist | | Should the :ref:`playlist module<_refUsagePlaylist>` automatically include this track when adding to  |
 |                          | | playlist.                                                                                             |
 +--------------------------+---------------------------------------------------------------------------------------------------------+
 | File path                | The full path for the media file, including folders and filename.                                       |
