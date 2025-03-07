@@ -119,8 +119,8 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                     .Distinct()
                     .SelectMany(aa =>
                     {
-                        string[] names = aa.Split(_nameSeparators, StringSplitOptions.TrimEntries & StringSplitOptions.RemoveEmptyEntries);
-                        return names.Select(n =>
+                        string[] names = aa?.Split(_nameSeparators, StringSplitOptions.TrimEntries & StringSplitOptions.RemoveEmptyEntries);
+                        return names?.Select(n =>
                         {
                             n = n.Trim();
                             string lastname = n;
@@ -158,6 +158,11 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
                 foreach (string fileGenre in albumGroup.Select(x => x.Genre).Distinct().OrderBy(x => x))
                 {
+                    if (fileGenre == null)
+                    {
+                        continue;
+                    }
+
                     var genre = new Genre
                     {
                         Name = fileGenre
