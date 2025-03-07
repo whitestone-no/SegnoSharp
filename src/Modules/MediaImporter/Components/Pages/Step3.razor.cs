@@ -71,14 +71,21 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 .Select(file =>
                 {
                     Tags tags = TagReader.ReadTagInfo(file.File.FullName);
+                    
                     if (tags == null)
                     {
-                        return new Tags();
+                        return new Tags
+                        {
+                            Album = "Unknown",
+                            Title = file.File.Name
+                        };
                     }
+                    
                     if (Settings.NormalizeAlbumTitles)
                     {
                         tags.Album = NormalizeAlbumTitle(tags.Album);
                     }
+
                     return tags;
                 })
                 .ToList();
@@ -120,7 +127,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                     .SelectMany(aa =>
                     {
                         string[] names = aa?.Split(_nameSeparators, StringSplitOptions.TrimEntries & StringSplitOptions.RemoveEmptyEntries);
-                        return names?.Select(n =>
+                        return names == null ? [] : names.Select(n =>
                         {
                             n = n.Trim();
                             string lastname = n;
