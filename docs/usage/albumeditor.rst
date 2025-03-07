@@ -34,29 +34,29 @@ Album data
 | Genres          | | Which genres the album belongs to.                                                                |
 |                 | | This is a special field where it searches for existing genres as you type.                        |
 |                 | | Select one of the existing genres that show up, or create a new if it doesn't exist.              |
-|                 | | See the :ref:`Genres<_refAlbumEditorGenres>` section on how to manage genres.                     |
+|                 | | See the :ref:`Genres <refAlbumEditorGenres>` section on how to manage genres.                     |
 +-----------------+-----------------------------------------------------------------------------------------------------+
 | Record labels   | | Which record labels published the album.                                                          |
 |                 | | Uses the same field handling as the Genres field.                                                 |
-|                 | | See the :ref:`Record Labels<_refAlbumEditorRecordLabels>` section on how to manage record labels. |
+|                 | | See the :ref:`Record Labels <refAlbumEditorRecordLabels>` section on how to manage record labels. |
 +-----------------+-----------------------------------------------------------------------------------------------------+
 | UPC             | The UPC code (barcode) of the album.                                                                |
 +-----------------+-----------------------------------------------------------------------------------------------------+
 | Catalgue number | The catalogue number with the publisher for the album.                                              |
 +-----------------+-----------------------------------------------------------------------------------------------------+
 | Is public       | | If the album should be included in a list displayed for non-authenticated users.                  |
-|                 | | Tracks in the :ref:`playlist<_refUsagePlaylist>` will be displayed regardless of this setting.    |
+|                 | | Tracks in the :ref:`playlist <refUsagePlaylist>` will be displayed regardless of this setting.    |
 +-----------------+-----------------------------------------------------------------------------------------------------+
 
 .. _refAlbumEditorAlbumCredits:
 Credits
 -------
 
-Credits are composed of a :ref:`credit group<_refAlbumEditorCreditGroups>`.
+Credits are composed of a :ref:`credit group <refAlbumEditorCreditGroups>`.
 You must add a credit group to an album before you can add people/groups to it.
 Select a credit group from the ``Add group`` dropdown list and click the ``Add`` button.
 You can now add people/groups to the credit group. This uses the same field handling as the Genres field.
-See the :ref:`Persons<_refAlbumEditorPersons>` section on how to manage people/groups.
+See the :ref:`Persons <refAlbumEditorPersons>` section on how to manage people/groups.
 
 Cover
 -----
@@ -76,7 +76,7 @@ An album must contain at least one disc, even if this is a digital album.
 +-------------+-----------------------------------------------------------------------------------------------+
 | Media types | | A disc can be of different types, such as CD, Digital Download, SACD, etc.                  |
 |             | | Select zero, one or more media types that apply to this disc.                               |
-|             | | See the :ref:`Media Types<_refAlbumEditorMediaTypes>` section on how to manage media types. |
+|             | | See the :ref:`Media Types <refAlbumEditorMediaTypes>` section on how to manage media types. |
 +-------------+-----------------------------------------------------------------------------------------------+
 
 Remove a disc by clicking the ``Delete disc`` button.
@@ -123,7 +123,7 @@ Credits
 """""""
 
 This is where you add people/groups to the track.
-See the :ref:`Credits<_refAlbumEditorAlbumCredits>` section for albums on how to manage this.
+See the :ref:`Credits <refAlbumEditorAlbumCredits>` section for albums on how to manage this.
 
 Stream Info
 """""""""""
@@ -132,7 +132,7 @@ If this track has a corresponding media file you can add information about this 
 If the stream info doesn't already exist, click the ``Add stream info`` button.
 
 +--------------------------+---------------------------------------------------------------------------------------------------------+
-| Include in auto playlist | | Should the :ref:`playlist module<_refUsagePlaylist>` automatically include this track when adding to  |
+| Include in auto playlist | | Should the :ref:`playlist module <refUsagePlaylist>` automatically include this track when adding to  |
 |                          | | playlist.                                                                                             |
 +--------------------------+---------------------------------------------------------------------------------------------------------+
 | File path                | The full path for the media file, including folders and filename.                                       |
@@ -222,7 +222,7 @@ Create a new group by clicking the ``Add`` button in the correct section.
 
 Delete a group by clicking the ``(X)`` button to the right of the name.
 
-``Include in auto playlist`` is used by the :ref:`playlist module<_refUsagePlaylist>` to determine
+``Include in auto playlist`` is used by the :ref:`playlist module <refUsagePlaylist>` to determine
 if this credit group is eligible for inclusion in the automatically generated playlist.
 
 .. _refAlbumEditorMediaTypes:
@@ -230,4 +230,4 @@ if this credit group is eligible for inclusion in the automatically generated pl
 Media Types
 ***********
 
-This page behaves exactly like the :ref:`Genres<_refAlbumEditorGenres>` page, but for media types.
+This page behaves exactly like the :ref:`Genres <refAlbumEditorGenres>` page, but for media types.

@@ -105,9 +105,9 @@ Create a new file called ``docker-compose.yml`` with the following content:
 Replace ``pathToYourDataFolder`` and ``pathToYourMusicFolder`` with the real paths from your computer.
 This file defines a Docker service called ``segnosharp`` with two folders on your computer mapped into the container.
 It also defines the available network ports, in this case port ``8080`` in the container is mapped to port ``8080`` on your computer.
-Finally it sets a few environment variables into the container. All settings are described in the :ref:`configuration<_refAuthentication>` section, but these three are required as a minimum for testing the application.
+Finally it sets a few environment variables into the container. All settings are described in the :ref:`configuration <refAuthentication>` section, but these three are required as a minimum for testing the application.
 
-.. note:: ``UseOidc`` should never be set to ``false`` in a production environment! Setting this to false overrides all security measures! See the :ref:`Authentication<refAuthentication>` chapter for details on how to properly set this up.
+.. note:: ``UseOidc`` should never be set to ``false`` in a production environment! Setting this to false overrides all security measures! See the :ref:`Authentication <refAuthentication>` chapter for details on how to properly set this up.
 
 The keen eyed will have noticed that this also defines an Icecast instance.
 This is to provide as fully functional an example as possible, so that you can try out all the features, and connect to using a media player.
