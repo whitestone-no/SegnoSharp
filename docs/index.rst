@@ -42,6 +42,7 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
    
    running/prerequisites
    running/visualstudio
+   running/vscode
    running/dotnet
    running/k8s
    
