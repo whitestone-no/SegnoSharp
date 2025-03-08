@@ -12,9 +12,10 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
 
 .. toctree::
    :hidden:
-   :caption: Quickstart
+   :caption: General
 
    quickstart
+   faq
    
 .. toctree::
    :hidden:
@@ -54,9 +55,3 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
   
   extending/modules
   extending/playlist
-
-.. toctree::
-   :hidden:
-   :caption: FAQ
-   
-   faq
