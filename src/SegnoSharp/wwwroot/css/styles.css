@@ -422,7 +422,8 @@ button[class~=tiny] {
     gap: 1rem;
 }
 
-    .form-group label {
+    .form-group label,
+    .form-group .label {
         grid-column: span 3;
     }
 
