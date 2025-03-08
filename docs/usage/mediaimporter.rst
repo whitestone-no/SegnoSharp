@@ -91,8 +91,8 @@ If you want to create a new album, click the ``Create a copy`` button. The text 
 |                 | | Artist names will be automatically normalized into ``Firstname`` and ``Lastname``.                |
 |                 | | ``John Doe`` will be normalized to ``John`` and ``Doe``, and                                      |
 |                 | | ``John William Doe`` will be normalized to ``John`` and ``William Doe``.                          |
-|                 | | Verify the albums in the Album editor after the import to ensure the normalization is correct,    |
-|                 | | and adjust the names the :ref:`Person editor <refAlbumEditorPersons>` if necessary.               |
+|                 | | Verify the albums in the Album editor after the import to ensure the normalization                |
+|                 | | is correct, and adjust the names in :ref:`Person editor <refAlbumEditorPersons>` if necessary.    |
 +-----------------+-----------------------------------------------------------------------------------------------------+
 | Is public       | | If the album should be included in a list displayed for non-authenticated users.                  |
 |                 | | Tracks in the :ref:`playlist <refUsagePlaylist>` will be displayed regardless of this setting.    |
