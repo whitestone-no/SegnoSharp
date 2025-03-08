@@ -43,10 +43,12 @@
                 @foreach (TrackPersonGroupPersonRelation personGroupRelation in Track.TrackPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
                 {
                     <div class="form-group">
-                        <label>
-                            @personGroupRelation.PersonGroup.Name
+                        <div class="label">
+                            <label>
+                                @personGroupRelation.PersonGroup.Name
+                            </label>
                             <button title="Remove @personGroupRelation.PersonGroup.Name group" class="tiny" @onclick="() => RemovePersonGroup(personGroupRelation)"><span class="fa-regular fa-circle-xmark"></span></button>
-                        </label>
+                        </div>
                         <TagList Items="@personGroupRelation.Persons" ExecuteSearch="ExecutePersonSearch" />
                     </div>
                 }
