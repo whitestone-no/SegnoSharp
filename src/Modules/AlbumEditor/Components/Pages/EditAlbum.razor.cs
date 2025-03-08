@@ -20,7 +20,6 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
         [Inject] private NavigationManager NavigationManager { get; set; }
         [Inject] private IJSRuntime JsRuntime { get; set; }
-        [Inject] private IHashingUtil HashingUtil { get; set; }
         [Inject] private ISystemClock SystemClock { get; set; }
 
         private SegnoSharpDbContext DbContext { get; set; }
@@ -84,11 +83,16 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
 
         private async Task<IEnumerable<Person>> ExecutePersonSearch(string searchTerm)
         {
-            var p = new Person { TagName = searchTerm };
+            string[] searchTerms = searchTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            return await DbContext.Persons
-                    .Where(pp => EF.Functions.Like(pp.LastName, "%" + searchTerm + "%") || EF.Functions.Like(pp.FirstName, "%" + searchTerm + "%"))
-                    .ToListAsync();
+            IQueryable<Person> persons = DbContext.Persons.AsQueryable();
+
+            foreach (string term in searchTerms)
+            {
+                persons = persons.Where(p => EF.Functions.Like(p.FirstName, "%" + term + "%") || EF.Functions.Like(p.LastName, "%" + term + "%"));
+            }
+
+            return await persons.ToListAsync();
         }
 
         private async Task<IEnumerable<RecordLabel>> ExecuteRecordLabelSearch(string searchTerm)
@@ -171,27 +175,59 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
                 return;
             }
 
+            // Get all persons from credit groups
+            List<Person> allPersons = Album.AlbumPersonGroupPersonRelations
+                .SelectMany(apg => apg.Persons)
+                .Distinct()
+                .ToList();
+
             foreach (AlbumPersonGroupPersonRelation personRelation in Album.AlbumPersonGroupPersonRelations)
             {
-                List<Person> persons = new();
+                List<Person> persons = [];
 
                 foreach (Person person in personRelation.Persons)
                 {
                     if (person.Id != 0)
                     {
+                        // The person already exists in the database if it has an ID, so just add it without further ado.
                         persons.Add(person);
                         continue;
                     }
 
-                    // Check if the person already exists in the database. If it does replace the dummy entry with the existing entry
-                    Person existingPerson = await DbContext.Persons.FirstOrDefaultAsync(p => p.FirstName == person.FirstName && p.LastName == person.LastName && p.Version == person.Version);
-                    if (existingPerson == null)
+                    // To prevent multiple copies of the same person between different credit groups
+                    // get the new person from the distinct list of persons, but ignore the variant number as
+                    // that may have been set by another credit group.
+                    Person newPerson = allPersons
+                        .FirstOrDefault(p =>
+                            p.Id == person.Id &&
+                            p.FirstName == person.FirstName &&
+                            p.LastName == person.LastName);
+
+                    if (newPerson == null)
                     {
-                        persons.Add(person);
+                        // This shouldn't really happen, but just continue to the next person if it does.
                         continue;
                     }
 
-                    persons.Add(existingPerson);
+                    // Find the correct variant number, but only if it hasn't already been set
+                    if (newPerson.Version == 0)
+                    {
+                        try
+                        {
+                            ushort variant = await DbContext.Persons
+                                .Where(p => p.FirstName == newPerson.FirstName && p.LastName == newPerson.LastName)
+                                .MaxAsync(p => p.Version);
+
+                            newPerson.Version = (ushort)(variant + 1);
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // Ignored as you can't get the max from a result set containing nothing (brand new person, not a variant)
+                        }
+                    }
+
+                    // Add the new person to the database
+                    persons.Add(newPerson);
                 }
 
                 personRelation.Persons = persons;

@@ -27,7 +27,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
 
         private EditContext _editContext;
 
-        private int _originalTrackNumber = 0;
+        private int _originalTrackNumber;
 
         protected override async Task OnInitializedAsync()
         {
@@ -56,6 +56,64 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
                 if (!_editContext.Validate())
                 {
                     return;
+                }
+
+                // This code is duplicated between EditTrack and EditAlbum. Should be combined, somehow
+                List<Person> allPersons = Track.TrackPersonGroupPersonRelations
+                    .SelectMany(apg => apg.Persons)
+                    .Distinct()
+                    .ToList();
+
+                foreach (TrackPersonGroupPersonRelation personRelation in Track.TrackPersonGroupPersonRelations)
+                {
+                    List<Person> persons = [];
+
+                    foreach (Person person in personRelation.Persons)
+                    {
+                        if (person.Id != 0)
+                        {
+                            // The person already exists in the database if it has an ID, so just add it without further ado.
+                            persons.Add(person);
+                            continue;
+                        }
+
+                        // To prevent multiple copies of the same person between different credit groups
+                        // get the new person from the distinct list of persons, but ignore the variant number as
+                        // that may have been set by another credit group.
+                        Person newPerson = allPersons
+                            .FirstOrDefault(p =>
+                                p.Id == person.Id &&
+                                p.FirstName == person.FirstName &&
+                                p.LastName == person.LastName);
+
+                        if (newPerson == null)
+                        {
+                            // This shouldn't really happen, but just continue to the next person if it does.
+                            continue;
+                        }
+
+                        // Find the correct variant number, but only if it hasn't already been set
+                        if (newPerson.Version == 0)
+                        {
+                            try
+                            {
+                                ushort variant = await DbContext.Persons
+                                    .Where(p => p.FirstName == newPerson.FirstName && p.LastName == newPerson.LastName)
+                                    .MaxAsync(p => p.Version);
+
+                                newPerson.Version = (ushort)(variant + 1);
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                // Ignored as you can't get the max from a result set containing nothing (brand new person, not a variant)
+                            }
+                        }
+
+                        // Add the new person to the database
+                        persons.Add(newPerson);
+                    }
+
+                    personRelation.Persons = persons;
                 }
 
                 await DbContext.SaveChangesAsync();
@@ -129,11 +187,16 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
 
         private async Task<IEnumerable<Person>> ExecutePersonSearch(string searchTerm)
         {
-            var p = new Person { TagName = searchTerm };
+            string[] searchTerms = searchTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            return await DbContext.Persons
-                .Where(pp => EF.Functions.Like(pp.LastName, "%" + searchTerm + "%") || EF.Functions.Like(pp.FirstName, "%" + searchTerm + "%"))
-                .ToListAsync();
+            IQueryable<Person> persons = DbContext.Persons.AsQueryable();
+
+            foreach (string term in searchTerms)
+            {
+                persons = persons.Where(p => EF.Functions.Like(p.FirstName, "%" + term + "%") || EF.Functions.Like(p.LastName, "%" + term + "%"));
+            }
+
+            return await persons.ToListAsync();
         }
 
         private void AddPersonGroup()
