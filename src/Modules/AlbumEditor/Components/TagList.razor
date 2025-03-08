@@ -43,12 +43,9 @@
             @{
                 string newName = CultureInfo.CurrentUICulture.TextInfo.ToTitleCase(Search);
                 var item = new TItem { TagName = newName };
-                if (SearchResults.All(i => i.TagName != item.TagName))
+                if (Items != null && Items.All(g => g.TagName != item.TagName))
                 {
-                    if (Items != null && Items.All(g => g.TagName != item.TagName))
-                    {
-                        <button class="suggestion new" title="Create new" @onmousedown="() => AddNewItem(newName)"><span class="fa-solid fa-plus-circle"></span>Create new: "@newName"</button>
-                    }
+                    <button class="suggestion new" title="Create new" @onmousedown="() => AddNewItem(newName)"><span class="fa-solid fa-plus-circle"></span>Create new: "@newName"</button>
                 }
             }
 
