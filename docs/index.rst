@@ -54,3 +54,9 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
   
   extending/modules
   extending/playlist
+
+.. toctree::
+   :hidden:
+   :caption: FAQ
+   
+   faq

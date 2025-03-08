@@ -38,7 +38,7 @@ BASS
 ****
 
 SegnoSharp uses the BASS audio libraries from `un4seen <https://www.un4seen.com/bass.html>`_ (see the corresponding chapter in :ref:`quickstart <refQuickstartBass>`).
-These libraries are not free for all use, so check if you need a license registration.
+These libraries are not free for all use, so check if you need a license registration. See also the relevant chapter in the :ref:`FAQ <faqBassRegistration>`
 This registration can be placed in the following configuration options:
 
 +---------------------------+---------------------+------------------------------+
