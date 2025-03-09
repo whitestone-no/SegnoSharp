@@ -46,7 +46,8 @@ Settings
 This administration submenu is where you set the options for that auto playlist feature.
 
 +-------------------------+--------------------------------------------------------------------------+
-| Minimum number of songs | The auto playlist will always have a minimum of N number of songs queued |
+| Minimum number of songs | | The auto playlist will always have a minimum of N number of songs      |
+|                         | | queued                                                                 |
 +-------------------------+--------------------------------------------------------------------------+
 | Minimum total duration  | | The total duration of all songs in the playlist should always be more  |
 |                         | | than this value                                                        |
