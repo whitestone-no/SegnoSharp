@@ -30,13 +30,12 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
    :caption: Usage
    
    usage/introduction
-   usage/albumeditor
-   usage/mediaimporter
    usage/playlist
    usage/streamcontrols
-   usage/bassservice
+   usage/albumeditor
+   usage/mediaimporter
    usage/appinspector
-   usage/tagreader
+   usage/bassinfo
 
 .. toctree::
    :hidden:

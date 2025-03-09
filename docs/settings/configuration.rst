@@ -33,6 +33,8 @@ Common configuration
 | Modules.ModulesFolder     | Absolute path or relative to working directory | Change this if you want to load modules from another folder.                 |
 +---------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 
+.. _refConfigurationBass:
+
 ****
 BASS
 ****
