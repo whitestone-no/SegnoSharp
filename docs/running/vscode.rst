@@ -1,3 +1,5 @@
+.. _refRunningVsCode:
+
 ##################
 Visual Studio Code
 ##################

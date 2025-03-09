@@ -1,3 +1,5 @@
+.. _refRunningVisualStudio:
+
 #############
 Visual Studio
 #############
