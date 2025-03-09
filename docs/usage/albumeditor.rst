@@ -1,3 +1,5 @@
+.. _usageAlbumEditor:
+
 ############
 Album Editor
 ############
@@ -13,6 +15,7 @@ Search
 
 The first page you'll see in ``Albums`` is the search page. Here you can search for albums by name.
 The results are listed in the order in which they were added to the database, with the most recent additions at the top.
+If there are more than 10 search results there is a pager at the bottom to see more results.
 
 Click an album title to edit this album.
 
@@ -57,6 +60,12 @@ Credits are composed of a :ref:`credit group <refAlbumEditorCreditGroups>`.
 You must add a credit group to an album before you can add people/groups to it.
 Select a credit group from the ``Add group`` dropdown list and click the ``Add`` button.
 You can now add people/groups to the credit group. This uses the same field handling as the Genres field.
+
+If you create a new entry it will automatically split firstname and lastname. ``John Williams`` becomes ``John`` and ``Williams``.
+The split is performed at the the last space. ``James Newton Howard`` becomes ``James Newton`` and ``Howard``.
+If you want to have more control you can write the lastname first and separate the lastname from the firstname with a comma.
+``Newton Howard, James`` becomes ``James`` and ``Newton Howard``.
+
 See the :ref:`Persons <refAlbumEditorPersons>` section on how to manage people/groups.
 
 Cover
@@ -131,6 +140,8 @@ Stream Info
 
 If this track has a corresponding media file you can add information about this here.
 If the stream info doesn't already exist, click the ``Add stream info`` button.
+
+.. _usageAlbumEditorWeights:
 
 +--------------------------+---------------------------------------------------------------------------------------------------------+
 | Include in auto playlist | | Should the :ref:`playlist module <refUsagePlaylist>` automatically include this track when adding to  |
