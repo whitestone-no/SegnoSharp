@@ -22,9 +22,17 @@ You can switch which database is used by the configuration options described bel
 
 .. note:: Only set ``SensitiveDataLogging`` to ``true`` when troubleshooting and you need additional information in the logs.
 
-**********
-PostgreSQL
-**********
+*****************
+Database creation
+*****************
+
+SegnoSharp uses `Entity Framework Migrations <https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/>`_.
+This will create the database if it is non-existing, and if there are future changes to the database schema it will also automatically update your database.
+Make sure that the database user specified in the connection string has the necessary permissions (create, alter, etc.) so that SegnoSharp can keep its database up-to-date.
+
+*******************************
+A special note about PostgreSQL
+*******************************
 
 A special note about PostgreSQL:
 
@@ -33,11 +41,3 @@ PostgreSQL is case sensitive. You can perform case insensitive searches using a 
 
 The other database engines uses ``LIKE`` and case insensitive collations so when there is a search in SegnoSharp it will not differ between ``SegnoSharp`` and ``segnosharp``.
 PostgreSQL *will* differ between them, so you have to use the same casing when searching as what you are looking for.
-
-*****************
-Database creation
-*****************
-
-SegnoSharp uses `Entity Framework Migrations <https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/>`_.
-This will create the database if it is non-existing, and if there are future changes to the database schema it will also automatically update your database.
-Make sure that the database user specified in the connection string has the necessary permissions (create, alter, etc.) so that SegnoSharp can keep its database up-to-date.
