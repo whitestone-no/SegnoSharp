@@ -49,10 +49,11 @@ What does "SegnoSharp" mean?
 A `"segno" <https://en.wikipedia.org/wiki/Dal_segno>`_ is a musical term that is used in repetitions.
 SegnoSharp is a music streamer that will play, and repeat, musical files.
 
-A `"sharp" <https://en.wikipedia.org/wiki/Sharp_(music)>`_ is also a musical term, but it is also the
+A `"sharp" <https://en.wikipedia.org/wiki/Sharp_(music)>`_ is also a musical term, but it is also a part of the
 name of the programming language used to create SegnoSharp: C# (pronounced See Sharp)
 
-Hence SegnoSharp is a play on musical and programming terms.
+Hence SegnoSharp is a play on musical and programming terms, and the logo contains a stylized "segno" symbol
+on top of a "sharp" symbol.
 
 Why is the logo so yellow?
 ==========================
