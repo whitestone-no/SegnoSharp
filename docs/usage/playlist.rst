@@ -40,6 +40,8 @@ or by dragging the track into the appropriate spot.
 The search option should be fairly self-explanatory, except for "Only auto playlist".
 Enabling this will only search for albums that are also used by the auto playlist feature.
 
+.. _refUsagePlaylistSettings:
+
 Settings
 ========
 

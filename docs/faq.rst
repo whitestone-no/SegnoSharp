@@ -5,16 +5,16 @@ Frequently Asked Questions
 .. contents::
    :local:
    
-***********
-General FAQ
-***********
+*******
+General
+*******
 
 .. _faqAudioFormats:
 
 Which audio formats are supported?
 ==================================
 
-At the moment SegnoSharp only supports MP3 (``.mp3``) and FLAC (``.flac``).
+At the moment SegnoSharp only supports playback of MP3 (``.mp3``) and FLAC (``.flac``), and streaming MP3 and AAC.
 
 Why do I need the BASS libraries?
 =================================

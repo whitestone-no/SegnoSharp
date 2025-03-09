@@ -1,2 +1,2 @@
-This folder is used for sample music files. This folder must be present, and this README.MD file ensures that.
-Any other files put into this folder will be ignored by Git.
+This folder is used for music file. This folder must be present for running SegnoSharp "out-of-the-box" from a cloned repository,
+and this README.MD file ensures that. Any other files put into this folder will be ignored by Git.
