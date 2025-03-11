@@ -10,6 +10,9 @@ It will show the following:
 +-----------------------+----------------------------------------------------------------------------+
 | Environment           | Information about the operating system and runtime architecture            |
 +-----------------------+----------------------------------------------------------------------------+
+| Core                  | | Lists the version numbers for the core functionality assemblies:         |
+|                       | | SegnoSharp, Shared, Database                                             |
++-----------------------+----------------------------------------------------------------------------+
 | Modules               | | Lists all the SegnoSharp modules that have been found and loaded         |
 |                       | | as well as their respective versions.                                    |
 +-----------------------+----------------------------------------------------------------------------+
