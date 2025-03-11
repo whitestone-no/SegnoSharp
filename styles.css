@@ -267,6 +267,19 @@ footer .acknowledgements a:hover {
 	text-decoration: underline;
 }
 
+aside {
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	border: solid 10px #5D1818;
+	width: 300px;
+	text-align: center;
+	transform: rotate(-45deg) translate(100px, 50px);
+	background-color: #5D1818;
+	color: white;
+	font-weight: bold;
+}
+
 
 @media screen and (max-width: 1080px) {
 	body {
