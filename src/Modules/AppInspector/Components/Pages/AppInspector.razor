@@ -2,8 +2,11 @@
 @using System.Collections
 @using Microsoft.AspNetCore.Authorization
 @using System.Runtime.InteropServices
+@using System.Reflection
+@using Whitestone.SegnoSharp.Database
 @using Whitestone.SegnoSharp.Shared.Attributes
 @using Whitestone.SegnoSharp.Modules.AppInspector.ViewModels
+@using Whitestone.SegnoSharp.Shared.Interfaces
 @attribute [Authorize]
 @attribute [ModuleMenu("AppInspector", 200, "fa-code", true)]
 
@@ -48,6 +51,32 @@
         </tr>
     </tbody>
 </table>
+
+<h2>SegnoSharp Core</h2>
+
+<table style="font-size: 12px">
+    <thead>
+        <tr>
+            <th>DLL file</th>
+            <th>Version</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>SegnoSharp</td>
+            <td>@(typeof(Bootstrapper).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion)</td>
+        </tr>
+        <tr>
+            <td>Shared</td>
+            <td>@(typeof(IModule).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion)</td>
+        </tr>
+        <tr>
+            <td>Database</td>
+            <td>@(typeof(SegnoSharpDbContext).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion)</td>
+        </tr>
+    </tbody>
+</table>
+
 
 <h2>Modules</h2>
 
@@ -96,21 +125,21 @@
 
 <table style="font-size: 12px">
     <thead>
-    <tr>
-        <th>Lifetime</th>
-        <th>Service</th>
-        <th>Implementation</th>
-    </tr>
+        <tr>
+            <th>Lifetime</th>
+            <th>Service</th>
+            <th>Implementation</th>
+        </tr>
     </thead>
     <tbody>
-    @foreach (DependencyViewModel dependency in _dependencies)
-    {
-        <tr>
-            <td>@dependency.Lifetime</td>
-            <td>@dependency.ServiceType</td>
-            <td>@dependency.ImplementationType</td>
-        </tr>
-    }
+        @foreach (DependencyViewModel dependency in _dependencies)
+        {
+            <tr>
+                <td>@dependency.Lifetime</td>
+                <td>@dependency.ServiceType</td>
+                <td>@dependency.ImplementationType</td>
+            </tr>
+        }
     </tbody>
 </table>
 
