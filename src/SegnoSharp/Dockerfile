@@ -19,9 +19,13 @@ WORKDIR "/src/Modules"
 RUN find . -type f -name '*.csproj' -printf "dotnet publish %p /p:PackageVersion=${SEGNOSHARP_SEMVER_FULL} /p:Version=${SEGNOSHARP_SEMVER} /p:InformationalVersion=${SEGNOSHARP_SEMVER_FULL} -c Release -o /app/publish/modules/%h\n" | sh
 
 FROM base AS final
-LABEL org.opencontainers.image.source=https://github.com/whitestone-no/segnosharp
-LABEL org.opencontainers.image.description="SegnoSharp is a simple audio streaming tool that can randomly stream audio files to Shoutcast/Icecast servers. Enjoy an engaging and unpredictable listening experience every time you hit play."
+LABEL org.opencontainers.image.title=SegnoSharp
+LABEL org.opencontainers.image.description="SegnoSharp is a simple audio streaming tool that can randomly stream audio files to Shoutcast/Icecast servers."
 LABEL org.opencontainers.image.licenses=MIT
+LABEL org.opencontainers.image.vendor=Whitestone
+LABEL org.opencontainers.image.source=https://github.com/whitestone-no/segnosharp
+LABEL org.opencontainers.image.documentation=https://segnosharp.readthedocs.io
+LABEL org.opencontainers.image.url=https://segnosharp.whitestone.no
 WORKDIR /app
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "Whitestone.SegnoSharp.dll"]
