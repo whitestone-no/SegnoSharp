@@ -2,7 +2,7 @@
 
 ![SegnoSharp logo](https://raw.githubusercontent.com/gthvidsten/SegnoSharp/main/img/logo.png)
 
-A simple audio streaming tool that can randomly stream audio files to Shoutcast/Icecast.
+SegnoSharp is a simple audio streaming tool that can randomly stream audio files to Shoutcast/Icecast servers. Enjoy an engaging and unpredictable listening experience every time you hit play.
 
 This is an early access project. Functionality may be removed or changed at any point, and any APIs are likely to change.
 
