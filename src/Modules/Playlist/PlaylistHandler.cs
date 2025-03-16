@@ -17,7 +17,7 @@ using Track = Whitestone.SegnoSharp.Shared.Models.Track;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist
 {
-    public class PlaylistHandler : IHostedService, IEventHandler<PlayerReady>, IEventHandler<PlayNextTrack>
+    public class PlaylistHandler : IHostedService, IAsyncEventHandler<PlayerReady>, IAsyncEventHandler<PlayNextTrack>
     {
         private readonly IDbContextFactory<SegnoSharpDbContext> _dbContextFactory;
         private readonly IPersistenceManager _persistenceManager;
@@ -90,7 +90,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
             await _currentlyPlayingTaskCancellationTokenSource?.CancelAsync()!;
         }
 
-        public void HandleEvent(PlayerReady input)
+        public Task HandleEventAsync(PlayerReady input)
         {
             _log.LogDebug("Player is ready. Starting playback of tracks from StreamQueue");
 
@@ -100,12 +100,14 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
             if (_currentlyPlayingTaskCancellationTokenSource != null)
             {
                 _log.LogWarning("{event} was fired while CurrentlyPlayingTask was already running. Doing nothing.", nameof(PlayerReady));
-                return;
+                return Task.CompletedTask;
             }
 
             _currentlyPlayingTaskCancellationTokenSource = new CancellationTokenSource();
 
             _ = CurrentlyPlayingTask(_currentlyPlayingTaskCancellationTokenSource.Token);
+
+            return Task.CompletedTask;
         }
 
         private async Task AutoplaylistTask(CancellationToken cancellationToken)
@@ -343,7 +345,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
             }
         }
 
-        public void HandleEvent(PlayNextTrack input)
+        public Task HandleEventAsync(PlayNextTrack input)
         {
             // Stop playlist task before starting a new instance
             _currentlyPlayingTaskCancellationTokenSource?.Cancel();
@@ -351,6 +353,8 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
             _currentlyPlayingTaskCancellationTokenSource = new CancellationTokenSource();
 
             _ = CurrentlyPlayingTask(_currentlyPlayingTaskCancellationTokenSource.Token);
+
+            return Task.CompletedTask;
         }
     }
 }

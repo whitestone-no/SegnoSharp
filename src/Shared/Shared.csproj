@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.3" />
-    <PackageReference Include="Whitestone.Cambion" Version="4.1.0" />
+    <PackageReference Include="Whitestone.Cambion" Version="6.0.0-preview-15" />
   </ItemGroup>
 
   <ItemGroup>

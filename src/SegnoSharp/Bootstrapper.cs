@@ -14,7 +14,6 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Whitestone.Cambion.Extensions;
-using Whitestone.Cambion.Serializer.MessagePack;
 using Whitestone.SegnoSharp.Shared.Extensions;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Shared.Models.Configuration;
@@ -160,8 +159,7 @@ namespace Whitestone.SegnoSharp
 
             builder.Services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
             builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddCambion()
-                .UseMessagePackSerializer();
+            builder.Services.AddCambion();
 
             builder.Services.Configure<CommonConfig>(builder.Configuration.GetSection(CommonConfig.Section));
 

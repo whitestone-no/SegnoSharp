@@ -20,10 +20,10 @@ using Whitestone.SegnoSharp.Modules.BassService.Models.Config;
 namespace Whitestone.SegnoSharp.Modules.BassService
 {
     public class BassServiceHost : IHostedService,
-        IEventHandler<PlayTrack>,
-        IEventHandler<StartStreaming>,
-        IEventHandler<StopStreaming>,
-        IEventHandler<SetVolume>
+        IAsyncEventHandler<PlayTrack>,
+        IAsyncEventHandler<StartStreaming>,
+        IAsyncEventHandler<StopStreaming>,
+        IAsyncEventHandler<SetVolume>
     {
         private readonly IBassWrapper _bassWrapper;
         private readonly CommonConfig _commonConfig;
@@ -99,11 +99,11 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             }
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             try
             {
-                HandleEvent(new StopStreaming());
+                await HandleEventAsync(new StopStreaming());
 
                 // Stop playback of BASS Mixer
                 if (!_bassWrapper.Stop(_mixer))
@@ -129,8 +129,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             {
                 _log.LogError(e, $"Unknown exception during {nameof(BassServiceHost)} shutdown");
             }
-
-            return Task.CompletedTask;
         }
 
         private void LoadAssemblies()
@@ -164,7 +162,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             _bassWrapper.BassUnloadPlugins();
         }
 
-        public void HandleEvent(PlayTrack input)
+        public Task HandleEventAsync(PlayTrack input)
         {
             try
             {
@@ -173,7 +171,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 if (input.Track == null)
                 {
                     _log.LogError("No track contained in event. Do nothing and let the current track play out.");
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 // Convert track to extended object
@@ -185,7 +183,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 if (track.ChannelHandle == 0)
                 {
                     _log.LogError("Could not create stream from {file}: {bassError}", track.File, _bassWrapper.GetLastBassError());
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 // Stop previous track (with 1 second fadeout)
@@ -224,15 +222,17 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             {
                 _log.LogError(e, $"Unknown error during {nameof(PlayTrack)} event in {nameof(BassServiceHost)}");
             }
+
+            return Task.CompletedTask;
         }
 
-        public void HandleEvent(StartStreaming e)
+        public Task HandleEventAsync(StartStreaming e)
         {
             try
             {
                 if (_encoder != null)
                 {
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 string encoderPath = Path.Combine(_commonConfig.DataPath, _ffmpegConfig.DataFolder);
@@ -273,7 +273,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 if (!encoder.EncoderExists)
                 {
                     _log.LogCritical("Could not find FFMPEG in {encoderDir}", encoder.EncoderDirectory);
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 _encoder = encoder;
@@ -282,7 +282,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 if (!encoder.Start(null, IntPtr.Zero, false))
                 {
                     _log.LogCritical("Could not start encoder");
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 _log.LogDebug("Encoder started");
@@ -304,7 +304,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 if (!castInitSuccess)
                 {
                     _log.LogCritical("Could not start casting. {error}", _bassWrapper.GetLastBassError());
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 _log.LogDebug("Casting to {server} started", _streamingSettings.Hostname + ":" + _streamingSettings.Port + _streamingSettings.MountPoint);
@@ -317,9 +317,11 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             {
                 _log.LogError(ex, "Unknown exception during {event}", nameof(StartStreaming));
             }
+
+            return Task.CompletedTask;
         }
 
-        public void HandleEvent(StopStreaming input)
+        public Task HandleEventAsync(StopStreaming input)
         {
             try
             {
@@ -342,9 +344,11 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             {
                 _log.LogError(e, "Unknown exception during {event}", nameof(StopStreaming));
             }
+
+            return Task.CompletedTask;
         }
 
-        public void HandleEvent(SetVolume input)
+        public Task HandleEventAsync(SetVolume input)
         {
             try
             {
@@ -355,6 +359,8 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             {
                 _log.LogError(e, "Unknown exception during {event}", nameof(StopStreaming));
             }
+
+            return Task.CompletedTask;
         }
 
         private void UpdateStreamingTitle()

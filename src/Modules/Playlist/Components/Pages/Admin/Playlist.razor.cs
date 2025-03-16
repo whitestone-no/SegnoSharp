@@ -12,7 +12,7 @@ using Whitestone.SegnoSharp.Database.Models;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
 {
-    public partial class Playlist : IEventHandler<PlaylistUpdated>
+    public partial class Playlist : IAsyncEventHandler<PlaylistUpdated>
     {
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
         [Inject] private ICambion Cambion { get; set; }
@@ -32,11 +32,11 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
         private PlaylistViewModel _currentlyDraggingOverPlaylistItem;
         private bool _currentlyDraggingOverPlaylistEnd;
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
             Cambion.Register(this);
 
-            HandleEvent(new PlaylistUpdated());
+            await HandleEventAsync(new PlaylistUpdated());
         }
 
         private async Task DoSearchAsync()
@@ -173,8 +173,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                 .ToListAsync();
         }
 
-        // ReSharper disable once AsyncVoidMethod
-        public async void HandleEvent(PlaylistUpdated input)
+        public async Task HandleEventAsync(PlaylistUpdated input)
         {
             try
             {

@@ -15,7 +15,7 @@ using Whitestone.SegnoSharp.Modules.Playlist.ViewModels;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages
 {
-    public partial class History : IEventHandler<PlaylistUpdated>
+    public partial class History : IAsyncEventHandler<PlaylistUpdated>
     {
         [Inject] private IDbContextFactory<SegnoSharpDbContext> DbFactory { get; set; }
         [Inject] private ICambion Cambion { get; set; }
@@ -32,17 +32,16 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages
         private int HistoryCurrentPage { get; set; } = 1;
 
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
             SelectedDate = SystemClock.Now;
 
             Cambion.Register(this);
 
-            HandleEvent(new PlaylistUpdated());
+            await HandleEventAsync(new PlaylistUpdated());
         }
 
-        // ReSharper disable once AsyncVoidMethod
-        public async void HandleEvent(PlaylistUpdated input)
+        public async Task HandleEventAsync(PlaylistUpdated input)
         {
             try
             {
