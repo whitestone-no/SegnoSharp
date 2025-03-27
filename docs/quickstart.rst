@@ -8,7 +8,11 @@ The easiest way to run SegnoSharp is through the official Docker image.
 
 ::
 
+    # From GitHub Container Registry
     docker pull ghcr.io/whitestone-no/segnosharp:latest
+
+    # From Docker Hub
+    docker pull whitestoneno/segnosharp
 	
 It takes a bit more than just pulling the image to get SegnoSharp running, so please keep reading.
 
