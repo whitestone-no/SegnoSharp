@@ -15,7 +15,7 @@ namespace Whitestone.SegnoSharp.Modules
         internal static IEnumerable<IModule> AddModules(this WebApplicationBuilder builder)
         {
             var modulesConfiguration = builder.Configuration.GetSection(Configuration.Models.Modules.Section).Get<Configuration.Models.Modules>();
-            var commonConfiguration = builder.Configuration.GetSection(Shared.Models.Configuration.CommonConfig.Section).Get<Shared.Models.Configuration.CommonConfig>();
+            var siteConfiguration = builder.Configuration.GetSection(Shared.Models.Configuration.SiteConfig.Section).Get<Shared.Models.Configuration.SiteConfig>();
             var executingFile = new FileInfo(Assembly.GetExecutingAssembly().Location);
             var modulesFolder = new DirectoryInfo(Path.Combine(executingFile.DirectoryName!, modulesConfiguration.ModulesFolder));
 
@@ -41,7 +41,7 @@ namespace Whitestone.SegnoSharp.Modules
 
                 var additionalAssemblyFolders = config.GetSection("AdditionalAssemblyFolderInDataFolder").Get<List<string>>();
                 additionalAssemblyFolders = additionalAssemblyFolders?
-                    .Select(f => Path.Combine(commonConfiguration.DataPath, f))
+                    .Select(f => Path.Combine(siteConfiguration.DataPath, f))
                     .ToList();
 
                 var loadContext = new ModuleLoadContext(moduleFile.FullName, additionalAssemblyFolders);

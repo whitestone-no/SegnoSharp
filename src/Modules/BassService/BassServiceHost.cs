@@ -26,7 +26,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
         IAsyncEventHandler<SetVolume>
     {
         private readonly IBassWrapper _bassWrapper;
-        private readonly CommonConfig _commonConfig;
+        private readonly SiteConfig _siteConfig;
         private readonly Ffmpeg _ffmpegConfig;
         private readonly ICambion _cambion;
         private readonly ILogger<BassServiceHost> _log;
@@ -40,14 +40,14 @@ namespace Whitestone.SegnoSharp.Modules.BassService
         public BassServiceHost(IBassWrapper bassWrapper,
             IOptions<BassRegistration> bassRegistration,
             IOptions<Ffmpeg> ffmpegConfig,
-            IOptions<CommonConfig> commonConfig,
+            IOptions<SiteConfig> siteConfig,
             ICambion cambion,
             ILogger<BassServiceHost> log,
             StreamingSettings streamingSettings,
             AudioSettings audioSettings)
         {
             _bassWrapper = bassWrapper;
-            _commonConfig = commonConfig.Value;
+            _siteConfig = siteConfig.Value;
             _ffmpegConfig = ffmpegConfig.Value;
             _cambion = cambion;
             _log = log;
@@ -139,7 +139,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 flacLib = "bassflac.dll";
             }
 
-            DirectoryInfo di = new(Path.Combine(_commonConfig.DataPath, "bass"));
+            DirectoryInfo di = new(Path.Combine(_siteConfig.DataPath, "bass"));
 
             if (!di.Exists)
             {
@@ -235,7 +235,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                     return Task.CompletedTask;
                 }
 
-                string encoderPath = Path.Combine(_commonConfig.DataPath, _ffmpegConfig.DataFolder);
+                string encoderPath = Path.Combine(_siteConfig.DataPath, _ffmpegConfig.DataFolder);
 
                 var ffmpegExecutable = "ffmpeg";
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

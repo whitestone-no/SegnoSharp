@@ -19,7 +19,7 @@ EF Core will try to create the database inside the "SegnoSharp" project folder, 
 Update-Database -Project MySQL -Args '--Database:Type mysql'
 Update-Database -Project PostgreSQL -Args '--Database:Type postgresql'
 Update-Database -Project MSSQL -Args '--Database:Type mssql'
-Update-Database -Project SQLite -Args '--Database:Type sqlite --CommonConfig:DataPath ..\..\data'
+Update-Database -Project SQLite -Args '--Database:Type sqlite --SiteConfig:DataPath ..\..\data'
 ```
 
 MySQL tables are created with the MyISAM engine by default.

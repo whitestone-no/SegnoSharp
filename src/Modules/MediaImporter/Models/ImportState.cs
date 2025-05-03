@@ -8,9 +8,9 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Models
 {
     public class ImportState
     {
-        public ImportState(IOptions<CommonConfig> commonConfig)
+        public ImportState(IOptions<SiteConfig> siteConfig)
         {
-            SelectedFolder = Directory.Exists(commonConfig.Value.MusicPath) ? new DirectoryInfo(commonConfig.Value.MusicPath) : null;
+            SelectedFolder = Directory.Exists(siteConfig.Value.MusicPath) ? new DirectoryInfo(siteConfig.Value.MusicPath) : null;
             MusicFolder = SelectedFolder;
         }
 

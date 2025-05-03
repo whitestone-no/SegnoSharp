@@ -16,7 +16,7 @@ namespace Whitestone.SegnoSharp.Shared.Components.Layouts
     public partial class MainLayout
     {
         [Inject] private AuthenticationStateProvider AuthState { get; set; } = null!;
-        [Inject] private IOptions<CommonConfig> CommonConfig { get; set; }
+        [Inject] private IOptions<SiteConfig> SiteConfig { get; set; }
         [Inject] private IEnumerable<IModule> Modules { get; set; }
         [Inject] private NavigationManager NavigationManager { get; set; }
 

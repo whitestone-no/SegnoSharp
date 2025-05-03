@@ -104,7 +104,7 @@ namespace Whitestone.SegnoSharp
                     {
                         case "sqlite":
                             SqliteConnectionStringBuilder connectionStringBuilder = new(connectionString);
-                            connectionStringBuilder.DataSource = Path.Combine(hostContext.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
+                            connectionStringBuilder.DataSource = Path.Combine(hostContext.Configuration["SiteConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
                             services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")));
                             break;
                         case "mysql":
@@ -135,7 +135,7 @@ namespace Whitestone.SegnoSharp
             {
                 case "sqlite":
                     SqliteConnectionStringBuilder connectionStringBuilder = new(connectionString);
-                    connectionStringBuilder.DataSource = Path.Combine(builder.Configuration["CommonConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
+                    connectionStringBuilder.DataSource = Path.Combine(builder.Configuration["SiteConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
 
                     builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")).EnableSensitiveDataLogging(sensitiveDataLogging));
                     builder.Services.AddHealthChecks().AddSqlite(connectionStringBuilder.ConnectionString, name: "Database");
@@ -161,7 +161,7 @@ namespace Whitestone.SegnoSharp
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddCambion();
 
-            builder.Services.Configure<CommonConfig>(builder.Configuration.GetSection(CommonConfig.Section));
+            builder.Services.Configure<SiteConfig>(builder.Configuration.GetSection(SiteConfig.Section));
 
             IEnumerable<IModule> modules = builder.AddModules();
 
