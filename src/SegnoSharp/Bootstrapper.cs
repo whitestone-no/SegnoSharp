@@ -23,6 +23,7 @@ using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.HealthChecks;
 using Whitestone.SegnoSharp.Middleware;
 using Whitestone.SegnoSharp.Modules;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Whitestone.SegnoSharp
 {
@@ -127,6 +128,22 @@ namespace Whitestone.SegnoSharp
     {
         public static void ConfigureServices(this WebApplicationBuilder builder)
         {
+            var behindProxy = builder.Configuration.GetSection(SiteConfig.Section).GetValue<bool>("BehindProxy");
+
+            if (behindProxy)
+            {
+                builder.Services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders =
+                        ForwardedHeaders.XForwardedFor |
+                        ForwardedHeaders.XForwardedProto | 
+                        ForwardedHeaders.XForwardedHost;
+
+                    options.KnownNetworks.Clear();
+                    options.KnownProxies.Clear();
+                });
+            }
+
             string databaseType = builder.Configuration.GetSection("Database").GetValue<string>("Type").ToLower();
             string connectionString = builder.Configuration.GetConnectionString("SegnoSharp");
             var sensitiveDataLogging = builder.Configuration.GetSection("Database").GetValue<bool>("SensitiveDataLogging");
@@ -183,6 +200,12 @@ namespace Whitestone.SegnoSharp
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+
+            var behindProxy = app.Configuration.GetSection(SiteConfig.Section).GetValue<bool>("BehindProxy");
+            if (behindProxy)
+            {
+                app.UseForwardedHeaders();
             }
 
             app.UseSerilogRequestLogging();
