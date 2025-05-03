@@ -63,7 +63,7 @@
                             {
                                 @try
                                 {
-                                    DirectoryInfo[] subfolders = ImporterState.SelectedFolder.GetDirectories();
+                                    DirectoryInfo[] subfolders = ImporterState.SelectedFolder.GetDirectories().OrderBy(d => d.Name).ToArray();
                                     if (ImporterState.SelectedFolder != null)
                                     {
                                         <button @onclick="() => OnPathClick(ImporterState.SelectedFolder.Parent)">
