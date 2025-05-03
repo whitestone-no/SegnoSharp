@@ -9,6 +9,6 @@ namespace Whitestone.SegnoSharp.Shared.Models.Configuration
         public string DataPath { get; set; }
         public string MusicPath { get; set; }
         public string SharedSecret { get; set; }
-        public string ProxyNetwork { get; set; }
+        public bool BehindProxy { get; set; }
     }
 }
