@@ -66,6 +66,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
                 List<FileInfo> files = ImporterState.SelectedFolder.EnumerateFiles("*",
                         ImporterState.ImportSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
                     .Where(f => extensions.Contains(f.Extension))
+                    .OrderBy(f => f.FullName)
                     .ToList();
 
                 if (files.Count == 0)
