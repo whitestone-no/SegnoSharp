@@ -168,16 +168,18 @@
 
 <table style="font-size: 12px">
     <thead>
-    <tr>
-        <th>Header</th>
-        <th>Value</th>
-    </tr>
+        <tr>
+            <th>Header</th>
+            <th>Value</th>
+        </tr>
     </thead>
     <tbody>
         @foreach (KeyValuePair<string, StringValues> header in HttpContext.Request.Headers)
         {
-            <td>@header.Key</td>
-            <td>@header.Value</td>
+            <tr>
+                <td>@header.Key</td>
+                <td>@header.Value</td>
+            </tr>
         }
     </tbody>
 </table>
