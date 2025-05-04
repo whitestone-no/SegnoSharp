@@ -1,6 +1,6 @@
 ﻿@page "/admin/mediaimporter/step3"
 @layout InnerLayout
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 @using Whitestone.SegnoSharp.Database.Models
 @using Whitestone.SegnoSharp.Modules.MediaImporter.Components.Layouts
 @using Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels

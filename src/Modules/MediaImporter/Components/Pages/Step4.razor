@@ -1,6 +1,6 @@
 ﻿@page "/admin/mediaimporter/step4"
 @layout InnerLayout
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 @using Whitestone.SegnoSharp.Modules.MediaImporter.Components.Layouts
 @attribute [Authorize]
 

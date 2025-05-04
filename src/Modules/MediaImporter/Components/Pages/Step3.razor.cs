@@ -253,18 +253,15 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
                             if (!trackArtists.OrderBy(x => x).SequenceEqual(albumArtists.OrderBy(x => x)))
                             {
-                                track.TrackPersonGroupPersonRelations = new List<TrackPersonGroupPersonRelation>
+                                track.TrackPersonGroupPersonRelations.Add(new TrackPersonGroupPersonRelation
                                 {
-                                    new()
+                                    Parent = track,
+                                    PersonGroup = new PersonGroup
                                     {
-                                        Parent = track,
-                                        PersonGroup = new PersonGroup
-                                        {
-                                            Id = trackArtistGroupId
-                                        },
-                                        Persons = trackArtists
-                                    }
-                                };
+                                        Id = trackArtistGroupId
+                                    },
+                                    Persons = trackArtists
+                                });
                             }
                         }
 
@@ -295,18 +292,15 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
                             if (!trackComposers.OrderBy(x => x).SequenceEqual(albumArtists.OrderBy(x => x)))
                             {
-                                track.TrackPersonGroupPersonRelations = new List<TrackPersonGroupPersonRelation>
+                                track.TrackPersonGroupPersonRelations.Add(new TrackPersonGroupPersonRelation
                                 {
-                                    new()
+                                    Parent = track,
+                                    PersonGroup = new PersonGroup
                                     {
-                                        Parent = track,
-                                        PersonGroup = new PersonGroup
-                                        {
-                                            Id = trackComposerGroupId
-                                        },
-                                        Persons = trackComposers
-                                    }
-                                };
+                                        Id = trackComposerGroupId
+                                    },
+                                    Persons = trackComposers
+                                });
                             }
                         }
 

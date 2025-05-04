@@ -12,6 +12,11 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
         public int ArtistPersonGroupMappingId;
         public int ComposerPersonGroupMappingId;
 
+        public TrackViewModel()
+        {
+            TrackPersonGroupPersonRelations = new List<TrackPersonGroupPersonRelation>();
+        }
+
         public bool AutoPlaylistDisabled => TrackStreamInfo == null;
 
         public bool IncludeInAutoPlaylist
