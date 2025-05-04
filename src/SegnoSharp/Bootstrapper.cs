@@ -129,6 +129,13 @@ namespace Whitestone.SegnoSharp
     {
         public static void ConfigureServices(this WebApplicationBuilder builder)
         {
+            DirectoryInfo dataFolder = builder.GetDataFolder();
+            if (dataFolder == null)
+            {
+                Log.Fatal("Could not find data folder. Either SiteConfig:DataPath is not set, or the folder doesn't exist");
+                return;
+            }
+
             string databaseType = builder.Configuration.GetSection("Database").GetValue<string>("Type").ToLower();
             string connectionString = builder.Configuration.GetConnectionString("SegnoSharp");
             var sensitiveDataLogging = builder.Configuration.GetSection("Database").GetValue<bool>("SensitiveDataLogging");
@@ -178,6 +185,19 @@ namespace Whitestone.SegnoSharp
                 .AddInteractiveServerComponents();
             builder.Services.AddOidcAuthorizaton(builder.Configuration);
             builder.Services.AddCommon();
+        }
+
+        private static DirectoryInfo GetDataFolder(this WebApplicationBuilder builder)
+        {
+            string dataFolderPath = builder.Configuration["SiteConfig:DataPath"];
+            if (dataFolderPath == null)
+            {
+                return null;
+            }
+
+            DirectoryInfo dataFolder = new(dataFolderPath);
+
+            return dataFolder.Exists ? dataFolder : null;
         }
 
         public static void Configure(this WebApplication app)
