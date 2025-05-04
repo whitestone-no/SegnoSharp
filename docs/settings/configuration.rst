@@ -20,18 +20,41 @@ Configuration of :ref:`database <refDatabase>` and :ref:`authentication <refAuth
 .. _refConfigurationDatapath:
 
 ********************
-Common configuration
+Site configuration
 ********************
 
-+---------------------------+------------------------------------------------+------------------------------------------------------------------------------+
-| CommonConfig.DataPath     | Absolute path or relative to working directory | Directory used for additional persistent data handling, i.e. SQLite database |
-+---------------------------+------------------------------------------------+------------------------------------------------------------------------------+
-| CommonConfig.MusicPath    | Absolute path or relative to working directory | This is the default directory SegnoSharp will read music from                |
-+---------------------------+------------------------------------------------+------------------------------------------------------------------------------+
-| CommonConfig.SharedSecret | Secret string value                            | Used by ``IHashingUtil`` to generate hashes unique to your installation      |
-+---------------------------+------------------------------------------------+------------------------------------------------------------------------------+
-| Modules.ModulesFolder     | Absolute path or relative to working directory | Change this if you want to load modules from another folder.                 |
-+---------------------------+------------------------------------------------+------------------------------------------------------------------------------+
++-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
+| SiteConfig.DataPath     | Absolute path or relative to working directory | Directory used for additional persistent data handling, i.e. SQLite database |
++-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
+| SiteConfig.MusicPath    | Absolute path or relative to working directory | This is the default directory SegnoSharp will read music from                |
++-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
+| SiteConfig.SharedSecret | Secret string value                            | Used by ``IHashingUtil`` to generate hashes unique to your installation      |
++-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
+| Modules.ModulesFolder   | Absolute path or relative to working directory | Change this if you want to load modules from another folder.                 |
++-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
+
+*******
+Proxies
+*******
+
+You can run SegnoSharp behind a proxy. Simply set the ``SiteConfig.BehindProxy`` to ``true``.
+This will enable the ``ForwardedHeaders`` middleware in .NET. Make sure your proxy properly sets the ``X-Forwarded-Proto``, ``X-Forwarded-Host``, and ``X-Forwarded-For`` headers to the correct values.
+
+Virtual directory
+=================
+
+A feature often combined with the proxy functionality is to run SegnoSharp in a virtual directory.
+If you don't want to run SegnoSharp on the root of your web server, you can set the ``SiteConfig.BasePath`` to another path.
+This will make SegnoSharp accessible at ``https://yourdomain.com/<BasePath>`` instead of the root of the domain.
+
+.. note:: Make sure that the ``BasePath`` both starts and ends with a ``/``. For example: ``/segnosharp/``.
+
+Examples using environment variables:
+
+::
+
+    SegnoSharp_SiteConfig__BehindProxy=true
+    SegnoSharp_SiteConfig__BasePath=/segnosharp/
 
 .. _refConfigurationBass:
 
@@ -66,3 +89,24 @@ In the following example the `Serilog.Sinks.File <https://github.com/serilog/ser
 You can also overwrite the existing console logger by changing the ``1`` to ``0`` in the above example.
 
 For more settings to override, see the documentation for `Serilog.Settings.Configuration <https://github.com/serilog/serilog-settings-configuration>`_.
+
+***************
+Data protection
+***************
+
+.NET uses `Data Protection <https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/introduction>`_ to protect sensitive data, such as authentication cookies.
+Keys are generated and stored in a folder defined by ``DataProtection:Folder`` inside the ``SiteConfig:DataPath`` folder.
+This folder is created automatically when SegnoSharp starts.
+
+The keys can optionally be encrypted using a PFX certificate that includes a private key.
+You can optionally set the ``DataProtection:CertificateFile`` to point to a certificate file in the same folder,
+and define the password for the certificate in ``DataProtection:CertificatePassword``.
+
+Even though the encryption is optional, it is highly recommended to enable it, even if it only uses a self-signed certificate.
+
+Examples using environment variables:
+
+::
+
+    SegnoSharp_DataProtection__CertificateFile=MyCertificate.pfx
+    SegnoSharp_DataProtection__CertificatePassword=MyPassword
