@@ -24,6 +24,7 @@ using Whitestone.SegnoSharp.HealthChecks;
 using Whitestone.SegnoSharp.Middleware;
 using Whitestone.SegnoSharp.Modules;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Options;
 
 namespace Whitestone.SegnoSharp
 {
@@ -128,22 +129,6 @@ namespace Whitestone.SegnoSharp
     {
         public static void ConfigureServices(this WebApplicationBuilder builder)
         {
-            var behindProxy = builder.Configuration.GetSection(SiteConfig.Section).GetValue<bool>("BehindProxy");
-
-            if (behindProxy)
-            {
-                builder.Services.Configure<ForwardedHeadersOptions>(options =>
-                {
-                    options.ForwardedHeaders =
-                        ForwardedHeaders.XForwardedFor |
-                        ForwardedHeaders.XForwardedProto | 
-                        ForwardedHeaders.XForwardedHost;
-
-                    options.KnownNetworks.Clear();
-                    options.KnownProxies.Clear();
-                });
-            }
-
             string databaseType = builder.Configuration.GetSection("Database").GetValue<string>("Type").ToLower();
             string connectionString = builder.Configuration.GetConnectionString("SegnoSharp");
             var sensitiveDataLogging = builder.Configuration.GetSection("Database").GetValue<bool>("SensitiveDataLogging");
@@ -197,15 +182,29 @@ namespace Whitestone.SegnoSharp
 
         public static void Configure(this WebApplication app)
         {
+            var siteConfig = app.Services.GetRequiredService<IOptions<SiteConfig>>();
+
+            app.UsePathBase(siteConfig.Value.BasePath);
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            var behindProxy = app.Configuration.GetSection(SiteConfig.Section).GetValue<bool>("BehindProxy");
-            if (behindProxy)
+            if (siteConfig.Value.BehindProxy)
             {
-                app.UseForwardedHeaders();
+                ForwardedHeadersOptions options = new()
+                {
+                    ForwardedHeaders =
+                        ForwardedHeaders.XForwardedFor |
+                        ForwardedHeaders.XForwardedProto |
+                        ForwardedHeaders.XForwardedHost
+                };
+
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+
+                app.UseForwardedHeaders(options);
             }
 
             app.UseSerilogRequestLogging();

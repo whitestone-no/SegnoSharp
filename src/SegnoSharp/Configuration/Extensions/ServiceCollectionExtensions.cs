@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Whitestone.SegnoSharp.Configuration.Authentication;
+using Whitestone.SegnoSharp.Shared.Models.Configuration;
 
 namespace Whitestone.SegnoSharp.Configuration.Extensions
 {
@@ -70,7 +72,6 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                         options.Scope.Add(scope);
                     }
                 }
-
                 options.ResponseType = "code";
                 options.SaveTokens = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
@@ -90,8 +91,10 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                 {
                     OnAccessDenied = context =>
                     {
+                        var siteConfig = context.HttpContext.RequestServices.GetRequiredService<IOptions<SiteConfig>>();
+
                         context.HandleResponse();
-                        context.Response.Redirect("/");
+                        context.Response.Redirect(siteConfig.Value.BasePath);
 
                         return Task.CompletedTask;
                     },

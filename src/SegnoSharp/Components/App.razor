@@ -1,9 +1,12 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.Extensions.Options
+@using Whitestone.SegnoSharp.Shared.Models.Configuration
+@inject IOptions<SiteConfig> SiteConfig
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
+    <base href="@SiteConfig.Value.BasePath" />
     <link rel="stylesheet" type="text/css" href="css/styles.css" />
     <link rel="stylesheet" type="text/css" href="fontawesome/css/all.min.css"/>
     <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
