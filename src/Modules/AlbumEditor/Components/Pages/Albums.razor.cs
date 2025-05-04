@@ -80,12 +80,12 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
 
         private static string GetAlbumUrl(int id)
         {
-            return $"/admin/albums/{id}";
+            return $"admin/albums/{id}";
         }
 
         private void NewAlbum()
         {
-            NavigationManager.NavigateTo($"/admin/albums/0");
+            NavigationManager.NavigateTo("admin/albums/0");
         }
     }
 

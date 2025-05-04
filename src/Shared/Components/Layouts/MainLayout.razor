@@ -4,20 +4,20 @@
 <PageTitle>SegnoSharp</PageTitle>
 
 <header>
-    <div class="logo"><img src="/img/logoHeader.png" alt="SegnoSharp Logo" /><span>SegnoSharp</span></div>
+    <div class="logo"><img src="img/logoHeader.png" alt="SegnoSharp Logo" /><span>SegnoSharp</span></div>
     <div class="identity">
         <AuthorizeView Policy="IgnoreRole">
             <Authorized>
                 <div class="user">
                     Logged in as <span class="username">@_loggedInAs</span>
-                    <NavLink href="/auth/logout">Logout</NavLink>
+                    <NavLink href="auth/logout">Logout</NavLink>
                 </div>
             </Authorized>
             <Authorizing>
                 Please wait while logging in
             </Authorizing>
             <NotAuthorized>
-                <NavLink href="@("/auth/login?redirectUri=" + @NavigationManager.Uri)">Login</NavLink>
+                <NavLink href="@("auth/login?redirectUri=" + @NavigationManager.Uri)">Login</NavLink>
             </NotAuthorized>
         </AuthorizeView>
     </div>

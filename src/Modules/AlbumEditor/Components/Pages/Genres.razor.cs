@@ -17,7 +17,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         [Inject] private IJSRuntime JsRuntime { get; set; }
 
         private SegnoSharpDbContext DbContext { get; set; }
-        private List<Genre> DbGenres { get; set; } = new();
+        private List<Genre> DbGenres { get; set; } = [];
 
         protected override async Task OnInitializedAsync()
         {

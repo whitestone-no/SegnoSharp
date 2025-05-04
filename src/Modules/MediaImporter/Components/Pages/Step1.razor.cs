@@ -56,7 +56,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
         private void OnNextClick()
         {
-            NavigationManager.NavigateTo("/admin/mediaimporter/step2");
+            NavigationManager.NavigateTo("admin/mediaimporter/step2");
         }
     }
 }

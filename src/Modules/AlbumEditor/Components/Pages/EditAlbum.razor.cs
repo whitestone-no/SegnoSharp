@@ -165,7 +165,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
                 await Save();
             }
 
-            NavigationManager.NavigateTo("/admin/albums");
+            NavigationManager.NavigateTo("admin/albums");
         }
 
         private async Task Save()
@@ -394,7 +394,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
 
             await DbContext.SaveChangesAsync();
 
-            NavigationManager.NavigateTo($"/admin/albums");
+            NavigationManager.NavigateTo("admin/albums");
         }
 
         private void RemoveTrackGroup(TrackGroup trackGroup)

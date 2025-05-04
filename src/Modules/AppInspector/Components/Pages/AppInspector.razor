@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using System.Runtime.InteropServices
 @using System.Reflection
+@using Microsoft.Extensions.Primitives
 @using Whitestone.SegnoSharp.Database
 @using Whitestone.SegnoSharp.Shared.Attributes
 @using Whitestone.SegnoSharp.Modules.AppInspector.ViewModels
@@ -159,6 +160,24 @@
                 <td>@de.Key</td>
                 <td>@de.Value</td>
             </tr>
+        }
+    </tbody>
+</table>
+
+<h2>HTTP headers</h2>
+
+<table style="font-size: 12px">
+    <thead>
+    <tr>
+        <th>Header</th>
+        <th>Value</th>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (KeyValuePair<string, StringValues> header in HttpContext.Request.Headers)
+        {
+            <td>@header.Key</td>
+            <td>@header.Value</td>
         }
     </tbody>
 </table>

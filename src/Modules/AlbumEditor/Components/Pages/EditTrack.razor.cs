@@ -156,7 +156,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
                 }
             }
 
-            NavigationManager.NavigateTo($"/admin/albums/{Track.Disc.Album.Id}");
+            NavigationManager.NavigateTo($"admin/albums/{Track.Disc.Album.Id}");
         }
 
         public void Dispose()
@@ -239,7 +239,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
             DbContext.Tracks.Remove(Track);
             await DbContext.SaveChangesAsync();
 
-            NavigationManager.NavigateTo($"/admin/albums/{Track.Disc.Album.Id}");
+            NavigationManager.NavigateTo($"admin/albums/{Track.Disc.Album.Id}");
         }
     }
 }

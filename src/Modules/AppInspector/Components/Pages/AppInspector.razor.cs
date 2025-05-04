@@ -7,14 +7,16 @@ using System.Linq;
 using Whitestone.SegnoSharp.Modules.AppInspector.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using Microsoft.AspNetCore.Http;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Modules.AppInspector.Extensions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Whitestone.SegnoSharp.Modules.AppInspector.Components.Pages
 {
     public partial class AppInspector
     {
+        [CascadingParameter] private HttpContext HttpContext { get; set; }
+
         [Inject] private IConfiguration Configuration { get; set; }
         [Inject] private IServiceProvider ServiceProvider { get; set; }
         [Inject] private IEnumerable<IModule> Modules { get; set; }

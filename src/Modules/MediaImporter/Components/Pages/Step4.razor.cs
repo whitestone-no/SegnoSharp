@@ -236,7 +236,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
             var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to go back? All tag info will be reread and any changes you've made to album/track names, artists, or reorderings will be lost.");
             if (confirmed)
             {
-                NavigationManager.NavigateTo("/admin/mediaimporter/step3");
+                NavigationManager.NavigateTo("admin/mediaimporter/step3");
             }
         }
     }

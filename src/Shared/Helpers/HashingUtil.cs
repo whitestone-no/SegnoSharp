@@ -26,7 +26,7 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         public string GetAlbumCoverUri(int albumId, int width = 500)
         {
             string hash = GetAlbumCoverHash(albumId, width);
-            return $"/img/albumcover/{albumId}?w={width}&hash={hash}";
+            return $"img/albumcover/{albumId}?w={width}&hash={hash}";
         }
 
         public string GetAlbumCoverHash(int albumId, int width = 500)

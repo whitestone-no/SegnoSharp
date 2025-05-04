@@ -17,10 +17,10 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         [Inject] private IJSRuntime JsRuntime { get; set; }
 
         private SegnoSharpDbContext DbContext { get; set; }
-        private List<MediaType> DbTypes { get; set; } = new();
+        private List<MediaType> DbTypes { get; set; } = [];
 
-        private MediaType _currentlyDraggingType = null;
-        private MediaType _currentlyDraggingOverType = null;
+        private MediaType _currentlyDraggingType;
+        private MediaType _currentlyDraggingOverType;
 
         protected override async Task OnInitializedAsync()
         {

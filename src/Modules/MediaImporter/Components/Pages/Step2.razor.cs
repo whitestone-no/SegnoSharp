@@ -94,12 +94,12 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
         private void OnNextClick()
         {
-            NavigationManager.NavigateTo("/admin/mediaimporter/step3");
+            NavigationManager.NavigateTo("admin/mediaimporter/step3");
         }
 
         private void OnBackClick()
         {
-            NavigationManager.NavigateTo("/admin/mediaimporter/step1");
+            NavigationManager.NavigateTo("admin/mediaimporter/step1");
         }
     }
 }

@@ -482,7 +482,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
 
         private void OnNextClick()
         {
-            NavigationManager.NavigateTo("/admin/mediaimporter/step4");
+            NavigationManager.NavigateTo("admin/mediaimporter/step4");
         }
 
         private async Task OnBackClick()
@@ -490,7 +490,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.Components.Pages
             var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to go back? Any changes you've made to album/track names, artists, or reorderings will be lost");
             if (confirmed)
             {
-                NavigationManager.NavigateTo("/admin/mediaimporter/step2");
+                NavigationManager.NavigateTo("admin/mediaimporter/step2");
             }
         }
 

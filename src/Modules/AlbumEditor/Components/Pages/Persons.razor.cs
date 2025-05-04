@@ -21,7 +21,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         private SegnoSharpDbContext DbContext { get; set; }
 
         private string SearchQuery { get; set; }
-        private List<Person> PersonResults { get; set; } = new();
+        private List<Person> PersonResults { get; set; } = [];
 
         private Timer _searchTimer;
 
