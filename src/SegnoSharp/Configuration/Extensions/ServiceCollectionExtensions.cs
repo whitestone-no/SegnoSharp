@@ -1,8 +1,11 @@
-﻿using System.Security.Claims;
+﻿using System.IO;
+using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -109,6 +112,32 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                     }
                 };
             });
+        }
+
+        public static void AddCustomDataProtection(this IServiceCollection services, IConfiguration configuration, DirectoryInfo dataFolder)
+        {
+            configuration.GetSection("DataProtection").GetValue<string>("Folder");
+            DirectoryInfo dataProtectionFolder = new(Path.Combine(dataFolder.FullName, configuration.GetSection("DataProtection").GetValue<string>("Folder")));
+
+            if (!dataProtectionFolder.Exists)
+            {
+                dataProtectionFolder.Create();
+            }
+
+            IDataProtectionBuilder builder = services.AddDataProtection()
+                .PersistKeysToFileSystem(dataProtectionFolder);
+
+            var certFileName = configuration.GetSection("DataProtection").GetValue<string>("CertificateFile");
+            
+            if (string.IsNullOrEmpty(certFileName))
+            {
+                return;
+            }
+
+            FileInfo certFile = new(Path.Combine(dataProtectionFolder.FullName, configuration.GetSection("DataProtection").GetValue<string>("CertificateFile")));
+            X509Certificate2 cert = X509CertificateLoader.LoadPkcs12FromFile(certFile.FullName, configuration.GetSection("DataProtection").GetValue<string>("CertificatePassword"), X509KeyStorageFlags.EphemeralKeySet);
+
+            builder.ProtectKeysWithCertificate(cert);
         }
     }
 }

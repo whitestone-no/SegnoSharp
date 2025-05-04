@@ -38,7 +38,7 @@ namespace Whitestone.SegnoSharp
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .CreateBootstrapLogger();
-            
+
             try
             {
                 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -144,7 +144,7 @@ namespace Whitestone.SegnoSharp
             {
                 case "sqlite":
                     SqliteConnectionStringBuilder connectionStringBuilder = new(connectionString);
-                    connectionStringBuilder.DataSource = Path.Combine(builder.Configuration["SiteConfig:DataPath"] ?? string.Empty, connectionStringBuilder.DataSource);
+                    connectionStringBuilder.DataSource = Path.Combine(dataFolder.FullName, connectionStringBuilder.DataSource);
 
                     builder.Services.AddDbContextFactory<SegnoSharpDbContext>(options => options.UseSqlite(connectionStringBuilder.ConnectionString, x => x.MigrationsAssembly("Whitestone.SegnoSharp.Database.Migrations.SQLite")).EnableSensitiveDataLogging(sensitiveDataLogging));
                     builder.Services.AddHealthChecks().AddSqlite(connectionStringBuilder.ConnectionString, name: "Database");
@@ -166,6 +166,7 @@ namespace Whitestone.SegnoSharp
                     throw new ArgumentException($"Unsupported database type: {databaseType}");
             }
 
+            builder.Services.AddCustomDataProtection(builder.Configuration, dataFolder);
             builder.Services.AddHealthChecks().AddDbContextCheck<SegnoSharpDbContext>("DatabaseContext");
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddCambion();
