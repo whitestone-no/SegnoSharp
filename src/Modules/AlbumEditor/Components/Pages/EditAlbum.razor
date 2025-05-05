@@ -1,6 +1,7 @@
 ﻿@page "/admin/albums/{Id:int}"
 @rendermode InteractiveServer
 @layout InnerLayout
+@using System.Collections.Immutable
 @using Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Layouts
 @using Whitestone.SegnoSharp.Database.Models
 @using Whitestone.SegnoSharp.Modules.AlbumEditor.Extensions
@@ -180,14 +181,14 @@
                                 <tbody>
                                     @foreach (Track track in disc.Tracks.OrderBy(t => t.TrackNumber))
                                     {
-                                        TrackGroup trackGroup = disc.TrackGroups.FirstOrDefault(tg => tg.GroupBeforeTrackNumber == track.TrackNumber);
-                                        if (trackGroup != null)
+                                        List<TrackGroup> trackGroups = disc.TrackGroups.Where(tg => tg.GroupBeforeTrackNumber == track.TrackNumber).ToList();
+                                        @foreach(TrackGroup trackGroup in trackGroups)
                                         {
                                             <tr draggable="true"
                                                 ondragover="event.preventDefault();"
-                                                class="track-group"
                                                 @ondragstart="() => DragStart(trackGroup)"
-                                                @ondragend="HandleDragEnd">
+                                                @ondragend="HandleDragEnd"
+                                                class="@(_currentlyDraggingTrackGroup == trackGroup ? "drag-current" : "track-group")">
                                                 <td class="text-center"><span class="fa-solid fa-grip"></span></td>
                                                 <td colspan="3">
                                                     <div class="form-group">
