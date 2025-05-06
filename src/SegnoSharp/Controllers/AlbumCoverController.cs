@@ -68,8 +68,6 @@ namespace Whitestone.SegnoSharp.Controllers
                 return File(coverData.Data, cover.Mime);
             }
 
-            SKImage img = SKImage.FromEncodedData(coverData.Data);
-
             SKBitmap bmp = SKBitmap.Decode(coverData.Data);
             double aspectRatio = (double)bmp.Width / bmp.Height;
 
