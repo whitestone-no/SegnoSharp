@@ -59,38 +59,20 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
 
                 if (sequenceEqual == null || !sequenceEqual.Value)
                 {
-                    if (TrackPersonGroupPersonRelations == null)
+                    TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ArtistPersonGroupMappingId);
+                    if (relation == null)
                     {
-                        TrackPersonGroupPersonRelations = new List<TrackPersonGroupPersonRelation>
+                        relation = new TrackPersonGroupPersonRelation
                         {
-                            new()
+                            PersonGroup = new PersonGroup
                             {
-                                Parent = this,
-                                PersonGroup = new PersonGroup
-                                {
-                                    Id = ArtistPersonGroupMappingId
-                                },
-                                Persons = persons
+                                Id = ArtistPersonGroupMappingId
                             }
                         };
+                        TrackPersonGroupPersonRelations.Add(relation);
                     }
-                    else
-                    {
-                        TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ArtistPersonGroupMappingId);
-                        if (relation == null)
-                        {
-                            relation = new TrackPersonGroupPersonRelation
-                            {
-                                PersonGroup = new PersonGroup
-                                {
-                                    Id = ComposerPersonGroupMappingId
-                                }
-                            };
-                            TrackPersonGroupPersonRelations.Add(relation);
-                        }
 
-                        relation.Persons = persons;
-                    }
+                    relation.Persons = persons;
                 }
             }
         }
@@ -129,38 +111,20 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
 
                 if (sequenceEqual == null || !sequenceEqual.Value)
                 {
-                    if (TrackPersonGroupPersonRelations == null)
+                    TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ComposerPersonGroupMappingId);
+                    if (relation == null)
                     {
-                        TrackPersonGroupPersonRelations = new List<TrackPersonGroupPersonRelation>
+                        relation = new TrackPersonGroupPersonRelation
                         {
-                            new()
+                            PersonGroup = new PersonGroup
                             {
-                                Parent = this,
-                                PersonGroup = new PersonGroup
-                                {
-                                    Id = ComposerPersonGroupMappingId
-                                },
-                                Persons = persons
+                                Id = ComposerPersonGroupMappingId
                             }
                         };
+                        TrackPersonGroupPersonRelations.Add(relation);
                     }
-                    else
-                    {
-                        TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ComposerPersonGroupMappingId);
-                        if (relation == null)
-                        {
-                            relation = new TrackPersonGroupPersonRelation
-                            {
-                                PersonGroup = new PersonGroup
-                                {
-                                    Id = ComposerPersonGroupMappingId
-                                }
-                            };
-                            TrackPersonGroupPersonRelations.Add(relation);
-                        }
 
-                        relation.Persons = persons;
-                    }
+                    relation.Persons = persons;
                 }
             }
         }
