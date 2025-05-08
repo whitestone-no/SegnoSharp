@@ -68,14 +68,24 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
                     };
                 }).ToList();
 
+                if (persons.Count <= 0)
+                {
+                    AlbumPersonGroupPersonRelation relation = AlbumPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == PersonGroupMappingId);
+                    if (relation != null)
+                    {
+                        AlbumPersonGroupPersonRelations.Remove(relation);
+                        return;
+                    }
+                }
+
                 AlbumPersonGroupPersonRelations = new List<AlbumPersonGroupPersonRelation>
                 {
                     new()
                     {
-                        Parent = this,
                         PersonGroup = new PersonGroup
                         {
-                            Id = PersonGroupMappingId
+                            Id = PersonGroupMappingId,
+                            Type = PersonGroupType.Album
                         },
                         Persons = persons
                     }

@@ -50,6 +50,16 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
                     };
                 }).ToList();
 
+                if (persons.Count <= 0)
+                {
+                    TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ArtistPersonGroupMappingId);
+                    if (relation != null)
+                    {
+                        TrackPersonGroupPersonRelations.Remove(relation);
+                        return;
+                    }
+                }
+                
                 // If track artist is the same persons as album artist, then blank the track artists
                 bool? sequenceEqual = Disc.Album.AlbumPersonGroupPersonRelations
                     .FirstOrDefault(r => r.PersonGroup.Id == AlbumArtistPersonGroupMappingId)?
@@ -66,7 +76,8 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
                         {
                             PersonGroup = new PersonGroup
                             {
-                                Id = ArtistPersonGroupMappingId
+                                Id = ArtistPersonGroupMappingId,
+                                Type = PersonGroupType.Track
                             }
                         };
                         TrackPersonGroupPersonRelations.Add(relation);
@@ -102,6 +113,16 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
                     };
                 }).ToList();
 
+                if (persons.Count <= 0)
+                {
+                    TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ComposerPersonGroupMappingId);
+                    if (relation != null)
+                    {
+                        TrackPersonGroupPersonRelations.Remove(relation);
+                        return;
+                    }
+                }
+
                 // If track composer is the same persons as album artist, then blank the track composers
                 bool? sequenceEqual = Disc.Album.AlbumPersonGroupPersonRelations
                     .FirstOrDefault(r => r.PersonGroup.Id == AlbumArtistPersonGroupMappingId)?
@@ -112,13 +133,15 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
                 if (sequenceEqual == null || !sequenceEqual.Value)
                 {
                     TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ComposerPersonGroupMappingId);
+
                     if (relation == null)
                     {
                         relation = new TrackPersonGroupPersonRelation
                         {
                             PersonGroup = new PersonGroup
                             {
-                                Id = ComposerPersonGroupMappingId
+                                Id = ComposerPersonGroupMappingId,
+                                Type = PersonGroupType.Track
                             }
                         };
                         TrackPersonGroupPersonRelations.Add(relation);
