@@ -134,6 +134,7 @@ namespace Whitestone.SegnoSharp.Modules.MainPlaylistProcessor
             var eligibleTracks = await dbContext.TrackStreamInfos
                 .AsNoTracking()
                 .Where(tsi =>
+                    tsi.IncludeInAutoPlaylist &&
                     !trackExclusions.Contains(tsi.TrackId) &&
                     !albumExclusions.Contains(tsi.Track.Disc.AlbumId) &&
                     !tsi.Track.TrackPersonGroupPersonRelations.Any(r =>
