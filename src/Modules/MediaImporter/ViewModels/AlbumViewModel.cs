@@ -13,6 +13,11 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
         public Guid TempId { get; set; }
         public bool AlbumAlreadyExists { get; set; }
 
+        public AlbumViewModel()
+        {
+            AlbumPersonGroupPersonRelations = new List<AlbumPersonGroupPersonRelation>();
+        }
+
         public string CoverImage
         {
             get
@@ -68,28 +73,28 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
                     };
                 }).ToList();
 
-                if (persons.Count <= 0)
+                AlbumPersonGroupPersonRelation relation = AlbumPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == PersonGroupMappingId);
+
+                if (relation != null && persons.Count <= 0)
                 {
-                    AlbumPersonGroupPersonRelation relation = AlbumPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == PersonGroupMappingId);
-                    if (relation != null)
-                    {
-                        AlbumPersonGroupPersonRelations.Remove(relation);
-                        return;
-                    }
+                    AlbumPersonGroupPersonRelations.Remove(relation);
+                    return;
                 }
 
-                AlbumPersonGroupPersonRelations = new List<AlbumPersonGroupPersonRelation>
+                if (relation == null)
                 {
-                    new()
+                    relation = new AlbumPersonGroupPersonRelation
                     {
                         PersonGroup = new PersonGroup
                         {
                             Id = PersonGroupMappingId,
                             Type = PersonGroupType.Album
-                        },
-                        Persons = persons
-                    }
-                };
+                        }
+                    };
+                    AlbumPersonGroupPersonRelations.Add(relation);
+                }
+
+                relation.Persons = persons;
             }
         }
     }

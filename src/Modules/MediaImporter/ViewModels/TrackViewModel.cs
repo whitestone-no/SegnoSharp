@@ -50,41 +50,44 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
                     };
                 }).ToList();
 
-                if (persons.Count <= 0)
+                TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ArtistPersonGroupMappingId);
+
+                if (relation != null && persons.Count <= 0)
                 {
-                    TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ArtistPersonGroupMappingId);
-                    if (relation != null)
-                    {
-                        TrackPersonGroupPersonRelations.Remove(relation);
-                        return;
-                    }
+                    TrackPersonGroupPersonRelations.Remove(relation);
+                    return;
                 }
-                
+
                 // If track artist is the same persons as album artist, then blank the track artists
+                // But only if the composer is empty
                 bool? sequenceEqual = Disc.Album.AlbumPersonGroupPersonRelations
                     .FirstOrDefault(r => r.PersonGroup.Id == AlbumArtistPersonGroupMappingId)?
                     .Persons
                     .OrderBy(x => x)
                     .SequenceEqual(persons.OrderBy(x => x));
 
-                if (sequenceEqual == null || !sequenceEqual.Value)
-                {
-                    TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ArtistPersonGroupMappingId);
-                    if (relation == null)
-                    {
-                        relation = new TrackPersonGroupPersonRelation
-                        {
-                            PersonGroup = new PersonGroup
-                            {
-                                Id = ArtistPersonGroupMappingId,
-                                Type = PersonGroupType.Track
-                            }
-                        };
-                        TrackPersonGroupPersonRelations.Add(relation);
-                    }
+                TrackPersonGroupPersonRelation composerRelation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ComposerPersonGroupMappingId);
 
-                    relation.Persons = persons;
+                if (sequenceEqual != null && sequenceEqual.Value && (composerRelation == null || composerRelation.Persons.Count <= 0))
+                {
+                    TrackPersonGroupPersonRelations.Remove(relation);
+                    return;
                 }
+
+                if (relation == null)
+                {
+                    relation = new TrackPersonGroupPersonRelation
+                    {
+                        PersonGroup = new PersonGroup
+                        {
+                            Id = ArtistPersonGroupMappingId,
+                            Type = PersonGroupType.Track
+                        }
+                    };
+                    TrackPersonGroupPersonRelations.Add(relation);
+                }
+
+                relation.Persons = persons;
             }
         }
 
@@ -113,42 +116,30 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
                     };
                 }).ToList();
 
-                if (persons.Count <= 0)
+                TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ComposerPersonGroupMappingId);
+
+                if (relation != null && persons.Count <= 0)
                 {
-                    TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ComposerPersonGroupMappingId);
-                    if (relation != null)
-                    {
-                        TrackPersonGroupPersonRelations.Remove(relation);
-                        return;
-                    }
+                    TrackPersonGroupPersonRelations.Remove(relation);
+                    return;
                 }
 
-                // If track composer is the same persons as album artist, then blank the track composers
-                bool? sequenceEqual = Disc.Album.AlbumPersonGroupPersonRelations
-                    .FirstOrDefault(r => r.PersonGroup.Id == AlbumArtistPersonGroupMappingId)?
-                    .Persons
-                    .OrderBy(x => x)
-                    .SequenceEqual(persons.OrderBy(x => x));
+                // Don't do album artist comparison here as it should only be done for artist, not composer
 
-                if (sequenceEqual == null || !sequenceEqual.Value)
+                if (relation == null)
                 {
-                    TrackPersonGroupPersonRelation relation = TrackPersonGroupPersonRelations.FirstOrDefault(r => r.PersonGroup.Id == ComposerPersonGroupMappingId);
-
-                    if (relation == null)
+                    relation = new TrackPersonGroupPersonRelation
                     {
-                        relation = new TrackPersonGroupPersonRelation
+                        PersonGroup = new PersonGroup
                         {
-                            PersonGroup = new PersonGroup
-                            {
-                                Id = ComposerPersonGroupMappingId,
-                                Type = PersonGroupType.Track
-                            }
-                        };
-                        TrackPersonGroupPersonRelations.Add(relation);
-                    }
-
-                    relation.Persons = persons;
+                            Id = ComposerPersonGroupMappingId,
+                            Type = PersonGroupType.Track
+                        }
+                    };
+                    TrackPersonGroupPersonRelations.Add(relation);
                 }
+
+                relation.Persons = persons;
             }
         }
     }
