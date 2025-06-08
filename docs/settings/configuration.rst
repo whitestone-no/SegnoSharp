@@ -79,14 +79,12 @@ This registration can be placed in the following configuration options:
 Logging
 *******
 
-SegnoSharp logs to console by default, using Serilog. The Serilog configuration can be overridden by setting environment variables, or changing the ``appsettings.json`` in the main application if running it from a cloned repo.
-In the following example the `Serilog.Sinks.File <https://github.com/serilog/serilog-sinks-file>`_ is added to the logging configuration:
+SegnoSharp logs to both console and file by default, using Serilog. The Serilog configuration can be overridden by setting environment variables, or changing the ``appsettings.json`` in the main application if running it from a cloned repo.
+In the following example the `Serilog.Sinks.File <https://github.com/serilog/serilog-sinks-file>`_ is modified to keep the latest 14 log files instead of the default 7:
 
-::
+.. code-block:: bash
 
-    SegnoSharp_Serilog__Using__1=Serilog.Sinks.File
-    SegnoSharp_Serilog__WriteTo__1__Name=File
-    SegnoSharp_Serilog__WriteTo__1__Args__path=/var/segnosharp/logs/log.txt
+    SegnoSharp_Serilog__WriteTo__1__Args__retainedFileCountLimit=14
 
 You can also overwrite the existing console logger by changing the ``1`` to ``0`` in the above example.
 
