@@ -14,10 +14,12 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Download Bass.NET
-      run: wget https://www.un4seen.com/files/z/4/Bass24.Net.zip --directory-prefix=tmp -nv
-    - name: Unzip BASS.NET
-      run: 7z e tmp/Bass24.Net.zip -o./data/bass core/Bass.Net.dll
+    - name: Checkout Assets
+      uses: actions/checkout@v4
+      with:
+        ref: assets
+        path: lib
+        fetch-depth: 0
     - name: Setup GitVersion
       uses: gittools/actions/gitversion/setup@v3.0.3
       with:
