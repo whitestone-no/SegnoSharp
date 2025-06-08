@@ -7,8 +7,12 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG SEGNOSHARP_SEMVER="0.0.1"
 ARG SEGNOSHARP_SEMVER_FULL="0.0.1-dev"
 
-WORKDIR /data
-COPY data .
+# Build expects DLL in /lib, but this folder also contains all "lib" content from the base image
+# Therefore create another clean folder under "lib" and copy it there as well. This is the folder used in the steps below.
+WORKDIR /lib
+COPY lib .
+WORKDIR /lib/segnosharp
+COPY lib .
 WORKDIR /src
 COPY src .
 
@@ -26,6 +30,15 @@ LABEL org.opencontainers.image.vendor=Whitestone
 LABEL org.opencontainers.image.source=https://github.com/whitestone-no/segnosharp
 LABEL org.opencontainers.image.documentation=https://segnosharp.readthedocs.io
 LABEL org.opencontainers.image.url=https://segnosharp.whitestone.no
+ENV SegnoSharp_SiteConfig__DataPath=/var/segnosharp
+ENV SegnoSharp_SiteConfig__LibPath=/lib/segnosharp
+ENV SegnoSharp_SiteConfig__MusicPath=/var/music
+ENV SegnoSharp_Serilog__WriteTo__1__Args__path=$SegnoSharp_SiteConfig__DataPath/logs/segnosharp.log
+# Ensure that the data and music folders exists in case users forget to map them as volumes
+WORKDIR /var/segnosharp
+WORKDIR /var/music
+WORKDIR /lib/segnosharp
+COPY --from=build /lib/segnosharp .
 WORKDIR /app
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "Whitestone.SegnoSharp.dll"]
