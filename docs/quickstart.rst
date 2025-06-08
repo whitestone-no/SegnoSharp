@@ -49,11 +49,11 @@ Create a new file called ``docker-compose.yml`` with the following content:
 
     name: segnosharp
     services:
-	  icecast:
+      icecast:
         image: libretime/icecast:latest
         container_name: segnosharp-icecast
         ports:
-          - "127.0.0.1:8000:8000"
+          - "8000:8000"
       segnosharp:
         container_name: segnosharp
         image: ghcr.io/whitestone-no/segnosharp:latest
@@ -64,10 +64,8 @@ Create a new file called ``docker-compose.yml`` with the following content:
           - "pathToYourDataFolder:/var/segnosharp"
           - "pathToYourMusicFolder:/var/music"
         ports:
-          - "127.0.0.1:8080:8080"
+          - "8080:8080"
         environment:
-          SegnoSharp_SiteConfig__DataPath: /var/segnosharp
-          SegnoSharp_SiteConfig__MusicPath: /var/music
           SegnoSharp_OpenIdConnect__UseOidc: false
 
 Replace ``pathToYourDataFolder`` and ``pathToYourMusicFolder`` with the real paths from your computer.

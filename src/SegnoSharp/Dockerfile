@@ -39,6 +39,7 @@ WORKDIR /var/segnosharp
 WORKDIR /var/music
 WORKDIR /lib/segnosharp
 COPY --from=build /lib/segnosharp .
+RUN chmod -R 755 .
 WORKDIR /app
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "Whitestone.SegnoSharp.dll"]
