@@ -1,3 +1,5 @@
+.. _refDatabase:
+
 ########
 Database
 ########

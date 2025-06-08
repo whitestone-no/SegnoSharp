@@ -6,7 +6,7 @@ Quickstart
 
 The easiest way to run SegnoSharp is through the official Docker image.
 
-::
+.. code-block:: bash
 
     # From GitHub Container Registry
     docker pull ghcr.io/whitestone-no/segnosharp:latest
@@ -89,7 +89,7 @@ This will download (pull) the image and start the image as a container running i
 When it says ``Completed`` and returns you to the command line you should be able to start using SegnoSharp on `http://localhost:8080 <http://localhost:8080>`_.
 
 Log in, import some media files, go to "Stream" in the menu, set the ``Hostname`` value to ``icecast`` and start the stream.
-You can now use i.e. `VLC <https://www.videolan.org/>`_ and use ``Media > Open Network Stream...`, input http://localhost:8000/stream and start listening.
+You can now use i.e. `VLC <https://www.videolan.org/>`_ and use ``Media > Open Network Stream...``, input http://localhost:8000/stream and start listening.
 
 When you don't want the container running anymore you can end it with the following command:
 

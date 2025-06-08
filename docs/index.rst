@@ -1,7 +1,7 @@
 .. rst-class:: indexheading
 
 Welcome to SegnoSharp
-------------------
+---------------------
 
 .. image:: images/logo.png
    :align: center
