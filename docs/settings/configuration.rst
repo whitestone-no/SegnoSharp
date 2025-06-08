@@ -26,6 +26,8 @@ Site configuration
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | SiteConfig.DataPath     | Absolute path or relative to working directory | Directory used for additional persistent data handling, i.e. SQLite database |
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
+| SiteConfig.LibPath      | Absolute path or relative to working directory | Directory used for BASS and FFMPEG binaries                                  |
++-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | SiteConfig.MusicPath    | Absolute path or relative to working directory | This is the default directory SegnoSharp will read music from                |
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | SiteConfig.SharedSecret | Secret string value                            | Used by ``IHashingUtil`` to generate hashes unique to your installation      |
@@ -62,7 +64,7 @@ Examples using environment variables:
 BASS
 ****
 
-SegnoSharp uses the BASS audio libraries from `un4seen <https://www.un4seen.com/bass.html>`_ (see the corresponding chapter in :ref:`quickstart <refQuickstartBass>`).
+SegnoSharp uses the BASS audio libraries from `un4seen <https://www.un4seen.com/bass.html>`_ (see the corresponding chapter in :ref:`prerequisites <refPrerequisiteBass>`).
 These libraries are not free for all use, so check if you need a license registration. See also the relevant chapter in the :ref:`FAQ <faqBassRegistration>`
 This registration can be placed in the following configuration options:
 

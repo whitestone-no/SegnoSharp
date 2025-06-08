@@ -162,14 +162,10 @@ Finally you create the deployment of SegnoSharp itself. Create a new file called
             env:
             - name: SegnoSharp_OpenIdConnect__UseOidc
               value: "false"
-            - name: SegnoSharp_CommonConfig__DataPath
-              value: "/usr/segnosharp/data"
-            - name: SegnoSharp_CommonConfig__MusicPath
-              value: "/usr/segnosharp/music"
             volumeMounts:
-              - mountPath: "/usr/segnosharp/data"
+              - mountPath: "/var/segnosharp"
                 name: segnosharp-storage-data
-              - mountPath: "/usr/segnosharp/music"
+              - mountPath: "/var/music"
                 name: segnosharp-storage-music          
 
 And apply this as well:

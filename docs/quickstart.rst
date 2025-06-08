@@ -25,55 +25,17 @@ This assumes you already have `Docker Desktop <https://www.docker.com/products/d
 Before starting the Docker container you need to perform a few additional steps.
 
 First and foremost, SegnoSharp expects a ``data`` folder to be mapped as a volume.
-This is where the SQLite database will be stored, and where SegnoSharps looks for additional data.
+This is where SegnoSharp will place its log files, as well as the SQLite database.
 It can be any existing folder on your harddrive or a new and empty one.
 
-.. _refQuickstartBass:
-
-BASS
-====
-
-SegnoSharp uses the BASS audio libraries to play and stream music.
-Create a new folder inside the ``data`` folder called ``bass``.
-
-Download the libraries from `un4seen <https://www.un4seen.com/bass.html>`_ and extract the files into ``data/bass``.
-The following table contains a list of all libraries and which file to extract into ``data/bass``
-
-+-------------+----------------------+----------------------------+------------------+
-| Library     | Filename             | Extract                    | Verified version |
-+=============+======================+============================+==================+
-| BASS        | bass24-linux.zip     | libs/x86_64/libbass.so     | 2.4.17           |
-+-------------+----------------------+----------------------------+------------------+
-| BASSFLAC    | bassflac24-linux.zip | libs/x86_64/libbassflac.so | 2.4.5.5          |
-+-------------+----------------------+----------------------------+------------------+
-| BASSmix     | bassmix24-linux.zip  | libs/x86_64/libbassmix.so  | 2.4.12           |
-+-------------+----------------------+----------------------------+------------------+
-| BASSenc     | bassenc24-linux.zip  | libs/x86_64/libbassenc.so  | 2.4.16.1         |
-+-------------+----------------------+----------------------------+------------------+
-| Bass.Net    | Bass24.Net.zip       | core/Bass.Net.dll          | 2.4.17.6         |
-+-------------+----------------------+----------------------------+------------------+
-
-The ``data/bass`` folder should now contain the following files:
-
-- Bass.Net.dll
-- libbass.so
-- libbassenc.so
-- libbassflac.so
-- libbassmix.so
-
-FFMPEG
-======
-
-SegnoSharp uses FFMPEG to encode the raw audio from BASS into a compressed stream that BASS then streams to Shoutcast/Icecast.
-Create a new folder inside the ``data`` folder called ``ffmpeg``, and download a linux build for linux64/amd64 and extract the ``ffmpeg`` binary
-from the downloaded package into ``data/ffmpeg``. Find a suitable package at `FFMPEG <https://www.ffmpeg.org/>`_.
+It also expects a ``music`` folder to be mapped as a volume.
+SegnoSharp will use this as a start path when looking for music files.
 
 **********************
 Starting the container
 **********************
 
-The ``data`` folder needs to be mapped into the container as a volume.
-You must also map a folder containing your music files into the container, otherwise SegnoSharp won't be able to find anything to play.
+The ``data`` and ``music`` folders needs to be mapped into the container as a volume.
 
 In order to access the web page in the container you also need to forward a network port.
 
@@ -104,8 +66,8 @@ Create a new file called ``docker-compose.yml`` with the following content:
         ports:
           - "127.0.0.1:8080:8080"
         environment:
-          SegnoSharp_CommonConfig__DataPath: /var/segnosharp
-          SegnoSharp_CommonConfig__MusicPath: /var/music
+          SegnoSharp_SiteConfig__DataPath: /var/segnosharp
+          SegnoSharp_SiteConfig__MusicPath: /var/music
           SegnoSharp_OpenIdConnect__UseOidc: false
 
 Replace ``pathToYourDataFolder`` and ``pathToYourMusicFolder`` with the real paths from your computer.

@@ -14,10 +14,10 @@ And start SegnoSharp with some required arguments:
 
 ::
 
-    dotnet run --project ./SegnoSharp/SegnoSharp.csproj --no-launch-profile CommonConfig:DataPath=../../data CommonConfig:MusicPath=../../music OpenIdConnect:UseOidc=false
+    dotnet run --project ./SegnoSharp/SegnoSharp.csproj --no-launch-profile SiteConfig:DataPath=../../data SiteConfig:LibPath=../../lib SiteConfig:MusicPath=../../music OpenIdConnect:UseOidc=false
 	
-The ``DataPath`` and ``MusicPaths`` are relative to the ``src/SegnoSharp`` folder.
-If you do not want to use the ``data`` and ``music`` paths that comes with the repository replace these settings.
+The ``DataPath``, ``LibPath``, and ``MusicPaths`` are relative to the ``src/SegnoSharp`` folder.
+If you do not want to use the ``data``, ``lib``, and ``music`` paths that comes with the repository replace these settings.
 Remember that the paths can be both relative and absolute.
 
 Seeing as you have cloned the repository there's nothing stopping you from editing ``src/SegnoSharp/appsettings.json`` instead of having to specifically

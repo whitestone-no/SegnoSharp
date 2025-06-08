@@ -6,7 +6,7 @@ Visual Studio Code
 
 .. note:: This guide is about Visual Studio Code (VSCode), *not* the regular Visual Studio
 
-Now that you have the source code you should first make sure that the ``data`` folder in the repository contains the correct files
+Now that you have the source code you should first make sure that the ``lib`` folder in the repository contains the correct files
 
 You should also make sure that you have the following extensions installed in VSCode:
 
@@ -31,8 +31,9 @@ This should prompt you to create a ``launch.json`` file. Accept the creation of 
                 "program": "${workspaceFolder}/src/SegnoSharp/bin/Debug/net9.0/Whitestone.SegnoSharp.dll",
                 "cwd": "${workspaceFolder}/src/SegnoSharp",
                 "env": {
-                    "SegnoSharp_CommonConfig__DataPath": "${workspaceFolder}/data",
-                    "SegnoSharp_CommonConfig__MusicPath": "${workspaceFolder}/music",
+                    "SegnoSharp_SiteConfig__DataPath": "${workspaceFolder}/data",
+                    "SegnoSharp_SiteConfig__LibPath": "${workspaceFolder}/lib",
+                    "SegnoSharp_SiteConfig__MusicPath": "${workspaceFolder}/music",
                     "SegnoSharp_OpenIdConnect__UseOidc": "false"
                 }
             }

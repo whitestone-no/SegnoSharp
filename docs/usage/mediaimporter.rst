@@ -10,7 +10,7 @@ Step 1
 ******
 
 Here you will select which folder to import. The first time you load this module the ``music`` folder is selected by default.
-See :ref:`CommonConfig.MusicPath <refConfigurationDatapath>` for more information on how to change this.
+See :ref:`SiteConfig.MusicPath <refConfigurationDatapath>` for more information on how to change this.
 
 +--------------------+---------------------------------------------------------------------------------+
 | Folder             | | You can naviate the folder structure by clicking on the folder names in the   |
