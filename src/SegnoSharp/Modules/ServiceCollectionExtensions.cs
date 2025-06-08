@@ -39,9 +39,9 @@ namespace Whitestone.SegnoSharp.Modules
                     .AddJsonFile(Path.Join(moduleFile.DirectoryName, $"appsettings.{builder.Environment.EnvironmentName}.json"), true);
                 IConfigurationRoot config = configBuilder.Build();
 
-                var additionalAssemblyFolders = config.GetSection("AdditionalAssemblyFolderInDataFolder").Get<List<string>>();
+                var additionalAssemblyFolders = config.GetSection("AdditionalAssemblyFolderInLibFolder").Get<List<string>>();
                 additionalAssemblyFolders = additionalAssemblyFolders?
-                    .Select(f => Path.Combine(siteConfiguration.DataPath, f))
+                    .Select(f => Path.Combine(siteConfiguration.LibPath, f))
                     .ToList();
 
                 var loadContext = new ModuleLoadContext(moduleFile.FullName, additionalAssemblyFolders);

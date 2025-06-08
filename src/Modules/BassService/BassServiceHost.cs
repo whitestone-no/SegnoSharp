@@ -139,7 +139,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 flacLib = "bassflac.dll";
             }
 
-            DirectoryInfo di = new(Path.Combine(_siteConfig.DataPath, "bass"));
+            DirectoryInfo di = new(Path.Combine(_siteConfig.LibPath, "bass"));
 
             if (!di.Exists)
             {
@@ -235,7 +235,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                     return Task.CompletedTask;
                 }
 
-                string encoderPath = Path.Combine(_siteConfig.DataPath, _ffmpegConfig.DataFolder);
+                string encoderPath = Path.Combine(_siteConfig.LibPath, _ffmpegConfig.LibFolder);
 
                 var ffmpegExecutable = "ffmpeg";
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

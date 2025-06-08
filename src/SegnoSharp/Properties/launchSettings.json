@@ -6,7 +6,9 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SegnoSharp_SiteConfig__DataPath": "$(SolutionDir)..\\data",
-        "SegnoSharp_SiteConfig__MusicPath": "$(SolutionDir)..\\music"
+        "SegnoSharp_SiteConfig__LibPath": "$(SolutionDir)..\\lib",
+        "SegnoSharp_SiteConfig__MusicPath": "$(SolutionDir)..\\music",
+        "SegnoSharp_Serilog__WriteTo__1__Args__path": "$(SolutionDir)..\\data\\logs\\segnosharp.log"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
@@ -20,8 +22,6 @@
       "useSSL": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "SegnoSharp_SiteConfig__DataPath": "/var/segnosharp",
-        "SegnoSharp_SiteConfig__MusicPath": "/var/music",
         "SegnoSharp_ConnectionStrings__SegnoSharp": "Data Source=SegnoSharpDocker.db"
       }
     },
@@ -33,8 +33,10 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000",
         "SegnoSharp_SiteConfig__DataPath": "../../data",
+        "SegnoSharp_SiteConfig__LibPath": "../../lib",
         "SegnoSharp_SiteConfig__MusicPath": "../../music",
-        "SegnoSharp_ConnectionStrings__SegnoSharp": "Data Source=SegnoSharpWsl.db"
+        "SegnoSharp_ConnectionStrings__SegnoSharp": "Data Source=SegnoSharpWsl.db",
+        "SegnoSharp_Serilog__WriteTo__1__Args__path": "../../data/logs/segnosharp.log"
       },
       "distributionName": ""
     }

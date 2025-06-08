@@ -4,6 +4,6 @@
     {
         public const string Section = "ffmpeg";
 
-        public string DataFolder { get; set; }
+        public string LibFolder { get; set; }
     }
 }
