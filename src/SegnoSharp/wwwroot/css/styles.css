@@ -38,23 +38,33 @@ body {
     line-height: 1.6;
     color: var(--text-color);
     min-height: 100vh;
-    display: grid;
-    grid-template-rows: auto 1fr;
+    overflow: hidden;
 }
 
 /* Header Styles */
 header {
-    background-color: var(--secondary-color);
-    color: var(--light-text);
-    padding: 0.5rem 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 40px;
     position: fixed;
+    top: 0;
+    height: 40px;
     width: 100%;
+    color: var(--light-text);
+    background-color: var(--secondary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 15px;
     z-index: 1000;
 }
+
+.mainmenu-toggle,
+.submenu-toggle {
+    display: none;
+}
+
+.mainmenu-label {
+    display: none;
+}
+
 
 .logo {
     font-size: 1.5rem;
@@ -65,31 +75,48 @@ header {
 }
 
 /* Identity Section */
-.identity a,
-.identity a:visited,
-.identity a:active {
-    color: var(--primary-color);
-    text-decoration: none;
-    margin-left: 20px;
+.identity {
+    margin-left: auto;
 }
 
-    .identity a:hover {
-        color: var(--hover-color);
-        text-decoration: underline;
+    .identity a,
+    .identity a:visited,
+    .identity a:active {
+        color: var(--primary-color);
+        text-decoration: none;
+        margin-left: 20px;
     }
 
-.identity .user .username {
-    font-style: italic;
-}
+        .identity a:hover {
+            color: var(--hover-color);
+            text-decoration: underline;
+        }
+
+    .identity .user .username {
+        font-style: italic;
+    }
 
 /* Navigation Styles */
-.admin-nav {
-    background-color: var(--secondary-color);
-    width: 250px;
+nav {
     position: fixed;
-    height: calc(100vh - 40px);
     top: 40px;
+    width: 250px;
+    height: calc(100vh - 40px);
+    color: var(--light-text);
+    background-color: var(--secondary-color);
+    z-index: 1000;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-color: var(--bg-gray) var(--secondary-color);
 }
+
+    nav a,
+    nav a:hover,
+    nav a:active,
+    nav a:visited {
+        color: var(--light-text);
+        text-decoration: none;
+    }
 
 .menu {
     list-style: none;
@@ -99,9 +126,11 @@ header {
     .menu li > span {
         color: var(--light-text);
         text-decoration: none;
-        padding: 10px 20px;
+        padding: 10px 0 10px 15px;
         display: block;
         border-left: 4px solid transparent;
+        width: 100%;
+        height: 45px;
     }
 
         .menu a:hover,
@@ -116,114 +145,70 @@ header {
             border-left-color: var(--primary-color);
         }
 
-        .menu a span,
-        .menu li > span > span {
-            width: 27px; /* As wide as the mini logo so that everything is centered */
+        .menu a span[class~="fa-solid"],
+        .menu li > span > span[class~="fa-solid"] {
+            width: 27px; /* As wide as the mini SegnoSharp logo in header so that everything is centered */
         }
 
-    .menu li > span {
-        margin-top: 40px;
-        text-transform: uppercase;
-        background-color: var(--submenu-lighter);
-    }
-
-/* Checkbox Hack Styles */
-.submenu-toggle {
-    display: none !important;
-}
-
-.submenu-label {
-    position: relative;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-}
-
-    /* Make the link fill the label space */
-    .submenu-label a {
-        flex: 1;
-    }
-
-    /* Create a clickable area for the arrow */
-    .submenu-label::before {
-        content: "";
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 30px;
-        height: 30px;
-        cursor: pointer;
-        background-color: rgba(255, 255, 255, 0.05);
-        border-radius: 4px;
-        transition: background-color 0.2s ease;
-    }
-
-    .submenu-label:hover::before {
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .submenu-label::after {
-        content: "►";
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        transition: transform 0.2s ease;
-        color: var(--light-text);
-        font-size: 0.8rem;
-        pointer-events: none;
-        z-index: 1;
-    }
-
-.submenu-toggle:checked + .submenu-label::before {
-    background-color: rgba(255, 255, 255, 0.15);
-}
-
-/* Rotate arrow when expanded */
-.submenu-toggle:checked + .submenu-label::after {
-    transform: translateY(-50%) rotate(90deg);
+.menu-header {
+    margin-top: 40px;
+    text-transform: uppercase;
+    background-color: var(--bg-darkergray);
 }
 
 .submenu {
-    list-style: none;
-    background-color: var(--submenu-bg);
     display: none;
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.3s ease-out;
+    background-color: var(--bg-black);
 }
 
     .submenu a {
-        padding-left: 47px;
+        padding-left: 42px; /* logo size (27px) + margin (15px) */
     }
 
-/* Show submenu when checkbox is checked */
+.mainmenu-label,
+.submenu-label {
+    cursor: pointer;
+}
+
+    .submenu-label:hover {
+        background-color: var(--bg-darkgray);
+    }
+
+.submenu-label {
+    padding: 0 10px;
+    border-left: solid 1px var(--bg-darkergray);
+    height: 45px; /* Same as height for `.menu li > span` */
+    display: inline-flex;
+    align-items: center;
+    float: right;
+    position: relative;
+    top: -45px; /* Same as height as it is exactly one "block" under the previous element */
+}
+
+    .submenu-label > span {
+        width: auto !important;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+
 .submenu-toggle:checked ~ .submenu {
     display: block;
-    max-height: 500px;
-    transition: max-height 0.3s ease-in;
+}
+
+.submenu-toggle:checked ~ label > span {
+    transform: rotate(180deg);
 }
 
 /* Main Content */
-.content {
-    margin-left: 250px;
-    padding: 2rem;
-    margin-top: 40px;
-}
-
-/* Add new styles for the hamburger menu */
-.nav-toggle {
-    display: none;
-}
-
-.nav-toggle-label {
-    display: none;
-    cursor: pointer;
-    height: 24px;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-right: 1rem;
+main {
+    position: relative;
+    left: 250px;
+    top: 40px;
+    width: calc(100% - 250px);
+    height: calc(100vh - 40px);
+    padding: 1rem;
+    overflow: auto;
 }
 
 /* Typography */
@@ -459,46 +444,47 @@ input[type="range"] {
 input.range[type="range"] {
     grid-column: span 8;
 }
+
 input.range[type="number"] {
     grid-column: span 1;
 }
 
 input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        background: var(--primary-color);
-        width: 33px;
-        height: 33px;
-        border-radius: 50%;
-        cursor: pointer;
-    }
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--primary-color);
+    width: 33px;
+    height: 33px;
+    border-radius: 50%;
+    cursor: pointer;
+}
 
-    input[type="range"]::-moz-range-thumb {
-        width: 33px; /* Set a specific slider handle width */
-        height: 33px; /* Slider handle height */
-        background: var(--primary-color); /* Green background */
-        cursor: pointer; /* Cursor on hover */
-    }
+input[type="range"]::-moz-range-thumb {
+    width: 33px; /* Set a specific slider handle width */
+    height: 33px; /* Slider handle height */
+    background: var(--primary-color); /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
 
-    input[type="text"]:hover,
-    input[type="number"]:hover,
-    input[type="date"]:hover,
-    input[type="range"]:hover,
-    select:hover,
-    textarea:hover {
-        border-color: var(--bg-darkgray);
-    }
+input[type="text"]:hover,
+input[type="number"]:hover,
+input[type="date"]:hover,
+input[type="range"]:hover,
+select:hover,
+textarea:hover {
+    border-color: var(--bg-darkgray);
+}
 
-    input[type="text"]:focus,
-    input[type="number"]:focus,
-    input[type="date"]:focus,
-    input[type="range"]:focus,
-    select:focus,
-    textarea:focus {
-        border-color: var(--primary-color);
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
-    }
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="range"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+}
 
 input.invalid[type="text"],
 input.invalid[type="number"],
@@ -766,14 +752,6 @@ a {
         color: #6B4D00; /* Darker muted gold */
     }
 
-nav a,
-nav a:hover,
-nav a:active,
-nav a:visited {
-    color: white;
-    text-decoration: none;
-}
-
 /* Pagination */
 .pagination {
     display: flex;
@@ -876,4 +854,45 @@ nav a:visited {
 
 .hidden {
     visibility: hidden;
+}
+
+
+
+
+
+@media only screen and (max-width: 768px) {
+
+    nav {
+        display: none;
+        width: 100%;
+        min-height: auto;
+        max-height: calc(100vh - 40px);
+    }
+
+    main {
+        left: 0;
+        width: 100%;
+    }
+
+    .mainmenu-toggle:checked ~ nav {
+        display: block;
+        height: auto;
+    }
+
+    .mainmenu-toggle:checked ~ main {
+        overflow: hidden;
+    }
+
+    .mainmenu-label {
+        display: inherit;
+    }
+
+    .menu a,
+    .menu li > span {
+        padding-left: 10px;
+    }
+
+    .submenu a {
+        padding-left: 37px; /* logo size (27px) + margin (10px) */
+    }
 }

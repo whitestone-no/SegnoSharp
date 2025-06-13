@@ -4,6 +4,7 @@
 <PageTitle>SegnoSharp</PageTitle>
 
 <header>
+    <label for="main-menu" class="mainmenu-label"><span class="fa-solid fa-bars"></span></label>
     <div class="logo"><img src="img/logoHeader.png" alt="SegnoSharp Logo" /><span>SegnoSharp</span></div>
     <div class="identity">
         <AuthorizeView Policy="IgnoreRole">
@@ -22,8 +23,8 @@
         </AuthorizeView>
     </div>
 </header>
-
-<nav class="admin-nav">
+<input id="main-menu" type="checkbox" role="button" class="mainmenu-toggle" />
+<nav>
     <ul class="menu">
         <li><NavLink href="@SiteConfig.Value.BasePath" Match="NavLinkMatch.All"><span class="fa-solid fa-house"></span>Home</NavLink></li>
         @foreach (MenuNavigationModel nav in ModuleNavItems.Where(n => !n.IsAdmin).OrderBy(n => n.SortOrder))
@@ -32,9 +33,10 @@
             {
                 <li class="has-submenu">
                     <input id="submenu-@(nav.Id)" type="checkbox" role="button" class="submenu-toggle" checked="@(IsExpanded(nav.Path))" />
-                    <label for="submenu-@(nav.Id)" class="submenu-label">
-                        <NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink>
-                    </label>
+                    <NavLink href="@nav.Path">
+                        <span><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</span>
+                    </NavLink>
+                    <label for="submenu-@(nav.Id)" class="submenu-label"><span class="fa-solid fa-caret-down"></span></label>
                     <ul class="submenu">
                         @foreach (BaseMenuNavigation navChild in nav.Children.OrderBy(c => c.SortOrder))
                         {
@@ -50,18 +52,19 @@
         }
         <AuthorizeView>
             <Authorized>
-                <li><span><span class="fa-solid fa-screwdriver-wrench"></span>Admin</span></li>
+                <li class="menu-header"><span><span class="fa-solid fa-screwdriver-wrench"></span>Admin</span></li>
                 @foreach (MenuNavigationModel nav in ModuleNavItems.Where(n => n.IsAdmin).OrderBy(n => n.SortOrder))
                 {
                     if (nav.Children.Any())
                     {
                         <li class="has-submenu">
                             <input id="submenu-@(nav.Id)-admin" type="checkbox" role="button" class="submenu-toggle" checked="@(IsExpanded(nav.Path))" />
-                            <label for="submenu-@(nav.Id)-admin" class="submenu-label">
-                                <NavLink href="@nav.Path"><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</NavLink>
-                            </label>
+                            <NavLink href="@nav.Path">
+                                <span><span class="fa-solid @nav.Icon"></span>@nav.MenuTitle</span>
+                            </NavLink>
+                            <label for="submenu-@(nav.Id)-admin" class="submenu-label"><span class="fa-solid fa-caret-down"></span></label>
                             <ul class="submenu">
-                                @foreach (var navChild in nav.Children.OrderBy(c => c.SortOrder))
+                                @foreach (BaseMenuNavigation navChild in nav.Children.OrderBy(c => c.SortOrder))
                                 {
                                     <li><NavLink href="@navChild.Path">@navChild.MenuTitle</NavLink></li>
                                 }
