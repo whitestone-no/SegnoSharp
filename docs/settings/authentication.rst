@@ -21,9 +21,9 @@ When you have the client values use them in the following configuration options 
 +----------------------------------+-----------------------+------------------------------------------------------------------------------------------------------------------------------------+
 | OpenIdConnect.AdditionalScopes   | Secret string value   | SegnoSharp will always ask for ``openid`` and ``profile`` scopes. If you need additional scopes add them here.                     |
 +----------------------------------+-----------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| OpenIdConnect.AdminClaimKey      | Secret string value   | Of all the claims returned from the OIDC provider, which claim key should be checked to determine administration privileges.       |
+| OpenIdConnect.RoleClaim          | Secret string value   | Of all the claims returned from the OIDC provider, which claim key should be mapped to roles.                                      |
 +----------------------------------+-----------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| OpenIdConnect.AdminClaimValue    | Secret string value   | If the value of the claim defined above contains this value, then the authentication is authorized with administration privileges. |
+| OpenIdConnect.AdminRole          | Secret string value   | If the value of the claim defined above contains this value, then the authentication is authorized with administration privileges. |
 +----------------------------------+-----------------------+------------------------------------------------------------------------------------------------------------------------------------+
 | OpenIdConnect.UsernameClaimKey   | Secret string value   | Of all the claims returned from the OIDC provider, which claim key will be mapped to the username displayed in SegnoSharp          |
 +----------------------------------+-----------------------+------------------------------------------------------------------------------------------------------------------------------------+

@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -19,6 +18,10 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
     {
         public static IServiceCollection AddOidcAuthorizaton(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<SegnoSharpOpenIdConnectOptions>(configuration.GetSection(SegnoSharpOpenIdConnectOptions.Section));
+
+            var oidcOptions = configuration.GetSection(SegnoSharpOpenIdConnectOptions.Section).Get<SegnoSharpOpenIdConnectOptions>();
+
             AuthenticationBuilder authenticationBuilder = services
                 .AddAuthentication(options =>
                 {
@@ -27,9 +30,9 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                 })
                 .AddCookie("SegnoSharpAuthCookies");
 
-            if (configuration.GetSection("OpenIdConnect").GetValue<bool>("UseOidc"))
+            if (oidcOptions.UseOidc)
             {
-                authenticationBuilder.AddOidc(configuration);
+                authenticationBuilder.AddOidc(oidcOptions);
             }
             else
             {
@@ -38,17 +41,9 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
 
             services.AddAuthorization(options =>
             {
-                var adminClaimKey = configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey");
-                var adminClaimValue = configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimValue");
-
                 options.DefaultPolicy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    // Would love to use .RequireRole() here, but somehow the "role" claims from IDP is not mapped to user roles.
-                    .RequireAssertion(ctx =>
-                    {
-                        Claim claim = ctx.User.FindFirst(adminClaimKey);
-                        return claim != null && claim.Value.Contains(adminClaimValue);
-                    })
+                    .RequireRole(oidcOptions.AdminRole)
                     .Build();
                 options.AddPolicy("IgnoreRole",
                     new AuthorizationPolicyBuilder()
@@ -56,18 +51,19 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                         .Build());
             });
 
+            services.AddTransient<IClaimsTransformation, RoleClaimsTransformation>();
+
             return services;
         }
 
-        private static void AddOidc(this AuthenticationBuilder builder, IConfiguration configuration)
+        private static void AddOidc(this AuthenticationBuilder builder, SegnoSharpOpenIdConnectOptions oidcOptions)
         {
             builder.AddOpenIdConnect("oidc", options =>
             {
-                options.Authority = configuration.GetSection("OpenIdConnect").GetValue<string>("Authority");
-                options.ClientId = configuration.GetSection("OpenIdConnect").GetValue<string>("ClientId");
-                options.ClientSecret = configuration.GetSection("OpenIdConnect").GetValue<string>("ClientSecret");
-                var additionalScopes =
-                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdditionalScopes");
+                options.Authority = oidcOptions.Authority;
+                options.ClientId = oidcOptions.ClientId;
+                options.ClientSecret = oidcOptions.ClientSecret;
+                string additionalScopes = oidcOptions.AdditionalScopes;
                 if (!string.IsNullOrEmpty(additionalScopes))
                 {
                     foreach (string scope in additionalScopes.Split(","))
@@ -78,17 +74,15 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                 options.ResponseType = "code";
                 options.SaveTokens = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
-                options.ClaimActions.MapUniqueJsonKey("preferred_username",
-                    configuration.GetSection("OpenIdConnect").GetValue<string>("UsernameClaimKey"));
-                // If the admin claim key is part of the access token, then this is not necessary
-                // but if it is part of the userinfo endpoint then it must be mapped into the regular claims
-                // This ensures that "AdminClaimKey" will always be available whether it comes from access token or user info
-                options.ClaimActions.MapUniqueJsonKey(
-                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey"),
-                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey"));
 
                 options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
+
+                // Claims from userrinfo endpoint are not automatically mapped into the user,
+                // so we need to map them manually
+                // `AdminClaimKey` can contain multiple values, so it is mapped to several claims with the same key/type
+                options.ClaimActions.MapJsonKey(oidcOptions.RoleClaim, oidcOptions.RoleClaim);
+                options.ClaimActions.MapUniqueJsonKey("preferred_username", oidcOptions.UsernameClaimKey);
 
                 options.Events = new OpenIdConnectEvents
                 {
@@ -103,7 +97,7 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                     },
                     OnRedirectToIdentityProviderForSignOut = context =>
                     {
-                        if (!configuration.GetSection("OpenIdConnect").GetValue<bool>("SupportsEndSession"))
+                        if (!oidcOptions.SupportsEndSession)
                         {
                             context.HandleResponse();
                         }
@@ -128,7 +122,7 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                 .PersistKeysToFileSystem(dataProtectionFolder);
 
             var certFileName = configuration.GetSection("DataProtection").GetValue<string>("CertificateFile");
-            
+
             if (string.IsNullOrEmpty(certFileName))
             {
                 return;

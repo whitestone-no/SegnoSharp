@@ -28,8 +28,8 @@ namespace Whitestone.SegnoSharp.Configuration.Authentication
                 new Claim(ClaimTypes.NameIdentifier, "fake-user"),
                 new Claim("preferred_username", "\u26a0\ufe0f FAKE USER - FOR LOCAL USE ONLY! \u26a0\ufe0f"),
                 new Claim(
-                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimKey"),
-                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminClaimValue"))
+                    configuration.GetSection("OpenIdConnect").GetValue<string>("RoleClaim"),
+                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminRole"))
             };
 
             var identity = new ClaimsIdentity(claims, "oidc");
