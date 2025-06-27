@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Whitestone.SegnoSharp.Configuration.Authentication;
+using Whitestone.SegnoSharp.Configuration.Models;
 using Whitestone.SegnoSharp.Shared.Models.Configuration;
 
 namespace Whitestone.SegnoSharp.Configuration.Extensions

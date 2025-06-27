@@ -1,4 +1,4 @@
-﻿namespace Whitestone.SegnoSharp.Configuration.Authentication
+﻿namespace Whitestone.SegnoSharp.Configuration.Models
 {
     public class SegnoSharpOpenIdConnectOptions
     {

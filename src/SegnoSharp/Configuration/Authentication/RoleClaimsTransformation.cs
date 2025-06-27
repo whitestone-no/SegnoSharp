@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using Whitestone.SegnoSharp.Configuration.Models;
 
 namespace Whitestone.SegnoSharp.Configuration.Authentication
 {
