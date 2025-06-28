@@ -214,37 +214,32 @@ main {
 /* Typography */
 h1 {
     font-size: 2.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     color: var(--text-black);
 }
 
 h2 {
     font-size: 2rem;
-    margin-bottom: 1.25rem;
     color: var(--text-black);
 }
 
 h3 {
     font-size: 1.75rem;
-    margin-bottom: 1rem;
     color: var(--text-black);
 }
 
 h4 {
     font-size: 1.5rem;
-    margin-bottom: 0.75rem;
     color: var(--text-black);
 }
 
 h5 {
     font-size: 1.25rem;
-    margin-bottom: 0.5rem;
     color: var(--text-black);
 }
 
 h6 {
     font-size: 1rem;
-    margin-bottom: 0.5rem;
     color: var(--text-black);
 }
 
@@ -460,9 +455,11 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]::-moz-range-thumb {
+    border: none;
     width: 33px; /* Set a specific slider handle width */
     height: 33px; /* Slider handle height */
     background: var(--primary-color); /* Green background */
+    border-radius: 50%;
     cursor: pointer; /* Cursor on hover */
 }
 
