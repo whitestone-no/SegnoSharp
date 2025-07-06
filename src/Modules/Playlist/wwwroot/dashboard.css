@@ -1,0 +1,53 @@
+﻿.dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-CurrentlyPlayingBox"] {
+    justify-content: space-between !important;
+}
+
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-CurrentlyPlayingBox"] > div {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-CurrentlyPlayingBox"] img {
+        margin: 0 0 0 10px !important;
+    }
+
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-CurrentlyPlayingBox"] .currentlyPlayingData .track {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-CurrentlyPlayingBox"] .currentlyPlayingData .artist {
+        font-style: italic;
+    }
+
+
+.dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] {
+    flex-direction: column;
+    align-items: start;
+    gap: 4px;
+}
+
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-box-item {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+    }
+
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-box-item img {
+            margin: 0 !important;
+        }
+
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-data {
+        margin-left: 5px;
+        font-size: 12px;
+    }
+
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-data .track {
+            font-weight: bold;
+        }
+
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-data .artist {
+            font-style: italic;
+        }

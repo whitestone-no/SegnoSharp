@@ -1,0 +1,16 @@
+﻿@rendermode InteractiveServer
+
+<div>
+    @if (CurrentlyPlaying == null)
+    {
+        <div class="notplaying">No track is currently playing.</div>
+        return;
+    }
+
+    <div class="currentlyPlayingData">
+        <div class="track">@CurrentlyPlaying.TrackTitle</div>
+        <div class="album">@CurrentlyPlaying.AlbumTitle</div>
+        <div class="artist">@CurrentlyPlaying.Artists</div>
+    </div>
+    <img src="@HashingUtil.GetAlbumCoverUri(CurrentlyPlaying.AlbumId, 150)" alt="@(CurrentlyPlaying.AlbumTitle) - Cover" class="bordered" />
+</div>
