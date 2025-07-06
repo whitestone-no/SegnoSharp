@@ -214,7 +214,7 @@ main {
 /* Typography */
 h1 {
     font-size: 2.5rem;
-    margin-bottom: 1rem;
+    padding-bottom: 1rem;
     color: var(--text-black);
 }
 
@@ -853,12 +853,7 @@ a {
     visibility: hidden;
 }
 
-
-
-
-
 @media only screen and (max-width: 768px) {
-
     nav {
         display: none;
         width: 100%;
