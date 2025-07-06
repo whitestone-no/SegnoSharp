@@ -28,7 +28,7 @@ This is done in the ``ConfigureServices()`` in the main class for your module:
 Processor settings
 ******************
 
-The ``IPlaylistProcessor`` interface as a ``Settings`` property. You can create a new class that inherits from ``Whitestone.SegnoSharp.Shared.Models.PlaylistProcessorSettings`` and implement it like this:
+The ``IPlaylistProcessor`` interface has a ``Settings`` property. You can create a new class that inherits from ``Whitestone.SegnoSharp.Shared.Models.PlaylistProcessorSettings`` and implement it like this:
 
 ::
 
