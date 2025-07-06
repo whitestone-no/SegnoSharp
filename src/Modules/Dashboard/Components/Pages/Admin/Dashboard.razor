@@ -1,0 +1,60 @@
+﻿@page "/admin/dashboard"
+@layout MainLayout
+@rendermode InteractiveServer
+@attribute [Authorize]
+@attribute [ModuleMenu("Dashboard", 5, "fa-table-columns", true)]
+
+<HeadContent>
+    <link rel="stylesheet" type="text/css" href="_moduleresource/@(GetType().Assembly.GetName().Name)/styles.css" />
+</HeadContent>
+
+<div class="dashboard-admin card-grid">
+    <div class="card card-span-6 boxes">
+        <h1>Active dashboard boxes</h1>
+        <div>
+            @foreach (DashboardBoxViewModel box in _activeDashboardBoxes)
+            {
+                <div draggable="true"
+                     ondragover="event.preventDefault();"
+                     @ondragstart="() => DragActiveStart(box)"
+                     @ondrop="() => HandleActivateDrop(box)"
+                     @ondragend="HandleDragEnd"
+                     @ondragenter="() => HandleDragEnter(box)"
+                     class="@(_currentlyDraggingActiveBox == box ? "drag-current" : _currentlyDraggingOverBox == box ? "drag-on" : null)">
+                    <span class="fa-solid fa-grip"></span>
+                    <span>@box.Name</span>
+                </div>
+            }
+            <div ondragover="event.preventDefault();"
+                 @ondrop="() => HandleActivateDrop(null)"
+                 @ondragenter="HandleDragEnterActiveLast"
+                 class="@(_currentlyDraggingOverActiveLast ? "drag-on" : null)">
+                Drag dashboard boxes here to activate them.
+            </div>
+        </div>
+    </div>
+    <div class="card card-span-6 boxes">
+        <h1>Available dashboard boxes</h1>
+        <div>
+            @foreach (DashboardBoxViewModel box in _availableDashboardBoxes)
+            {
+                <div draggable="true"
+                     ondragover="event.preventDefault();"
+                     @ondragstart="() => DragAvailableStart(box)"
+                     @ondrop="() => HandleDeactivateDrop(box)"
+                     @ondragend="HandleDragEnd"
+                     @ondragenter="() => HandleDragEnter(box)"
+                     class="@(_currentlyDraggingAvailableBox == box ? "drag-current" : _currentlyDraggingOverBox == box ? "drag-on" : null)">
+                    <span class="fa-solid fa-grip"></span>
+                    <span>@box.Name</span>
+                </div>
+            }
+            <div ondragover="event.preventDefault();"
+                 @ondrop="() => HandleDeactivateDrop(null)"
+                 @ondragenter="HandleDragEnterAvailableLast"
+                 class="@(_currentlyDraggingOverAvailableLast ? "drag-on" : null)">
+                Drag dashboard boxes here to deactivate them.
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <OutputPath>$(SolutionDir)\SegnoSharp\bin\$(Configuration)\$(TargetFramework)\Modules\$(MSBuildProjectName)</OutputPath>
+    <RootNamespace>Whitestone.SegnoSharp.Modules.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <AssemblyName>Module.$(MSBuildProjectName)</AssemblyName>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <PackageId>SegnoSharp-$(AssemblyName)</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>0.0.1-dev</Version>
+    <Product>Whitestone SegnoSharp</Product>
+    <Company>Whitestone</Company>
+    <Authors>Whitestone-NO</Authors>
+    <StaticWebAssetBasePath>_content/$(AssemblyName)</StaticWebAssetBasePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\styles.css" />
+    <Content Remove="wwwroot\welcomeLogo.png" />
+    <EmbeddedResource Include="wwwroot\styles.css" />
+    <EmbeddedResource Include="wwwroot\welcomeLogo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\Shared.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Database\Database.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+</Project>

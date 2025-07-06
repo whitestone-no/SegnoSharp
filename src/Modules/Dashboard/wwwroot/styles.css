@@ -1,0 +1,84 @@
+﻿.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(540px, 1fr));
+    gap: 1rem;
+    justify-content: center;
+}
+
+.dashboard-box {
+    position: relative;
+    background-color: var(--bg-lightestgray);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+    .dashboard-box[data-heading] {
+        padding-top: 40px!important;
+    }
+
+    .dashboard-box:empty {
+        display: none;
+    }
+
+    .dashboard-box[data-heading]::before {
+        content: attr(data-heading);
+        font-weight: bold;
+        font-size: 20px;
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        top: 5px;
+        left: 15px;
+        text-transform: uppercase;
+    }
+
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Dashboard-Components-Dashboard-Welcome"] .welcome-text {
+        margin-left: 1rem;
+    }
+
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Dashboard-Components-Dashboard-Welcome"] .welcome-text h1 {
+            font-size: 28px;
+            margin-bottom: 0;
+        }
+
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Dashboard-Components-Dashboard-Welcome"] .welcome-text p {
+            font-size: 1.5rem;
+        }
+
+
+.dashboard-admin .boxes > div div {
+    border: solid 1px var(--bg-lightgray);
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin-top: 5px;
+}
+
+    .dashboard-admin .boxes > div div:last-child {
+        border-style: dashed;
+    }
+
+    .dashboard-admin .boxes > div div.drag-current {
+        display: none;
+    }
+
+    .dashboard-admin .boxes > div div.drag-on {
+        position: relative;
+        margin-top: 46px;
+    }
+
+        .dashboard-admin .boxes > div div.drag-on::before {
+            content: "";
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: -41px;
+            left: 0px;
+            border-radius: 4px;
+            border: dashed 1px var(--bg-lightgray);
+        }
+
+.dashboard-admin span[class~="fa-grip"] {
+    cursor: grab;
+}

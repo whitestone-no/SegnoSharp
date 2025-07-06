@@ -1,0 +1,23 @@
+﻿@page "/dashboard"
+@layout MainLayout
+@attribute [ModuleMenu("Dashboard", 5, "fa-table-columns")]
+
+<HeadContent>
+    <link rel="stylesheet" type="text/css" href="_moduleresource/@(GetType().Assembly.GetName().Name)/styles.css" />
+    @foreach (string additionalCss in DashboardBoxes
+                  .Select(box => box.AdditionalCss?.Trim())
+                  .Where(s => !string.IsNullOrEmpty(s))
+                  .Distinct())
+    {
+        <link rel="stylesheet" type="text/css" href="@additionalCss" />
+    }
+</HeadContent>
+
+<div class="dashboard">
+    @foreach (DashboardBoxViewModel box in DashboardBoxes)
+    {
+        <div class="dashboard-box" data-heading="@box.Title" data-id="@box.Id">
+            <DynamicComponent Type="box.Type" />
+        </div>
+    }
+</div>
