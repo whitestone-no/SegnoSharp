@@ -54,3 +54,5 @@ Extra notes
 As each box is rendered as a ``DynamicComponent`` which also allows for dependency injection, so use ``@inject`` to inject services into your box.
 
 SegnoSharp uses per page/component interactivity, so you can use ``@rendermode InteractiveServer`` to include interactivity in your box.
+
+You can also use ``<AuthorizeView>`` in your boxes to restrict access to your box, or to make parts of your box restricted.
