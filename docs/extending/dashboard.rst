@@ -5,7 +5,7 @@ Dashboard boxes
 ###############
 
 You can add additional boxes to the dashboard.
-As with :ref:`Playlist processors <_refExtendingPlaylist>` you must first create a new module (see :ref:`Modules <refExtendingModules>`).
+As with :ref:`Playlist processors <refExtendingPlaylist>` you must first create a new module (see :ref:`Modules <refExtendingModules>`).
 
 ******
 Basics
