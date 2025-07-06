@@ -30,6 +30,9 @@ Site configuration
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | SiteConfig.MusicPath    | Absolute path or relative to working directory | This is the default directory SegnoSharp will read music from                |
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
+| SiteConfig.StartPage    | Relative to root of website                    | If the user accesses the root of the website (``/``) they will be redirected |
+|                         |                                                | to this path. This path will *not* be validated.                             |
++-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | SiteConfig.SharedSecret | Secret string value                            | Used by ``IHashingUtil`` to generate hashes unique to your installation      |
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | Modules.ModulesFolder   | Absolute path or relative to working directory | Change this if you want to load modules from another folder.                 |
