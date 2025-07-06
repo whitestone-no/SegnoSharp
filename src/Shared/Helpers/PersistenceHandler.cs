@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
+using Whitestone.SegnoSharp.Database;
+using Whitestone.SegnoSharp.Database.Models;
 using Whitestone.SegnoSharp.Shared.Attributes.PersistenceManager;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Shared.Models.PersistenceManager;
-using Whitestone.SegnoSharp.Database;
-using Whitestone.SegnoSharp.Database.Models;
 
 namespace Whitestone.SegnoSharp.Shared.Helpers
 {
@@ -20,6 +21,11 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         IDbContextFactory<SegnoSharpDbContext> dbContextFactory,
         ILogger<PersistenceHandler> logger) : BackgroundService, IPersistenceManager
     {
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            Converters = { new JsonStringEnumConverter() }
+        };
+
         private readonly List<PersistenceEntry> _entries = [];
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -194,7 +200,7 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
 
                         object objValue = e.PropertyInfo.GetValue(persistence);
                         return e.Owner == persistence &&
-                               ((objValue != null && objValue.ToString() != e.Value) ||
+                               ((objValue != null && JsonSerializer.Serialize(objValue, JsonOptions) != e.Value) ||
                                 (objValue == null && e.Value != null));
                     })
                     .ToArray();
@@ -209,7 +215,7 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
                         lock (entry.Owner)
                         {
                             // Update the value to be stored in the database
-                            entry.Value = entry.PropertyInfo.GetValue(persistence)?.ToString();
+                            entry.Value = JsonSerializer.Serialize(entry.PropertyInfo.GetValue(persistence), JsonOptions);
                         }
                     }
                 }
@@ -219,7 +225,7 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
                 }
             }
 
-            if (persistenceEntries.Any())
+            if (persistenceEntries.Length > 0)
             {
                 await using SegnoSharpDbContext dbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -247,51 +253,35 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
 
         private static void SetValue(PersistenceEntry key, string value, object configuration)
         {
-            if (key.PropertyInfo.PropertyType == typeof(string))
+            // Fix to handle old PersistenceHandler entries that were stored as `.ToString()`
+            // These values were not valid JSON as strings were stored without quotes,
+            // and booleans to stored as `True` or `False`.
+            // Remove this fix in a future version when probability of all installations have
+            // been updated to the new format.
+            if (key.PropertyInfo.PropertyType == typeof(string) ||
+                key.PropertyInfo.PropertyType.IsEnum)
             {
-                key.PropertyInfo.SetValue(configuration, value);
+                if (!value.StartsWith('"'))
+                {
+                    value = "\"" + value;
+                }
+                if (!value.EndsWith('"'))
+                {
+                    value = value + "\"";
+                }
             }
-            else if (key.PropertyInfo.PropertyType == typeof(bool))
+
+            if (key.PropertyInfo.PropertyType == typeof(bool))
             {
-                key.PropertyInfo.SetValue(configuration, bool.Parse(value));
+                value = value.ToLowerInvariant();
             }
-            else if (key.PropertyInfo.PropertyType == typeof(int))
+            // End of fix
+
+            object obj = JsonSerializer.Deserialize(value, key.PropertyInfo.PropertyType, JsonOptions);
+            if (obj != null)
             {
-                key.PropertyInfo.SetValue(configuration, int.Parse(value));
+                key.PropertyInfo.SetValue(configuration, obj);
             }
-            else if (key.PropertyInfo.PropertyType == typeof(uint))
-            {
-                key.PropertyInfo.SetValue(configuration, uint.Parse(value));
-            }
-            else if (key.PropertyInfo.PropertyType == typeof(float))
-            {
-                key.PropertyInfo.SetValue(configuration, float.Parse(value, CultureInfo.InvariantCulture));
-            }
-            else if (key.PropertyInfo.PropertyType == typeof(double))
-            {
-                key.PropertyInfo.SetValue(configuration, double.Parse(value, CultureInfo.InvariantCulture));
-            }
-            else if (key.PropertyInfo.PropertyType == typeof(decimal))
-            {
-                key.PropertyInfo.SetValue(configuration, decimal.Parse(value, CultureInfo.InvariantCulture));
-            }
-            else if (key.PropertyInfo.PropertyType == typeof(ushort))
-            {
-                key.PropertyInfo.SetValue(configuration, ushort.Parse(value, CultureInfo.InvariantCulture));
-            }
-            else if (key.PropertyInfo.PropertyType == typeof(byte))
-            {
-                key.PropertyInfo.SetValue(configuration, byte.Parse(value, CultureInfo.InvariantCulture));
-            }
-            else if (key.PropertyInfo.PropertyType == typeof(DateTime))
-            {
-                key.PropertyInfo.SetValue(configuration, DateTime.ParseExact(value, "s", CultureInfo.InvariantCulture));
-            }
-            else if (key.PropertyInfo.PropertyType.IsEnum)
-            {
-                key.PropertyInfo.SetValue(configuration, Enum.Parse(key.PropertyInfo.PropertyType, value));
-            }
-            else throw new ArgumentException("Unsupported configuration parameter type");
         }
     }
 }

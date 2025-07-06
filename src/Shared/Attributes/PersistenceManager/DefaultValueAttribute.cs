@@ -38,5 +38,10 @@ namespace Whitestone.SegnoSharp.Shared.Attributes.PersistenceManager
         {
             DefaultValue = defaultValue;
         }
+
+        public DefaultValueAttribute(params object[] defaultValue)
+        {
+            DefaultValue = defaultValue;
+        }
     }
 }
