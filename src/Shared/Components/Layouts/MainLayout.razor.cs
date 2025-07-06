@@ -22,9 +22,16 @@ namespace Whitestone.SegnoSharp.Shared.Components.Layouts
 
         private string _loggedInAs = null!;
         private List<MenuNavigationModel> ModuleNavItems { get; set; } = [];
+        private bool ShowHome { get; set; } = true;
 
         protected override async Task OnInitializedAsync()
         {
+            if (!string.IsNullOrEmpty(SiteConfig.Value.StartPage) &&
+                !SiteConfig.Value.StartPage.Equals("/", StringComparison.OrdinalIgnoreCase))
+            {
+                ShowHome = false;
+            }
+
             AuthenticationState state = await AuthState.GetAuthenticationStateAsync();
 
             _loggedInAs = state.User.Claims
