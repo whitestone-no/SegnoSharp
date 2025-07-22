@@ -1,64 +1,37 @@
-﻿.playlist-settings {
-    background-color: var(--bg-darkergray); /* Lighter than secondary-color */
-    border-radius: 8px;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    color: var(--light-text);
-    overflow: hidden;
+﻿.settings-body .form-group:last-child {
+    margin-bottom: 0;
 }
 
-
-.settings-body .form-group {
-    display: flex;
-    grid-template-columns: 1fr 150px;
-    gap: 1rem;
-    padding: 0.5rem 1rem;
-    align-items: center;
+.settings-body .form-group label {
+    grid-column: span 9;
 }
 
-    .settings-body .form-group:first-child {
-        padding-top: 1rem;
-    }
-
-    .settings-body .form-group:last-child {
-        padding-bottom: 1rem;
-    }
-
-    .settings-body .form-group label {
-        flex: 1;
-        font-weight: 500;
-    }
-
-    .settings-body .form-group input {
-        padding: 0.5rem;
-        border: 1px solid var(--bg-darkgray);
-        border-radius: 4px;
-        background-color: var(--bg-darkergray);
-        color: var(--light-text);
-    }
+.settings-body .form-group input {
+    grid-column: span 3;
+}
 
 
 .settings-header {
-    background-color: var(--bg-darkgray); /* Slightly darker than processor bg */
+    background-color: var(--bg-content);
     padding: 1rem;
     display: flex;
     align-items: center;
     gap: 1rem;
-    color: var(--light-text);
+    color: var(--text-regular);
     margin-bottom: 0.25rem;
 }
 
     .settings-header span {
         font-size: 1.2rem;
         font-weight: 600;
-        color: var(--primary-color);
+        color: var(--button-primary);
         margin-right: auto;
     }
 
     .settings-header button {
-        background-color: var(--bg-darkgray);
+        background-color: var(--bg-content);
         color: var(--light-text);
-        border: 1px solid var(--bg-gray);
+        border: 1px solid var(--generic-border);
         padding: 0.5rem 1rem;
         border-radius: 4px;
         font-size: 1rem;
@@ -67,15 +40,23 @@
     }
 
         .settings-header button:hover {
-            background-color: var(--bg-gray);
+            background-color: var(--bg-content);
         }
 
-.playlist-settings[class~=disabled] .settings-header span {
-    color: var(--bg-lightgray)
+.processors div[class~=disabled] h3 {
+    color: var(--text-regular);
 }
 
-div.drag-on {
-    border-top: solid 51px var(--hover-color) !important;
+.processors div h3 {
+    color: var(--button-primary);
+}
+
+.processors div[class~=disabled] label {
+    color: var(--text-neutral);
+}
+
+div .drag-on {
+    border-top: solid 51px var(--button-primary-hover) !important;
     padding-top: 1rem;
 }
 
@@ -94,13 +75,29 @@ span[class~="fa-grip"] {
     text-align: center;
 }
 
+.search-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+    .search-panel > * {
+        width: 100%;
+    }
+
+    .search-panel > div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
 .search-result {
     margin: 0;
     padding: 0.5rem;
 }
 
     .search-result:hover {
-        background-color: var(--hover-bg);
+        background-color: var(--table-hover);
     }
 
     .search-result > div {
@@ -115,16 +112,16 @@ span[class~="fa-grip"] {
 
     .search-result[class~="drag-search"],
     .currently-playing {
-        background-color: var(--bg-lightyellow);
+        background-color: var(--table-hover);
     }
 
 .playlist-item {
     margin-bottom: 0 !important;
-    padding: 5px 0 !important;
+    padding: 5px 10px !important;
 }
 
     .playlist-item:hover {
-        background-color: var(--hover-bg);
+        background-color: var(--table-hover);
     }
 
     .playlist-item img {

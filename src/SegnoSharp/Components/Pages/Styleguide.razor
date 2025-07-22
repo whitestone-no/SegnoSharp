@@ -3,18 +3,12 @@
     <style>
 
         /* Style Guide Specific Styles */
-        .style-section {
-            margin-bottom: 3rem;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid var(--bg-lightgray);
-        }
-
         .example-block {
-            background: #fff;
+            background: var(--bg-main);
             padding: 1.5rem;
             border-radius: 4px;
             border: 1px solid var(--bg-lightgray);
-            margin: 1rem 0;
+            margin: 1rem 0 2rem 0;
         }
 
             .example-block img {
@@ -31,203 +25,259 @@
         .color-sample {
             padding: 2rem 1rem;
             border-radius: 4px;
-            color: white;
+            color: var(--text-dark);
             text-align: center;
         }
+
+        .color-sample-dark {
+            padding: 2rem 1rem;
+            border-radius: 4px;
+            color: var(--text-regular);
+            text-align: center;
+        }
+
     </style>
 </HeadContent>
 
-<h1>SegnoSharp Style Guide</h1>
+<div class="header-container">
+    <h1>SegnoSharp Style Guide</h1>
+</div>
 
-<section class="style-section">
-    <h2>Typography</h2>
-
-    <h3>Headings</h3>
-    <div class="example-block">
-        <h1>Heading 1</h1>
-        <h2>Heading 2</h2>
-        <h3>Heading 3</h3>
-        <h4>Heading 4</h4>
-        <h5>Heading 5</h5>
-        <h6>Heading 6</h6>
-    </div>
-
-    <h3>Text Styles</h3>
-    <div class="example-block">
-        <p>Regular paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-        <p><strong>Bold text</strong> and <em>italic text</em> examples.</p>
-        <p><code>Inline code</code> and <mark>highlighted text</mark>.</p>
-        <p class="text-small">Small text for less emphasis</p>
-        <blockquote>This is a blockquote. It can be used for important quotes or callouts.</blockquote>
-    </div>
-
-    <h3>Text Alignment</h3>
-    <div class="example-block">
-        <p class="text-left">Left aligned text (default)</p>
-        <p class="text-center">Center aligned text</p>
-        <p class="text-right">Right aligned text</p>
-        <p class="text-justify">Justified text that spans multiple lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-    </div>
-</section>
-
-<section class="style-section">
-    <h2>Colors</h2>
-
-    <div class="color-grid">
-        <div class="color-sample primary-color">Primary Color</div>
-        <div class="color-sample secondary-color">Secondary Color</div>
-        <div class="color-sample hover-color">Hover Color</div>
-        <div class="color-sample text-color">Text Color</div>
-        <div class="color-sample light-text">Light Text</div>
-        <div class="color-sample bg-yellow">Background Yellow</div>
-        <div class="color-sample bg-black">Background Black</div>
-        <div class="color-sample bg-darkgray">Dark Gray</div>
-        <div class="color-sample bg-lightgray">Light Gray</div>
-    </div>
-</section>
-
-<section class="style-section">
-    <h2>Buttons</h2>
-
-    <div class="example-block">
-        <button class="primary">Primary Button</button>
-        <button class="secondary">Secondary Button</button>
-        <button class="outline">Outline Button</button>
-        <button disabled>Disabled Button</button>
-        <button class="small">Small Button</button>
-        <button class="large">Large Button</button>
-    </div>
-</section>
-
-<section class="style-section">
-    <h2>Form Elements</h2>
-
-    <div class="example-block">
-        <div class="form-group">
-            <label for="text-input">Text Input</label>
-            <input type="text" id="text-input" placeholder="Enter text...">
+<div class="card-grid">
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Typography</h2>
         </div>
 
-        <div class="form-group">
-            <label for="number-input">Number Input</label>
-            <input type="number" id="number-input" value="42">
+        <div class="card-header-container">
+            <h3>Headings</h3>
         </div>
-
-        <div class="form-group">
-            <label for="select-input">Select Input</label>
-            <select id="select-input">
-                <option>Option 1</option>
-                <option>Option 2</option>
-                <option>Option 3</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Checkbox Option</label>
-            <input type="checkbox" checked>
-        </div>
-
-        <div class="form-group">
-            <label>Radio Options</label>
-            <div class="form-radio">
-                <label class="radio-label">
-                    <input type="radio" name="radio-group" checked>
-                    Radio Option 1
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="radio-group">
-                    Radio Option 2
-                </label>
+        <div class="example-block">
+            <div class="header-container">
+                <h1>Heading 1</h1>
+            </div>
+            <div class="header-container">
+                <h2>Heading 2</h2>
+            </div>
+            <div class="header-container">
+                <h3>Heading 3</h3>
+            </div>
+            <div class="header-container">
+                <h4>Heading 4</h4>
+            </div>
+            <div class="header-container">
+                <h5>Heading 5</h5>
+            </div>
+            <div class="header-container">
+                <h6>Heading 6</h6>
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="textarea">Textarea</label>
-            <textarea id="textarea" rows="4" placeholder="Enter multiple lines of text..."></textarea>
+        <div class="card-header-container">
+            <h3>Text Styles</h3>
+        </div>
+
+        <div class="example-block">
+            <p>Regular paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <p><strong>Bold text</strong> and <em>italic text</em> examples.</p>
+            <p><code>Inline code</code> and <mark>highlighted text</mark>.</p>
+            <p class="text-small">Small text for less emphasis</p>
+            <blockquote>This is a blockquote. It can be used for important quotes or callouts.</blockquote>
+        </div>
+
+        <div class="card-header-container">
+            <h3>Text Alignment</h3>
+        </div>
+
+        <div class="example-block">
+            <p class="text-left">Left aligned text (default)</p>
+            <p class="text-center">Center aligned text</p>
+            <p class="text-right">Right aligned text</p>
+            <p class="text-justify">Justified text that spans multiple lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sagittis porta velit a euismod. Donec molestie, nibh quis lobortis tincidunt, ante ante pulvinar erat, quis dapibus est leo quis est. Nunc sit amet magna a ex vestibulum sollicitudin. Duis nec tempor turpis, id tristique lorem. Suspendisse varius tincidunt eros. Integer luctus ut arcu sed laoreet. Integer tincidunt et eros tempus eleifend. Aliquam ut dignissim lorem.</p>
         </div>
     </div>
-</section>
 
-<section class="style-section">
-    <h2>Tables</h2>
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Colors</h2>
+        </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Header 1</th>
-                <th>Header 2</th>
-                <th>Header 3</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Row 1, Cell 1</td>
-                <td>Row 1, Cell 2</td>
-                <td>Row 1, Cell 3</td>
-            </tr>
-            <tr>
-                <td>Row 2, Cell 1</td>
-                <td>Row 2, Cell 2</td>
-                <td>Row 2, Cell 3</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
+        <div class="color-grid">
+            <div class="color-sample primary-color">Primary Color</div>
+            <div class="color-sample-dark secondary-color">Secondary Color</div>
+            <div class="color-sample tertiary-color">Tertiary Color</div>
+            <div class="color-sample hover-color">Hover Color</div>
+            <div class="color-sample text-color">Text Color</div>
+            <div class="color-sample-dark dark-text">Dark Text</div>
+        </div>
+    </div>
 
-<section class="style-section">
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Buttons</h2>
+        </div>
+
+        <div class="example-block">
+            <button class="primary">Primary Button</button>
+            <button class="secondary">Secondary Button</button>
+            <button class="outline">Outline Button</button>
+            <button disabled>Disabled Button</button>
+            <button class="tiny">Tiny Button</button>
+            <button class="small">Small Button</button>
+            <button class="large">Large Button</button>
+        </div>
+    </div>
+
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Form Elements</h2>
+        </div>
+        <div class="example-block">
+            <div class="form-group">
+                <label for="text-input">Text Input</label>
+                <input type="text" id="text-input" placeholder="Enter text...">
+            </div>
+
+            <div class="form-group">
+                <label for="number-input">Number Input</label>
+                <input type="number" id="number-input" value="42">
+            </div>
+
+            <div class="form-group">
+                <label for="select-input">Select Input</label>
+                <select id="select-input">
+                    <option>Option 1</option>
+                    <option>Option 2</option>
+                    <option>Option 3</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Checkbox Option</label>
+                <input type="checkbox" checked>
+            </div>
+
+            <div class="form-group">
+                <label>Radio Options</label>
+                <div class="form-radio">
+                    <label class="radio-label">
+                        <input type="radio" name="radio-group" checked>
+                        Radio Option 1
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="radio-group">
+                        Radio Option 2
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="textarea">Textarea</label>
+                <textarea id="textarea" rows="4" placeholder="Enter multiple lines of text..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="rangeslider">Range</label>
+                <input type="range" id="rangeslider" min="0" max="100" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Tables</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Header 1</th>
+                    <th>Header 2</th>
+                    <th>Header 3</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Row 1, Cell 1</td>
+                    <td>Row 1, Cell 2</td>
+                    <td>Row 1, Cell 3</td>
+                </tr>
+                <tr>
+                    <td>Row 2, Cell 1</td>
+                    <td>Row 2, Cell 2</td>
+                    <td>Row 2, Cell 3</td>
+                </tr>
+                <tr>
+                    <td>Row 3, Cell 1</td>
+                    <td>Row 3, Cell 2</td>
+                    <td>Row 3, Cell 3</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="header-container">
     <h2>Cards</h2>
+</div>
 
-    <div class="card-grid">
-        <div class="card card-span-4">
-            <div class="card-header">Card Header</div>
-            <div class="card-body">
-                <p>Card content goes here. This is a basic card layout.</p>
-            </div>
-            <div class="card-footer">Card Footer</div>
+<div class="card-grid">
+    <div class="card grid-span-4">
+        <div class="card-header-container">
+            <h3>Card Header</h3>
         </div>
-
-        <div class="card card-span-4">
-            <div class="card-header">Interactive Card</div>
-            <div class="card-body">
-                <p>Cards can contain various elements:</p>
-                <button class="primary">Action Button</button>
-            </div>
+        <div>
+            <p>Card content goes here. This is a basic card layout.</p>
+        </div>
+        <div class="card-footer">
+            Card footer
         </div>
     </div>
-</section>
+    <div class="card grid-span-4">
+        <div class="card-header-container">
+            <h3>Interactive Card</h3>
+        </div>
+        <div>
+            <p>Cards can contain various elements:</p>
+            <button class="primary">Action Button</button>
+        </div>
+    </div>
+</div>
 
-<section class="style-section">
-    <h2>Alerts</h2>
-
-    <div class="example-block">
+<div class="card-grid">
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Alerts</h2>
+        </div>
         <div class="alert alert-success">This is a success message.</div>
         <div class="alert alert-warning">This is a warning message.</div>
         <div class="alert alert-error">This is an error message.</div>
         <div class="alert alert-info">This is an information message.</div>
-    </div>
-</section>
-
-<section class="style-section">
-    <h2>Images</h2>
-
-    <div class="example-block">
-        <img src="img/logoFrontpage.png" alt="Regular image" class="regular">
-        <img src="img/logoFrontpage.png" alt="Bordered image" class="bordered">
-        <img src="img/logoFrontpage.png" alt="Rounded image" class="rounded">
-        <div class="img-caption">Images can include captions</div>
-    </div>
-</section>
-
-<section class="style-section">
-    <h2>Wizards</h2>
-    
-    <div class="wizard-steps">
-        <ul>
-            <li>The first step</li>
-            <li class="active">Second step</li>
-            <li>Almost done<span>Step with details</span></li>
-            <li>Finalizing</li>
-        </ul>
+        <div class="alert">This is an uncategorized message.</div>
     </div>
 
-</section>
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Images</h2>
+        </div>
+        <div class="example-block">
+            <img src="img/logoFrontpage.png" alt="Regular image" class="regular">
+            <img src="img/logoFrontpage.png" alt="Bordered image" class="bordered">
+            <img src="img/logoFrontpage.png" alt="Rounded image" class="rounded">
+            <div class="img-caption">Images can include captions</div>
+        </div>
+    </div>
+
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Wizards</h2>
+        </div>
+        <div class="wizard-steps">
+            <ul>
+                <li class="done">The first step</li>
+                <li class="active">Second step</li>
+                <li>Almost done<span>Step with details</span></li>
+                <li>Finalizing</li>
+            </ul>
+        </div>
+    </div>
+</div>

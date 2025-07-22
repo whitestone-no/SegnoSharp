@@ -1,4 +1,5 @@
 ﻿.dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-CurrentlyPlayingBox"] {
+    align-items: start!important;
     justify-content: space-between !important;
 }
 
@@ -41,7 +42,7 @@
 
     .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-data {
         margin-left: 5px;
-        font-size: 12px;
+        font-size: 14px;
     }
 
         .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-data .track {

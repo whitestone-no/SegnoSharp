@@ -3,13 +3,16 @@
 @attribute [Authorize]
 @attribute [ModuleMenu("Stream", 20, "fa-radio", true)]
 
+<div class="header-container">
+    <h1>Stream controls</h1>
+</div>
+
 <div class="card-grid">
-    <div class="card card-span-12">
-        <div class="card-header">Stream controls</div>
-        <div class="card-body">
+    <div class="card grid-span-12">
+        <div>
             <div class="form-group">
                 <label>Playback</label>
-                <div class="card-span-9 flex-center">
+                <div class="grid-span-9 flex-center">
                     <button class="secondary flex-fill" @onclick="FireEvent_PlayNextTrack_Click">
                         <span class="fa-solid fa-forward-step"></span>
                         Play next track from playlist
@@ -37,9 +40,9 @@
             </div>
         </div>
     </div>
-    <div class="card card-span-12">
-        <div class="card-header">Stream server settings</div>
-        <div class="card-body">
+    <div class="card grid-span-12">
+        <div class="card-header-container"><h2>Stream server settings</h2></div>
+        <div>
             <ObjectEditor Object="Settings" Disabled="Settings.IsStreaming" IgnoreProperties="@([nameof(Settings.IsStreaming), nameof(Settings.StartStreamOnStartup), nameof(Settings.TitleFormat)])" />
         </div>
     </div>

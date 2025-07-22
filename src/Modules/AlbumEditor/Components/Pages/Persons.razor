@@ -8,32 +8,36 @@
 @attribute [ModuleMenu("Persons", 100, typeof(Albums), true)]
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
-<h1>Persons/Artists/Groups</h1>
+
+<div class="header-container">
+    <h1>Persons/Artists/Groups</h1>
+    <button class="secondary" @onclick="Add">Add</button>
+</div>
 
 <div class="card-grid">
-    <div class="card card-span-12">
-        <div class="card-header"><h2 class="no-margin">Search</h2></div>
-        <div class="card-body">
-            <div class="form-group no-margin">
-                <input type="text" class="card-span-12" @bind="SearchQuery" @bind:event="oninput" @bind:after="StartSearchTimer" placeholder="Start typing to search..." disabled="@DbContext.ChangeTracker.HasChanges()"/>
+    <div class="card grid-span-12">
+        <div class="card-header-container"><h2>Search</h2></div>
+        <div>
+            <div class="form-group">
+                <input type="text" class="grid-span-12" @bind="SearchQuery" @bind:event="oninput" @bind:after="StartSearchTimer" placeholder="Start typing to search..." disabled="@DbContext.ChangeTracker.HasChanges()" />
             </div>
         </div>
     </div>
-    <div class="card card-span-12">
-        <div class="card-header">
-            <h2 class="no-margin">
-                Search results
-            </h2>
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Search results</h2>
+        </div>
+        <div>
             @if (PersonResults.Count != 0)
             {
-                <div class="card-grid no-margin">
-                    <div class="card-span-5">Firstname</div>
-                    <div class="card-span-5">Lastname/Groupname</div>
-                    <div class="card-span-1 text-center">Variant</div>
+                <div class="grid">
+                    <div class="grid-span-5">Firstname</div>
+                    <div class="grid-span-5">Lastname/Groupname</div>
+                    <div class="grid-span-1 text-center">Variant</div>
                 </div>
             }
         </div>
-        <div class="card-body">
+        <div>
             @if (PersonResults.Count == 0)
             {
                 <div class="alert alert-info">No persons found that matches search criteria</div>
@@ -43,27 +47,21 @@
                 @foreach (Person person in PersonResults)
                 {
                     <div class="form-group">
-                        <input class="card-span-5" type="text" @bind="@person.FirstName" />
-                        <input class="card-span-5" type="text" @bind="@person.LastName" />
-                        <div class="card-span-1 flex-center">
+                        <input class="grid-span-5" type="text" @bind="@person.FirstName" />
+                        <input class="grid-span-5" type="text" @bind="@person.LastName" />
+                        <div class="grid-span-1 flex-center">
                             <div class="fullwidth text-center">@(person.Version > 0 ? person.Version : "")</div>
                         </div>
-                        <div class="card-span-1 text-center">
+                        <div class="grid-span-1 text-center">
                             <button class="tertiary" @onclick="() => RemovePerson(person)"><span class="fa-regular fa-circle-xmark"></span></button>
                         </div>
                     </div>
                 }
-                <div class="form-group">
-                    <div class="text-center">
-                        <button class="secondary" @onclick="Add">Add</button>
-                    </div>
-                </div>
             }
         </div>
     </div>
-</div>
-
-<div>
-    <button class="primary" @onclick="SaveChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Save</button>
-    <button class="primary" @onclick="DiscardChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Discard changes</button>
+    <div class="grid-span-12">
+        <button class="primary" @onclick="SaveChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Save</button>
+        <button class="primary" @onclick="DiscardChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Discard changes</button>
+    </div>
 </div>

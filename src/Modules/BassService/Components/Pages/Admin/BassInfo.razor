@@ -9,40 +9,49 @@
 @attribute [Authorize]
 @attribute [ModuleMenu("BASS Info", 210, "fa-wave-square", true)]
 
-<h1>BASS Information</h1>
-
-<h2>Registration</h2>
-
-<div>
-    Email: @BassRegistration.Value.Email<br />
-    Key: @BassRegistration.Value.Key
+<div class="header-container">
+    <h1>BASS Information</h1>
 </div>
 
-<h2>Components</h2>
-
-<table>
-    <thead>
-        <tr>
-            <th>Component</th>
-            <th>Version</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>BASS</td>
-            <td>@BassWrapper.GetBassVersion()</td>
-        </tr>
-        <tr>
-            <td>BASS Enc</td>
-            <td>@BassWrapper.GetBassEncVersion()</td>
-        </tr>
-        <tr>
-            <td>BASS Mixer</td>
-            <td>@BassWrapper.GetBassMixerVersion()</td>
-        </tr>
-        <tr>
-            <td>BASS.NET</td>
-            <td>@BassWrapper.GetBassNetVersion()</td>
-        </tr>
-    </tbody>
-</table>
+<div class="card-grid">
+    <div class="card grid-span-6">
+        <div class="card-header-container">
+            <h2>Registration</h2>
+        </div>
+        <div>
+            Email: @BassRegistration.Value.Email<br />
+            Key: @BassRegistration.Value.Key
+        </div>
+    </div>
+    <div class="card grid-span-6">
+        <div class="card-header-container">
+            <h2>Components</h2>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>Component</th>
+                <th>Version</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>BASS</td>
+                <td>@BassWrapper.GetBassVersion()</td>
+            </tr>
+            <tr>
+                <td>BASS Enc</td>
+                <td>@BassWrapper.GetBassEncVersion()</td>
+            </tr>
+            <tr>
+                <td>BASS Mixer</td>
+                <td>@BassWrapper.GetBassMixerVersion()</td>
+            </tr>
+            <tr>
+                <td>BASS.NET</td>
+                <td>@BassWrapper.GetBassNetVersion()</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

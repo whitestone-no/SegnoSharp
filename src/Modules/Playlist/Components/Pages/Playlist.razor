@@ -6,50 +6,50 @@
 @using Whitestone.SegnoSharp.Modules.Playlist.ViewModels
 @attribute [ModuleMenu("Playlist", 10, "fa-list")]
 
+<div class="header-container"><h1>Playlist</h1></div>
 <div class="card-grid">
-    <div class="card card-span-12">
-        <div class="card-header">Playlist</div>
-        <div class="card-body">
+    <div class="card grid-span-12">
+        <div>
             @if (CurrentlyPlaying != null)
             {
-                <div class="card-grid playlist-item currently-playing">
-                    <div class="card-span-1 center-all">
+                <div class="grid playlist-item currently-playing">
+                    <div class="grid-span-1 center-all">
                         <span class="fa-solid fa-play"></span>
                     </div>
-                    <div class="card-span-1 center-all">
+                    <div class="grid-span-1 center-all">
                         @if (CurrentlyPlaying.HasAlbumCover)
                         {
                             <img src="@HashingUtil.GetAlbumCoverUri(CurrentlyPlaying.AlbumId, 50)" alt="@(CurrentlyPlaying.AlbumTitle) - Cover" class="bordered" />
                         }
                     </div>
-                    <div class="card-span-9 flex-center">
+                    <div class="grid-span-9 flex-center">
                         <div>
                             <b>@CurrentlyPlaying.AlbumTitle</b> <em>(@CurrentlyPlaying.Artists)</em><br />
                             @CurrentlyPlaying.TrackTitle
                         </div>
                     </div>
-                    <div class="card-span-1 center-all">@CurrentlyPlaying.Length</div>
+                    <div class="grid-span-1 center-all">@CurrentlyPlaying.Length</div>
                 </div>
             }
             @foreach (PlaylistViewModel playlistItem in PlaylistItems)
             {
-                <div class="card-grid playlist-item">
-                    <div class="card-span-1 center-all">
+                <div class="grid playlist-item">
+                    <div class="grid-span-1 center-all">
                         @playlistItem.SortOrder
                     </div>
-                    <div class="card-span-1 center-all">
+                    <div class="grid-span-1 center-all">
                         @if (playlistItem.HasAlbumCover)
                         {
                             <img src="@HashingUtil.GetAlbumCoverUri(playlistItem.AlbumId, 50)" alt="@(playlistItem.AlbumTitle) - Cover" class="bordered" />
                         }
                     </div>
-                    <div class="card-span-9 flex-center">
+                    <div class="grid-span-9 flex-center">
                         <div>
                             <b>@playlistItem.AlbumTitle</b> <em>(@playlistItem.Artists)</em><br />
                             @playlistItem.TrackTitle
                         </div>
                     </div>
-                    <div class="card-span-1 center-all">@playlistItem.Length</div>
+                    <div class="grid-span-1 center-all">@playlistItem.Length</div>
                 </div>
             }
         </div>

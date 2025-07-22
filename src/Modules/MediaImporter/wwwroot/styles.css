@@ -2,17 +2,18 @@
 
 .path-list {
     padding: 5px 0.5rem;
-    border: 1px solid var(--bg-lightgray);
+    border: 1px solid var(--form-border);
+    background-color: var(--form-bg);
     border-radius: 4px;
     grid-column: span 9;
 }
 
     .path-list:hover {
-        border-color: var(--bg-darkgray);
+        border-color: var(--table-hover);
     }
 
     .path-list:focus-within {
-        border-color: var(--primary-color);
+        border-color: var(--form-accent);
         outline: none;
         box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
     }
@@ -32,7 +33,7 @@
     }
 
         .path-list li button:hover {
-            background-color: var(--bg-lightyellow);
+            background-color: var(--table-hover);
         }
 
         .path-list li button::after {
@@ -49,18 +50,20 @@
         }
 
 .folder-list {
-    border: 1px solid var(--bg-lightgray) !important;
+    border: 1px solid var(--generic-border) !important;
     border-radius: 4px;
     grid-column: span 9;
-    border: solid 1px
+    border: solid 1px;
+    display: block !important;
+    overflow: hidden;
 }
 
     .folder-list:hover {
-        border-color: var(--bg-darkgray) !important;
+        border-color: var(--neutral-border) !important;
     }
 
     .folder-list:focus-within {
-        border-color: var(--primary-color) !important;
+        border-color: var(--form-accent) !important;
         outline: none;
         box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
     }
@@ -74,7 +77,7 @@
 
 .folder-list-header {
     font-weight: bold;
-    background-color: var(--bg-lightergray);
+    background-color: var(--table-header);
     margin-bottom: 0.5rem;
 }
 
@@ -90,64 +93,45 @@
         margin: 0;
         padding: 0.5rem 0;
         cursor: pointer;
+        color: var(--text-regular);
         background-color: transparent;
         border: none;
         outline: none;
     }
 
         .folder-list-body button:hover {
-            background-color: var(--hover-bg);
+            background-color: var(--table-hover);
         }
 
         .folder-list-body button span.fa-solid {
             margin-right: 0.5rem;
         }
 
-    .folder-list-body .card-grid div {
+    .folder-list-body .grid div {
         text-align: center;
     }
 
-        .folder-list-body .card-grid div:first-child {
+        .folder-list-body .grid div:first-child {
             text-align: left;
             display: flex;
             align-items: center;
         }
 
-    .folder-list-body .card-grid {
+    .folder-list-body .grid {
         grid-column: span 12 !important;
         margin-bottom: 0;
     }
 
-        .folder-list-body .card-grid:hover {
-            background-color: var(--hover-bg);
+        .folder-list-body .grid:hover {
+            background-color: var(--table-hover);
         }
 
-.folder-list .card-grid {
+.folder-list .grid {
     gap: 0;
-}
-
-.card .buttons {
-    text-align: right;
-    margin-top: 1rem;
 }
 
 .card img.album-cover {
     width: 150px;
-}
-
-
-
-.card[class~="disc"] {
-    margin-bottom: 0;
-}
-
-.card-body[class~="discs"],
-.card-body[class~="album"] {
-    padding-bottom: 0;
-}
-
-.card-body[class~="album"] > .card-grid {
-    margin-bottom: 0;
 }
 
 table.track-list {
@@ -155,65 +139,77 @@ table.track-list {
     margin-bottom: 0;
 }
 
-table.track-list tr.drag-on {
-    border-top: 50px solid var(--hover-color);
-}
+    table.track-list input {
+        color: var(--text-regular);
+    }
+    table.track-list input:focus {
+        color: var(--text-dark);
+    }
 
-table.track-list tr.drag-current {
-    display: none;
-}
+    table.track-list tr.drag-on {
+        border-top: 50px solid var(--button-primary-hover);
+    }
 
-table.track-list span.fa-grip {
-    cursor: pointer;
-}
+    table.track-list tr.drag-current {
+        display: none;
+    }
 
-table.track-list tr th:nth-child(1),
-table.track-list tr td:nth-child(1) {
-    width: 40px;
-    text-align: center;
-}
+    table.track-list span.fa-grip {
+        cursor: pointer;
+    }
 
-table.track-list tr th:nth-child(2),
-table.track-list tr td:nth-child(2) input {
-    width: 55px;
-    text-align: center;
-}
+    table.track-list tr th:nth-child(1),
+    table.track-list tr td:nth-child(1) {
+        width: 40px;
+        text-align: center;
+    }
 
-table.track-list tr th:nth-child(3),
-table.track-list tr td:nth-child(3) input {
-    width: 75px;
-    text-align: center;
-}
+    table.track-list tr th:nth-child(2),
+    table.track-list tr td:nth-child(2) input {
+        width: 55px;
+        text-align: center;
+    }
 
-table.track-list tr th:nth-child(4),
-table.track-list tr td:nth-child(4) {
-    width: 75px;
-    text-align: center;
-}
+    table.track-list tr th:nth-child(3),
+    table.track-list tr td:nth-child(3) input {
+        width: 75px;
+        text-align: center;
+    }
 
-table.track-list tr th:nth-child(5),
-table.track-list tr th:nth-child(6),
-table.track-list tr th:nth-child(7) {
-    text-align: left;
-}
+    table.track-list tr th:nth-child(4),
+    table.track-list tr td:nth-child(4) {
+        width: 75px;
+        text-align: center;
+    }
 
-table.track-list input[type="text"],
-table.track-list input[type="number"] {
-    width: 100%;
-    border-color: transparent;
-    background-color: transparent;
-}
+    table.track-list tr th:nth-child(5),
+    table.track-list tr th:nth-child(6),
+    table.track-list tr th:nth-child(7) {
+        text-align: left;
+    }
 
-table.track-list input[type="text"]:focus,
-table.track-list input[type="number"]:focus {
-    width: 100%;
-    background-color: #fff;
-    border-color: var(--primary-color);
-}
+    table.track-list input[type="text"],
+    table.track-list input[type="number"] {
+        width: 100%;
+        border-color: transparent;
+        background-color: transparent;
+    }
+
+        table.track-list input[type="text"]:focus,
+        table.track-list input[type="number"]:focus {
+            width: 100%;
+            background-color: #fff;
+            border-color: var(--button-primary);
+        }
 
 .normalization input[type="text"] {
     grid-column: span 8;
 }
+
 .normalization div {
     grid-column: span 1;
+}
+
+.wizard-steps ul {
+    margin-bottom: 0 !important;
 }

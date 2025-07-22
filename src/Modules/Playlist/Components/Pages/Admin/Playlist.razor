@@ -7,85 +7,83 @@
 @attribute [Authorize]
 @attribute [ModuleMenu("Playlist", 10, "fa-list-check", true)]
 
-<h1>Playlist admin</h1>
+<div class="header-container">
+    <h1>Playlist admin</h1>
+</div>
 
 <div class="card-grid">
-    <div class="card card-span-12">
-        <div class="card-header">Playlist</div>
-        <div class="card-body">
-            @foreach (PlaylistViewModel playlistItem in PlaylistModel)
-            {
-                <div draggable="true"
-                     ondragover="event.preventDefault();"
-                     @ondragstart="() => HandleDragStart(playlistItem)"
-                     @ondrop="() => HandleDrop(playlistItem)"
-                     @ondragend="HandleDragEnd"
-                     @ondragenter="() => HandleDragEnter(playlistItem)"
-                     class="card-grid playlist-item @(_currentlyDraggingPlaylistItem == playlistItem ? "drag-current" : _currentlyDraggingOverPlaylistItem == playlistItem ? "drag-on" : null)">
-                    <div class="card-span-1 center-all">
-                        <span class="fa-solid fa-grip"></span>
-                    </div>
-                    <div class="card-span-1 center-all">
-                        @playlistItem.SortOrder
-                    </div>
-                    <div class="card-span-8">
-                        <div>
-                            <b>@playlistItem.AlbumTitle</b> <em>(@playlistItem.Artists)</em><br />
-                            @playlistItem.TrackTitle
-                        </div>
-                    </div>
-                    <div class="card-span-1 center-all">@playlistItem.Length</div>
-                    <div class="card-span-1 center-all"><button class="tertiary" title="Remove from playlist" @onclick="() => RemoveFromPlaylist(playlistItem)"><span class="fa-solid fa-trash-can"></span></button></div>
+    <div class="card grid-span-12">
+        <div class="card-header-container"><h2>Playlist</h2></div>
+        @foreach (PlaylistViewModel playlistItem in PlaylistModel)
+        {
+            <div draggable="true"
+                 ondragover="event.preventDefault();"
+                 @ondragstart="() => HandleDragStart(playlistItem)"
+                 @ondrop="() => HandleDrop(playlistItem)"
+                 @ondragend="HandleDragEnd"
+                 @ondragenter="() => HandleDragEnter(playlistItem)"
+                 class="grid playlist-item @(_currentlyDraggingPlaylistItem == playlistItem ? "drag-current" : _currentlyDraggingOverPlaylistItem == playlistItem ? "drag-on" : null)">
+                <div class="grid-span-1 center-all">
+                    <span class="fa-solid fa-grip"></span>
                 </div>
-            }
-            <div ondragover="event.preventDefault();"
-                 @ondragenter="() => HandleDragEnter(null)"
-                 @ondrop="() => HandleDrop(null)"
-                 class="card-grid @(_currentlyDraggingOverPlaylistEnd ? "drag-on" : null)">
-                <div class="card-span-12">
-                    <em>End of playlist</em>
+                <div class="grid-span-1 center-all">
+                    @playlistItem.SortOrder
                 </div>
+                <div class="grid-span-8">
+                    <div>
+                        <b>@playlistItem.AlbumTitle</b> <em>(@playlistItem.Artists)</em><br />
+                        @playlistItem.TrackTitle
+                    </div>
+                </div>
+                <div class="grid-span-1 center-all">@playlistItem.Length</div>
+                <div class="grid-span-1 center-all"><button class="tertiary" title="Remove from playlist" @onclick="() => RemoveFromPlaylist(playlistItem)"><span class="fa-solid fa-trash-can"></span></button></div>
+            </div>
+        }
+        <div ondragover="event.preventDefault();"
+             @ondragenter="() => HandleDragEnter(null)"
+             @ondrop="() => HandleDrop(null)"
+             class="card-grid @(_currentlyDraggingOverPlaylistEnd ? "drag-on" : null)">
+            <div class="grid-span-12">
+                <em>End of playlist</em>
             </div>
         </div>
     </div>
-    <div class="card card-span-4">
-        <div class="card-header">Search</div>
-        <div class="card-body">
-            <EditForm Model="@SearchModel" OnSubmit="DoSearchAsync" class="card-grid">
-                <div class="form-group card-span-12">
-                    <InputText type="text" id="search-text" class="card-span-9" @bind-Value="SearchModel.SearchTerm" />
-                    <button type="submit" class="secondary card-span-3">Search</button>
-                </div>
-                <div class="form-group card-span-6">
-                    <label for="search-for-album" class="card-span-5">Album</label>
+    <div class="card grid-span-4">
+        <div class="card-header-container"><h3>Search</h3></div>
+        <EditForm Model="@SearchModel" OnSubmit="DoSearchAsync">
+            <div class="search-panel">
+                <InputText type="text" id="search-text" @bind-Value="SearchModel.SearchTerm" />
+                <button type="submit" class="secondary">Search</button>
+                <div>
                     <InputCheckbox type="checkbox" id="search-for-album" @bind-Value="SearchModel.SearchForAlbum" />
+                    <label for="search-for-album">Album</label>
                 </div>
-                <div class="form-group card-span-6">
-                    <label for="search-for-track" class="card-span-5">Track</label>
+                <div>
                     <InputCheckbox type="checkbox" id="search-for-track" @bind-Value="SearchModel.SearchForTrack" />
+                    <label for="search-for-track">Track</label>
                 </div>
-                <div class="form-group card-span-6">
-                    <label for="search-for-artist" class="card-span-5">Artist</label>
+                <div>
                     <InputCheckbox type="checkbox" id="search-for-artist" @bind-Value="SearchModel.SearchForArtist" />
+                    <label for="search-for-artist">Artist</label>
                 </div>
-                <div class="form-group card-span-6">
-                    <label for="search-for-filename" class="card-span-5">Filename</label>
+                <div>
                     <InputCheckbox type="checkbox" id="search-for-filename" @bind-Value="SearchModel.SearchForFilename" />
+                    <label for="search-for-filename">Filename</label>
                 </div>
-                <div class="form-group card-span-12">
-                    <label for="search-for-onlypublic" class="card-span-5">Only public albums</label>
+                <div>
                     <InputCheckbox type="checkbox" id="search-for-onlypublic" @bind-Value="SearchModel.OnlyPublic" />
+                    <label for="search-for-onlypublic">Only public albums</label>
                 </div>
-                <div class="form-group card-span-12">
-                    <label for="search-for-onlyautoplaylist" class="card-span-5">Only auto playlist</label>
+                <div>
                     <InputCheckbox type="checkbox" id="search-for-onlyautoplaylist" @bind-Value="SearchModel.OnlyAutoPlaylist" />
+                    <label for="search-for-onlyautoplaylist">Only auto playlist</label>
                 </div>
-            </EditForm>
-        </div>
+            </div>
+        </EditForm>
     </div>
-    <div class="card card-span-8">
-        <div class="card-header">Search results</div>
-        <div class="card-body">
+    <div class="card grid-span-8">
+        <div class="card-header-container"><h3>Search results</h3></div>
+        <div>
             @if (SearchResults.Count == 0)
             {
                 <div class="alert alert-info">No results for current search</div>
@@ -98,18 +96,18 @@
                          ondragover="event.preventDefault();"
                          @ondragstart="() => HandleDragStart(result)"
                          @ondragend="HandleDragEnd"
-                         class="card-grid search-result @(_currentlyDraggingSearchItem == result ? "drag-search" : null)">
-                        <div class="card-span-1 center-all">
+                         class="grid search-result @(_currentlyDraggingSearchItem == result ? "drag-search" : null)">
+                        <div class="grid-span-1 center-all">
                             <span class="fa-solid fa-grip"></span>
                         </div>
-                        <div class="card-span-8">
+                        <div class="grid-span-8">
                             <b>@result.AlbumTitle</b> <em>(@result.Artists)</em><br />
                             @result.TrackTitle
                         </div>
-                        <div class="card-span-2">
+                        <div class="grid-span-2">
                             @result.Length
                         </div>
-                        <div class="card-span-1 playlist-search-actions center-all">
+                        <div class="grid-span-1 playlist-search-actions center-all">
                             <button class="secondary" @onclick="() => AddTrackToQueueTop(result.TrackStreamInfoId)" title="Queue top"><span class="fa-solid fa-arrows-up-to-line"></span></button>
                             <button class="secondary" @onclick="() => AddTrackToQueueBottom(result.TrackStreamInfoId)" title="Queue bottom"><span class="fa-solid fa-arrows-down-to-line"></span></button>
                         </div>

@@ -6,22 +6,20 @@
 @using Whitestone.SegnoSharp.Modules.Playlist.ViewModels
 @attribute [ModuleMenu("History", typeof(Playlist))]
 
+<div class="header-container">
+    <h1>History</h1>
+    <div>
+        <label for="date-selector">Select date</label>
+        <input type="date" id="date-selector" min="@MinDate.ToString("yyyy-MM-dd")" max="@SystemClock.Now.ToString("yyyy-MM-dd")" @bind="SelectedDate" @bind:after="OnDateChanged" />
+    </div>
+</div>
 <div class="card-grid">
-    <div class="card card-span-12">
-        <div class="card-header card-grid">
-            <div class="card-span-8">
-                History
-            </div>
-            <div class="card-span-4 text-right">
-                <label for="date-selector">Select date</label>
-                <input type="date" id="date-selector" min="@MinDate.ToString("yyyy-MM-dd")" max="@SystemClock.Now.ToString("yyyy-MM-dd")" @bind="SelectedDate" @bind:after="OnDateChanged" />
-            </div>
-        </div>
-        <div class="card-body">
+    <div class="card grid-span-12">
+        <div>
             @foreach (HistoryViewModel playlistItem in HistoryItems)
             {
-                <div class="card-grid playlist-item @(playlistItem.CurrentlyPlaying ? "currently-playing" : null)">
-                    <div class="card-span-2 center-all">
+                <div class="grid playlist-item @(playlistItem.CurrentlyPlaying ? "currently-playing" : null)">
+                    <div class="grid-span-2 center-all">
                         <div>
                             @playlistItem.Played.ToString("yyyy-MM-dd HH:mm:ss")
                             @if (playlistItem.CurrentlyPlaying)
@@ -31,19 +29,19 @@
                             }
                         </div>
                     </div>
-                    <div class="card-span-1 center-all">
+                    <div class="grid-span-1 center-all">
                         @if (playlistItem.HasAlbumCover)
                         {
                             <img src="@HashingUtil.GetAlbumCoverUri(playlistItem.AlbumId, 50)" alt="@(playlistItem.AlbumTitle) - Cover" class="bordered" />
                         }
                     </div>
-                    <div class="card-span-8 flex-center">
+                    <div class="grid-span-8 flex-center">
                         <div>
                             <b>@playlistItem.AlbumTitle</b> <em>(@playlistItem.Artists)</em><br />
                             @playlistItem.TrackTitle
                         </div>
                     </div>
-                    <div class="card-span-1 center-all">@playlistItem.Length</div>
+                    <div class="grid-span-1 center-all">@playlistItem.Length</div>
                 </div>
             }
         </div>

@@ -13,13 +13,17 @@
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 
-<h1>Edit track</h1>
+<div class="header-container">
+    <h1>Edit track</h1>
+</div>
+
+
 <EditForm EditContext="_editContext">
     <DataAnnotationsValidator />
     <div class="card-grid">
-        <div class="card card-span-12">
-            <div class="card-header">Track data</div>
-            <div class="card-body">
+        <div class="card grid-span-12">
+            <div class="card-header-container"><h2>Track data</h2></div>
+            <div>
                 <div class="form-group">
                     <label for="track-number">Track #</label>
                     <input id="track-number" type="number" min="1" max="@(ushort.MaxValue)" @bind="Track.TrackNumber" />
@@ -34,11 +38,11 @@
                 </div>
                 <div class="form-group">
                     <label for="track-notes">Notes</label>
-                    <InputTextArea @bind-Value="Track.Notes" />
+                    <InputTextArea id="track-notes" @bind-Value="Track.Notes" />
                 </div>
             </div>
-            <div class="card-header">Credits</div>
-            <div class="card-body">
+            <div class="card-header-container"><h2>Credits</h2></div>
+            <div>
                 @foreach (TrackPersonGroupPersonRelation personGroupRelation in Track.TrackPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
                 {
                     <div class="form-group">
@@ -60,39 +64,35 @@
                     {
                         <div class="form-group">
                             <label>Add group</label>
-                            <div class="card-grid card-span-9">
-                                <select class="card-span-11" @bind="SelectedPersonGroupId">
+                            <div>
+                                <select @bind="SelectedPersonGroupId">
                                     <option value="-1"></option>
                                     @foreach (PersonGroup personGroup in personGroups)
                                     {
                                         <option value="@personGroup.Id">@personGroup.Name</option>
                                     }
                                 </select>
-                                <button class="secondary card-span-1" @onclick="AddPersonGroup" disabled="@(SelectedPersonGroupId <= 0)">Add</button>
+                                <button class="secondary" @onclick="AddPersonGroup" disabled="@(SelectedPersonGroupId <= 0)">Add</button>
                             </div>
                         </div>
                     }
                 }
             </div>
         </div>
-        <div class="card card-span-12">
-            <div class="card-header card-grid">
-                <div class="card-span-11">
-                    Stream info
-                </div>
+        <div class="card grid-span-12">
+            <div class="card-header-container">
+                <h2>Stream info</h2>
                 @if (Track?.TrackStreamInfo != null)
                 {
-                    <div class="card-span-1">
-                        <button class="tertiary" title="Remove Stream Info" @onclick="RemoveStreamInfo">Remove</button>
-                    </div>
+                    <button class="tertiary" title="Remove Stream Info" @onclick="RemoveStreamInfo">Remove</button>
                 }
-            </div>
-            <div class="card-body">
-                @if (Track?.TrackStreamInfo == null)
+                else
                 {
                     <button class="secondary" type="button" @onclick="AddStreamInfo">Add stream info</button>
                 }
-                else
+            </div>
+            <div>
+                @if (Track?.TrackStreamInfo != null)
                 {
                     <div class="form-group">
                         <label for="track-stream-include">Include in auto playlist</label>
@@ -106,8 +106,8 @@
                     <div class="form-group">
                         <label for="track-stream-weight">Weight</label>
                         <input id="track-stream-weight" type="number" @bind="Track.TrackStreamInfo.Weight" />
-                        <div class="card-span-3"></div>
-                        <div class="alert alert-info card-span-9">
+                        <div class="grid-span-3"></div>
+                        <div class="alert alert-info grid-span-9">
                             Weight is a whole number where 0 equals no playlist rotation. Default rotation should be 100.
                         </div>
                     </div>
@@ -118,7 +118,7 @@
 
     <ValidationSummaryAlert></ValidationSummaryAlert>
 
-    <div>
+    <div class="grid-span-12">
         <button class="primary" @onclick="() => Close()">Close</button>
         <button class="primary" @onclick="() => Close(true)" disabled="@Invalid">Close & Save</button>
         <button class="tertiary" @onclick="DeleteTrack">Delete</button>

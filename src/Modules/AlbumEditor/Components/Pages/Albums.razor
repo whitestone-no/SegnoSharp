@@ -7,7 +7,10 @@
 @attribute [Authorize]
 @attribute [ModuleMenu("Albums", 30, "fa-compact-disc", true)]
 
-<h1>Album Editor</h1>
+<div class="header-container">
+    <h1>Album Editor</h1>
+    <button class="secondary" @onclick="NewAlbum">New album</button>
+</div>
 
 @if (!AlbumList.Any())
 {
@@ -16,21 +19,21 @@
 }
 
 <div class="card-grid">
-    <div class="card card-span-12">
-        <div class="card-body">
+    <div class="card grid-span-12">
+        <div>
             <EditForm Model="@SearchModel" OnSubmit="DoSearch">
                 <div class="form-group no-margin">
-                    <label for="album-search" class="card-span-1 flex-center">Search</label>
-                    <InputText type="text" id="album-search" class="card-span-10" @bind-Value="SearchModel.SearchString" />
-                    <div class="card-span-1 text-center">
+                    <label for="album-search" class="grid-span-1 flex-center">Search</label>
+                    <InputText type="text" id="album-search" class="grid-span-10" @bind-Value="SearchModel.SearchString" />
+                    <div class="grid-span-1 text-center">
                         <button class="primary" type="submit"><span class="fa-solid fa-magnifying-glass"></span></button>
                     </div>
                 </div>
             </EditForm>
         </div>
     </div>
-    <div class="card card-span-12">
-        <div class="card-body">
+    <div class="card grid-span-12">
+        <div>
             <table>
                 <thead>
                 <tr>
@@ -68,8 +71,4 @@
             </div>
         }
     </div>
-</div>
-
-<div>
-    <button class="secondary" @onclick="NewAlbum">New album</button>
 </div>

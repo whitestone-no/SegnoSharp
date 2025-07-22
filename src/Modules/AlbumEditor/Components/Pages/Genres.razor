@@ -8,7 +8,10 @@
 @attribute [ModuleMenu("Genres", 300, typeof(Albums), true)]
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
-<h1>Genres</h1>
+<div class="header-container">
+    <h1>Genres</h1>
+    <button class="secondary" @onclick="AddGenre">Add new genre</button>
+</div>
 
 @if (DbGenres.Count == 0)
 {
@@ -17,12 +20,12 @@
 else
 {
     <div class="card-grid">
-        <div class="card card-span-12">
+        <div class="card grid-span-12">
             @foreach (Genre genre in DbGenres)
             {
                 <div class="form-group">
-                    <input type="text" class="card-span-11" @bind="@genre.Name" />
-                    <div class="card-span-1 text-center">
+                    <input type="text" class="grid-span-11" @bind="@genre.Name" />
+                    <div class="grid-span-1 text-center">
                         <button class="tertiary" @onclick="() => RemoveGenre(genre)"><span class="fa-regular fa-circle-xmark"></span></button>
                     </div>
                 </div>
@@ -31,7 +34,6 @@ else
     </div>
 }
 <div>
-    <button class="secondary" @onclick="AddGenre">Add new genre</button>
     <button class="primary" @onclick="SaveChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Save</button>
     <button class="primary" @onclick="DiscardChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Discard changes</button>
 </div>

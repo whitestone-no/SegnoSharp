@@ -9,8 +9,10 @@
 </HeadContent>
 
 <div class="dashboard-admin card-grid">
-    <div class="card card-span-6 boxes">
-        <h1>Active dashboard boxes</h1>
+    <div class="card grid-span-6 boxes">
+        <div class="card-header-container">
+            <h1>Active dashboard boxes</h1>
+        </div>
         <div>
             @foreach (DashboardBoxViewModel box in _activeDashboardBoxes)
             {
@@ -33,8 +35,10 @@
             </div>
         </div>
     </div>
-    <div class="card card-span-6 boxes">
-        <h1>Available dashboard boxes</h1>
+    <div class="card grid-span-6 boxes">
+        <div class="card-header-container">
+            <h1>Available dashboard boxes</h1>
+        </div>
         <div>
             @foreach (DashboardBoxViewModel box in _availableDashboardBoxes)
             {

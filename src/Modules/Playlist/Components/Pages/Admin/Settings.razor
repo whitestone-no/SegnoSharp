@@ -8,47 +8,55 @@
 @attribute [Authorize]
 @attribute [ModuleMenu("Settings", typeof(Playlist), true)]
 
-<h1>Playlist rules</h1>
+<div class="header-container">
+    <h1>Playlist rules</h1>
+</div>
 
 <div class="alert alert-warning">Warning: Changes are saved immediately</div>
 
-<div class="playlist-settings">
-    <div class="settings-body">
-        <div class="form-group">
-            <ObjectPropertyEditor Object="PlaylistSettings" Property="@nameof(PlaylistSettings.MinimumNumberOfSongs)" />
-        </div>
-        <div class="form-group">
-            <ObjectPropertyEditor Object="PlaylistSettings" Property="@nameof(PlaylistSettings.MinimumTotalDuration)" />
+<div class="card-grid">
+    <div class="card grid-span-12">
+        <div class="settings-body">
+            <div class="form-group">
+                <ObjectPropertyEditor Object="PlaylistSettings" Property="@nameof(PlaylistSettings.MinimumNumberOfSongs)"/>
+            </div>
+            <div class="form-group">
+                <ObjectPropertyEditor Object="PlaylistSettings" Property="@nameof(PlaylistSettings.MinimumTotalDuration)"/>
+            </div>
         </div>
     </div>
 </div>
 
-<h2>Playlist processors</h2>
+<div class="header-container">
+    <h2>Playlist processors</h2>
+</div>
 
-<div class="processors">
+<div class="processors card-grid">
     @foreach (IPlaylistProcessor processor in PlaylistProcessors.OrderByDescending(p => p.Settings.SortOrder))
     {
-        <div class="playlist-settings @(processor.Settings.Enabled ? "" : "disabled")">
-            <div class="settings-header">
+        <div class="card grid-span-12 @(processor.Settings.Enabled ? "" : "disabled")">
+            <div class="card-header-container">
                 @if (processor.Settings.SortOrder > 0)
                 {
                     <input type="checkbox" title="@(processor.Settings.Enabled ? "Enabled" : "Disabled")" @bind="processor.Settings.Enabled" />
                 }
-                <span>@processor.Name</span>
+
+                <h3>@processor.Name</h3>
 
                 @if (processor.Settings.SortOrder > 0 && processor.Settings.SortOrder < PlaylistProcessors.Count() - 1)
                 {
-                    <button @onclick="() => MoveProcessorUp(processor)">Move up</button>
+                    <button @onclick="() => MoveProcessorUp(processor)" class="secondary">Move up</button>
                 }
 
                 @if (processor.Settings.SortOrder > 1)
                 {
-                    <button @onclick="() => MoveProcessorDown(processor)">Move down</button>
+                    <button @onclick="() => MoveProcessorDown(processor)" class="secondary">Move down</button>
                 }
             </div>
-
-            <div class="settings-body">
-                <ObjectEditor Object="processor.Settings" IgnoreProperties="@([nameof(PlaylistProcessorSettings.Enabled), nameof(PlaylistProcessorSettings.SortOrder)])" />
+            <div>
+                <div class="settings-body">
+                    <ObjectEditor Object="processor.Settings" IgnoreProperties="@([nameof(PlaylistProcessorSettings.Enabled), nameof(PlaylistProcessorSettings.SortOrder)])" />
+                </div>
             </div>
         </div>
     }

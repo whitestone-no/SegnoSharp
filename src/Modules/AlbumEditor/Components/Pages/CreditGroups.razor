@@ -9,7 +9,10 @@
 @attribute [ModuleMenu("Credit groups", 400, typeof(Albums), true)]
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
-<h1>Credit Groups</h1>
+
+<div class="header-container">
+    <h1>Credit Groups</h1>
+</div>
 
 @if (DbGroups.Count == 0)
 {
@@ -17,16 +20,12 @@
 }
 
 <div class="card-grid">
-    <div class="card card-span-12">
-        <div class="card-header">
-            <div class="card-grid">
-                <div class="card-span-9">Album groups</div>
-                <div class="card-span-2">
-                    Include in auto playlist
-                </div>
-            </div>
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Album groups</h2>
+            <button class="secondary" @onclick="() => AddGroup(PersonGroupType.Album)">Add</button>
         </div>
-        <div class="card-body">
+        <div>
             @foreach (PersonGroupViewModel group in DbGroups.Where(g => g.Type == PersonGroupType.Album).OrderBy(pg => pg.Type).ThenBy(pg => pg.SortOrder))
             {
                 <div draggable="true"
@@ -36,36 +35,28 @@
                      @ondragend="HandleDragEnd"
                      @ondragenter="() => HandleDragEnter(group)"
                      class="form-group @(_currentlyDraggingGroup == group ? "drag-current" : _currentlyDraggingOverGroup == group ? "drag-on" : null)">
-                    <div class="card-span-1 text-center">
+                    <div class="grid-span-1 text-center">
                         <span class="fa-solid fa-grip"></span>
                     </div>
-                    <input type="text" class="card-span-8" @bind="@group.Name" />
-                    <div class="card-span-2 text-center">
+                    <input type="text" class="grid-span-7" @bind="@group.Name" />
+                    <div class="grid-span-3 text-center">
                         <input type="checkbox" @bind="@group.IncludeInAutoPlaylist" title="Include in auto playlist" />
+                        <label>Auto playlist</label>
                     </div>
-                    <div class="card-span-1 text-center">
+                    <div class="grid-span-1 text-center">
                         <button class="tertiary" @onclick="() => RemoveGroup(group)"><span class="fa-regular fa-circle-xmark"></span></button>
                     </div>
 
                 </div>
             }
-            <div class="form-group">
-                <div class="text-center">
-                    <button class="secondary" @onclick="() => AddGroup(PersonGroupType.Album)">Add</button>
-                </div>
-            </div>
         </div>
     </div>
-    <div class="card card-span-12">
-        <div class="card-header">
-            <div class="card-grid">
-                <div class="card-span-9">Track groups</div>
-                <div class="card-span-2">
-                    Include in auto playlist
-                </div>
-            </div>
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h2>Track groups</h2>
+            <button class="secondary" @onclick="() => AddGroup(PersonGroupType.Track)">Add</button>
         </div>
-        <div class="card-body">
+        <div>
             @foreach (PersonGroupViewModel group in DbGroups.Where(g => g.Type == PersonGroupType.Track).OrderBy(pg => pg.Type).ThenBy(pg => pg.SortOrder))
             {
                 <div draggable="true"
@@ -75,28 +66,24 @@
                      @ondragend="HandleDragEnd"
                      @ondragenter="() => HandleDragEnter(group)"
                      class="form-group @(_currentlyDraggingGroup == group ? "drag-current" : _currentlyDraggingOverGroup == group ? "drag-on" : null)">
-                    <div class="card-span-1 text-center">
+                    <div class="grid-span-1 text-center">
                         <span class="fa-solid fa-grip"></span>
                     </div>
-                    <input type="text" class="card-span-8" @bind="@group.Name" />
-                    <div class="card-span-2 text-center">
+                    <input type="text" class="grid-span-7" @bind="@group.Name" />
+                    <div class="grid-span-3 text-center">
                         <input type="checkbox" @bind="@group.IncludeInAutoPlaylist" title="Include in auto playlist" />
+                        <label>Auto playlist</label>
                     </div>
-                    <div class="card-span-1 text-center">
+                    <div class="grid-span-1 text-center">
                         <button class="tertiary" @onclick="() => RemoveGroup(group)"><span class="fa-regular fa-circle-xmark"></span></button>
                     </div>
 
                 </div>
             }
-            <div class="form-group">
-                <div class="text-center">
-                    <button class="secondary" @onclick="() => AddGroup(PersonGroupType.Track)">Add</button>
-                </div>
-            </div>
         </div>
     </div>
-</div>
-<div>
-    <button class="primary" @onclick="SaveChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Save</button>
-    <button class="primary" @onclick="DiscardChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Discard changes</button>
+    <div class="grid-span-12">
+        <button class="primary" @onclick="SaveChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Save</button>
+        <button class="primary" @onclick="DiscardChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Discard changes</button>
+    </div>
 </div>

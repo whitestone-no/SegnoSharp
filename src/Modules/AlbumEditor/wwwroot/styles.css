@@ -1,18 +1,21 @@
 ﻿
 
 .taglist {
-    border: 1px solid var(--bg-lightgray);
-    padding: 10px;
+    display: block !important;
+    border: 1px solid var(--generic-border);
+    color: var(--text-dark);
+    background-color: var(--form-bg);
+    padding: 5px;
     border-radius: 4px;
     grid-column: span 9;
 }
 
     .taglist:hover {
-        border-color: var(--bg-darkgray);
+        border-color: var(--generic-border);
     }
 
     .taglist:focus-within {
-        border-color: var(--primary-color);
+        border-color: var(--form-accent);
         box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
     }
 
@@ -24,9 +27,9 @@
     }
 
         .taglist .selected .tag {
-            background: var(--bg-lightyellow);
-            padding: 5px 10px;
-            border-radius: 10px;
+            background: var(--link-color);
+            padding: 0 5px 0 7px;
+            border-radius: 5px;
             display: flex;
             align-items: center;
             gap: 5px;
@@ -35,7 +38,7 @@
             .taglist .selected .tag button {
                 border: none;
                 background-color: transparent;
-                color: var(--text-color);
+                color: var(--text-dark);
                 margin-top: 3px;
                 cursor: pointer;
             }
@@ -64,14 +67,15 @@
 
 
     .taglist .tag-suggestions {
-        margin-top: 5px;
+        margin-top: 2px;
         border: 1px solid #ccc;
         border-radius: 4px;
         max-height: 200px;
         overflow-y: auto;
         position: absolute;
-        background-color: var(--bg-lightestgray);
-        box-shadow: 0 0 5px 0 var(--bg-lightergray);
+        background-color: var(--text-regular);
+        box-shadow: 0 0 5px 0 var(--text-regular);
+        z-index: 1;
     }
 
         .taglist .tag-suggestions .suggestion {
@@ -86,12 +90,12 @@
         }
 
             .taglist .tag-suggestions .suggestion:hover {
-                background-color: var(--bg-lightergray);
+                background-color: var(--lighter-border);
             }
 
             .taglist .tag-suggestions .suggestion[class~="new"] {
                 font-style: italic;
-                color: var(--bg-gray);
+                color: var(--text-dark);
             }
 
                 .taglist .tag-suggestions .suggestion[class~="new"] span {
@@ -101,7 +105,8 @@
     .taglist .tag-input select {
         width: 100%;
         font-size: 1rem;
-        color: var(--bg-midgray);
+        color: var(--text-dark);
+        border-color: var(--lighter-border)
     }
 
         .taglist .tag-input select option {
@@ -109,7 +114,7 @@
         }
 
             .taglist .tag-input select option[value="0"] {
-                color: var(--bg-midgray);
+                color: var(--text-dark);
                 display: none;
             }
 
@@ -131,7 +136,7 @@ table.tracks tr th:nth-child(3) {
 }
 
 table.tracks tr.drag-on td {
-    border-top: solid 2.5rem var(--hover-color) !important;
+    border-top: solid 2.5rem var(--link-color) !important;
 }
 
 table.tracks tr.drag-current {
@@ -139,7 +144,7 @@ table.tracks tr.drag-current {
 }
 
 table.tracks tr.track-group {
-    background-color: var(--bg-lightyellow);
+    background-color: var(--table-header);
 }
 
     table.tracks tr.track-group div.form-group {
@@ -160,7 +165,7 @@ table.tracks tr.track-group {
     }
 
 .form-group[class~="drag-on"] {
-    border-top: solid 40px var(--hover-color) !important;
+    border-top: solid 40px var(--button-primary-hover) !important;
     padding-top: 1rem;
 }
 

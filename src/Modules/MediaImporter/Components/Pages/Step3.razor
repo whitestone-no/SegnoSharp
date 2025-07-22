@@ -6,167 +6,171 @@
 @using Whitestone.SegnoSharp.Modules.MediaImporter.ViewModels
 @attribute [Authorize]
 
+<div class="header-container">
+    <h1>Media importer</h1>
+</div>
+
 <div class="card-grid">
-    <div class="card card-span-12">
-        <div class="card-header">Media importer</div>
-        <div class="card-body">
-            <div class="wizard-steps">
-                <ul>
-                    <li>Select Folder</li>
-                    <li>Select Files</li>
-                    <li class="active">Verify Metadata</li>
-                    <li>Import</li>
-                </ul>
-            </div>
-            @if (_loading)
+    <div class="card grid-span-12">
+        <div class="wizard-steps">
+            <ul>
+                <li class="done">Select Folder</li>
+                <li class="done">Select Files</li>
+                <li class="active">Verify Metadata</li>
+                <li>Import</li>
+            </ul>
+        </div>
+    </div>
+
+
+    @if (_loading)
+    {
+        <div class="card grid-span-12">
+            <div class="alert alert-info">Loading. Please wait.</div>
+        </div>
+    }
+    else if (_loaded && ImporterState.AlbumsToImport == null)
+    {
+        <div class="card grid-span-12">
+            <div class="alert alert-error">Nothing to import. Please redo the previous steps</div>
+        </div>
+    }
+
+</div>
+
+@if (!(_loading || (_loaded && ImporterState.AlbumsToImport == null)))
+{
+    @foreach (AlbumViewModel album in ImporterState.AlbumsToImport.OrderBy(a => a.Title))
+    {
+        <div class="header-container"><h2>Album</h2></div>
+
+        <div class="card-grid">
+            @if (album.AlbumAlreadyExists)
             {
-                <div class="card">
-                    <div class="alert alert-info">Loading. Please wait.</div>
-                </div>
-            }
-            else if (_loaded && ImporterState.AlbumsToImport == null)
-            {
-                <div class="card">
-                    <div class="alert alert-error">Nothing to import. Please redo the previous steps</div>
+                <div class="card grid-span-12">
+                    <div class="alert alert-warning">
+                        Album already exists. Tracks below will be added as new media to the existing album. Album info will not be updated.
+                    </div>
+                    <div>
+                        <button class="secondary" @onclick="() => CreateAlbumNameCopy(album)">Create a copy</button>
+                    </div>
                 </div>
             }
             else
             {
-                @foreach (AlbumViewModel album in ImporterState.AlbumsToImport.OrderBy(a => a.Title))
-                {
-                    <div class="card">
-                        <div class="card-header">Album</div>
-                        <div class="card-body album">
-                            @if (album.AlbumAlreadyExists)
-                            {
-                                <div class="alert alert-warning">
-                                    Album already exists. Tracks below will be added as new media to the existing album. Album info will not be updated.
-                                </div>
-                                <div>
-                                    <button class="secondary" @onclick="() => CreateAlbumNameCopy(album)">Create a copy</button>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="card-grid">
-                                    <div class="card card-span-10">
-                                        <div class="form-group">
-                                            <label for="album-title-@album.TempId">Title</label>
-                                            <input id="album-title-@album.TempId" type="text" @bind="album.Title" @bind:after="() => AlbumNameChanged(album)" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="album-published-@album.TempId">Published</label>
-                                            <input id="album-published-@album.TempId" type="number" @bind="album.Published" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="album-genres-@album.TempId">Genres</label>
-                                            <input id="album-genres-@album.TempId" type="text" @bind="album.GenresString" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="album-artists-@album.TempId">Album artist(s)</label>
-                                            <input id="album-artists-@album.TempId" type="text" @bind="album.AlbumArtistString" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="album-ispublic-@album.TempId" class="checkbox-label">Is public</label>
-                                            <input id="album-ispublic-@album.TempId" type="checkbox" @bind="@album.IsPublic" />
-                                        </div>
-                                    </div>
-                                    <div class="card card-span-2">
-                                        @if (album.CoverImage != null)
-                                        {
-                                            <div class="text-center">
-                                                <img class="album-cover bordered" src="@album.CoverImage" alt="Album cover" />
-                                                <button class="tertiary" @onclick="() => OnAlbumCoverRemoveClick(album)">Remove</button>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div class="text-center">
-                                                <InputFile OnChange="e => LoadAlbumCover(e, album)" accept=".jpg,.jpeg,image/jpeg,.png,image/png" />
-                                                @if (album.AlbumCoverFileSizeError)
-                                                {
-                                                    <div class="alert alert-error">Image is too large. Max image size is 5MB.</div>
-                                                }
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                        <div class="card-body card-grid discs">
-                            @foreach (Disc disc in album.Discs.OrderBy(d => d.DiscNumber))
-                            {
-                                <div class="card card-span-12 disc">
-                                    <div class="card-body">
-                                        <div class="form-group">
-                                            <label for="disc-number-@(((DiscViewModel)disc).TempId)">Disc number</label>
-                                            <input id="disc-number-@(((DiscViewModel)disc).TempId)" type="number" @bind="@disc.DiscNumber" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="disc-title-@(((DiscViewModel)disc).TempId)">Disc title</label>
-                                            <input id="disc-title-@(((DiscViewModel)disc).TempId)" type="text" @bind="@disc.Title" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="disc-type-@(((DiscViewModel)disc).TempId)">Media type</label>
-                                            <select id="disc-type-@(((DiscViewModel)disc).TempId)" @bind="@(((DiscViewModel)disc).SelectedMediaType)">
-                                                <option value="-1"></option>
-                                                @foreach (MediaType mediaType in MediaTypes)
-                                                {
-                                                    <option value="@mediaType.Id">@mediaType.Name</option>
-                                                }
-                                            </select>
-                                        </div>
-                                        <table class="track-list">
-                                            <thead>
-                                                <tr>
-                                                    <th>&nbsp;</th>
-                                                    <th>Track #</th>
-                                                    <th>Length</th>
-                                                    <th>Autoplay</th>
-                                                    <th>Title</th>
-                                                    <th>Artist(s)</th>
-                                                    <th>Composer(s)</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @{
-                                                    var trackCounter = 1;
-                                                }
-                                                @foreach (Track track in disc.Tracks.OrderBy(t => t.TrackNumber))
-                                                {
-                                                    int currentTrackNumber = trackCounter; // Using trackCounter directly makes it the same across all tracks, so take a copy of it first
-                                                    <tr draggable="true"
-                                                        ondragover="event.preventDefault();"
-                                                        @ondragstart="() => OnDragStart((TrackViewModel)track)"
-                                                        @ondrop="() => HandleDrop((TrackViewModel)track)"
-                                                        @ondragend="HandleDragEnd"
-                                                        @ondragenter="() => HandleDragEnter((TrackViewModel)track)"
-                                                        class="@(_currentlyDraggingTrack == track ? "drag-current" : _currentlyDraggingOverTrack == track ? "drag-on" : null)">
-                                                        <td><span class="fa-solid fa-grip"></span></td>
-                                                        <td><input type="number" @bind="@track.TrackNumber" class="Number" @bind:after="() => TrackNumberChanged(track, currentTrackNumber)" /></td>
-                                                        <td><input type="text" @bind="@track.Duration" class="Duration" /></td>
-                                                        <td><input type="checkbox" @bind="@(((TrackViewModel)track).IncludeInAutoPlaylist)" disabled="@(((TrackViewModel)track).AutoPlaylistDisabled)" /></td>
-                                                        <td><input type="text" @bind="@track.Title" class="Title" /></td>
-                                                        <td><input type="text" @bind="@(((TrackViewModel)track).ArtistString)" class="Artist" /></td>
-                                                        <td><input type="text" @bind="@(((TrackViewModel)track).ComposerString)" class="Composer" /></td>
-                                                    </tr>
-                                                    {
-                                                        trackCounter++;
-                                                    }
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            }
-                        </div>
+                <div class="card grid-span-10">
+                    <div class="form-group">
+                        <label for="album-title-@album.TempId">Title</label>
+                        <input id="album-title-@album.TempId" type="text" @bind="album.Title" @bind:after="() => AlbumNameChanged(album)" />
                     </div>
-                }
+                    <div class="form-group">
+                        <label for="album-published-@album.TempId">Published</label>
+                        <input id="album-published-@album.TempId" type="number" @bind="album.Published" />
+                    </div>
+                    <div class="form-group">
+                        <label for="album-genres-@album.TempId">Genres</label>
+                        <input id="album-genres-@album.TempId" type="text" @bind="album.GenresString" />
+                    </div>
+                    <div class="form-group">
+                        <label for="album-artists-@album.TempId">Album artist(s)</label>
+                        <input id="album-artists-@album.TempId" type="text" @bind="album.AlbumArtistString" />
+                    </div>
+                    <div class="form-group">
+                        <label for="album-ispublic-@album.TempId" class="checkbox-label">Is public</label>
+                        <input id="album-ispublic-@album.TempId" type="checkbox" @bind="@album.IsPublic" />
+                    </div>
+                </div>
+                <div class="card grid-span-2">
+                    @if (album.CoverImage != null)
+                    {
+                        <div class="text-center">
+                            <img class="album-cover bordered" src="@album.CoverImage" alt="Album cover" />
+                            <button class="tertiary" @onclick="() => OnAlbumCoverRemoveClick(album)">Remove</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center">
+                            <InputFile OnChange="e => LoadAlbumCover(e, album)" accept=".jpg,.jpeg,image/jpeg,.png,image/png" />
+                            @if (album.AlbumCoverFileSizeError)
+                            {
+                                <div class="alert alert-error">Image is too large. Max image size is 5MB.</div>
+                            }
+                        </div>
+                    }
+                </div>
             }
-            <div class="buttons">
-                <button class="secondary" @onclick="OnBackClick">&lt; Back</button>
-                <button class="primary" @onclick="OnNextClick" disabled="@(ImporterState.AlbumsToImport == null)">Continue &gt;</button>
-            </div>
+            @foreach (Disc disc in album.Discs.OrderBy(d => d.DiscNumber))
+            {
+                <div class="card grid-span-12 disc">
+                    <div>
+                        <div class="form-group">
+                            <label for="disc-number-@(((DiscViewModel)disc).TempId)">Disc number</label>
+                            <input id="disc-number-@(((DiscViewModel)disc).TempId)" type="number" @bind="@disc.DiscNumber" />
+                        </div>
+                        <div class="form-group">
+                            <label for="disc-title-@(((DiscViewModel)disc).TempId)">Disc title</label>
+                            <input id="disc-title-@(((DiscViewModel)disc).TempId)" type="text" @bind="@disc.Title" />
+                        </div>
+                        <div class="form-group">
+                            <label for="disc-type-@(((DiscViewModel)disc).TempId)">Media type</label>
+                            <select id="disc-type-@(((DiscViewModel)disc).TempId)" @bind="@(((DiscViewModel)disc).SelectedMediaType)">
+                                <option value="-1"></option>
+                                @foreach (MediaType mediaType in MediaTypes)
+                                {
+                                    <option value="@mediaType.Id">@mediaType.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <table class="track-list">
+                            <thead>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th>Track #</th>
+                                    <th>Length</th>
+                                    <th>Autoplay</th>
+                                    <th>Title</th>
+                                    <th>Artist(s)</th>
+                                    <th>Composer(s)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var trackCounter = 1;
+                                }
+                                @foreach (Track track in disc.Tracks.OrderBy(t => t.TrackNumber))
+                                {
+                                    int currentTrackNumber = trackCounter; // Using trackCounter directly makes it the same across all tracks, so take a copy of it first
+                                                                           <tr draggable="true"
+                                                                               ondragover="event.preventDefault();"
+                                                                               @ondragstart="() => OnDragStart((TrackViewModel)track)"
+                                                                               @ondrop="() => HandleDrop((TrackViewModel)track)"
+                                                                               @ondragend="HandleDragEnd"
+                                                                               @ondragenter="() => HandleDragEnter((TrackViewModel)track)"
+                                                                               class="@(_currentlyDraggingTrack == track ? "drag-current" : _currentlyDraggingOverTrack == track ? "drag-on" : null)">
+                                                                               <td><span class="fa-solid fa-grip"></span></td>
+                                                                               <td><input type="number" @bind="@track.TrackNumber" class="Number" @bind:after="() => TrackNumberChanged(track, currentTrackNumber)" /></td>
+                                                                               <td><input type="text" @bind="@track.Duration" class="Duration" /></td>
+                                                                               <td><input type="checkbox" @bind="@(((TrackViewModel)track).IncludeInAutoPlaylist)" disabled="@(((TrackViewModel)track).AutoPlaylistDisabled)" /></td>
+                                                                               <td><input type="text" @bind="@track.Title" class="Title" /></td>
+                                                                               <td><input type="text" @bind="@(((TrackViewModel)track).ArtistString)" class="Artist" /></td>
+                                                                               <td><input type="text" @bind="@(((TrackViewModel)track).ComposerString)" class="Composer" /></td>
+                                                                           </tr>
+                                    {
+                                        trackCounter++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
         </div>
+    }
+}
+<div class="card-grid">
+    <div class="grid-span-12 text-right">
+        <button class="secondary" @onclick="OnBackClick">&lt; Back</button>
+        <button class="primary" @onclick="OnNextClick" disabled="@(ImporterState.AlbumsToImport == null)">Continue &gt;</button>
     </div>
 </div>

@@ -9,7 +9,10 @@
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 
-<h1>Media Types</h1>
+<div class="header-container">
+    <h1>Media Types</h1>
+    <button class="secondary" @onclick="AddType">Add new media type</button>
+</div>
 
 @if (DbTypes.Count == 0)
 {
@@ -18,7 +21,7 @@
 else
 {
     <div class="card-grid">
-        <div class="card card-span-12">
+        <div class="card grid-span-12">
             @foreach (MediaType type in DbTypes.OrderBy(t => t.SortOrder))
             {
                 <div draggable="true"
@@ -28,11 +31,11 @@ else
                      @ondragend="HandleDragEnd"
                      @ondragenter="() => HandleDragEnter(type)"
                      class="form-group @(_currentlyDraggingType == type ? "drag-current" : _currentlyDraggingOverType == type ? "drag-on" : null)">
-                    <div class="card-span-1 text-center">
+                    <div class="grid-span-1 text-center">
                         <span class="fa-solid fa-grip"></span>
                     </div>
-                    <input type="text" class="card-span-10" @bind="@type.Name" />
-                    <div class="card-span-1 text-center">
+                    <input type="text" class="grid-span-10" @bind="@type.Name" />
+                    <div class="grid-span-1 text-center">
                         <button class="tertiary" @onclick="() => RemoveType(type)"><span class="fa-regular fa-circle-xmark"></span></button>
                     </div>
                 </div>
@@ -42,7 +45,6 @@ else
 }
 
 <div>
-    <button class="secondary" @onclick="AddType">Add new media type</button>
     <button class="primary" @onclick="SaveChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Save</button>
     <button class="primary" @onclick="DiscardChanges" disabled="@(!DbContext.ChangeTracker.HasChanges())">Discard changes</button>
 </div>

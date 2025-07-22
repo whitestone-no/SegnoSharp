@@ -1,7 +1,6 @@
 ﻿@page "/admin/albums/{Id:int}"
 @rendermode InteractiveServer
 @layout InnerLayout
-@using System.Collections.Immutable
 @using Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Layouts
 @using Whitestone.SegnoSharp.Database.Models
 @using Whitestone.SegnoSharp.Modules.AlbumEditor.Extensions
@@ -15,18 +14,19 @@
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 
-<h1>@(Id == 0 ? "New" : "Edit") album</h1>
-
-<div class="text-right">
-    Album added on: <em>@Album.Added</em>
+<div class="header-container">
+    <h1>@(Id == 0 ? "New" : "Edit") album</h1>
 </div>
 
 <EditForm EditContext="_editContext">
     <DataAnnotationsValidator />
     <div class="card-grid">
-        <div class="card card-span-8">
-            <div class="card-header">Album data</div>
-            <div class="card-body">
+        <div class="card grid-span-8">
+            <div class="card-header-container">
+                <h2>Album data</h2>
+                <div>Album added on: <em>@Album.Added</em></div>
+            </div>
+            <div>
                 <div class="form-group">
                     <label for="album-data-title">Title<ValidationCustomMessage For="() => Album.Title"><span class="invalid fa-solid fa-triangle-exclamation"></span></ValidationCustomMessage></label>
                     <InputText id="album-data-title" type="text" @bind-Value="Album.Title"></InputText>
@@ -56,8 +56,10 @@
                     <input id="album-data-ispublic" type="checkbox" @bind="Album.IsPublic" />
                 </div>
             </div>
-            <div class="card-header">Credits</div>
-            <div class="card-body">
+            <div class="card-header-container">
+                <h3>Credits</h3>
+            </div>
+            <div>
 
                 @foreach (AlbumPersonGroupPersonRelation personGroupRelation in Album.AlbumPersonGroupPersonRelations.OrderBy(r => r.PersonGroup.SortOrder))
                 {
@@ -81,15 +83,15 @@
                     {
                         <div class="form-group">
                             <label>Add group</label>
-                            <div class="card-grid card-span-9">
-                                <select class="card-span-11" @bind="SelectedPersonGroupId">
+                            <div>
+                                <select @bind="SelectedPersonGroupId">
                                     <option value="-1"></option>
                                     @foreach (PersonGroup personGroup in personGroups)
                                     {
                                         <option value="@personGroup.Id">@personGroup.Name</option>
                                     }
                                 </select>
-                                <button class="secondary card-span-1" @onclick="AddPersonGroup" disabled="@(SelectedPersonGroupId <= 0)">Add</button>
+                                <button class="secondary" @onclick="AddPersonGroup" disabled="@(SelectedPersonGroupId <= 0)">Add</button>
                             </div>
                         </div>
                     }
@@ -97,22 +99,21 @@
             </div>
         </div>
 
-        <div class="album-cover card card-span-4">
-            <div class="card-header">Cover</div>
-            <div class="card-body">
+        <div class="card grid-span-4">
+            <div class="card-header-container">
+                <h3>Cover</h3>
+            </div>
+            <div class="album-cover">
 
                 @if (Album.AlbumCover != null)
                 {
-                    <div>
-                        <img src="@Album.GetCoverImage()" alt="Album cover" />
-                        <button class="tertiary" @onclick="RemoveAlbumCover">Remove</button>
-                    </div>
+                    <img src="@Album.GetCoverImage()" alt="Album cover" /><br/>
+                    <button class="tertiary" @onclick="RemoveAlbumCover">Remove</button>
                 }
                 else
                 {
-                    <div>
-                        <InputFile OnChange="AddAlbumCover" accept=".jpg,.jpeg,image/jpeg,.png,image/png" />
-                    </div>
+                    <InputFile OnChange="AddAlbumCover" accept=".jpg,.jpeg,image/jpeg,.png,image/png" />
+
                     @if (AlbumCoverFileSizeError)
                     {
                         <div class="Error">Image is too large. Max image size is 5MB.</div>
@@ -120,123 +121,109 @@
                 }
             </div>
         </div>
-    </div>
 
-    <div class="card-grid">
-        <div class="card card-span-12">
-            <div class="card-header">
-                <div class="card-grid no-margin">
-                    <div class="card-span-10 flex-center">Discs</div>
-                    <div class="card-span-2 text-right">
-                        <button type="button" class="secondary" @onclick="AddDisc">Add disc</button>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body card-grid">
-
-                @foreach (Disc disc in Album.Discs)
-                {
-                    <div class="card card-span-12">
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label class="card-span-2">Disc number</label>
-                                <input class="card-span-1" type="number" min="1" max="@(byte.MaxValue)" @bind="disc.DiscNumber" />
-                            </div>
-                            <div class="form-group">
-                                <label class="card-span-2">Disc title</label>
-                                <input class="card-span-10" type="text" @bind="disc.Title" />
-                            </div>
-                            <div class="form-group">
-                                <label class="card-span-2">Media types</label>
-                                <TagList Class="card-span-10" Items="disc.MediaTypes" Selection="MediaTypes"></TagList>
-                            </div>
-                            <div class="form-group">
-                                <div class="card-span-2"></div>
-                                <div class="card-span-10">
-                                    <button class="tertiary" @onclick="() => DeleteDisc(disc)">Delete disc</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-header">
-                            <div class="card-grid no-margin">
-                                <div class="card-span-10 flex-center">Tracks</div>
-                                <div class="card-span-2 text-right">
-                                    <button type="button" class="secondary" @onclick="() => AddTrack(disc)">Add track</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body">
-
-                            <button class="secondary" @onclick="() => AddTrackGroup(disc)">Add track group</button>
-
-                            <table class="tracks">
-                                <thead>
-                                    <tr>
-                                        <th>&nbsp;</th>
-                                        <th>Track #</th>
-                                        <th>Length</th>
-                                        <th>Title</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (Track track in disc.Tracks.OrderBy(t => t.TrackNumber))
-                                    {
-                                        List<TrackGroup> trackGroups = disc.TrackGroups.Where(tg => tg.GroupBeforeTrackNumber == track.TrackNumber).ToList();
-                                        @foreach(TrackGroup trackGroup in trackGroups)
-                                        {
-                                            <tr draggable="true"
-                                                ondragover="event.preventDefault();"
-                                                @ondragstart="() => DragStart(trackGroup)"
-                                                @ondragend="HandleDragEnd"
-                                                class="@(_currentlyDraggingTrackGroup == trackGroup ? "drag-current" : "track-group")">
-                                                <td class="text-center"><span class="fa-solid fa-grip"></span></td>
-                                                <td colspan="3">
-                                                    <div class="form-group">
-                                                        <input type="text" class="card-span-11" @bind="@trackGroup.Name" />
-                                                        <button class="tiny card-span-1" @onclick="() => RemoveTrackGroup(trackGroup)"><span class="fa-regular fa-circle-xmark"></span></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        }
-
-                                        <tr draggable="true"
-                                            ondragover="event.preventDefault();"
-                                            @ondragstart="() => DragStart(track)"
-                                            @ondrop="() => HandleDrop(track)"
-                                            @ondragend="HandleDragEnd"
-                                            @ondragenter="() => HandleDragEnter(track)"
-                                            class="@(_currentlyDraggingTrack == track ? "drag-current" : _currentlyDraggingOverTrack == track ? "drag-on" : null)">
-                                            <td class="text-center"><span class="fa-solid fa-grip"></span></td>
-                                            <td class="text-center">@track.TrackNumber</td>
-                                            <td class="text-center">@track.Duration</td>
-                                            <td>
-                                                @if (track.Id == 0)
-                                                {
-                                                    <span title="Save to edit new track">New track</span>
-                                                }
-                                                else
-                                                {
-                                                    <NavLink href="@($"admin/albums/track/{track.Id}")">@track.Title</NavLink>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                }
+        <div class="header-container">
+            <h2>Discs</h2>
+            <div>
+                <button type="button" class="secondary" @onclick="AddDisc">Add disc</button>
             </div>
         </div>
+
+        @foreach (Disc disc in Album.Discs)
+        {
+            <div class="card grid-span-12">
+                <div>
+                    <div class="form-group">
+                        <label>Disc number</label>
+                        <input type="number" min="1" max="@(byte.MaxValue)" @bind="disc.DiscNumber" />
+                    </div>
+                    <div class="form-group">
+                        <label>Disc title</label>
+                        <input type="text" @bind="disc.Title" />
+                    </div>
+                    <div class="form-group">
+                        <label>Media types</label>
+                        <TagList Items="disc.MediaTypes" Selection="MediaTypes"></TagList>
+                    </div>
+                    <div class="form-group">
+                        <div class="label"></div>
+                        <div>
+                            <button class="tertiary" @onclick="() => DeleteDisc(disc)">Delete disc</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-header-container">
+                    <h3>Tracks</h3>
+                    <button type="button" class="secondary" @onclick="() => AddTrack(disc)">Add track</button>
+                    <button class="secondary" @onclick="() => AddTrackGroup(disc)">Add track group</button>
+                </div>
+
+                <table class="tracks">
+                    <thead>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>Track #</th>
+                            <th>Length</th>
+                            <th class="text-left">Title</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (Track track in disc.Tracks.OrderBy(t => t.TrackNumber))
+                        {
+                            List<TrackGroup> trackGroups = disc.TrackGroups.Where(tg => tg.GroupBeforeTrackNumber == track.TrackNumber).ToList();
+                            @foreach (TrackGroup trackGroup in trackGroups)
+                            {
+                                <tr draggable="true"
+                                    ondragover="event.preventDefault();"
+                                    @ondragstart="() => DragStart(trackGroup)"
+                                    @ondragend="HandleDragEnd"
+                                    class="@(_currentlyDraggingTrackGroup == trackGroup ? "drag-current" : "track-group")">
+                                    <td class="text-center"><span class="fa-solid fa-grip"></span></td>
+                                    <td colspan="3">
+                                        <div class="form-group">
+                                            <input type="text" @bind="@trackGroup.Name" />
+                                            <button class="tiny" @onclick="() => RemoveTrackGroup(trackGroup)"><span class="fa-regular fa-circle-xmark"></span></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+
+                            <tr draggable="true"
+                                ondragover="event.preventDefault();"
+                                @ondragstart="() => DragStart(track)"
+                                @ondrop="() => HandleDrop(track)"
+                                @ondragend="HandleDragEnd"
+                                @ondragenter="() => HandleDragEnter(track)"
+                                class="@(_currentlyDraggingTrack == track ? "drag-current" : _currentlyDraggingOverTrack == track ? "drag-on" : null)">
+                                <td class="text-center"><span class="fa-solid fa-grip"></span></td>
+                                <td class="text-center">@track.TrackNumber</td>
+                                <td class="text-center">@track.Duration</td>
+                                <td>
+                                    @if (track.Id == 0)
+                                    {
+                                        <span title="Save to edit new track">New track</span>
+                                    }
+                                    else
+                                    {
+                                        <NavLink href="@($"admin/albums/track/{track.Id}")">@track.Title</NavLink>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <ValidationSummaryAlert></ValidationSummaryAlert>
+
+        <div class="grid-span-12">
+            <button class="primary" @onclick="() => Close()">Close</button>
+            <button class="primary" @onclick="() => Close(true)">Close & Save</button>
+            <button class="secondary" @onclick="Save">Save</button>
+            <button class="tertiary" @onclick="DeleteAlbum">Delete</button>
+        </div>
+
     </div>
-
-    <ValidationSummaryAlert></ValidationSummaryAlert>
-
-    <div>
-        <button class="primary" @onclick="() => Close()">Close</button>
-        <button class="primary" @onclick="() => Close(true)">Close & Save</button>
-        <button class="secondary" @onclick="Save">Save</button>
-        <button class="tertiary" @onclick="DeleteAlbum">Delete</button>
-    </div>
-
 </EditForm>
