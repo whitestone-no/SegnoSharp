@@ -59,6 +59,7 @@ namespace Whitestone.SegnoSharp
                 // Add these again as modules may have overwritten some values
                 // The priority is:
                 // CommandLine arguments > Environment variables > module secrets > module appsettings > SegnoSharp secrets > SegnoSharp appsettings
+                builder.Configuration.AddUserSecrets(typeof(Bootstrapper).Assembly);
                 builder.Configuration.AddEnvironmentVariables("SegnoSharp_");
                 builder.Configuration.AddCommandLine(args);
 
