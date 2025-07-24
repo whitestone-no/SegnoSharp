@@ -21,7 +21,7 @@ namespace Whitestone.SegnoSharp.Shared.Extensions
             {
                 AudioSettings settings = new();
                 var persistence = sp.GetRequiredService<IPersistenceManager>();
-                persistence.RegisterAsync(settings);
+                persistence.Register(settings);
                 return settings;
             });
 
@@ -29,7 +29,7 @@ namespace Whitestone.SegnoSharp.Shared.Extensions
             {
                 StreamingSettings settings = new();
                 var persistence = sp.GetRequiredService<IPersistenceManager>();
-                persistence.RegisterAsync(settings);
+                persistence.Register(settings);
                 return settings;
             });
 

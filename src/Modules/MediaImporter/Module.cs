@@ -23,7 +23,7 @@ namespace Whitestone.SegnoSharp.Modules.MediaImporter
             {
                 MediaImporterSettings settings = new();
                 var pm = sp.GetRequiredService<IPersistenceManager>();
-                pm.RegisterAsync(settings);
+                pm.Register(settings);
                 return settings;
             });
         }

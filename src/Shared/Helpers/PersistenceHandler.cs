@@ -61,6 +61,11 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
             }
         }
 
+        public void Register(object persistence)
+        {
+            AsyncHelper.RunSync(async () => await RegisterAsync(persistence));
+        }
+
         public async Task RegisterAsync(object persistence)
         {
             List<PersistenceEntry> entries = [];
@@ -165,10 +170,10 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
                 configKeys = _entries.Where(e => e.Owner == persistence).ToList();
             }
 
+            await using SegnoSharpDbContext dbContext = await dbContextFactory.CreateDbContextAsync();
+
             foreach (PersistenceEntry key in configKeys)
             {
-                await using SegnoSharpDbContext dbContext = await dbContextFactory.CreateDbContextAsync();
-
                 PersistenceManagerEntry dbEntry = await dbContext.PersistenceManagerEntries.FindAsync(key.Key);
 
                 if (dbEntry != null && key.PropertyInfo != null && key.PropertyInfo.CanWrite)
@@ -261,13 +266,21 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
             if (key.PropertyInfo.PropertyType == typeof(string) ||
                 key.PropertyInfo.PropertyType.IsEnum)
             {
-                if (!value.StartsWith('"'))
+                if (string.IsNullOrEmpty(value))
                 {
-                    value = "\"" + value;
+                    value = "\"\"";
                 }
-                if (!value.EndsWith('"'))
+                else
                 {
-                    value = value + "\"";
+                    if (!value.StartsWith('"'))
+                    {
+                        value = "\"" + value;
+                    }
+
+                    if (!value.EndsWith('"'))
+                    {
+                        value = value + "\"";
+                    }
                 }
             }
 

@@ -5,6 +5,7 @@ namespace Whitestone.SegnoSharp.Shared.Interfaces
 {
     public interface IPersistenceManager : IHostedService
     {
+        void Register(object persistence);
         Task RegisterAsync(object persistence);
     }
 }

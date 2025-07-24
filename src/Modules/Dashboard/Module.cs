@@ -17,7 +17,7 @@ namespace Whitestone.SegnoSharp.Modules.Dashboard
             {
                 DashboardSettings settings = new();
                 var pm = sp.GetRequiredService<IPersistenceManager>();
-                pm.RegisterAsync(settings);
+                pm.Register(settings);
                 return settings;
             });
         }
