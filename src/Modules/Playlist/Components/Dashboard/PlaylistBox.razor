@@ -1,14 +1,21 @@
 ﻿@using Whitestone.SegnoSharp.Modules.Playlist.ViewModels
 @rendermode InteractiveServer
 
-@foreach (PlaylistViewModel track in Playlist)
+@if (Playlist == null)
 {
-    <div class="playlist-box-item">
-        <img src="@HashingUtil.GetAlbumCoverUri(track.AlbumId, 67)" alt="@(track.AlbumTitle) - Cover" class="bordered" />
-        <div class="playlist-data">
-            <div class="track">@track.TrackTitle</div>
-            <div class="album">@track.AlbumTitle</div>
-            <div class="artist">@track.Artists</div>
+    <div>Empty playlist</div>
+}
+else
+{
+    foreach (PlaylistViewModel track in Playlist)
+    {
+        <div class="playlist-box-item">
+            <img src="@HashingUtil.GetAlbumCoverUri(track.AlbumId, 67)" alt="@(track.AlbumTitle) - Cover" class="bordered" />
+            <div class="playlist-data">
+                <div class="track">@track.TrackTitle</div>
+                <div class="album">@track.AlbumTitle</div>
+                <div class="artist">@track.Artists</div>
+            </div>
         </div>
-    </div>
+    }
 }

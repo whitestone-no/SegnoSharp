@@ -77,7 +77,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Dashboard
             }
             catch (Exception e)
             {
-                Logger.LogError(e, "{exceptionMessage}", e.Message);
+                Logger.LogError(e, "Error when retrieving playlist for PlaylistBox: {exceptionMessage}", e.Message);
             }
         }
     }
