@@ -1,5 +1,5 @@
 ﻿.dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-CurrentlyPlayingBox"] {
-    align-items: start!important;
+    align-items: start !important;
     justify-content: space-between !important;
 }
 
@@ -34,6 +34,7 @@
         display: flex;
         align-items: start;
         justify-content: space-between;
+        max-width: 100%;
     }
 
         .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-box-item img {
@@ -43,7 +44,16 @@
     .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-data {
         margin-left: 5px;
         font-size: 14px;
+        overflow: hidden;
     }
+
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-data .track,
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-data .album,
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-data .artist {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
         .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-Playlist-Components-Dashboard-PlaylistBox"] .playlist-data .track {
             font-weight: bold;
