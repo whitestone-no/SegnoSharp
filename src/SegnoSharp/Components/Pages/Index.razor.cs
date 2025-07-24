@@ -12,8 +12,7 @@ namespace Whitestone.SegnoSharp.Components.Pages
 
         protected override void OnInitialized()
         {
-            if (!string.IsNullOrEmpty(SiteConfig.Value.StartPage) &&
-                !SiteConfig.Value.StartPage.Equals("/", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(SiteConfig.Value.StartPage))
             {
                 NavigationManager.NavigateTo(SiteConfig.Value.StartPage, true);
             }

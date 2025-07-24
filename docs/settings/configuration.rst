@@ -32,6 +32,7 @@ Site configuration
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | SiteConfig.StartPage    | Relative to root of website                    | If the user accesses the root of the website (``/``) they will be redirected |
 |                         |                                                | to this path. This path will *not* be validated.                             |
+|                         |                                                | Relative to ``BasePath``, so no need to start with a ``/``.                  |
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | SiteConfig.SharedSecret | Secret string value                            | Used by ``IHashingUtil`` to generate hashes unique to your installation      |
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+

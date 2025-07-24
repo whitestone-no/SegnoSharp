@@ -26,8 +26,7 @@ namespace Whitestone.SegnoSharp.Shared.Components.Layouts
 
         protected override async Task OnInitializedAsync()
         {
-            if (!string.IsNullOrEmpty(SiteConfig.Value.StartPage) &&
-                !SiteConfig.Value.StartPage.Equals("/", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(SiteConfig.Value.StartPage))
             {
                 ShowHome = false;
             }
