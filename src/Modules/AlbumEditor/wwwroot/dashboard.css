@@ -1,0 +1,17 @@
+﻿.dashboard-box[data-id="Whitestone-SegnoSharp-Modules-AlbumEditor-Components-Dashboard-PlaylistStatistics"]{
+    justify-content: start;
+}
+
+.dashboard-box[data-id="Whitestone-SegnoSharp-Modules-AlbumEditor-Components-Dashboard-PlaylistStatistics"] table {
+    border: none;
+}
+
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-AlbumEditor-Components-Dashboard-PlaylistStatistics"] table th,
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-AlbumEditor-Components-Dashboard-PlaylistStatistics"] table td,
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-AlbumEditor-Components-Dashboard-PlaylistStatistics"] table tr:nth-child(even),
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-AlbumEditor-Components-Dashboard-PlaylistStatistics"] table tr:hover {
+        border: none;
+        background-color: transparent;
+        text-align: left;
+        padding-left: 0;
+    }

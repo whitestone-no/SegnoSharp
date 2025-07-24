@@ -1,0 +1,23 @@
+﻿@rendermode InteractiveServer
+
+<table>
+    @if (Statistics != null)
+    {
+        <tr>
+            <th>Number of albums:</th>
+            <td>@Statistics.NumberOfAlbums</td>
+        </tr>
+        <tr>
+            <th>Number of tracks:</th>
+            <td>@Statistics.NumberOfTracks</td>
+        </tr>
+        <tr>
+            <th>Number of artists:</th>
+            <td>@Statistics.NumberOfArtists</td>
+        </tr>
+        <tr>
+            <th>Total duration:</th>
+            <td>@TimeSpan.FromSeconds(Statistics.TotalDuration).ToString("d' days 'h' hours 'm' minutes 's' seconds'")</td>
+        </tr>
+    }
+</table>
