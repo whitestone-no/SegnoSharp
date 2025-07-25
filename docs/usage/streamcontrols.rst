@@ -18,11 +18,14 @@ These are the settings that determine which Shoutcast/Icecast server to stream t
 | Bitrate      | | How much to compress the audio sent to the server.                                   |
 |              | | The higher the number, the higher the quality, but also more network bandwidth used. |
 +--------------+----------------------------------------------------------------------------------------+
+| Server type  | Stream to Shoutcast or Icecast                                                         |
++--------------+----------------------------------------------------------------------------------------+
 | Hostname     | The hostname of the Shoutcast/Icecast server                                           |
 +--------------+----------------------------------------------------------------------------------------+
 | Port         | The TCP port number of the Shoutcast/Icecast server                                    |
 +--------------+----------------------------------------------------------------------------------------+
-| Mount point  | The path to the mount point on the Shoutcast/Icecast server                            |
+| Mount point  | The Stream ID (Shoutcast) or path (Icecast) to the mount point                         |
+|              | on the Shoutcast/Icecast server                                                        |
 +--------------+----------------------------------------------------------------------------------------+
 | Password     | Streaming to a Shoutcast/Icecast server requires a password. Put this here.            |
 +--------------+----------------------------------------------------------------------------------------+

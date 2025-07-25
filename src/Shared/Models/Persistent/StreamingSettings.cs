@@ -16,16 +16,17 @@ namespace Whitestone.SegnoSharp.Shared.Models.Persistent
 
         [Persist]
         [Attributes.PersistenceManager.DefaultValue(nameof(ServerType.Icecast))]
+        [Attributes.PersistenceManager.Description("Server type")]
         public ServerType ServerType { get; set; }
 
         [Persist]
         [Attributes.PersistenceManager.DefaultValue("localhost")]
         public string Hostname { get; set; }
-        
+
         [Persist]
         [Attributes.PersistenceManager.DefaultValue(8000)]
         public ushort Port { get; set; }
-        
+
         [Persist]
         [Attributes.PersistenceManager.DefaultValue("/stream")]
         [Attributes.PersistenceManager.Description("Mount point")]
@@ -43,7 +44,7 @@ namespace Whitestone.SegnoSharp.Shared.Models.Persistent
         [Persist]
         [Attributes.PersistenceManager.DefaultValue("SegnoSharp")]
         public string Name { get; set; }
-        
+
         [Persist]
         [Attributes.PersistenceManager.DefaultValue("localhost")]
         [Attributes.PersistenceManager.Description("Server URL")]
