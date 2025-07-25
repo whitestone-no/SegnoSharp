@@ -49,32 +49,30 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Dashboard
                             r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
                         .SelectMany(r => r.Persons.Select(p => p.Id)));
                 
-                Task<int> albumsTask = baseQuery
+                int albumsResult = await baseQuery
                     .Select(tsi => tsi.Track.Disc.Album.Id)
                     .Distinct()
                     .CountAsync();
 
-                Task<int> tracksTask = baseQuery
+                int tracksResult = await baseQuery
                     .Select(tsi => tsi.Track.Id)
                     .Distinct()
                     .CountAsync();
 
-                Task<int> durationTask = baseQuery
+                int durationResult = await baseQuery
                     .Select(tsi => tsi.Track)
                     .Distinct()
                     .SumAsync(t => t.Length);
 
-                Task<int> artistsTask = trackArtistIdsQuery
+                int artistsResult = await trackArtistIdsQuery
                     .Union(albumArtistIdsQuery)
                     .Distinct()
                     .CountAsync();
 
-                await Task.WhenAll(albumsTask, tracksTask, durationTask, artistsTask);
-
-                Statistics.NumberOfAlbums = albumsTask.Result;
-                Statistics.NumberOfTracks = tracksTask.Result;
-                Statistics.TotalDuration = durationTask.Result;
-                Statistics.NumberOfArtists = artistsTask.Result;
+                Statistics.NumberOfAlbums = albumsResult;
+                Statistics.NumberOfTracks = tracksResult;
+                Statistics.TotalDuration = durationResult;
+                Statistics.NumberOfArtists = artistsResult;
             }
             catch (Exception e)
             {
