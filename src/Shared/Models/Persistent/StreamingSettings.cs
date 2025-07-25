@@ -15,6 +15,10 @@ namespace Whitestone.SegnoSharp.Shared.Models.Persistent
         public Bitrate Bitrate { get; set; }
 
         [Persist]
+        [Attributes.PersistenceManager.DefaultValue(nameof(ServerType.Icecast))]
+        public ServerType ServerType { get; set; }
+
+        [Persist]
         [Attributes.PersistenceManager.DefaultValue("localhost")]
         public string Hostname { get; set; }
         
@@ -104,4 +108,11 @@ namespace Whitestone.SegnoSharp.Shared.Models.Persistent
         Aac
     }
 
+    public enum ServerType
+    {
+        [FriendlyName("Icecast")]
+        Icecast,
+        [FriendlyName("Shoutcast")]
+        Shoutcast
+    }
 }
