@@ -287,14 +287,21 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 
                 _log.LogDebug("Encoder started");
 
-                string server = _streamingSettings.ServerType switch
+                string server = _streamingSettings.Hostname + ":" + _streamingSettings.Port;
+
+                if (!string.IsNullOrEmpty(_streamingSettings.MountPoint))
                 {
-                    ServerType.Icecast => _streamingSettings.Hostname + ":" + _streamingSettings.Port + "/" + _streamingSettings.MountPoint.TrimStart('/'),
-                    ServerType.Shoutcast => _streamingSettings.Hostname + ":" + _streamingSettings.Port + "," + _streamingSettings.MountPoint,
+                    server += _streamingSettings.ServerType switch
+                {
+                        ServerType.Shoutcast => ",",
+                        ServerType.Icecast => "/",
 #pragma warning disable CA2208
                     _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
 #pragma warning restore CA2208
                 };
+
+                    server += _streamingSettings.MountPoint.TrimStart('/');
+                }
 
                 bool castInitSuccess = _bassWrapper.CastInit(
                     encoder.EncoderHandle,
@@ -312,7 +319,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 
                 if (!castInitSuccess)
                 {
-                    _log.LogCritical("Could not start casting. {error}", _bassWrapper.GetLastBassError());
+                    _log.LogCritical("Could not start casting to {server}. {error}", server, _bassWrapper.GetLastBassError());
                     HandleEventAsync(new StopStreaming()); // Don't await this as we just want to stop the encoder
                     return Task.CompletedTask;
                 }
