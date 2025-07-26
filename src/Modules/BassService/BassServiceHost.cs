@@ -282,7 +282,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 if (!encoder.Start(null, IntPtr.Zero, false))
                 {
                     _log.LogCritical("Could not start encoder: {bassError}", _bassWrapper.GetLastBassError());
-                    _log.LogCritical("Could not start encoder");
                     return Task.CompletedTask;
                 }
 
@@ -293,20 +292,20 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                 if (!string.IsNullOrEmpty(_streamingSettings.MountPoint))
                 {
                     server += _streamingSettings.ServerType switch
-                {
+                    {
                         ServerType.Shoutcast => ",",
                         ServerType.Icecast => "/",
 #pragma warning disable CA2208
-                    _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
+                        _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
 #pragma warning restore CA2208
-                };
+                    };
 
                     server += _streamingSettings.MountPoint.TrimStart('/');
                 }
 
                 bool castInitSuccess = _bassWrapper.CastInit(
                     encoder.EncoderHandle,
-                server,
+                    server,
                     _streamingSettings.Password,
                     encoderType,
                     _streamingSettings.Name,
