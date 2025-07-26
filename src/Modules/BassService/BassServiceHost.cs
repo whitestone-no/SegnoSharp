@@ -281,6 +281,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 
                 if (!encoder.Start(null, IntPtr.Zero, false))
                 {
+                    _log.LogCritical("Could not start encoder: {bassError}", _bassWrapper.GetLastBassError());
                     _log.LogCritical("Could not start encoder");
                     return Task.CompletedTask;
                 }
