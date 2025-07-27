@@ -11,40 +11,42 @@ Stream server settings
 
 These are the settings that determine which Shoutcast/Icecast server to stream to, and some meta information for the server.
 
-+--------------+----------------------------------------------------------------------------------------+
-| Audio format | | The compressed audio format to send to the Shoutcast/Icecast server.                 |
-|              | | One of either ``MP3`` or ``AAC``                                                     |
-+--------------+----------------------------------------------------------------------------------------+
-| Bitrate      | | How much to compress the audio sent to the server.                                   |
-|              | | The higher the number, the higher the quality, but also more network bandwidth used. |
-+--------------+----------------------------------------------------------------------------------------+
-| Server type  | Stream to Shoutcast or Icecast                                                         |
-+--------------+----------------------------------------------------------------------------------------+
-| Hostname     | The hostname of the Shoutcast/Icecast server                                           |
-+--------------+----------------------------------------------------------------------------------------+
-| Port         | The TCP port number of the Shoutcast/Icecast server                                    |
-+--------------+----------------------------------------------------------------------------------------+
-| Mount point  | The Stream ID (Shoutcast) or path (Icecast) to the mount point                         |
-|              | on the Shoutcast/Icecast server                                                        |
-+--------------+----------------------------------------------------------------------------------------+
-| Password     | Streaming to a Shoutcast/Icecast server requires a password. Put this here.            |
-+--------------+----------------------------------------------------------------------------------------+
-| Is public    | | Meta data for the Shoutcast/Icecast server.                                          |
-|              | | Should this stream be shown in a public directory on the Shoutcast/Icecast server    |
-|              | | or not                                                                               |
-+--------------+----------------------------------------------------------------------------------------+
-| Name         | | Meta data for the Shoutcast/Icecast server.                                          |
-|              | | The name of the stream as shown on the server.                                       |
-+--------------+----------------------------------------------------------------------------------------+
-| Server URL   | | Meta data for the Shoutcast/Icecast server.                                          |
-|              | | A custom URI that the server will link to. Does not have to link back to SegnoSharp. |
-+--------------+----------------------------------------------------------------------------------------+
-| Genre        | | Meta data for the Shoutcast/Icecast server.                                          |
-|              | | The genre of the stream as shown on the server.                                      |
-+--------------+----------------------------------------------------------------------------------------+
-| Description  | | Meta data for the Shoutcast/Icecast server.                                          |
-|              | | The description of the stream as shown on the server.                                |
-+--------------+----------------------------------------------------------------------------------------+
++----------------+----------------------------------------------------------------------------------------+
+| Audio format   | | The compressed audio format to send to the Shoutcast/Icecast server.                 |
+|                | | One of either ``MP3`` or ``AAC``                                                     |
++----------------+----------------------------------------------------------------------------------------+
+| Bitrate        | | How much to compress the audio sent to the server.                                   |
+|                | | The higher the number, the higher the quality, but also more network bandwidth used. |
++----------------+----------------------------------------------------------------------------------------+
+| Server type    | Stream to Shoutcast or Icecast                                                         |
++----------------+----------------------------------------------------------------------------------------+
+| Hostname       | The hostname of the Shoutcast/Icecast server                                           |
++----------------+----------------------------------------------------------------------------------------+
+| Port           | The TCP port number of the Shoutcast/Icecast server                                    |
++----------------+----------------------------------------------------------------------------------------+
+| Mount point    | | The Stream ID (Shoutcast) or path (Icecast) to the mount point                       |
+|                | | on the Shoutcast/Icecast server                                                      |
++----------------+----------------------------------------------------------------------------------------+
+| Password       | Streaming to a Shoutcast/Icecast server requires a password. Put this here.            |
++----------------+----------------------------------------------------------------------------------------+
+| Admin password | Shoutcast/Icecast admin password for retrieval of statistics.                          |
++----------------+----------------------------------------------------------------------------------------+
+| Is public      | | Meta data for the Shoutcast/Icecast server.                                          |
+|                | | Should this stream be shown in a public directory on the Shoutcast/Icecast server    |
+|                | | or not                                                                               |
++----------------+----------------------------------------------------------------------------------------+
+| Name           | | Meta data for the Shoutcast/Icecast server.                                          |
+|                | | The name of the stream as shown on the server.                                       |
++----------------+----------------------------------------------------------------------------------------+
+| Server URL     | | Meta data for the Shoutcast/Icecast server.                                          |
+|                | | A custom URI that the server will link to. Does not have to link back to SegnoSharp. |
++----------------+----------------------------------------------------------------------------------------+
+| Genre          | | Meta data for the Shoutcast/Icecast server.                                          |
+|                | | The genre of the stream as shown on the server.                                      |
++----------------+----------------------------------------------------------------------------------------+
+| Description    | | Meta data for the Shoutcast/Icecast server.                                          |
+|                | | The description of the stream as shown on the server.                                |
++----------------+----------------------------------------------------------------------------------------+
 
 ***************
 Stream controls

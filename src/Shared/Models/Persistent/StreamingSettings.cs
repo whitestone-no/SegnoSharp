@@ -37,6 +37,11 @@ namespace Whitestone.SegnoSharp.Shared.Models.Persistent
         public string Password { get; set; }
 
         [Persist]
+        [Attributes.PersistenceManager.DefaultValue("hackme")]
+        [Attributes.PersistenceManager.Description("Admin password")]
+        public string AdminPassword { get; set; }
+
+        [Persist]
         [Attributes.PersistenceManager.DefaultValue(false)]
         [Attributes.PersistenceManager.Description("Is public")]
         public bool IsPublic { get; set; }

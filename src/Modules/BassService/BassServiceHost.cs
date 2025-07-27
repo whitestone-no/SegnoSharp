@@ -418,7 +418,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 #pragma warning restore CA2208
             };
 
-            string statsRaw = _bassWrapper.GetStreamingStats(_encoder.EncoderHandle, type, null);
+            string statsRaw = _bassWrapper.GetStreamingStats(_encoder.EncoderHandle, type, _streamingSettings.AdminPassword);
 
             if (statsRaw == null)
             {
