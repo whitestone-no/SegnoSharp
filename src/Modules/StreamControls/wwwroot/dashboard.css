@@ -1,0 +1,18 @@
+﻿.dashboard-box[data-id="Whitestone-SegnoSharp-Modules-StreamControls-Components-Dashboard-StreamStats"] {
+    justify-content: start;
+    align-items: start;
+}
+
+    .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-StreamControls-Components-Dashboard-StreamStats"] table {
+        border: none;
+    }
+
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-StreamControls-Components-Dashboard-StreamStats"] table th,
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-StreamControls-Components-Dashboard-StreamStats"] table td,
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-StreamControls-Components-Dashboard-StreamStats"] table tr:nth-child(even),
+        .dashboard-box[data-id="Whitestone-SegnoSharp-Modules-StreamControls-Components-Dashboard-StreamStats"] table tr:hover {
+            border: none;
+            background-color: transparent;
+            text-align: left;
+            padding-left: 0;
+        }

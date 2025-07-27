@@ -1,0 +1,21 @@
+﻿@rendermode InteractiveServer
+
+<table>
+    @if (!StreamingSettings.IsStreaming)
+    {
+        <tr>
+            <td colspan="2">Not currently streaming.</td>
+        </tr>
+    }
+    else
+    {
+        <tr>
+            <th>Listeners:</th>
+            <td>@_listeners</td>
+        </tr>
+        <tr>
+            <th>Peak listeners:</th>
+            <td>@_peakListeners</td>
+        </tr>
+    }
+</table>

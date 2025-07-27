@@ -22,10 +22,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\dashboard.css" />
     <Content Remove="wwwroot\styles.css" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="wwwroot\dashboard.css" />
     <EmbeddedResource Include="wwwroot\styles.css" />
   </ItemGroup>
 
