@@ -31,5 +31,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Interfaces
         bool RemoveSync(int handle, int sync);
         bool CastInit(int handle, string server, string pass, string content, string name, string url, string genre, string desc, string headers, int bitrate, BASSEncodeCast flags);
         bool SetStreamingTitle(int handle, string title);
+        string GetStreamingStats(int handle, BASSEncodeStats type, string password);
     }
 }

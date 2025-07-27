@@ -124,5 +124,10 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
         {
             return BassEnc.BASS_Encode_CastSetTitle(handle, title, null);
         }
+
+        public string GetStreamingStats(int handle, BASSEncodeStats type, string password)
+        {
+            return BassEnc.BASS_Encode_CastGetStats(handle, type, password);
+        }
     }
 }

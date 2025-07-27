@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -23,7 +24,8 @@ namespace Whitestone.SegnoSharp.Modules.BassService
         IAsyncEventHandler<PlayTrack>,
         IAsyncEventHandler<StartStreaming>,
         IAsyncEventHandler<StopStreaming>,
-        IAsyncEventHandler<SetVolume>
+        IAsyncEventHandler<SetVolume>,
+        IAsyncSynchronizedHandler<GetListenersRequest, GetListenersResponse>
     {
         private readonly IBassWrapper _bassWrapper;
         private readonly SiteConfig _siteConfig;
@@ -401,6 +403,101 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             {
                 _log.LogWarning("Could not update title on streaming server. {error}", _bassWrapper.GetLastBassError());
             }
+        }
+
+        public Task<GetListenersResponse> HandleSynchronizedAsync(GetListenersRequest _)
+        {
+            //string statsRaw = statsIce;
+
+            BASSEncodeStats type = _streamingSettings.ServerType switch
+            {
+                ServerType.Icecast => BASSEncodeStats.BASS_ENCODE_STATS_ICESERV,
+                ServerType.Shoutcast => BASSEncodeStats.BASS_ENCODE_STATS_SHOUT,
+#pragma warning disable CA2208
+                _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
+#pragma warning restore CA2208
+            };
+
+            string statsRaw = _bassWrapper.GetStreamingStats(_encoder.EncoderHandle, type, null);
+
+            if (statsRaw == null)
+            {
+                _log.LogError("Failed to get streaming server stats: {error}", _bassWrapper.GetLastBassError());
+                return Task.FromResult(new GetListenersResponse());
+            }
+
+            XmlDocument statsXml = new();
+            statsXml.LoadXml(statsRaw);
+
+            switch (_streamingSettings.ServerType)
+            {
+                case ServerType.Icecast:
+                    return Task.FromResult(GetIcecastListenersFromXml(statsXml));
+                case ServerType.Shoutcast:
+                    return Task.FromResult(GetShoutcastListenersFromXml(statsXml));
+                default:
+#pragma warning disable CA2208
+                    throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type");
+#pragma warning restore CA2208
+            }
+        }
+
+        private GetListenersResponse GetIcecastListenersFromXml(XmlDocument xml)
+        {
+            GetListenersResponse response = new();
+
+            var sourcePath = $"/icestats/source[@mount='/{_streamingSettings.MountPoint.TrimStart('/')}']";
+            XmlNode sourceNode = xml.SelectSingleNode(sourcePath);
+
+            if (sourceNode == null)
+            {
+                _log.LogError("Could not find {sourcePath} in streaming stats XML", sourcePath);
+                return response;
+            }
+
+            XmlNode listenersNode = sourceNode.SelectSingleNode("listeners");
+            XmlNode peakListenersNode = sourceNode.SelectSingleNode("listener_peak");
+
+            if (listenersNode != null && int.TryParse(listenersNode.InnerText, out int listeners))
+            {
+                response.Listeners = listeners;
+            }
+
+            if (peakListenersNode != null && int.TryParse(peakListenersNode.InnerText, out int peakListeners))
+            {
+                response.PeakListeners = peakListeners;
+            }
+
+            return response;
+        }
+
+        private GetListenersResponse GetShoutcastListenersFromXml(XmlDocument xml)
+        {
+            GetListenersResponse response = new();
+
+            const string sourcePath = $"/SHOUTCASTSERVER";
+            XmlNode sourceNode = xml.SelectSingleNode(sourcePath);
+
+            if (sourceNode == null)
+            {
+                _log.LogError("Could not find {sourcePath} in streaming stats XML", sourcePath);
+                return response;
+            }
+
+            XmlNode listenersNode = sourceNode.SelectSingleNode("CURRENTLISTENERS");
+            XmlNode peakListenersNode = sourceNode.SelectSingleNode("PEAKLISTENERS");
+
+            if (listenersNode != null && int.TryParse(listenersNode.InnerText, out int listeners))
+            {
+                response.Listeners = listeners;
+            }
+
+            if (peakListenersNode != null && int.TryParse(peakListenersNode.InnerText, out int peakListeners))
+            {
+                response.PeakListeners = peakListeners;
+            }
+
+            return response;
         }
     }
 }
