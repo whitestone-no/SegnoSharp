@@ -17,7 +17,11 @@ using Track = Whitestone.SegnoSharp.Shared.Models.Track;
 
 namespace Whitestone.SegnoSharp.Modules.Playlist
 {
-    public class PlaylistHandler : IHostedService, IAsyncEventHandler<PlayerReady>, IAsyncEventHandler<PlayNextTrack>
+    public class PlaylistHandler :
+        IHostedService,
+        IAsyncEventHandler<PlayerReady>,
+        IAsyncEventHandler<PlayNextTrack>,
+        IAsyncEventHandler<ReplayCurrentTrack>
     {
         private readonly IDbContextFactory<SegnoSharpDbContext> _dbContextFactory;
         private readonly IPersistenceManager _persistenceManager;
@@ -355,6 +359,43 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
             _ = CurrentlyPlayingTask(_currentlyPlayingTaskCancellationTokenSource.Token);
 
             return Task.CompletedTask;
+        }
+
+        public async Task HandleEventAsync(ReplayCurrentTrack input)
+        {
+            try
+            {
+                await _queueLocker.LockQueueAsync();
+
+                await using SegnoSharpDbContext dbContext = await _dbContextFactory.CreateDbContextAsync();
+
+                StreamHistory currentlyPlayingTrack = await dbContext.StreamHistory
+                    .Include(streamHistory => streamHistory.TrackStreamInfo)
+                    .OrderByDescending(h => h.Played)
+                    .FirstOrDefaultAsync();
+
+                await dbContext.StreamQueue
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(q => q.SortOrder, q => q.SortOrder + 1));
+
+                await dbContext.StreamQueue.AddAsync(new StreamQueue
+                {
+                    SortOrder = 1,
+                    TrackStreamInfo = currentlyPlayingTrack.TrackStreamInfo
+                });
+
+                await dbContext.SaveChangesAsync();
+
+                await _cambion.PublishEventAsync(new PlayNextTrack());
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Unknown exception during track replay event: {message}", ex.Message);
+            }
+
+            finally
+            {
+                _queueLocker.UnlockQueue();
+            }
         }
     }
 }

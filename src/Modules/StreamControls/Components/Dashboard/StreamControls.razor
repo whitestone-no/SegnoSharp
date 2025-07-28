@@ -1,0 +1,22 @@
+﻿@rendermode InteractiveServer
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            @if (!StreamingSettings.IsStreaming)
+            {
+                <div>Not currently streaming</div>
+            }
+            else
+            {
+                <button class="secondary flex-fill" @onclick="FireEvent_ReplayCurrentTrack_Click">
+                    <span class="fa-solid fa-backward-step"></span>
+                    Replay current track
+                </button>
+                <button class="secondary flex-fill" @onclick="FireEvent_PlayNextTrack_Click">
+                    <span class="fa-solid fa-forward-step"></span>
+                    Play next track
+                </button>
+            }
+        </Authorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>
