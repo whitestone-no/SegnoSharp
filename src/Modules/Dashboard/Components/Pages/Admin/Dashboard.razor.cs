@@ -43,14 +43,12 @@ namespace Whitestone.SegnoSharp.Modules.Dashboard.Components.Pages.Admin
                 }
             }
 
-            foreach (string boxId in DashboardSettings.DashboardBoxes)
+            foreach (string boxId in DashboardSettings.DashboardBoxes.ToList())
             {
                 DashboardBoxViewModel box = boxes.Find(b => b.Id == boxId);
 
                 if (box == null)
                 {
-                    // ReSharper disable once PossibleInvalidOperationExceptionCollectionWasModified
-                    // Fix is to add `.ToList()` to the end of the LINQ query, but this is already a List<>
                     DashboardSettings.DashboardBoxes.Remove(boxId);
                     continue;
                 }
