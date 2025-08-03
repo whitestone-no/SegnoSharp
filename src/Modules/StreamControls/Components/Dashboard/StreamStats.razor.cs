@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using System.Timers;
@@ -17,6 +18,7 @@ namespace Whitestone.SegnoSharp.Modules.StreamControls.Components.Dashboard
 
         [Inject] private StreamingSettings StreamingSettings { get; set; }
         [Inject] private ICambion Cambion { get; set; }
+        [Inject] private ISystemClock SystemClock { get; set; }
         [Inject] private ILogger<StreamStats> Logger { get; set; }
 
         private int _listeners;
@@ -26,6 +28,8 @@ namespace Whitestone.SegnoSharp.Modules.StreamControls.Components.Dashboard
 
         protected override void OnInitialized()
         {
+            TimerElapsed(this, new ElapsedEventArgs(SystemClock.Now));
+
             _timer = new Timer(TimeSpan.FromSeconds(5));
             _timer.Elapsed += TimerElapsed;
             _timer.Start();
