@@ -236,7 +236,7 @@ main {
     top: 40px;
     width: calc(100% - 250px);
     height: calc(100vh - 40px);
-    padding: 0 14px 14px 14px;
+    padding: 14px;
     overflow: auto;
 }
 
@@ -977,7 +977,8 @@ a {
     main {
         left: 0;
         width: 100%;
-        padding-bottom: 40px; /* Some mobile browser cut off the bottom of the page, so add some padding to circument this */
+        padding-top: 14px;
+        padding-bottom: 50px; /* Some mobile browser cut off the bottom of the page, so add some padding to circument this */
     }
     .mainmenu-toggle:checked ~ header > .identity {
         display: flex;
@@ -990,6 +991,7 @@ a {
 
     .mainmenu-toggle:checked ~ main {
         overflow: hidden;
+        opacity: 25%;
     }
 
     .mainmenu-label {
