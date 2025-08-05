@@ -17,7 +17,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService
         {
 
             services.Configure<BassRegistration>(configuration.GetSection(BassRegistration.Section));
-            services.Configure<Ffmpeg>(configuration.GetSection(Ffmpeg.Section));
 
             services.AddSingleton<IBassWrapper, BassWrapper>();
             

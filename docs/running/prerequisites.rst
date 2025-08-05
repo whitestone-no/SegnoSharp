@@ -27,53 +27,53 @@ Create a new folder inside the ``lib`` folder called ``bass``.
 Download the libraries from `un4seen <https://www.un4seen.com/bass.html>`_ and extract the files into ``lib/bass``.
 The following table contains a list of all libraries and which file to extract into ``lib/bass``
 
-+-------------+----------------------+----------------------------+------------------+
-| Library     | Filename             | Extract                    | Verified version |
-+=============+======================+============================+==================+
-| BASS        | bass24-linux.zip     | libs/x86_64/libbass.so     | 2.4.17           |
-+-------------+----------------------+----------------------------+------------------+
-| BASSFLAC    | bassflac24-linux.zip | libs/x86_64/libbassflac.so | 2.4.5.5          |
-+-------------+----------------------+----------------------------+------------------+
-| BASSmix     | bassmix24-linux.zip  | libs/x86_64/libbassmix.so  | 2.4.12           |
-+-------------+----------------------+----------------------------+------------------+
-| BASSenc     | bassenc24-linux.zip  | libs/x86_64/libbassenc.so  | 2.4.16.1         |
-+-------------+----------------------+----------------------------+------------------+
-| Bass.Net    | Bass24.Net.zip       | core/Bass.Net.dll          | 2.4.17.6         |
-+-------------+----------------------+----------------------------+------------------+
++-------------+-------------------------+-------------------------------+------------------+
+| Library     | Filename                | Extract                       | Verified version |
++=============+=========================+===============================+==================+
+| BASS        | bass24-linux.zip        | libs/x86_64/libbass.so        | 2.4.17           |
++-------------+-------------------------+-------------------------------+------------------+
+| BASSFLAC    | bassflac24-linux.zip    | libs/x86_64/libbassflac.so    | 2.4.5.5          |
++-------------+-------------------------+-------------------------------+------------------+
+| BASSmix     | bassmix24-linux.zip     | libs/x86_64/libbassmix.so     | 2.4.12           |
++-------------+-------------------------+-------------------------------+------------------+
+| BASSenc     | bassenc24-linux.zip     | libs/x86_64/libbassenc.so     | 2.4.16.1         |
++-------------+-------------------------+-------------------------------+------------------+
+| BASSenc_MP3 | bassenc_mp324-linux.zip | libs/x86_64/libbassenc_mp3.so | 2.4.1.6          |
++-------------+-------------------------+-------------------------------+------------------+
+| BASSenc_AAC | bassenc_aac-linux.zip   | libs/x86_64/libbassenc_aac.so | 0.0.0.3          |
++-------------+-------------------------+-------------------------------+------------------+
+| Bass.Net    | Bass24.Net.zip          | core/Bass.Net.dll             | 2.4.17.8         |
++-------------+-------------------------+-------------------------------+------------------+
 
 The ``lib/bass`` folder should now contain the following files:
 
 - Bass.Net.dll
 - libbass.so
 - libbassenc.so
+- libbassenc_mp3.so
+- libbassenc_aac.so
 - libbassflac.so
 - libbassmix.so
 
 .. note:: If you are going to run SegnoSharp in a Windows environment you will need the (64 bit) ``Win32`` version of these libraries. See the table below for details:
 
-+-------------+----------------+-------------------+------------------+
-| Library     | Filename       | Extract           | Verified version |
-+=============+================+===================+==================+
-| BASS        | bass24.zip     | x64/bass.dll      | 2.4.17           |
-+-------------+----------------+-------------------+------------------+
-| BASSFLAC    | bassflac24.zip | x64/bassflac.dll  | 2.4.5.5          |
-+-------------+----------------+-------------------+------------------+
-| BASSmix     | bassmix24.zip  | x64/bassmix.dll   | 2.4.12           |
-+-------------+----------------+-------------------+------------------+
-| BASSenc     | bassenc24.zip  | x64/bassenc.dll   | 2.4.16.1         |
-+-------------+----------------+-------------------+------------------+
-| Bass.Net    | Bass24.Net.zip | core/Bass.Net.dll | 2.4.17.6         |
-+-------------+----------------+-------------------+------------------+
-
-FFMPEG
-======
-
-SegnoSharp uses FFMPEG to encode the raw audio from BASS into a compressed stream that BASS then streams to Shoutcast/Icecast.
-Create a new folder inside the ``lib`` folder called ``ffmpeg``, and download a linux build for linux64/amd64 and extract the ``ffmpeg`` binary
-from the downloaded package into ``lib/ffmpeg``. Find a suitable package at `FFMPEG <https://www.ffmpeg.org/>`_.
-
-If you plan on running SegnoSharp on Windows you need to download a Windows distribution of FFMPEG and place ``ffmpeg.exe``
-in the ``ffmpeg`` folder inside the ``lib`` folder.
++-------------+-------------------+---------------------+------------------+
+| Library     | Filename          | Extract             | Verified version |
++=============+===================+=====================+==================+
+| BASS        | bass24.zip        | x64/bass.dll        | 2.4.17           |
++-------------+-------------------+---------------------+------------------+
+| BASSFLAC    | bassflac24.zip    | x64/bassflac.dll    | 2.4.5.5          |
++-------------+-------------------+---------------------+------------------+
+| BASSmix     | bassmix24.zip     | x64/bassmix.dll     | 2.4.12           |
++-------------+-------------------+---------------------+------------------+
+| BASSenc     | bassenc24.zip     | x64/bassenc.dll     | 2.4.16.1         |
++-------------+-------------------+---------------------+------------------+
+| BASSenc_MP3 | bassenc_mp324.zip | x64/bassenc_mp3.dll | 2.4.1.6          |
++-------------+-------------------+---------------------+------------------+
+| BASSenc_AAC | bassenc_aac.zip   | x64/bassenc_aac.dll | 0.0.0.3          |
++-------------+-------------------+---------------------+------------------+
+| Bass.Net    | Bass24.Net.zip    | core/Bass.Net.dll   | 2.4.17.8         |
++-------------+-------------------+---------------------+------------------+
 
 ***********
 Source code

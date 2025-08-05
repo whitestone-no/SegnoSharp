@@ -1,22 +1,22 @@
-﻿using System;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
 using Un4seen.Bass.Misc;
 using Whitestone.Cambion.Interfaces;
-using Whitestone.SegnoSharp.Shared.Events;
-using Whitestone.SegnoSharp.Shared.Models.Configuration;
-using Whitestone.SegnoSharp.Shared.Models.Persistent;
 using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
 using Whitestone.SegnoSharp.Modules.BassService.Models;
 using Whitestone.SegnoSharp.Modules.BassService.Models.Config;
+using Whitestone.SegnoSharp.Shared.Events;
+using Whitestone.SegnoSharp.Shared.Models.Configuration;
+using Whitestone.SegnoSharp.Shared.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Modules.BassService
 {
@@ -29,7 +29,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService
     {
         private readonly IBassWrapper _bassWrapper;
         private readonly SiteConfig _siteConfig;
-        private readonly Ffmpeg _ffmpegConfig;
         private readonly ICambion _cambion;
         private readonly ILogger<BassServiceHost> _log;
         private readonly StreamingSettings _streamingSettings;
@@ -41,7 +40,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 
         public BassServiceHost(IBassWrapper bassWrapper,
             IOptions<BassRegistration> bassRegistration,
-            IOptions<Ffmpeg> ffmpegConfig,
             IOptions<SiteConfig> siteConfig,
             ICambion cambion,
             ILogger<BassServiceHost> log,
@@ -50,7 +48,6 @@ namespace Whitestone.SegnoSharp.Modules.BassService
         {
             _bassWrapper = bassWrapper;
             _siteConfig = siteConfig.Value;
-            _ffmpegConfig = ffmpegConfig.Value;
             _cambion = cambion;
             _log = log;
             _streamingSettings = streamingSettings;
@@ -155,6 +152,8 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 
             _log.LogInformation("BASS Version: {bassVersion}", _bassWrapper.GetBassVersion());
             _log.LogInformation("BASS Enc Version: {bassEncVersion}", _bassWrapper.GetBassEncVersion());
+            _log.LogInformation("BASS Enc AAC Version: {bassEncAacVersion}", _bassWrapper.GetBassEncAacVersion());
+            _log.LogInformation("BASS Enc MP3 Version: {bassEncMp3Version}", _bassWrapper.GetBassEncMp3Version());
             _log.LogInformation("BASS Mixer Version: {bassMixerVersion}", _bassWrapper.GetBassMixerVersion());
             _log.LogInformation("BASS.NET Version: {bassMixerVersion}", _bassWrapper.GetBassNetVersion());
         }
@@ -228,62 +227,48 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             return Task.CompletedTask;
         }
 
+#pragma warning disable CA2208
         public Task HandleEventAsync(StartStreaming e)
         {
             try
             {
                 if (_encoder != null)
                 {
+                    // Encoder is already running, do nothing
                     return Task.CompletedTask;
                 }
 
-                string encoderPath = Path.Combine(_siteConfig.LibPath, _ffmpegConfig.LibFolder);
-
-                var ffmpegExecutable = "ffmpeg";
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                switch (_streamingSettings.AudioFormat)
                 {
-                    ffmpegExecutable = "ffmpeg.exe";
+                    case AudioFormat.Mp3:
+                        _encoder = new EncoderBassEnc_Mp3(_mixer)
+                        {
+                            LAME_Bitrate = (int)_streamingSettings.Bitrate,
+                            LAME_Quality = EncoderBassEnc_Mp3.LAMEQuality.Q2,
+                            UseAsyncQueue = true,
+                        };
+                        break;
+                    case AudioFormat.Aac:
+                        _encoder = new EncoderBassEnc_Aac(_mixer)
+                        {
+                            FDKAAC_ConstantBitrate = (int)_streamingSettings.Bitrate * 1000,
+                            FDKAAC_VBRMode = 0, // 0 = CBR, 1 = VBR
+                            UseAsyncQueue = true
+                        };
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(_streamingSettings.AudioFormat), "Invalid audio format for streaming");
                 }
 
-                var format1 = "mp3";
-                var format2 = "mp3";
-                var extension = ".mp3";
-                var encoderCtype = BASSChannelType.BASS_CTYPE_STREAM_MP3;
-                string encoderType = BassEnc.BASS_ENCODE_TYPE_MP3;
-                if (_streamingSettings.AudioFormat == AudioFormat.Aac)
+                if (_encoder is not { EncoderExists: true })
                 {
-                    format1 = "aac";
-                    format2 = "adts";
-                    extension = ".aac";
-                    encoderCtype = BASSChannelType.BASS_CTYPE_STREAM_AAC;
-                    encoderType = BassEnc.BASS_ENCODE_TYPE_AAC;
-                }
-
-                EncoderCMDLN encoder = new(_mixer)
-                {
-                    EncoderDirectory = encoderPath,
-                    CMDLN_Executable = ffmpegExecutable,
-                    CMDLN_CBRString = "-f s16le -ar 44100 -ac 2 -i ${input} -c:a " + format1 + " -b:a ${kbps}k -vn -f " + format2 + " ${output}", // Remember to use "-f adts" for AAC streaming
-                    CMDLN_EncoderType = encoderCtype,
-                    CMDLN_DefaultOutputExtension = extension,
-                    CMDLN_Bitrate = (int)_streamingSettings.Bitrate,
-                    CMDLN_SupportsSTDOUT = true,
-                    CMDLN_ParamSTDIN = "-",
-                    CMDLN_ParamSTDOUT = "-"
-                };
-
-                if (!encoder.EncoderExists)
-                {
-                    _log.LogCritical("Could not find FFMPEG in {encoderDir}", encoder.EncoderDirectory);
+                    _log.LogCritical("Could not load encoder");
                     return Task.CompletedTask;
                 }
 
-                _encoder = encoder;
-                _log.LogDebug("BASS Encoder is set up with the following command line: {commandLine}", encoder.EncoderCommandLine);
-
-                if (!encoder.Start(null, IntPtr.Zero, false))
+                if (!_encoder.Start(null, IntPtr.Zero, false))
                 {
-                    _log.LogCritical("Could not start encoder: {bassError}", _bassWrapper.GetLastBassError());
+                    _log.LogCritical("Could not start encoder: {error}", _bassWrapper.GetLastBassError());
                     return Task.CompletedTask;
                 }
 
@@ -297,19 +282,22 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                     {
                         ServerType.Shoutcast => ",",
                         ServerType.Icecast => "/",
-#pragma warning disable CA2208
                         _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
-#pragma warning restore CA2208
                     };
 
                     server += _streamingSettings.MountPoint.TrimStart('/');
                 }
 
                 bool castInitSuccess = _bassWrapper.CastInit(
-                    encoder.EncoderHandle,
+                    _encoder.EncoderHandle,
                     server,
                     _streamingSettings.Password,
-                    encoderType,
+                    _streamingSettings.AudioFormat switch
+                    {
+                        AudioFormat.Mp3 => BassEnc.BASS_ENCODE_TYPE_MP3,
+                        AudioFormat.Aac => BassEnc.BASS_ENCODE_TYPE_AAC,
+                        _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.AudioFormat), "Invalid audio format for streaming")
+                    },
                     _streamingSettings.Name,
                     _streamingSettings.ServerUrl,
                     _streamingSettings.Genre,
@@ -339,6 +327,7 @@ namespace Whitestone.SegnoSharp.Modules.BassService
 
             return Task.CompletedTask;
         }
+#pragma warning restore CA2208
 
         public Task HandleEventAsync(StopStreaming input)
         {
@@ -356,8 +345,8 @@ namespace Whitestone.SegnoSharp.Modules.BassService
                     }
                 }
 
-                _streamingSettings.IsStreaming = false;
                 _encoder = null;
+                _streamingSettings.IsStreaming = false;
             }
             catch (Exception e)
             {
@@ -405,17 +394,19 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             }
         }
 
+#pragma warning disable CA2208
         public Task<GetListenersResponse> HandleSynchronizedAsync(GetListenersRequest _)
         {
-            //string statsRaw = statsIce;
+            if (_encoder is not { IsActive: true })
+            {
+                return Task.FromResult(new GetListenersResponse());
+            }
 
             BASSEncodeStats type = _streamingSettings.ServerType switch
             {
                 ServerType.Icecast => BASSEncodeStats.BASS_ENCODE_STATS_ICESERV,
                 ServerType.Shoutcast => BASSEncodeStats.BASS_ENCODE_STATS_SHOUT,
-#pragma warning disable CA2208
                 _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
-#pragma warning restore CA2208
             };
 
             string statsRaw = _bassWrapper.GetStreamingStats(_encoder.EncoderHandle, type, _streamingSettings.AdminPassword);
@@ -429,18 +420,14 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             XmlDocument statsXml = new();
             statsXml.LoadXml(statsRaw);
 
-            switch (_streamingSettings.ServerType)
+            return _streamingSettings.ServerType switch
             {
-                case ServerType.Icecast:
-                    return Task.FromResult(GetIcecastListenersFromXml(statsXml));
-                case ServerType.Shoutcast:
-                    return Task.FromResult(GetShoutcastListenersFromXml(statsXml));
-                default:
-#pragma warning disable CA2208
-                    throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type");
-#pragma warning restore CA2208
-            }
+                ServerType.Icecast => Task.FromResult(GetIcecastListenersFromXml(statsXml)),
+                ServerType.Shoutcast => Task.FromResult(GetShoutcastListenersFromXml(statsXml)),
+                _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
+            };
         }
+#pragma warning restore CA2208
 
         private GetListenersResponse GetIcecastListenersFromXml(XmlDocument xml)
         {

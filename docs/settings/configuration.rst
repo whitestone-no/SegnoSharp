@@ -26,7 +26,7 @@ Site configuration
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | SiteConfig.DataPath     | Absolute path or relative to working directory | Directory used for additional persistent data handling, i.e. SQLite database |
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
-| SiteConfig.LibPath      | Absolute path or relative to working directory | Directory used for BASS and FFMPEG binaries                                  |
+| SiteConfig.LibPath      | Absolute path or relative to working directory | Directory used for BASS and other binaries                                   |
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+
 | SiteConfig.MusicPath    | Absolute path or relative to working directory | This is the default directory SegnoSharp will read music from                |
 +-------------------------+------------------------------------------------+------------------------------------------------------------------------------+

@@ -1,8 +1,6 @@
 ﻿using System;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
-using Whitestone.SegnoSharp.Shared.Models;
-using Whitestone.SegnoSharp.Shared.Models.Persistent;
 
 namespace Whitestone.SegnoSharp.Modules.BassService.Interfaces
 {
@@ -22,6 +20,8 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Interfaces
         Version GetBassEncVersion();
         Version GetBassMixerVersion();
         Version GetBassNetVersion();
+        Version GetBassEncMp3Version();
+        Version GetBassEncAacVersion();
         bool Play(int handle, bool restart);
         bool MixerPlay(int streamHandle);
         bool Stop(int handle);

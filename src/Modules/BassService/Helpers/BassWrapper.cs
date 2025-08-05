@@ -1,6 +1,7 @@
 ﻿using System;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
+using Un4seen.Bass.AddOn.EncAac;
 using Un4seen.Bass.AddOn.EncMp3;
 using Un4seen.Bass.AddOn.Mix;
 using Whitestone.SegnoSharp.Modules.BassService.Interfaces;
@@ -78,6 +79,16 @@ namespace Whitestone.SegnoSharp.Modules.BassService.Helpers
         public Version GetBassNetVersion()
         {
             return Utils.GetVersion();
+        }
+
+        public Version GetBassEncMp3Version()
+        {
+            return BassEnc_Mp3.BASS_Encode_MP3_GetVersion(4);
+        }
+
+        public Version GetBassEncAacVersion()
+        {
+            return BassEnc_Aac.BASS_Encode_AAC_GetVersion(4);
         }
 
         public bool Play(int handle, bool restart)
