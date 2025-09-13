@@ -33,6 +33,8 @@ namespace Whitestone.SegnoSharp.Modules.BassService
         private readonly ILogger<BassServiceHost> _log;
         private readonly StreamingSettings _streamingSettings;
         private readonly AudioSettings _audioSettings;
+        private readonly CancellationTokenSource _listenerCountTaskCancellationTokenSource = new();
+        private readonly GetListenersResponse _currentListeners = new();
 
         private int _mixer;
         private TrackExt _currentlyPlayingTrack;
@@ -62,6 +64,11 @@ namespace Whitestone.SegnoSharp.Modules.BassService
         {
             try
             {
+                // Start the task to automatically get the listener count
+                // Don't await it as it should be long-running, so just discard the Task object
+                _ = GetListenersTask(_listenerCountTaskCancellationTokenSource.Token);
+
+
                 LoadAssemblies();
 
                 // Initialize BASS
@@ -394,40 +401,67 @@ namespace Whitestone.SegnoSharp.Modules.BassService
             }
         }
 
-#pragma warning disable CA2208
         public Task<GetListenersResponse> HandleSynchronizedAsync(GetListenersRequest _)
         {
-            if (_encoder is not { IsActive: true })
-            {
-                return Task.FromResult(new GetListenersResponse());
-            }
-
-            BASSEncodeStats type = _streamingSettings.ServerType switch
-            {
-                ServerType.Icecast => BASSEncodeStats.BASS_ENCODE_STATS_ICESERV,
-                ServerType.Shoutcast => BASSEncodeStats.BASS_ENCODE_STATS_SHOUT,
-                _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
-            };
-
-            string statsRaw = _bassWrapper.GetStreamingStats(_encoder.EncoderHandle, type, _streamingSettings.AdminPassword);
-
-            if (statsRaw == null)
-            {
-                _log.LogError("Failed to get streaming server stats: {error}", _bassWrapper.GetLastBassError());
-                return Task.FromResult(new GetListenersResponse());
-            }
-
-            XmlDocument statsXml = new();
-            statsXml.LoadXml(statsRaw);
-
-            return _streamingSettings.ServerType switch
-            {
-                ServerType.Icecast => Task.FromResult(GetIcecastListenersFromXml(statsXml)),
-                ServerType.Shoutcast => Task.FromResult(GetShoutcastListenersFromXml(statsXml)),
-                _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
-            };
+            return Task.FromResult(_currentListeners);
         }
-#pragma warning restore CA2208
+
+#pragma warning disable CA2208, CA1859
+        private async Task GetListenersTask(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    if (_encoder is not { IsActive: true })
+                    {
+                        _currentListeners.Listeners = 0;
+                        continue;
+                    }
+
+                    BASSEncodeStats type = _streamingSettings.ServerType switch
+                    {
+                        ServerType.Icecast => BASSEncodeStats.BASS_ENCODE_STATS_ICESERV,
+                        ServerType.Shoutcast => BASSEncodeStats.BASS_ENCODE_STATS_SHOUT,
+                        _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
+                    };
+
+                    string statsRaw = _bassWrapper.GetStreamingStats(_encoder.EncoderHandle, type, _streamingSettings.AdminPassword);
+
+                    if (statsRaw == null)
+                    {
+                        _log.LogError("Failed to get streaming server stats: {error}", _bassWrapper.GetLastBassError());
+                        _currentListeners.Listeners = 0;
+                        continue;
+                    }
+
+                    XmlDocument statsXml = new();
+                    statsXml.LoadXml(statsRaw);
+
+                    GetListenersResponse listeners = _streamingSettings.ServerType switch
+                    {
+                        ServerType.Icecast => GetIcecastListenersFromXml(statsXml),
+                        ServerType.Shoutcast => GetShoutcastListenersFromXml(statsXml),
+                        _ => throw new ArgumentOutOfRangeException(nameof(_streamingSettings.ServerType), "Invalid server type")
+                    };
+
+                    _currentListeners.Listeners = listeners.Listeners;
+                    _currentListeners.PeakListeners = listeners.PeakListeners;
+                }
+                catch (Exception e)
+                {
+                    _log.LogError(e, "Method {method} in {class} failed", nameof(GetListenersTask), nameof(BassServiceHost));
+                }
+            }
+        }
+#pragma warning restore CA2208, CA1859
 
         private GetListenersResponse GetIcecastListenersFromXml(XmlDocument xml)
         {
