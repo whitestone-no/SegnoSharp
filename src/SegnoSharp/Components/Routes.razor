@@ -1,6 +1,7 @@
-﻿@using Whitestone.SegnoSharp.Shared.Components.Layouts
+﻿@using Whitestone.SegnoSharp.Components.Pages
+@using Whitestone.SegnoSharp.Shared.Components.Layouts
 <CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(Bootstrapper).Assembly">
+    <Router AppAssembly="@typeof(Bootstrapper).Assembly" NotFoundPage="@typeof(NotFound)">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
@@ -14,11 +15,5 @@
                 </Authorizing>
             </AuthorizeRouteView>
         </Found>
-        <NotFound>
-            <PageTitle>Not found</PageTitle>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <p role="alert">Sorry, there's nothing at this address.</p>
-            </LayoutView>
-        </NotFound>
     </Router>
 </CascadingAuthenticationState>

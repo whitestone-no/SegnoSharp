@@ -231,7 +231,7 @@ namespace Whitestone.SegnoSharp
 
             app.UseSerilogRequestLogging();
 
-            app.UseStaticFiles();
+            app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
             app.UseModuleEmbeddedResource();
 
@@ -244,6 +244,8 @@ namespace Whitestone.SegnoSharp
             app.UseAuthorization();
 
             app.MapHealthChecks("/health", new HealthCheckOptions { ResponseWriter = HealthCheckResponseWriter.WriteResponse });
+            app.MapStaticAssets();
+
             app.MapControllers();
 
             Assembly[] moduleAssemblies = app.Services.GetServices<IModule>()

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
-using System;
 using Whitestone.SegnoSharp.Shared.Models.Configuration;
 
 namespace Whitestone.SegnoSharp.Components.Pages
