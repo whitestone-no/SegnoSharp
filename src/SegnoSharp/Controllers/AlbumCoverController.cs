@@ -7,10 +7,12 @@ using SkiaSharp;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
+using Whitestone.SegnoSharp.Shared.Attributes.Controllers;
 
 namespace Whitestone.SegnoSharp.Controllers
 {
     [ApiController]
+    [SkipGlobalRoutePrefix]
     [Route("/img/[controller]")]
     public class AlbumCoverController(
         IDbContextFactory<SegnoSharpDbContext> dbContextFactory,

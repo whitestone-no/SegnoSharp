@@ -17,11 +17,13 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Whitestone.Cambion.Extensions;
 using Whitestone.SegnoSharp.Components;
+using Whitestone.SegnoSharp.Configuration.Controllers;
 using Whitestone.SegnoSharp.Configuration.Extensions;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.HealthChecks;
 using Whitestone.SegnoSharp.Middleware;
 using Whitestone.SegnoSharp.Modules;
+using Whitestone.SegnoSharp.Services;
 using Whitestone.SegnoSharp.Shared.Extensions;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Shared.Models.Configuration;
@@ -68,8 +70,12 @@ namespace Whitestone.SegnoSharp
 
                 using (IServiceScope scope = app.Services.CreateScope())
                 {
+                    // Apply database migrations
                     var dbContext = scope.ServiceProvider.GetService<SegnoSharpDbContext>();
                     await dbContext?.Database.MigrateAsync()!;
+
+                    // Initialize permissions
+                    _ = app.Services.GetRequiredService<PermissionRegistry>();
                 }
 
                 await app.RunAsync();
@@ -176,7 +182,11 @@ namespace Whitestone.SegnoSharp
 
             IEnumerable<IModule> modules = builder.AddModules();
 
-            IMvcBuilder controllerBuilder = builder.Services.AddControllers();
+            IMvcBuilder controllerBuilder = builder.Services.AddControllers(options =>
+            {
+                // Force all controllers to be prefixed with "api"
+                options.Conventions.Add(new GlobalRoutePrefixConvention("api"));
+            });
 
             foreach (IModule module in modules)
             {

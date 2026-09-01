@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -22,15 +23,21 @@ namespace Whitestone.SegnoSharp.Configuration.Authentication
 
         protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            var claims = new[]
-            {
+            List<Claim> claims =
+            [
                 new Claim(ClaimTypes.Name, "Fake User"),
                 new Claim(ClaimTypes.NameIdentifier, "fake-user"),
-                new Claim("preferred_username", "\u26a0\ufe0f FAKE USER - FOR LOCAL USE ONLY! \u26a0\ufe0f"),
-                new Claim(
+                new Claim("preferred_username", "\u26a0\ufe0f FAKE USER - FOR LOCAL USE ONLY! \u26a0\ufe0f")
+            ];
+
+            var adminRoles = configuration.GetSection("OpenIdConnect").GetSection("AdminRole").Get<List<string>>();
+            foreach (string adminRole in adminRoles)
+            {
+                claims.Add(new Claim(
                     configuration.GetSection("OpenIdConnect").GetValue<string>("RoleClaim"),
-                    configuration.GetSection("OpenIdConnect").GetValue<string>("AdminRole"))
-            };
+                    adminRole
+                ));
+            }
 
             var identity = new ClaimsIdentity(claims, "oidc");
             var principal = new ClaimsPrincipal(identity);

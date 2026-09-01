@@ -33,10 +33,7 @@ namespace Whitestone.SegnoSharp.Shared.Components.Layouts
 
             AuthenticationState state = await AuthState.GetAuthenticationStateAsync();
 
-            _loggedInAs = state.User.Claims
-                .Where(c => c.Type.Equals("preferred_username"))
-                .Select(c => c.Value)
-                .FirstOrDefault() ?? "[Unknown username]";
+            _loggedInAs = state.User.FindFirst("preferred_username")?.Value ?? "[Unknown username]";
 
             foreach (IModule module in Modules)
             {

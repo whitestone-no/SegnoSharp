@@ -29,6 +29,10 @@ namespace Whitestone.SegnoSharp.Database
 
         public DbSet<PersistenceManagerEntry> PersistenceManagerEntries { get; set; }
 
+        public DbSet<SecurityRole> SecurityRoles { get; set; }
+        public DbSet<SecurityRoleIdpMapping> SecurityRoleIdpMappings { get; set; }
+        public DbSet<SecurityRolePermission> SecurityRolePermissions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             string databaseType = configuration.GetSection("Database").GetChildren().FirstOrDefault(c => c.Key == "Type")?.Value?.ToLower();
@@ -55,6 +59,21 @@ namespace Whitestone.SegnoSharp.Database
                 default:
                     throw new ArgumentException($"Unsupported database type: {databaseType}");
             }
+
+            modelBuilder.Entity<SecurityRole>().HasData(new SecurityRole
+            {
+                Id = SecurityRole.AdministratorRoleId,
+                Name = "Administrator",
+                Description = "Full access",
+                IsSystem = true
+            });
+
+            modelBuilder.Entity<SecurityRolePermission>().HasData(new SecurityRolePermission
+            {
+                Id = 1,
+                SecurityRoleId = SecurityRole.AdministratorRoleId,
+                Permission = "*"
+            });
 
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 1, Type = PersonGroupType.Album, Name = "Artist", SortOrder = 1 });
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 2, Type = PersonGroupType.Track, Name = "Artist", SortOrder = 1 });

@@ -1,7 +1,5 @@
-﻿using System.IO;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -9,9 +7,18 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System;
+using System.IO;
+using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Whitestone.SegnoSharp.Configuration.Authentication;
 using Whitestone.SegnoSharp.Configuration.Models;
+using Whitestone.SegnoSharp.Services;
+using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Shared.Models.Configuration;
+using Whitestone.SegnoSharp.Shared.Models.Security;
+using Whitestone.SegnoSharp.Shared.Permissions;
 
 namespace Whitestone.SegnoSharp.Configuration.Extensions
 {
@@ -26,10 +33,30 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
             AuthenticationBuilder authenticationBuilder = services
                 .AddAuthentication(options =>
                 {
-                    options.DefaultScheme = "SegnoSharpAuthCookies";
-                    options.DefaultChallengeScheme = "oidc";
+                    options.DefaultScheme = AuthenticationSchemes.Cookie;
+                    options.DefaultChallengeScheme = AuthenticationSchemes.Oidc;
                 })
-                .AddCookie("SegnoSharpAuthCookies");
+                .AddCookie(AuthenticationSchemes.Cookie, options =>
+                {
+                    // API paths must get status codes, not redirects to the login page.
+                    options.Events.OnRedirectToLogin = ctx => ApiAware(ctx, StatusCodes.Status401Unauthorized);
+                    options.Events.OnRedirectToAccessDenied = ctx => ApiAware(ctx, StatusCodes.Status403Forbidden);
+                    return;
+
+                    static Task ApiAware<TOptions>(RedirectContext<TOptions> ctx, int statusCode) where TOptions : AuthenticationSchemeOptions
+                    {
+                        if (ctx.Request.Path.StartsWithSegments("/api"))
+                        {
+                            ctx.Response.StatusCode = statusCode;
+                        }
+                        else
+                        {
+                            ctx.Response.Redirect(ctx.RedirectUri);
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                });
 
             if (oidcOptions.UseOidc)
             {
@@ -37,29 +64,30 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
             }
             else
             {
-                authenticationBuilder.AddScheme<AuthenticationSchemeOptions, FakeAuthHandler>("oidc", null);
+                authenticationBuilder
+                    .AddScheme<AuthenticationSchemeOptions, FakeAuthHandler>(AuthenticationSchemes.Oidc, null)
+                    .AddScheme<AuthenticationSchemeOptions, FakeAuthHandler>(AuthenticationSchemes.Bearer, null);
             }
 
-            services.AddAuthorization(options =>
-            {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .RequireRole(oidcOptions.AdminRole)
-                    .Build();
-                options.AddPolicy("IgnoreRole",
-                    new AuthorizationPolicyBuilder()
-                        .RequireAuthenticatedUser()
-                        .Build());
-            });
+            services.AddSingleton<IPermissionProvider, CorePermissions>();
+            services.AddSingleton<PermissionRegistry>();
 
-            services.AddTransient<IClaimsTransformation, RoleClaimsTransformation>();
+            services.AddSingleton<SecurityRolesSnapshotProvider>();
+            services.AddHostedService<SecurityRolesSnapshotRefresher>();
+
+            services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
+
+            services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+            services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+            services.AddAuthorization();
 
             return services;
         }
 
         private static void AddOidc(this AuthenticationBuilder builder, SegnoSharpOpenIdConnectOptions oidcOptions)
         {
-            builder.AddOpenIdConnect("oidc", options =>
+            builder.AddOpenIdConnect(AuthenticationSchemes.Oidc, options =>
             {
                 options.Authority = oidcOptions.Authority;
                 options.ClientId = oidcOptions.ClientId;
@@ -101,6 +129,47 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                         if (!oidcOptions.SupportsEndSession)
                         {
                             context.HandleResponse();
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
+            })
+            .AddJwtBearer(AuthenticationSchemes.Bearer, options =>
+            {
+                options.Authority = oidcOptions.Authority;
+                options.Audience = oidcOptions.JwtAudience;
+
+                // Keep "roles" as "roles" so the shared transformation finds it.
+                options.MapInboundClaims = false;
+
+                // Internal role names are mirrored to ClaimTypes.Role by the transformation,
+                // so the framework's role claim type must match.
+                options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+                options.TokenValidationParameters.NameClaimType = "name";
+
+                options.TokenValidationParameters.ValidateIssuer = true;
+                options.TokenValidationParameters.ValidateAudience = true;
+                options.TokenValidationParameters.ClockSkew = TimeSpan.FromSeconds(30);
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = ctx =>
+                    {
+                        // Reject ID tokens presented as access tokens.
+                        if (ctx.Principal!.HasClaim(c => c.Type is "nonce" or "at_hash"))
+                        {
+                            ctx.Fail("ID tokens are not accepted; use an access token.");
+                            return Task.CompletedTask;
+                        }
+
+                        // Bearer tokens are for users only; machines will use API keys.
+                        string sub = ctx.Principal.FindFirst("sub")?.Value;
+                        string clientId = ctx.Principal.FindFirst("client_id")?.Value;
+
+                        if (sub is null || string.Equals(sub, clientId, StringComparison.Ordinal))
+                        {
+                            ctx.Fail("Client credentials tokens are not accepted on this API.");
                         }
 
                         return Task.CompletedTask;

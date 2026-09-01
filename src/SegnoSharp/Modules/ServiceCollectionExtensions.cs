@@ -67,6 +67,11 @@ namespace Whitestone.SegnoSharp.Modules
 
                 builder.Services.AddSingleton(moduleInstance);
 
+                if (moduleInstance is IPermissionProvider permissionProvider)
+                {
+                    builder.Services.AddSingleton(permissionProvider);
+                }
+
                 yield return moduleInstance;
             }
         }
