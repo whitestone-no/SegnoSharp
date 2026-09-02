@@ -193,6 +193,16 @@ namespace Whitestone.SegnoSharp
                 controllerBuilder.AddApplicationPart(module.GetType().Assembly);
             }
 
+            builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+            builder.Services.AddProblemDetails(options =>
+            {
+                options.CustomizeProblemDetails = ctx =>
+                {
+                    ctx.ProblemDetails.Instance ??= ctx.HttpContext.Request.Path;
+                    ctx.ProblemDetails.Extensions["traceId"] = ctx.HttpContext.TraceIdentifier;
+                };
+            });
+
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
             builder.Services.AddOidcAuthorizaton(builder.Configuration);
@@ -218,11 +228,6 @@ namespace Whitestone.SegnoSharp
 
             app.UsePathBase(siteConfig.Value.BasePath);
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
             if (siteConfig.Value.BehindProxy)
             {
                 ForwardedHeadersOptions options = new()
@@ -239,6 +244,13 @@ namespace Whitestone.SegnoSharp
                 app.UseForwardedHeaders(options);
             }
 
+            app.UseExceptionHandler();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
             app.UseSerilogRequestLogging();
 
             app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
@@ -246,6 +258,8 @@ namespace Whitestone.SegnoSharp
             app.UseModuleEmbeddedResource();
 
             app.UseRouting();
+
+            app.UseMiddleware<ApiProblemDetailsMiddleware>();
 
             app.UseAntiforgery();
 

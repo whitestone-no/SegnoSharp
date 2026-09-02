@@ -14,6 +14,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Whitestone.SegnoSharp.Configuration.Authentication;
 using Whitestone.SegnoSharp.Configuration.Models;
+using Whitestone.SegnoSharp.Models.Security;
 using Whitestone.SegnoSharp.Services;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Shared.Models.Configuration;
@@ -38,9 +39,19 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                 })
                 .AddCookie(AuthenticationSchemes.Cookie, options =>
                 {
+                    options.Events.OnValidatePrincipal = ctx =>
+                    {
+                        if (ctx.Principal is not null && !ctx.Principal.HasClaim(c => c.Type == Constants.AuthenticationSchemeClaim))
+                            ctx.Principal.AddIdentity(new ClaimsIdentity(
+                                [new Claim(Constants.AuthenticationSchemeClaim, AuthenticationSchemes.Cookie)]));
+
+                        return Task.CompletedTask;
+                    };
+
                     // API paths must get status codes, not redirects to the login page.
                     options.Events.OnRedirectToLogin = ctx => ApiAware(ctx, StatusCodes.Status401Unauthorized);
                     options.Events.OnRedirectToAccessDenied = ctx => ApiAware(ctx, StatusCodes.Status403Forbidden);
+
                     return;
 
                     static Task ApiAware<TOptions>(RedirectContext<TOptions> ctx, int statusCode) where TOptions : AuthenticationSchemeOptions
@@ -69,6 +80,9 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                     .AddScheme<AuthenticationSchemeOptions, FakeAuthHandler>(AuthenticationSchemes.Bearer, null);
             }
 
+            authenticationBuilder
+                .AddScheme<AuthenticationSchemeOptions, ApiKeyHandler>(AuthenticationSchemes.ApiKey, null);
+
             services.AddSingleton<IPermissionProvider, CorePermissions>();
             services.AddSingleton<PermissionRegistry>();
 
@@ -79,6 +93,16 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
 
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+
+            services.AddSingleton<ApiKeyGenerator>();
+            services.AddSingleton<ApiKeyCache>();
+            services.AddSingleton<ApiClientGrantCache>();
+            services.AddSingleton<ApiKeyUsageBuffer>();
+            services.AddSingleton<ApiKeyFailureTracker>();
+            services.AddScoped<ApiKeyStore>();
+            services.AddScoped<ApiClientGrantStore>();
+            services.AddHostedService<ApiKeyUsageFlusher>();
 
             services.AddAuthorization();
 
@@ -171,6 +195,9 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                         {
                             ctx.Fail("Client credentials tokens are not accepted on this API.");
                         }
+
+                        ctx.Principal!.AddIdentity(new ClaimsIdentity(
+                            [new Claim(Constants.AuthenticationSchemeClaim, AuthenticationSchemes.Bearer)]));
 
                         return Task.CompletedTask;
                     }

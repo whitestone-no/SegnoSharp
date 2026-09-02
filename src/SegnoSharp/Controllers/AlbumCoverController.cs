@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -7,19 +8,19 @@ using SkiaSharp;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
+using Whitestone.SegnoSharp.Shared.Abstractions;
 using Whitestone.SegnoSharp.Shared.Attributes.Controllers;
 
 namespace Whitestone.SegnoSharp.Controllers
 {
-    [ApiController]
     [SkipGlobalRoutePrefix]
     [Route("/img/[controller]")]
     public class AlbumCoverController(
         IDbContextFactory<SegnoSharpDbContext> dbContextFactory,
         IDistributedCache cache,
-        IHashingUtil hashingUtil) : ControllerBase
+        IHashingUtil hashingUtil) : ApiControllerBase
     {
-        private DistributedCacheEntryOptions _cacheOptions = new()
+        private readonly DistributedCacheEntryOptions _cacheOptions = new()
         {
             SlidingExpiration = TimeSpan.FromHours(2),
             AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(4)
@@ -27,6 +28,7 @@ namespace Whitestone.SegnoSharp.Controllers
 
         [HttpGet]
         [Route("{albumId:int}")]
+        [AllowAnonymous]
         public async Task<IActionResult> Index([FromRoute] int albumId, [FromQuery] string hash, [FromQuery(Name = "w")] int width = 500)
         {
             SegnoSharpDbContext dbContext = await dbContextFactory.CreateDbContextAsync();

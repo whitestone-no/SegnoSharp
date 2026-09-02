@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 
 namespace Whitestone.SegnoSharp.Shared.Helpers
@@ -8,6 +9,11 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         public int GetInt(int upperBound)
         {
             return RandomNumberGenerator.GetInt32(upperBound);
+        }
+
+        public void GetBytes(Span<byte> buffer)
+        {
+            RandomNumberGenerator.Fill(buffer);
         }
     }
 }

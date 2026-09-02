@@ -21,7 +21,8 @@ public sealed class PermissionAuthorizationHandler
             return Task.CompletedTask;
         }
 
-        if (ctx.User.Identity?.AuthenticationType == AuthenticationSchemes.Bearer)
+        if (IsBearerRequest(ctx.User))
+        //if (ctx.User.Identity?.AuthenticationType == AuthenticationSchemes.Bearer)
         {
             string requiredScope = options.Value.JwtScope;
 
@@ -40,6 +41,15 @@ public sealed class PermissionAuthorizationHandler
         return Task.CompletedTask;
     }
 
+    // Identity.AuthenticationType is "AuthenticationTypes.Federation" for both cookie
+    // and bearer principals, so the scheme is carried on an explicit claim instead.
+    private static bool IsBearerRequest(ClaimsPrincipal user) =>
+        string.Equals(
+            user.FindFirst(Constants.AuthenticationSchemeClaim)?.Value,
+            AuthenticationSchemes.Bearer,
+            StringComparison.Ordinal);
+
+    // Some providers emits one claim per scope; other providers emit a single space-delimited value.
     private static bool HasScope(ClaimsPrincipal user, string scope) =>
         user.FindAll("scope").Any(c =>
             c.Value == scope ||

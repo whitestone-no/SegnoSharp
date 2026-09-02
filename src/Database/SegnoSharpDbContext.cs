@@ -33,6 +33,10 @@ namespace Whitestone.SegnoSharp.Database
         public DbSet<SecurityRoleIdpMapping> SecurityRoleIdpMappings { get; set; }
         public DbSet<SecurityRolePermission> SecurityRolePermissions { get; set; }
 
+        public DbSet<SecurityApiClient> SecurityApiClients { get; set; }
+        public DbSet<SecurityApiClientPermission> SecurityApiClientPermissions { get; set; }
+        public DbSet<SecurityApiKey> SecurityApiKeys { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             string databaseType = configuration.GetSection("Database").GetChildren().FirstOrDefault(c => c.Key == "Type")?.Value?.ToLower();

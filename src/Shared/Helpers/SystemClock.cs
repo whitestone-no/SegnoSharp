@@ -6,5 +6,6 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
     public class SystemClock : ISystemClock
     {
         public DateTime Now => DateTime.Now;
+        public DateTime UtcNow => DateTime.UtcNow;
     }
 }

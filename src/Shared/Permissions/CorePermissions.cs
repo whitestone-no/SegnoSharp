@@ -22,6 +22,6 @@ public sealed class CorePermissions : IPermissionProvider
         new() { Name = AlbumsEdit, DisplayName = "Edit albums", Description = "Edit albums, their content, and metadata." },
         new() { Name = PlaylistView, DisplayName = "View playlist", Description = "View the playlist." },
         new() { Name = PlaylistEdit, DisplayName = "Edit playlist", Description = "Edit the playlist." },
-        new() { Name = SecurityEdit, DisplayName = "Edit security settings", Description = "Edit roles, permissions, and API keys, in security settings." }
+        new() { Name = SecurityEdit, DisplayName = "Edit security settings", Description = "Edit roles, permissions, and API keys, in security settings.", AllowForApiClients = false}
     ];
 }
