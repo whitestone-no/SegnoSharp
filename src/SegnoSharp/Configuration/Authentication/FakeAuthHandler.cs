@@ -25,7 +25,7 @@ namespace Whitestone.SegnoSharp.Configuration.Authentication
         {
             List<Claim> claims =
             [
-                new Claim(ClaimTypes.Name, "Fake User"),
+                new Claim(ClaimTypes.Name, "\u26a0\ufe0f FAKE USER - FOR LOCAL USE ONLY! \u26a0\ufe0f"),
                 new Claim(ClaimTypes.NameIdentifier, "fake-user"),
                 new Claim("preferred_username", "\u26a0\ufe0f FAKE USER - FOR LOCAL USE ONLY! \u26a0\ufe0f")
             ];
