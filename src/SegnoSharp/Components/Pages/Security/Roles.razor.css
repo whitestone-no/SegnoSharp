@@ -1,0 +1,15 @@
+/* No ::deep needed: these rows are rendered by this component, so the scoping
+   attribute lands on them and beats the global `table tr:...` rules on specificity. */
+
+tr.selectable {
+    cursor: pointer;
+}
+
+tr.selected,
+tr.selected:hover {
+    background-color: var(--nav-active);
+}
+
+.unreachable {
+    color: var(--alert-warning-border);
+}

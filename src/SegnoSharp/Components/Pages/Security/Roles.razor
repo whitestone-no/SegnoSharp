@@ -1,0 +1,237 @@
+﻿@page "/admin/security/roles"
+@rendermode InteractiveServer
+@layout MainLayout
+@using Whitestone.SegnoSharp.Models.Security
+@using Whitestone.SegnoSharp.Shared.Attributes
+@using Whitestone.SegnoSharp.Shared.Attributes.Security
+@using Whitestone.SegnoSharp.Shared.Components.Layouts
+@using Whitestone.SegnoSharp.Shared.Permissions
+@using Whitestone.SegnoSharp.ViewModels.Security
+@attribute [RequirePermission(CorePermissions.SecurityEdit)]
+@attribute [ModuleMenu("Roles", 100, typeof(Security), true)]
+
+<PageTitle>Security - Roles</PageTitle>
+
+<div class="header-container">
+    <h1>Roles</h1>
+    <button class="primary" @onclick="StartCreate" disabled="@_busy">New role</button>
+</div>
+
+@if (_message is not null)
+{
+    <div class="alert @_messageClass">@_message</div>
+}
+
+<div class="card-grid">
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h3 class="no-margin">All roles</h3>
+            <span class="text-small">@_roles.Count total</span>
+        </div>
+
+        @if (_roles.Count == 0)
+        {
+            <p>No roles yet. Create one to start granting access.</p>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Mapped IdP roles</th>
+                        <th>Permissions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (RoleListItem role in _roles)
+                    {
+                        <tr class="selectable @(role.Id == _edit?.Id ? "selected" : "")"
+                            @onclick="() => SelectAsync(role.Id)">
+                            <td>
+                                @role.Name
+                                @if (role.IsSystem)
+                                {
+                                    <span class="text-small"> (built in)</span>
+                                }
+                            </td>
+                            <td class="text-small">@role.Description</td>
+                            <td>
+                                @role.MappingCount
+                                @if (role.MappingCount == 0 && !role.IsSystem)
+                                {
+                                    <div class="text-small unreachable">Nobody can reach this role</div>
+                                }
+                            </td>
+                            <td>@(role.HasWildcard ? "All" : role.PermissionCount.ToString())</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@if (_edit is not null)
+{
+    <div class="card-grid">
+        <div class="header-container">
+            <h2>@(_edit.Id == 0 ? "New role" : _edit.Name)</h2>
+            @if (_dirty)
+            {
+                <span class="text-small">Unsaved changes</span>
+            }
+            <button class="tiny" @onclick="Cancel" disabled="@_busy">Close</button>
+        </div>
+
+        <div class="card grid-span-5">
+            <div class="card-header-container">
+                <h3 class="no-margin">Details</h3>
+            </div>
+
+            <div class="form-group">
+                <label for="role-name">Name</label>
+                <input type="text" id="role-name" @bind="_edit.Name" @bind:event="oninput"
+                       @bind:after="MarkDirty" disabled="@(_edit.IsSystem || _busy)" />
+            </div>
+
+            <div class="form-group">
+                <label for="role-description">Description</label>
+                <input type="text" id="role-description" @bind="_edit.Description" @bind:event="oninput"
+                       @bind:after="MarkDirty" disabled="@_busy" />
+            </div>
+
+            @if (_edit.IsSystem)
+            {
+                <div class="alert alert-info">
+                    Built-in roles cannot be renamed or deleted, and their permissions are fixed.
+                    You can still change which identity provider roles map to them.
+                </div>
+            }
+
+            <div class="card-header-container">
+                <h4 class="no-margin">Identity provider roles</h4>
+            </div>
+
+            <p class="text-small">
+                A user gets this role when their <code>@RoleClaimType</code> claim contains one of these
+                values. Matching ignores case.
+            </p>
+
+            @if (_edit.Mappings.Count == 0 && _bootstrapMappings.Count == 0)
+            {
+                <div class="alert alert-warning">
+                    Nobody can reach this role until at least one identity provider role is mapped to it.
+                </div>
+            }
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Claim value</th>
+                        <th>Note</th>
+                        <th class="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (string bootstrap in _bootstrapMappings)
+                    {
+                        <tr>
+                            <td><code>@bootstrap</code></td>
+                            <td class="text-small">From appsettings, always applied</td>
+                            <td class="text-right"><span class="text-small">Read only</span></td>
+                        </tr>
+                    }
+
+                    @foreach (RoleMappingEdit mapping in _edit.Mappings)
+                    {
+                        <tr>
+                            <td><code>@mapping.ClaimValue</code></td>
+                            <td>
+                                <input type="text" class="fullwidth" @bind="mapping.Description"
+                                       @bind:event="oninput" @bind:after="MarkDirty"
+                                       placeholder="e.g. Moderators (Entra)" disabled="@_busy" />
+                            </td>
+                            <td class="text-right">
+                                <button class="tertiary small" disabled="@_busy"
+                                        @onclick="() => RemoveMapping(mapping)">
+                                    Remove
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="form-group">
+                <label for="new-mapping">Add a claim value</label>
+                <div>
+                    <input type="text" id="new-mapping" class="flex-fill" @bind="_newMappingValue"
+                           @bind:event="oninput" placeholder="Value from the role claim" disabled="@_busy" />
+                    <button class="secondary" @onclick="AddMapping"
+                            disabled="@(_busy || string.IsNullOrWhiteSpace(_newMappingValue))">
+                        Add
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <button class="primary" @onclick="SaveAsync" disabled="@(_busy || !_dirty)">Save changes</button>
+                <button class="secondary" @onclick="Cancel" disabled="@_busy">Cancel</button>
+
+                @if (_edit.Id != 0 && !_edit.IsSystem)
+                {
+                    <button class="tertiary" @onclick="DeleteAsync" disabled="@_busy">Delete role</button>
+                }
+            </div>
+        </div>
+
+        <div class="card grid-span-7">
+            <PermissionPicker Selected="_edit.Permissions"
+                              Wildcard="_edit.HasWildcard"
+                              Disabled="@(_edit.IsSystem || _busy)"
+                              OnChanged="MarkDirty" />
+        </div>
+    </div>
+}
+
+<div class="card-grid">
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h3 class="no-margin">Unmapped identity provider roles</h3>
+            <button class="tiny" @onclick="ClearUnmappedClaims">Clear</button>
+        </div>
+
+        @if (UnmappedRoleClaims.Count == 0)
+        {
+            <p class="text-small">
+                Values from the <code>@RoleClaimType</code> claim that match no mapping appear here after
+                someone signs in. Use them to find the right identifier without exporting anything from
+                the identity provider.
+            </p>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Claim value</th>
+                        <th>Label</th>
+                        <th>Last seen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (UnmappedRoleClaim claim in UnmappedRoleClaims)
+                    {
+                        <tr>
+                            <td><code>@claim.Value</code></td>
+                            <td class="text-small">@claim.Label</td>
+                            <td class="text-small">@Format(claim.LastSeen)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

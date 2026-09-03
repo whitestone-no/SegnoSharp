@@ -1,0 +1,34 @@
+/* No ::deep needed: these rows are rendered by this component, so the scoping
+   attribute lands on them and beats the global `table tr:...` rules on specificity. */
+
+tr.selectable {
+    cursor: pointer;
+}
+
+tr.selected,
+tr.selected:hover {
+    background-color: var(--nav-active);
+}
+
+/* The reveal panel sits in its own row, so opt it out of the alternating
+   and hover backgrounds that would otherwise fight the alert inside it. */
+tr.issued-key,
+tr.issued-key:hover {
+    background-color: var(--bg-main);
+}
+
+    tr.issued-key td {
+        padding: 10px;
+    }
+
+    tr.issued-key .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+.muted {
+    color: var(--text-neutral);
+}
+
+.expiring {
+    color: var(--alert-warning-border);
+}

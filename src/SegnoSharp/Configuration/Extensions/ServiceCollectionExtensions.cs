@@ -39,6 +39,10 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                 })
                 .AddCookie(AuthenticationSchemes.Cookie, options =>
                 {
+                    options.LoginPath = "/auth/login";
+                    options.LogoutPath = "/auth/logout";
+                    options.AccessDeniedPath = "/access-denied";
+
                     options.Events.OnValidatePrincipal = ctx =>
                     {
                         if (ctx.Principal is not null && !ctx.Principal.HasClaim(c => c.Type == Constants.AuthenticationSchemeClaim))
@@ -83,17 +87,16 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
             authenticationBuilder
                 .AddScheme<AuthenticationSchemeOptions, ApiKeyHandler>(AuthenticationSchemes.ApiKey, null);
 
-            services.AddSingleton<IPermissionProvider, CorePermissions>();
             services.AddSingleton<PermissionRegistry>();
 
             services.AddSingleton<SecurityRolesSnapshotProvider>();
             services.AddHostedService<SecurityRolesSnapshotRefresher>();
+            services.AddSingleton<UnmappedRoleClaimTracker>();
 
             services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
 
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
-
 
             services.AddSingleton<ApiKeyGenerator>();
             services.AddSingleton<ApiKeyCache>();
@@ -103,6 +106,8 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
             services.AddScoped<ApiKeyStore>();
             services.AddScoped<ApiClientGrantStore>();
             services.AddHostedService<ApiKeyUsageFlusher>();
+
+            services.AddCascadingAuthenticationState();
 
             services.AddAuthorization();
 
@@ -137,6 +142,10 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                 options.ClaimActions.MapJsonKey(oidcOptions.RoleClaim, oidcOptions.RoleClaim);
                 options.ClaimActions.MapUniqueJsonKey("preferred_username", oidcOptions.UsernameClaimKey);
 
+                // ClaimActions run after token validation, so the name claim type must point at the
+                // normalised claim rather than the provider-specific one.
+                options.TokenValidationParameters.NameClaimType = "preferred_username";
+
                 options.Events = new OpenIdConnectEvents
                 {
                     OnAccessDenied = context =>
@@ -170,7 +179,7 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
                 // Internal role names are mirrored to ClaimTypes.Role by the transformation,
                 // so the framework's role claim type must match.
                 options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
-                options.TokenValidationParameters.NameClaimType = "name";
+                options.TokenValidationParameters.NameClaimType = oidcOptions.UsernameClaimKey;
 
                 options.TokenValidationParameters.ValidateIssuer = true;
                 options.TokenValidationParameters.ValidateAudience = true;

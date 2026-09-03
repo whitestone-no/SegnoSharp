@@ -1,0 +1,38 @@
+﻿<div class="header-container">
+    <h1>Access denied</h1>
+</div>
+
+<div class="alert alert-warning">
+    You're signed in, but your account doesn't have permission to view this page.
+</div>
+
+<AuthorizeView>
+    <Authorized Context="auth">
+        <p class="text-small">
+            Signed in as <strong>@auth.User.Identity?.Name</strong>.
+            If you expected access, you may need a different account, or an administrator
+            may need to grant your identity provider role the required permission.
+        </p>
+    </Authorized>
+</AuthorizeView>
+
+@if (Diagnostics is not null)
+{
+    <div class="diagnostics text-small">
+        @Diagnostics
+    </div>
+}
+
+<div class="access-denied-links">
+    <a href="/">Go to the start page</a>
+    <a href="/auth/logout">Sign in as a different user</a>
+</div>
+
+@code {
+    /// <summary>
+    /// Optional supporting detail, rendered above the links. Used by the access denied page
+    /// to show the requested URL; empty when authorization failed after render.
+    /// </summary>
+    [Parameter]
+    public RenderFragment Diagnostics { get; set; }
+}

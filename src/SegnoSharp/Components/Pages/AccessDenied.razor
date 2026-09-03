@@ -1,0 +1,23 @@
+﻿@page "/access-denied"
+
+<PageTitle>Access denied</PageTitle>
+
+<NotAuthorizedContent Diagnostics="@RequestedPageFragment" />
+
+@code {
+    [SupplyParameterFromQuery(Name = "ReturnUrl")]
+    private string ReturnUrl { get; set; }
+
+    // Displayed only, and only when relative: a query-supplied URL must never become a link.
+    private string SafeReturnUrl =>
+        ReturnUrl is not null
+        && ReturnUrl.StartsWith('/')
+        && !ReturnUrl.StartsWith("//")
+        && Uri.IsWellFormedUriString(ReturnUrl, UriKind.Relative)
+            ? ReturnUrl
+            : null;
+
+    private RenderFragment RequestedPageFragment => SafeReturnUrl is null
+        ? null
+        : @<text>Requested page: <code>@SafeReturnUrl</code></text>;
+}

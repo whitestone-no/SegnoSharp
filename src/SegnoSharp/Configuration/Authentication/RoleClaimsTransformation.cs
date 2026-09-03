@@ -18,6 +18,7 @@ namespace Whitestone.SegnoSharp.Configuration.Authentication
     internal class RoleClaimsTransformation(
         IOptions<SegnoSharpOpenIdConnectOptions> options,
         SecurityRolesSnapshotProvider snapshots,
+        UnmappedRoleClaimTracker unmappedRoleClaimTracker,
         PermissionRegistry permissionRegistry,
         ApiClientGrantStore grantStore,
         ILogger<RoleClaimsTransformation> log) : IClaimsTransformation
@@ -56,6 +57,7 @@ namespace Whitestone.SegnoSharp.Configuration.Authentication
 
                 if (!snapshot.ClaimToRoles.TryGetValue(currentRoleClaim.Value, out ImmutableArray<int> ids))
                 {
+                    unmappedRoleClaimTracker.Record(currentRoleClaim.Value);
                     (unmapped ??= []).Add(currentRoleClaim.Value);
                     continue;
                 }

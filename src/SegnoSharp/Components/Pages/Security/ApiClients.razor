@@ -1,0 +1,253 @@
+﻿@page "/admin/security/api-clients"
+@rendermode InteractiveServer
+@layout MainLayout
+@using Whitestone.SegnoSharp.Shared.Attributes
+@using Whitestone.SegnoSharp.Shared.Attributes.Security
+@using Whitestone.SegnoSharp.Shared.Components.Layouts
+@using Whitestone.SegnoSharp.Shared.Permissions
+@using Whitestone.SegnoSharp.ViewModels.Security
+@attribute [RequirePermission(CorePermissions.SecurityEdit)]
+@attribute [ModuleMenu("API Clients", 200, typeof(Security), true)]
+
+<PageTitle>Security - API clients</PageTitle>
+
+<div class="header-container">
+    <h1>API clients</h1>
+    <button class="primary" @onclick="StartCreate" disabled="@_busy">New client</button>
+</div>
+
+@if (_message is not null)
+{
+    <div class="alert @_messageClass">@_message</div>
+}
+
+<div class="card-grid">
+    <div class="card grid-span-12">
+        <div class="card-header-container">
+            <h3 class="no-margin">All clients</h3>
+            <span class="text-small">@_clients.Count total</span>
+        </div>
+
+        @if (_clients.Count == 0)
+        {
+            <p>No API clients yet. Create one, then issue it a key.</p>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Active keys</th>
+                        <th>Permissions</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (ApiClientListItem client in _clients)
+                    {
+                        <tr class="selectable @(client.Id == _edit?.Id ? "selected" : "")"
+                            @onclick="() => SelectAsync(client.Id)">
+                            <td>@client.Name</td>
+                            <td class="text-small">@client.Description</td>
+                            <td>
+                                @client.ActiveKeyCount
+                                @if (client.Enabled && client.ActiveKeyCount == 0)
+                                {
+                                    <div class="text-small muted">Cannot authenticate</div>
+                                }
+                            </td>
+                            <td>@client.PermissionCount</td>
+                            <td>@(client.Enabled ? "Enabled" : "Disabled")</td>
+                            <td class="text-small">@Format(client.Created)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@if (_edit is not null)
+{
+    <div class="card-grid">
+        <div class="header-container">
+            <h2>@(_edit.Id == 0 ? "New client" : _edit.Name)</h2>
+            @if (_dirty)
+            {
+                <span class="text-small">Unsaved changes</span>
+            }
+            <button class="tiny" @onclick="Cancel" disabled="@_busy">Close</button>
+        </div>
+
+        <div class="card grid-span-5">
+            <div class="card-header-container">
+                <h3 class="no-margin">Details</h3>
+            </div>
+
+            <div class="form-group">
+                <label for="client-name">Name</label>
+                <input type="text" id="client-name" @bind="_edit.Name" @bind:event="oninput"
+                       @bind:after="MarkDirty" disabled="@_busy" />
+            </div>
+
+            <div class="form-group">
+                <label for="client-description">Description</label>
+                <input type="text" id="client-description" @bind="_edit.Description" @bind:event="oninput"
+                       @bind:after="MarkDirty" placeholder="What calls this API and why" disabled="@_busy" />
+            </div>
+
+            <div class="form-group">
+                <label>Enabled</label>
+                <div>
+                    <label class="checkbox-label">
+                        <input type="checkbox" @bind="_edit.Enabled" @bind:after="MarkDirty" disabled="@_busy" />
+                        Keys for this client are accepted
+                    </label>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <button class="primary" @onclick="SaveAsync" disabled="@(_busy || !_dirty)">Save changes</button>
+                <button class="secondary" @onclick="Cancel" disabled="@_busy">Cancel</button>
+
+                @if (_edit.Id != 0)
+                {
+                    <button class="tertiary" @onclick="DeleteAsync" disabled="@_busy">Delete client</button>
+                }
+            </div>
+        </div>
+
+        <div class="card grid-span-7">
+            <PermissionPicker Selected="_edit.Permissions"
+                              ApiClientsOnly="true"
+                              Disabled="@_busy"
+                              OnChanged="MarkDirty" />
+        </div>
+
+        @if (_edit.Id != 0)
+        {
+            <div class="card grid-span-12">
+                <div class="card-header-container">
+                    <h3 class="no-margin">Keys</h3>
+                    <span class="text-small">@_keys.Count(key => key.IsActive) active</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="key-description">Issue a key</label>
+                    <div>
+                        <input type="text" id="key-description" class="flex-fill" @bind="_newKeyDescription"
+                               placeholder="Where this key will be used" disabled="@_busy" />
+                        <input type="date" id="key-expiry" @bind="_newKeyExpiry" disabled="@_busy" />
+                        <button class="primary" @onclick="CreateKeyAsync" disabled="@(_busy || _dirty)">
+                            Issue key
+                        </button>
+                    </div>
+                </div>
+
+                @if (_dirty)
+                {
+                    <div class="alert alert-info">
+                        Save the client first so the key is issued against the saved permissions.
+                    </div>
+                }
+
+                @if (_keys.Count == 0)
+                {
+                    <p>This client has no keys, so it cannot authenticate yet.</p>
+                }
+                else
+                {
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Prefix</th>
+                                <th>Note</th>
+                                <th>Created</th>
+                                <th>Expires</th>
+                                <th>Last used</th>
+                                <th>Status</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (ApiKeyListItem key in _keys)
+                            {
+                                <tr>
+                                    <td><code title="@key.Prefix">@ShortPrefix(key.Prefix)</code></td>
+                                    <td>@key.Description</td>
+                                    <td class="text-small">@Format(key.Created)</td>
+                                    <td class="text-small @(key.ExpiresSoon ? "expiring" : "")">
+                                        @Format(key.Expires)
+                                        @if (key.ExpiresSoon)
+                                        {
+                                            <div>Expiring soon</div>
+                                        }
+                                    </td>
+                                    <td class="text-small">@Format(key.LastUsed)</td>
+                                    <td>@key.Status</td>
+                                    <td class="text-right">
+                                        @if (key.IsActive)
+                                        {
+                                            <button class="secondary small" disabled="@_busy"
+                                                    @onclick="() => ReplaceKeyAsync(key.Id)">
+                                                Replace
+                                            </button>
+                                            <button class="tertiary small" disabled="@_busy"
+                                                    @onclick="() => RevokeKeyAsync(key.Id)">
+                                                Revoke
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+
+                                @if (_issuedKey is not null && _issuedKeyId == key.Id)
+                                {
+                                    <tr class="issued-key">
+                                        <td colspan="7">
+                                            <div class="alert alert-warning">
+                                                This is the only time the key is shown. It is stored as a hash
+                                                and cannot be recovered. If it is lost, replace the key.
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="issued-key">Key</label>
+                                                <div>
+                                                    <input type="text" id="issued-key" class="flex-fill" readonly
+                                                           value="@_issuedKey" @ref="_issuedKeyInput" />
+                                                    <button class="secondary" @onclick="CopyIssuedKeyAsync">
+                                                        Copy
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" @bind="_issuedKeyAcknowledged" />
+                                                    I have copied the key somewhere safe
+                                                </label>
+                                                <div>
+                                                    <button class="primary" @onclick="DismissIssuedKey"
+                                                            disabled="@(!_issuedKeyAcknowledged)">
+                                                        Done
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                    <p class="text-small">
+                        Replacing a key revokes it immediately and issues a new one, which is right for a lost key.
+                        To rotate without downtime, issue a second key, move the caller across, then revoke the first.
+                    </p>
+                }
+            </div>
+        }
+    </div>
+}

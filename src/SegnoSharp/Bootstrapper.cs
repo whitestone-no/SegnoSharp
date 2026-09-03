@@ -193,6 +193,10 @@ namespace Whitestone.SegnoSharp
                 controllerBuilder.AddApplicationPart(module.GetType().Assembly);
             }
 
+            // Core module must be added last as its application parts have already been added.
+            builder.Services.AddSingleton<IModule, CoreModule>();
+            builder.Services.AddSingleton<IPermissionProvider, CoreModule>();
+
             builder.Services.AddExceptionHandler<ApiExceptionHandler>();
             builder.Services.AddProblemDetails(options =>
             {
@@ -273,6 +277,7 @@ namespace Whitestone.SegnoSharp
             app.MapControllers();
 
             Assembly[] moduleAssemblies = app.Services.GetServices<IModule>()
+                .Where(m => !typeof(CoreModule).IsAssignableFrom(m.GetType()))
                 .Select(p => p.GetType().Assembly)
                 .Distinct()
                 .ToArray();

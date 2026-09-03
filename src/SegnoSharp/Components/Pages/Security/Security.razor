@@ -1,0 +1,214 @@
+﻿@page "/admin/security"
+@rendermode InteractiveServer
+@layout MainLayout
+@using Whitestone.SegnoSharp.Shared.Attributes
+@using Whitestone.SegnoSharp.Shared.Attributes.Security
+@using Whitestone.SegnoSharp.Shared.Components.Layouts
+@using Whitestone.SegnoSharp.Shared.Permissions
+@using Whitestone.SegnoSharp.ViewModels.Security
+@attribute [RequirePermission(CorePermissions.SecurityEdit)]
+@attribute [ModuleMenu("Security", 30, "fa-shield", true)]
+
+<div class="header-container">
+    <h1>Security</h1>
+    <button class="secondary" @onclick="RefreshAsync" disabled="@_busy">Refresh</button>
+</div>
+
+@if (_loading)
+{
+    <div class="alert alert-info">Loading…</div>
+}
+else
+{
+    @if (_findings.Count > 0)
+    {
+        <div class="card-grid">
+            <div class="card grid-span-12">
+                <div class="card-header-container">
+                    <h3 class="no-margin">Needs attention</h3>
+                    <span class="text-small">@_findings.Count @(_findings.Count == 1 ? "item" : "items")</span>
+                </div>
+
+                @foreach (Finding finding in _findings)
+                {
+                    <div class="alert @finding.CssClass finding">
+                        <span class="flex-fill">@finding.Message</span>
+                        @if (finding.Href is not null)
+                        {
+                            <button class="tiny" @onclick="() => Navigation.NavigateTo(finding.Href)">
+                                @finding.ActionLabel
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success">
+            Nothing needs attention. No unreachable roles, orphaned permissions, or keys expiring soon.
+        </div>
+    }
+
+    <div class="card-grid">
+        <div class="card grid-span-3">
+            <div class="card-header-container">
+                <h3 class="no-margin">Roles</h3>
+            </div>
+
+            <div class="stat">@_stats.RolesTotal</div>
+            <div class="text-small">defined</div>
+
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Reachable</td>
+                        <td class="text-right">@(_stats.RolesTotal - _stats.RolesUnreachable)</td>
+                    </tr>
+                    <tr>
+                        <td>Unreachable</td>
+                        <td class="text-right">@_stats.RolesUnreachable</td>
+                    </tr>
+                    <tr>
+                        <td>IdP roles mapped</td>
+                        <td class="text-right">@_stats.MappingsTotal</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="card-footer">
+                <button class="secondary small" @onclick="() => Navigation.NavigateTo(RolesPage)">
+                    Manage roles
+                </button>
+            </div>
+        </div>
+
+        <div class="card grid-span-3">
+            <div class="card-header-container">
+                <h3 class="no-margin">Permissions</h3>
+            </div>
+
+            <div class="stat">@_stats.PermissionsDeclared</div>
+            <div class="text-small">declared by loaded plugins</div>
+
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Providers</td>
+                        <td class="text-right">@_stats.PermissionProviders</td>
+                    </tr>
+                    <tr>
+                        <td>Grantable to clients</td>
+                        <td class="text-right">@_stats.PermissionsForClients</td>
+                    </tr>
+                    <tr>
+                        <td>Orphaned grants</td>
+                        <td class="text-right">@_stats.OrphanedPermissions</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card grid-span-3">
+            <div class="card-header-container">
+                <h3 class="no-margin">API clients</h3>
+            </div>
+
+            <div class="stat">@_stats.ClientsTotal</div>
+            <div class="text-small">defined</div>
+
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Enabled</td>
+                        <td class="text-right">@(_stats.ClientsTotal - _stats.ClientsDisabled)</td>
+                    </tr>
+                    <tr>
+                        <td>Disabled</td>
+                        <td class="text-right">@_stats.ClientsDisabled</td>
+                    </tr>
+                    <tr>
+                        <td>Without a usable key</td>
+                        <td class="text-right">@_stats.ClientsWithoutActiveKey</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="card-footer">
+                <button class="secondary small" @onclick="() => Navigation.NavigateTo(ApiClientsPage)">
+                    Manage clients
+                </button>
+            </div>
+        </div>
+
+        <div class="card grid-span-3">
+            <div class="card-header-container">
+                <h3 class="no-margin">API keys</h3>
+            </div>
+
+            <div class="stat">@_stats.KeysActive</div>
+            <div class="text-small">active</div>
+
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Expiring within 30 days</td>
+                        <td class="text-right">@_stats.KeysExpiringSoon</td>
+                    </tr>
+                    <tr>
+                        <td>Revoked or expired</td>
+                        <td class="text-right">@_stats.KeysInactive</td>
+                    </tr>
+                    <tr>
+                        <td>Never used</td>
+                        <td class="text-right">@_stats.KeysNeverUsed</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card-grid">
+        <div class="card grid-span-12">
+            <div class="card-header-container">
+                <h3 class="no-margin">Configuration</h3>
+            </div>
+
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Identity provider role claim</td>
+                        <td><code>@_stats.RoleClaimType</code></td>
+                        <td class="text-small">
+                            Role values are read from this claim. It must match what the provider emits.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Bootstrap admin mappings</td>
+                        <td>@_stats.BootstrapMappings</td>
+                        <td class="text-small">
+                            From appsettings, always applied on top of the database mappings.
+                            This is the recovery path if the roles table is damaged.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Snapshot in memory</td>
+                        <td>@_stats.SnapshotRoles roles, @_stats.SnapshotClaimMappings claim mappings</td>
+                        <td class="text-small">
+                            What authorisation is currently using. Should track the database within
+                            the refresh interval.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Unmapped IdP roles seen</td>
+                        <td>@_stats.UnmappedClaimsSeen</td>
+                        <td class="text-small">
+                            Claim values presented at sign-in that match no mapping.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

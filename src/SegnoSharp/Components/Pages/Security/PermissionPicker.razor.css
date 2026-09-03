@@ -1,0 +1,40 @@
+.permission-group {
+    border: 1px solid var(--generic-border);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.permission-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid var(--heading-border);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    color: var(--text-heading);
+}
+
+.permission-row {
+    padding: 5px 0;
+
+    & + .permission-row {
+        border-top: 1px solid var(--heading-border);
+    }
+}
+
+.permission-name {
+    color: var(--text-heading);
+}
+
+/* Aligns the description with the checkbox label text above it:
+   checkbox width (20px) + .checkbox-label gap (0.5rem). */
+.permission-detail {
+    color: var(--text-neutral);
+    margin-left: calc(20px + 0.5rem);
+
+    & code {
+        margin-left: 0.5rem;
+    }
+}

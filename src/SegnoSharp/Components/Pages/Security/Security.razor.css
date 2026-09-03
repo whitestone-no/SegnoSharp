@@ -1,0 +1,18 @@
+.stat {
+    font-size: 2.5rem;
+    line-height: 1;
+    color: var(--text-heading);
+    margin-bottom: 5px;
+}
+
+/* The alert already has padding and a background; this just lays the action button
+   out on the same line as the message. */
+.finding {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}

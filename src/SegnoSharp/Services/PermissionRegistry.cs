@@ -4,6 +4,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using Whitestone.SegnoSharp.Models.Security;
+using Whitestone.SegnoSharp.Modules;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Shared.Models.Security;
 using Whitestone.SegnoSharp.Shared.Permissions;
@@ -24,7 +25,7 @@ public sealed class PermissionRegistry
         // Use a list to avoid multiple enumerations.
         IEnumerable<IPermissionProvider> permissionProviders = providers.ToList();
         
-        var corePermissions = permissionProviders.First(p => p is CorePermissions) as CorePermissions;
+        var corePermissions = permissionProviders.First(p => p is CoreModule) as CoreModule;
 
         foreach (IPermissionProvider provider in permissionProviders)
         {
@@ -35,7 +36,7 @@ public sealed class PermissionRegistry
 
             // ReSharper disable once PossibleNullReferenceException
             // `corePermissions` is known not to be null. If it is null then `.First()` above will throw an exception.
-            if (provider is not CorePermissions && provider.PermissionPrefix.TrimEnd(':').Equals(corePermissions.PermissionPrefix, StringComparison.Ordinal))
+            if (provider is not CoreModule && provider.PermissionPrefix.TrimEnd(':').Equals(corePermissions.PermissionPrefix, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException($"Plugin '{provider.GetType().FullName}' uses prefix '{provider.PermissionPrefix}' which is reserved.");
             }

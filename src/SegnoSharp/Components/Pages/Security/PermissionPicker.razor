@@ -1,0 +1,91 @@
+﻿@using Whitestone.SegnoSharp.Models.Security
+@*
+    Shared permission picker. Renders the registry grouped by plugin, and lists granted
+    permissions that no loaded plugin declares ("orphaned") separately so they can be
+    reviewed and removed deliberately rather than silently disappearing from the UI.
+
+    Selected is mutated in place; OnChanged fires so the parent can mark itself dirty.
+*@
+
+<div class="card-header-container">
+    <h4 class="no-margin">Permissions</h4>
+    <span class="text-small">@Selected.Count granted</span>
+</div>
+
+@if (Wildcard)
+{
+    <div class="alert alert-info">
+        This role grants every permission, including permissions added by plugins after installation.
+    </div>
+}
+else if (_groups.Count == 0)
+{
+    <div class="alert">
+        No permissions are available to grant. Check that the host and its plugins registered their
+        permission providers at startup.
+    </div>
+}
+else
+{
+    @foreach (PermissionGroup group in _groups)
+    {
+        <div class="permission-group">
+            <div class="permission-group-header">
+                <h5 class="no-margin">@group.Label</h5>
+                <span class="text-small">
+                    @group.Permissions.Count(p => Selected.Contains(p.Name)) of @group.Permissions.Count granted
+                </span>
+            </div>
+
+            @foreach (RegisteredPermission permission in group.Permissions)
+            {
+                <div class="permission-row">
+                    <label class="checkbox-label">
+                        <input type="checkbox"
+                               checked="@Selected.Contains(permission.Name)"
+                               disabled="@Disabled"
+                               @onchange="args => ToggleAsync(permission.Name, args)" />
+                        <span class="permission-name">@permission.Permission.DisplayName</span>
+                    </label>
+                    <div class="permission-detail text-small">
+                        @permission.Permission.Description
+                        <code>@permission.Name</code>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
+@if (_orphaned.Count > 0)
+{
+    <div class="alert alert-warning">
+        @_orphaned.Count granted @(_orphaned.Count == 1 ? "permission is" : "permissions are") not declared by
+        any loaded plugin. They stay in place and grant nothing while the owning plugin is missing or disabled,
+        so removing them is only safe if the plugin is gone for good.
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Permission</th>
+                <th class="text-right">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (string orphan in _orphaned)
+            {
+                <tr>
+                    <td><code>@orphan</code></td>
+                    <td class="text-right">
+                        <button class="tertiary small"
+                                disabled="@Disabled"
+                                @onclick="() => RemoveAsync(orphan)">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

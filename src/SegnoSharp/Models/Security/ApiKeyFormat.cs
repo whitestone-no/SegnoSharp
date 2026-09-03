@@ -6,11 +6,11 @@ namespace Whitestone.SegnoSharp.Models.Security;
 
 public static class ApiKeyFormat
 {
-    public const string PrefixMarker = "segnosharp_apikey_";
+    public const string PrefixMarker = "sgns_";
     public const char Separator = '.';
     public const int PrefixRandomBytes = 6;
     public const int SecretRandomBytes = 32;
-    public const int PrefixLength = 30;                 // "segnosharp_apikey_" + 12 hex chars
+    public const int PrefixLength = 17;                 // "sgns_" + 12 hex chars
     public const int SecretLength = 43;                 // base64url of 32 bytes, unpadded
     public const int TotalLength = PrefixLength + 1 + SecretLength;
 
