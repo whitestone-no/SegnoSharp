@@ -22,6 +22,7 @@ using Whitestone.SegnoSharp.Configuration.Extensions;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.HealthChecks;
 using Whitestone.SegnoSharp.Middleware;
+using Whitestone.SegnoSharp.Models.Security;
 using Whitestone.SegnoSharp.Modules;
 using Whitestone.SegnoSharp.Services;
 using Whitestone.SegnoSharp.Shared.Extensions;
@@ -187,10 +188,20 @@ namespace Whitestone.SegnoSharp
                 // Force all controllers to be prefixed with "api"
                 options.Conventions.Add(new GlobalRoutePrefixConvention("api"));
             });
+            IMcpServerBuilder mcpBuilder = builder.Services.AddMcpServer()
+                .WithHttpTransport()
+                .AddAuthorizationFilters();
 
+            // In `Configure()` below theres is a check to ignore `CoreModule`.
+            // This is not necessary here as this is the result of `.AddModules()` which does not include `CoreModule`.
             foreach (IModule module in modules)
             {
-                controllerBuilder.AddApplicationPart(module.GetType().Assembly);
+                Assembly moduleAssembly = module.GetType().Assembly;
+                controllerBuilder.AddApplicationPart(moduleAssembly);
+                mcpBuilder
+                    .WithToolsFromAssembly(moduleAssembly)
+                    .WithResourcesFromAssembly(moduleAssembly)
+                    .WithPromptsFromAssembly(moduleAssembly);
             }
 
             // Core module must be added last as its application parts have already been added.
@@ -275,6 +286,7 @@ namespace Whitestone.SegnoSharp
             app.MapStaticAssets();
 
             app.MapControllers();
+            app.MapMcp("/mcp").RequireAuthorization(Policies.Mcp);
 
             Assembly[] moduleAssemblies = app.Services.GetServices<IModule>()
                 .Where(m => !typeof(CoreModule).IsAssignableFrom(m.GetType()))

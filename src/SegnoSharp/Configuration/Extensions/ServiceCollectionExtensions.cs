@@ -110,7 +110,12 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
 
             services.AddCascadingAuthenticationState();
 
-            services.AddAuthorization();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(Policies.Mcp, policy => policy
+                    .AddAuthenticationSchemes(AuthenticationSchemes.Bearer, AuthenticationSchemes.ApiKey)
+                    .RequireAuthenticatedUser());
+            });
 
             return services;
         }
