@@ -16,13 +16,13 @@ public sealed class PermissionAuthorizationHandler
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext ctx, PermissionRequirement req)
     {
-        if (string.IsNullOrEmpty(req.Permission))
+        // Guards against the sentinel claim written when nothing matched.
+        if (req.Permissions.Length == 0)
         {
             return Task.CompletedTask;
         }
 
         if (IsBearerRequest(ctx.User))
-        //if (ctx.User.Identity?.AuthenticationType == AuthenticationSchemes.Bearer)
         {
             string requiredScope = options.Value.JwtScope;
 
@@ -32,13 +32,23 @@ public sealed class PermissionAuthorizationHandler
             }
         }
 
-        if (ctx.User.HasClaim(Constants.PermissionsClaim, req.Permission) ||
-            ctx.User.HasClaim(Constants.PermissionsClaim, "*"))
+        bool granted =
+            ctx.User.HasClaim(Constants.PermissionsClaim, "*") ||
+            (req.Match == PermissionMatch.All
+                ? req.Permissions.All(HasPermission)
+                : req.Permissions.Any(HasPermission));
+
+        if (granted)
         {
             ctx.Succeed(req);
         }
 
         return Task.CompletedTask;
+
+        bool HasPermission(string permission)
+        {
+            return ctx.User.HasClaim(Constants.PermissionsClaim, permission);
+        }
     }
 
     // Identity.AuthenticationType is "AuthenticationTypes.Federation" for both cookie

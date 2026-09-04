@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Whitestone.SegnoSharp.Models.Security;
 using Whitestone.SegnoSharp.Modules;
+using Whitestone.SegnoSharp.Shared.Attributes.Security;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Shared.Models.Security;
 using Whitestone.SegnoSharp.Shared.Permissions;
@@ -45,6 +46,15 @@ public sealed class PermissionRegistry
 
             foreach (Permission p in provider.ProvidedPermissions)
             {
+                if (p.Name.Contains(RequirePermissionAttribute.AnySeparator) ||
+                    p.Name.Contains(RequirePermissionAttribute.AllSeparator))
+                {
+                    throw new InvalidOperationException(
+                        $"Permission '{p.Name}' from plugin '{provider.GetType().FullName}' must not contain " +
+                        $"'{RequirePermissionAttribute.AnySeparator}' or " +
+                        $"'{RequirePermissionAttribute.AllSeparator}', which are reserved as policy separators.");
+                }
+
                 if (p.Name == Wildcard)
                 {
                     throw new InvalidOperationException($"Plugin '{provider.GetType().FullName}' tried to register wildcard ('{Wildcard}') which is reserved.");

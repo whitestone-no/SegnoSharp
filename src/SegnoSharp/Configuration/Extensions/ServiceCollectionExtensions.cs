@@ -16,10 +16,9 @@ using Whitestone.SegnoSharp.Configuration.Authentication;
 using Whitestone.SegnoSharp.Configuration.Models;
 using Whitestone.SegnoSharp.Models.Security;
 using Whitestone.SegnoSharp.Services;
-using Whitestone.SegnoSharp.Shared.Interfaces;
+using Whitestone.SegnoSharp.Shared.Helpers.Security;
 using Whitestone.SegnoSharp.Shared.Models.Configuration;
 using Whitestone.SegnoSharp.Shared.Models.Security;
-using Whitestone.SegnoSharp.Shared.Permissions;
 
 namespace Whitestone.SegnoSharp.Configuration.Extensions
 {
@@ -106,6 +105,8 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
             services.AddScoped<ApiKeyStore>();
             services.AddScoped<ApiClientGrantStore>();
             services.AddHostedService<ApiKeyUsageFlusher>();
+
+            services.AddScoped<PermissionChecker>();
 
             services.AddCascadingAuthenticationState();
 

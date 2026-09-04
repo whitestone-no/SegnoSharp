@@ -4,6 +4,7 @@ using System;
 using System.Threading.Tasks;
 using Whitestone.SegnoSharp.Models.Security;
 using Whitestone.SegnoSharp.Shared.Attributes.Security;
+using Whitestone.SegnoSharp.Shared.Models.Security;
 
 namespace Whitestone.SegnoSharp.Configuration.Authentication;
 
@@ -16,13 +17,29 @@ public sealed class PermissionAuthorizationPolicyProvider(IOptions<Authorization
             return await base.GetPolicyAsync(name);
         }
 
-        string permission = name[RequirePermissionAttribute.Prefix.Length..];
+        string spec = name[RequirePermissionAttribute.Prefix.Length..];
 
-        return string.IsNullOrEmpty(permission)
+        bool all = spec.Contains(RequirePermissionAttribute.AllSeparator);
+
+        // Mixing the separators has no defined precedence, so refuse rather than guess.
+        // Returning null fails the request, which is the correct outcome for a malformed name.
+        if (all && spec.Contains(RequirePermissionAttribute.AnySeparator))
+        {
+            return null;
+        }
+
+        char separator = all
+            ? RequirePermissionAttribute.AllSeparator
+            : RequirePermissionAttribute.AnySeparator;
+
+        string[] permissions = spec.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+
+        return permissions.Length == 0
             ? null
             : new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
-                .AddRequirements(new PermissionRequirement(permission))
+                .AddRequirements(new PermissionRequirement(
+                    permissions, all ? PermissionMatch.All : PermissionMatch.Any))
                 .Build();
     }
 }
