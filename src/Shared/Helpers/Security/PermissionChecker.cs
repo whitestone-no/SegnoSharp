@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using System.Threading.Tasks;
 
 namespace Whitestone.SegnoSharp.Shared.Helpers.Security;
@@ -10,33 +9,33 @@ namespace Whitestone.SegnoSharp.Shared.Helpers.Security;
 /// does not prevent the handler from being invoked over the circuit.
 /// </summary>
 /// <remarks>
-/// Blazor only, since it resolves the user through AuthenticationStateProvider. API controllers
-/// are covered by [RequirePermission], which runs before the action does.
+/// Blazor only, since it resolves the user through the circuit. API controllers
+/// can use PermissionAuthorizer directly.
 /// </remarks>
 public sealed class PermissionChecker(
-    IAuthorizationService authorizationService,
+    PermissionAuthorizer authorizer,
     AuthenticationStateProvider authenticationStateProvider)
 {
     /// <summary>True when the user holds any one of the permissions.</summary>
     public Task<bool> HasAnyAsync(params string[] permissions)
     {
-        return EvaluateAsync(PermissionPolicy.ForAny(permissions));
+        return EvaluateAsync(permissions, false);
     }
 
     /// <summary>True when the user holds all of the permissions.</summary>
     public Task<bool> HasAllAsync(params string[] permissions)
     {
-        return EvaluateAsync(PermissionPolicy.ForAll(permissions));
+        return EvaluateAsync(permissions, true);
     }
 
-    private async Task<bool> EvaluateAsync(string policy)
+    private async Task<bool> EvaluateAsync(string[] permissions, bool all)
     {
         // Deliberately not cached: permissions can change while a circuit is alive, and a
         // stale "yes" is the failure that matters.
         AuthenticationState state = await authenticationStateProvider.GetAuthenticationStateAsync();
 
-        AuthorizationResult result = await authorizationService.AuthorizeAsync(state.User, policy);
-
-        return result.Succeeded;
+        return all
+            ? await authorizer.HasAllAsync(state.User, permissions)
+            : await authorizer.HasAnyAsync(state.User, permissions);
     }
 }
