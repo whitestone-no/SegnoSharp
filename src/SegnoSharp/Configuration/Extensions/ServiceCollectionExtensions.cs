@@ -106,6 +106,7 @@ namespace Whitestone.SegnoSharp.Configuration.Extensions
             services.AddScoped<ApiClientGrantStore>();
             services.AddHostedService<ApiKeyUsageFlusher>();
 
+            services.AddScoped<PermissionAuthorizer>();
             services.AddScoped<PermissionChecker>();
 
             services.AddCascadingAuthenticationState();
