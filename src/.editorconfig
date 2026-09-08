@@ -1,0 +1,2 @@
+[*.cs]
+dotnet_style_prefer_collection_expression = never
