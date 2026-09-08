@@ -10,10 +10,17 @@ using Whitestone.SegnoSharp.Database.Models;
 namespace Whitestone.SegnoSharp.Shared.Helpers
 {
     /// <summary>
-    /// Stage-two (in-memory) fuzzy matching plus the portable stage-one LIKE predicate.
-    /// Stage one runs in the database (deliberately over-broad, one LIKE per token, OR'd
-    /// together) to gather a candidate set; stage two ranks the survivors here in C#, so
-    /// none of the fuzzy logic depends on the SQL provider.
+    /// Stage-two (in-memory) fuzzy matching plus the portable stage-one LIKE predicates.
+    /// Stage one runs in the database to gather a candidate set; stage two ranks the
+    /// survivors here in C#, so none of the fuzzy logic depends on the SQL provider.
+    ///
+    /// Stage one comes in three tiers of decreasing precision — <see cref="TitlePhraseLike"/>,
+    /// <see cref="TitleAllTokensLike"/>, <see cref="TitleLike"/>. The caller tries them in
+    /// order and stops at the first that returns anything. This matters because the caller
+    /// caps the candidate set before ranking: with only the broad OR tier, a query of common
+    /// words ("now we are free") fills the cap with rows matched on "%we%" and the real track
+    /// never reaches the scorer. The loose tier is still kept last, because a misspelling
+    /// ("Gladeator") produces nothing in the stricter tiers and only fuzzy scoring can recover it.
     /// </summary>
     public static class TextSearch
     {
@@ -46,6 +53,17 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
             }
 
             return sb.ToString().Normalize(NormalizationForm.FormC);
+        }
+
+        /// <summary>
+        /// Normalized text collapsed to single spaces, for the exact-phrase candidate tier.
+        /// Stopwords are deliberately kept here: the phrase tier is matched as one contiguous
+        /// substring, so dropping "the" would stop "Fellowship of the Ring" matching itself.
+        /// </summary>
+        public static string NormalizePhrase(string s)
+        {
+            string[] parts = Normalize(s).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return string.Join(' ', parts);
         }
 
         public static List<string> Tokenize(string s, bool dropStopWords = true)
@@ -213,12 +231,45 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         }
 
         /// <summary>
-        /// Stage-one candidate filter for track titles: OR of one LIKE per token.
-        /// Both sides are lowercased so it stays case-insensitive across every provider
-        /// (Postgres LIKE is case-sensitive otherwise). This is the one provider-touching
-        /// spot; on SQLite, LOWER() is ASCII-only, so non-ASCII case variants may be missed
-        /// at this stage (the in-memory scorer still normalizes them). Postgres users who
-        /// care about that can swap in ILIKE / citext.
+        /// Stage-one tier 1 (tightest): the whole normalized query as one contiguous substring.
+        /// Matches "Now We Are Free" and "Now We Are Free (Reprise)" but nothing built from the
+        /// individual words, so the candidate cap fills with rows that are actually plausible.
+        /// Only the query side is normalized — the database side is a plain LOWER() — so a title
+        /// whose punctuation sits inside the phrase ("Rock'n'Roll" vs "rock n roll") falls
+        /// through to a looser tier rather than matching here.
+        /// </summary>
+        public static Expression<Func<Track, bool>> TitlePhraseLike(string phrase)
+        {
+            string pattern = "%" + phrase + "%";
+            return t => EF.Functions.Like(t.Title.ToLower(), pattern);
+        }
+
+        /// <summary>
+        /// Stage-one tier 2: AND of one LIKE per token. Every query word must appear somewhere
+        /// in the title, in any order, which catches "Free Now We Are" and subtitle reorderings
+        /// that the phrase tier misses, while still excluding titles that share only one word.
+        /// </summary>
+        public static Expression<Func<Track, bool>> TitleAllTokensLike(IReadOnlyList<string> tokens)
+        {
+            Expression<Func<Track, bool>> predicate = PredicateBuilder.True<Track>();
+
+            foreach (string token in tokens)
+            {
+                string pattern = "%" + token + "%";
+                predicate = predicate.And(t => EF.Functions.Like(t.Title.ToLower(), pattern));
+            }
+
+            return predicate;
+        }
+
+        /// <summary>
+        /// Stage-one tier 3 (loosest): OR of one LIKE per token — deliberately over-broad, and
+        /// the only tier that can survive a misspelled word, since the in-memory scorer is
+        /// typo-tolerant but the database LIKE is not. Both sides are lowercased so it stays
+        /// case-insensitive across every provider (Postgres LIKE is case-sensitive otherwise).
+        /// This is the one provider-touching spot; on SQLite, LOWER() is ASCII-only, so
+        /// non-ASCII case variants may be missed at this stage (the in-memory scorer still
+        /// normalizes them). Postgres users who care about that can swap in ILIKE / citext.
         /// </summary>
         public static Expression<Func<Track, bool>> TitleLike(IReadOnlyList<string> tokens)
         {
@@ -234,21 +285,38 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         }
     }
 
-    /// <summary>Minimal OR-combining predicate builder so we don't need LinqKit.</summary>
+    /// <summary>Minimal AND/OR-combining predicate builder so we don't need LinqKit.</summary>
     public static class PredicateBuilder
     {
         public static Expression<Func<T, bool>> False<T>() => _ => false;
 
+        public static Expression<Func<T, bool>> True<T>() => _ => true;
+
         public static Expression<Func<T, bool>> Or<T>(
             this Expression<Func<T, bool>> a,
             Expression<Func<T, bool>> b)
+        {
+            return Combine(a, b, Expression.OrElse);
+        }
+
+        public static Expression<Func<T, bool>> And<T>(
+            this Expression<Func<T, bool>> a,
+            Expression<Func<T, bool>> b)
+        {
+            return Combine(a, b, Expression.AndAlso);
+        }
+
+        private static Expression<Func<T, bool>> Combine<T>(
+            Expression<Func<T, bool>> a,
+            Expression<Func<T, bool>> b,
+            Func<Expression, Expression, BinaryExpression> join)
         {
             var parameter = Expression.Parameter(typeof(T));
 
             Expression left = new ReplaceParameterVisitor(a.Parameters[0], parameter).Visit(a.Body)!;
             Expression right = new ReplaceParameterVisitor(b.Parameters[0], parameter).Visit(b.Body)!;
 
-            return Expression.Lambda<Func<T, bool>>(Expression.OrElse(left, right), parameter);
+            return Expression.Lambda<Func<T, bool>>(join(left, right), parameter);
         }
 
         private sealed class ReplaceParameterVisitor : ExpressionVisitor
