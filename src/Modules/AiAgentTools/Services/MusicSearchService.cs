@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -11,7 +12,6 @@ using Whitestone.SegnoSharp.Modules.AiAgentTools.Models;
 using Whitestone.SegnoSharp.Modules.AiAgentTools.Models.Enums;
 using Whitestone.SegnoSharp.Shared.Events;
 using Whitestone.SegnoSharp.Shared.Helpers;
-using Whitestone.SegnoSharp.Shared.Helpers.Security;
 
 // ReSharper disable ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
 
@@ -26,7 +26,7 @@ public interface IMusicSearchService
     Task<IReadOnlyList<AlbumResult>> SearchAlbumsAsync(string query, int limit = 5, bool allowOnlyPublicAlbums = true);
     Task<TrackSearchResult> SearchTracksAsync(TrackSearchQuery query, double minScore = 0.4, bool allowOnlyPublicAlbums = true);
     Task<AlbumTracklist> GetAlbumTracklistAsync(int albumId, bool allowOnlyPublicAlbums = true);
-    Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, int? position = null, bool playNow = false);
+    Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, int? position = null, bool playNow = false, bool allowOnlyPublicAlbums = true);
     Task<TrackPickResult> PickTracksAsync(int personId, PickRules rules, DateTime now, Func<int, int> nextRandom, string role = null, int count = 1, bool allowOnlyPublicAlbums = true);
 }
 
@@ -39,6 +39,17 @@ public interface IMusicSearchService
 /// "Playlist" here is the single global <see cref="StreamQueue"/>. Unplayable tracks
 /// (no <see cref="TrackStreamInfo"/>) are hidden from search; <see cref="GetAlbumTracklistAsync"/>
 /// shows everything (marked) so the agent can verify an externally-suggested title.
+///
+/// Track search is two-stage: the database gathers candidates with a portable LIKE
+/// predicate, then ranking happens in memory so no fuzzy logic depends on the SQL provider.
+/// Because the candidate gather is capped, it runs in tiers (exact phrase, then all tokens,
+/// then any token) and stops at the first tier that returns rows — otherwise a query of
+/// common words fills the cap with noise before the scorer ever sees the right track. When
+/// the cap is hit anyway, <see cref="TrackSearchResult.Truncated"/> says so.
+///
+/// minScore is a real filter: candidates below it are never returned. A WeakMatch therefore
+/// comes back empty, with TopScore and Hint telling the caller how close it got and what
+/// threshold would surface it.
 ///
 /// Query-shape notes for this schema's MySQL/multi-provider setup: everything here is
 /// written to translate without a correlated CROSS APPLY (which older MySQL can't run) —
@@ -53,23 +64,46 @@ public class MusicSearchService(
     ICambion cambion) : IMusicSearchService
 {
     // Stage-one candidate ceilings, so a vague query ("love") can't drag the whole
-    // library into memory. Hitting the cap a lot is a signal the query is too broad.
+    // library into memory. Hitting the cap is reported as Truncated rather than silently
+    // discarding rows the scorer never saw.
     private const int TrackCandidateCap = 300;
     private const int NameCandidateCap = 200;
 
+    // Below this score a "best available" candidate is noise rather than a near miss, so the
+    // hint stops suggesting a lower threshold and points at the album tracklist instead.
+    private const double WeakMatchRetryFloor = 0.3;
+
+    // A role-filtered person search has to compute credit counts before it knows whether a
+    // candidate qualifies, so it walks further down the ranked list to fill its limit. This
+    // bounds how far.
+    private const int RoleFilterScanMultiplier = 3;
+    private const int RoleFilterScanFloor = 15;
+
     public async Task<IReadOnlyList<RoleResult>> GetRolesAsync()
     {
-        List<RoleResult> roles = await dbContext.PersonGroups
-            .Select(pg => new RoleResult(pg.Name, ToCreditSource(pg.Type)))
+        var raw = await dbContext.PersonGroups
+            .Select(pg => new { pg.Name, pg.Type })
             .ToListAsync();
 
-        return roles;
+        // The table holds a row per name/scope pair, but callers filter on the name alone,
+        // so collapse to one entry per distinct name carrying the scopes it covers.
+        return raw
+            .GroupBy(pg => pg.Name, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(g => new RoleResult(
+                g.First().Name,
+                g.Select(pg => ToCreditSource(pg.Type)).Distinct().OrderBy(s => s).ToList()))
+            .ToList();
     }
 
     /// <summary>
     /// Resolve a person name to candidates, with per-role credit counts and sample works
     /// so the agent can tell two same-named people apart (the film composer vs the guitarist).
     /// A genuine tie (two distinct people) is the agent's cue to ask.
+    ///
+    /// When <paramref name="role"/> is supplied it filters the people returned, not just their
+    /// counts: a candidate with no credit in that role is dropped, and the scan walks further
+    /// down the ranked list to fill <paramref name="limit"/>.
     /// </summary>
     public async Task<IReadOnlyList<PersonResult>> SearchPeopleAsync(
         string query, string role = null, int limit = 5, bool allowOnlyPublicAlbums = true)
@@ -97,7 +131,12 @@ public class MusicSearchService(
             .Take(NameCandidateCap)
             .ToListAsync();
 
-        // Rank in memory against the full name, then keep the top few.
+        // Rank in memory against the full name. Without a role filter the top `limit` is all
+        // we need; with one, some of them will be discarded, so scan deeper.
+        int scanLimit = role == null
+            ? limit
+            : Math.Max(limit * RoleFilterScanMultiplier, RoleFilterScanFloor);
+
         var ranked = raw
             .Select(p => new
             {
@@ -107,7 +146,7 @@ public class MusicSearchService(
                 TextSearch.ScoreTitle(query, $"{p.FirstName} {p.LastName}").Score
             })
             .OrderByDescending(x => x.Score)
-            .Take(limit)
+            .Take(scanLimit)
             .ToList();
 
         if (ranked.Count == 0)
@@ -121,10 +160,15 @@ public class MusicSearchService(
         // relation side with a WHERE EXISTS (r.Persons.Any) plus a GROUP BY stays plain
         // JOIN/GROUP BY SQL that translates on every provider. The top set is tiny
         // (<= limit), so the extra round-trips are cheap.
-        var results = new List<PersonResult>(ranked.Count);
+        var results = new List<PersonResult>(Math.Min(ranked.Count, limit));
 
         foreach (var person in ranked)
         {
+            if (results.Count >= limit)
+            {
+                break;
+            }
+
             int pid = person.Id; // local, so it binds as a query parameter
 
             IQueryable<TrackPersonGroupPersonRelation> trackRelationQuery = dbContext.TrackPersonGroupsRelations
@@ -135,7 +179,7 @@ public class MusicSearchService(
             {
                 trackRelationQuery = trackRelationQuery.Where(r => r.Parent.Disc.Album.IsPublic);
             }
-            
+
             var trackCounts = await trackRelationQuery
                 .GroupBy(r => r.PersonGroup.Name)
                 .Select(g => new { Role = g.Key, Count = g.Count() })
@@ -159,6 +203,14 @@ public class MusicSearchService(
             foreach (var c in trackCounts.Concat(albumCounts))
             {
                 counts[c.Role] = counts.TryGetValue(c.Role, out int existing) ? existing + c.Count : c.Count;
+            }
+
+            // A role filter is a filter on people, not just on their counts: drop candidates
+            // who hold no credit in it. Done here rather than in the candidate query because
+            // reaching the relations from the Person side would emit a CROSS APPLY.
+            if (role != null && (!counts.TryGetValue(role, out int roleCount) || roleCount == 0))
+            {
+                continue;
             }
 
             // Sample works: album titles first, topped up with track titles.
@@ -283,30 +335,51 @@ public class MusicSearchService(
     /// Search playable tracks by any combination of title, person/role and album.
     /// Person scope unions direct track credits with credits inherited from the album,
     /// so "by John Williams" still finds tracks credited only at the soundtrack level.
-    /// The <see cref="TrackSearchResult.Outcome"/> plus <paramref name="minScore"/> let the
-    /// agent branch: Matched → act; WeakMatch/NoMatch → resolve the exact title externally
-    /// and search again.
+    ///
+    /// At least one of TitleQuery, PersonId or AlbumId is required: an unfiltered search
+    /// would return arbitrary tracks and — having nothing to rank them against — report
+    /// them as a full match.
+    ///
+    /// <paramref name="minScore"/> filters, it does not merely classify: only candidates at
+    /// or above it are returned. The <see cref="TrackSearchResult.Outcome"/> lets the agent
+    /// branch — Matched → act; WeakMatch → nothing cleared the bar, but TopScore and Hint say
+    /// how close the best one came; NoMatch → nothing exists in this scope at all.
     /// </summary>
     public async Task<TrackSearchResult> SearchTracksAsync(TrackSearchQuery query, double minScore = 0.4, bool allowOnlyPublicAlbums = true)
     {
-        IQueryable<Track> tracks = dbContext.Tracks.Where(t => t.TrackStreamInfo != null); // playable only
+        List<string> tokens = string.IsNullOrWhiteSpace(query.TitleQuery)
+            ? []
+            : TextSearch.Tokenize(query.TitleQuery);
+
+        // A title of nothing but punctuation tokenizes to nothing; treat it as no title
+        // rather than silently searching the whole scope on its behalf.
+        bool hasTitle = tokens.Count > 0;
+
+        if (!hasTitle && !query.PersonId.HasValue && !query.AlbumId.HasValue)
+        {
+            throw new ArgumentException(
+                "At least one of TitleQuery, PersonId or AlbumId must be supplied. An unfiltered track search returns arbitrary tracks.",
+                nameof(query));
+        }
+
+        IQueryable<Track> scope = dbContext.Tracks.Where(t => t.TrackStreamInfo != null); // playable only
 
         if (allowOnlyPublicAlbums)
         {
-            tracks = tracks.Where(t => t.Disc.Album.IsPublic);
+            scope = scope.Where(t => t.Disc.Album.IsPublic);
         }
 
         if (query.AlbumId.HasValue)
         {
             int albumId = query.AlbumId.Value;
-            tracks = tracks.Where(t => t.Disc.AlbumId == albumId);
+            scope = scope.Where(t => t.Disc.AlbumId == albumId);
         }
 
         if (query.PersonId.HasValue)
         {
             int personId = query.PersonId.Value;
             string role = query.Role;
-            tracks = tracks.Where(t =>
+            scope = scope.Where(t =>
                 t.TrackPersonGroupPersonRelations.Any(r =>
                     (role == null || r.PersonGroup.Name == role) &&
                     r.Persons.Any(p => p.Id == personId))
@@ -316,39 +389,30 @@ public class MusicSearchService(
                     r.Persons.Any(p => p.Id == personId)));
         }
 
-        List<string> tokens = string.IsNullOrWhiteSpace(query.TitleQuery)
-            ? new List<string>()
-            : TextSearch.Tokenize(query.TitleQuery);
-
-        if (tokens.Count > 0)
-        {
-            tracks = tracks.Where(TextSearch.TitleLike(tokens));
-        }
-
-        // Two collection projections (TrackCredits and AlbumCredits, each nesting Persons):
-        // AsSplitQuery loads each in its own round-trip so a single query doesn't multiply
-        // rows. OrderBy(Id) makes the candidate Take deterministic (and is required for a
-        // stable split-query correlation). Final ranking happens in memory below.
-        List<TrackRow> rows = await tracks
-            .OrderBy(t => t.Id)
-            .Select(TrackRowSelector)
-            .Take(TrackCandidateCap)
-            .AsSplitQuery()
-            .ToListAsync();
-
-        bool hasTitle = tokens.Count > 0;
+        (List<TrackRow> rows, bool truncated) = hasTitle
+            ? await GatherTitleCandidatesAsync(scope, query.TitleQuery, tokens)
+            : Cap(await TakeCandidatesAsync(scope));
 
         List<(TrackRow Row, double Score, string MatchedOn)> scored;
+        double? topScore;
+
         if (hasTitle)
         {
             scored = rows
                 .Select(r =>
                 {
                     (double score, string matchedOn) = TextSearch.ScoreTitle(query.TitleQuery, r.Title);
-                    return (r, score, matchedOn);
+                    return (Row: r, Score: score, MatchedOn: matchedOn);
                 })
-                .OrderByDescending(x => x.score)
+                .OrderByDescending(x => x.Score)
                 .ToList();
+
+            topScore = scored.Count == 0 ? null : scored[0].Score;
+
+            // minScore is a filter, not a label. Everything below it is dropped, so a
+            // WeakMatch hands back an empty list and the agent has to decide out loud
+            // whether to retry lower or tell the user nothing good was found.
+            scored = scored.Where(x => x.Score >= minScore).ToList();
         }
         else
         {
@@ -356,18 +420,18 @@ public class MusicSearchService(
             // stable output and treat every credited hit as a full match.
             scored = rows
                 .OrderBy(r => r.AlbumTitle).ThenBy(r => r.DiscNumber).ThenBy(r => r.TrackNumber)
-                .Select(r => (r, 1.0, "credit match"))
+                .Select(r => (Row: r, Score: 1.0, MatchedOn: "credit match"))
                 .ToList();
+
+            topScore = scored.Count == 0 ? null : 1.0;
         }
 
-        double? topScore = scored.Count == 0 ? null : scored[0].Score;
-
         SearchOutcome outcome;
-        if (scored.Count == 0)
+        if (rows.Count == 0)
         {
             outcome = SearchOutcome.NoMatch;
         }
-        else if (!hasTitle || topScore >= minScore)
+        else if (scored.Count > 0)
         {
             outcome = SearchOutcome.Matched;
         }
@@ -375,17 +439,6 @@ public class MusicSearchService(
         {
             outcome = SearchOutcome.WeakMatch;
         }
-
-        string hint = outcome switch
-        {
-            SearchOutcome.NoMatch when hasTitle =>
-                "No track title matched in this scope. Resolve the exact track name (e.g. via external lookup) and search again. If the album is known get all tracks from the album for the real titles.",
-            SearchOutcome.NoMatch =>
-                "No credited, playable tracks found for this person/role.",
-            SearchOutcome.WeakMatch =>
-                "Only weak title matches. Verify the exact track name before adding, or fetch the album tracklist to choose.",
-            _ => null
-        };
 
         List<TrackCandidate> candidates = scored
             .Take(query.Limit)
@@ -396,13 +449,121 @@ public class MusicSearchService(
             outcome,
             candidates,
             topScore.HasValue ? Math.Round(topScore.Value, 3) : null,
-            hint,
-            query.AlbumId);
+            BuildSearchHint(outcome, hasTitle, topScore, minScore, truncated),
+            query.AlbumId,
+            truncated);
+    }
+
+    /// <summary>
+    /// Gather title candidates in tiers of decreasing precision, stopping at the first tier
+    /// that returns anything. The ranking cap is applied to whatever that tier produced, so a
+    /// query of common words no longer spends its 300 rows on incidental substring hits.
+    /// </summary>
+    private async Task<(List<TrackRow> Rows, bool Truncated)> GatherTitleCandidatesAsync(
+        IQueryable<Track> scope, string titleQuery, List<string> tokens)
+    {
+        // Tier 1: the whole query as one contiguous phrase.
+        string phrase = TextSearch.NormalizePhrase(titleQuery);
+        if (phrase.Length > 0)
+        {
+            List<TrackRow> phraseRows = await TakeCandidatesAsync(scope.Where(TextSearch.TitlePhraseLike(phrase)));
+            if (phraseRows.Count > 0)
+            {
+                return Cap(phraseRows);
+            }
+        }
+
+        // Tier 2: every token present, in any order. Only worth a round-trip for multi-token
+        // queries — with one token it is the same query as tier 3.
+        if (tokens.Count > 1)
+        {
+            List<TrackRow> allTokenRows = await TakeCandidatesAsync(scope.Where(TextSearch.TitleAllTokensLike(tokens)));
+            if (allTokenRows.Count > 0)
+            {
+                return Cap(allTokenRows);
+            }
+        }
+
+        // Tier 3: any token. Over-broad by design, and the only tier that survives a typo.
+        return Cap(await TakeCandidatesAsync(scope.Where(TextSearch.TitleLike(tokens))));
+    }
+
+    // One row past the cap, so hitting it is detectable rather than silent.
+    private static Task<List<TrackRow>> TakeCandidatesAsync(IQueryable<Track> scope) =>
+        scope
+            .OrderBy(t => t.Id)
+            .Select(TrackRowSelector)
+            .Take(TrackCandidateCap + 1)
+            .AsSplitQuery()
+            .ToListAsync();
+
+    private static (List<TrackRow> Rows, bool Truncated) Cap(List<TrackRow> rows) =>
+        rows.Count > TrackCandidateCap
+            ? (rows.Take(TrackCandidateCap).ToList(), true)
+            : (rows, false);
+
+    /// <summary>
+    /// Plain-language next step for the agent. Scores are formatted with the invariant
+    /// culture so a server running under a comma-decimal locale doesn't hand the model a
+    /// threshold it can't pass back.
+    /// </summary>
+    private static string BuildSearchHint(SearchOutcome outcome, bool hasTitle, double? topScore, double minScore, bool truncated)
+    {
+        var parts = new List<string>();
+
+        switch (outcome)
+        {
+            case SearchOutcome.NoMatch when hasTitle:
+                parts.Add("No track title matched in this scope. Resolve the exact track name (e.g. via external lookup) and search again. If the album is known, get all tracks from the album for the real titles.");
+                break;
+
+            case SearchOutcome.NoMatch:
+                parts.Add("No credited, playable tracks found for this person/role.");
+                break;
+
+            case SearchOutcome.WeakMatch:
+                double best = topScore ?? 0;
+                parts.Add(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Nothing reached minScore {0:0.##}; the best available scored {1:0.##}, and candidates below minScore are not returned.",
+                    minScore,
+                    best));
+
+                if (best >= WeakMatchRetryFloor)
+                {
+                    double retry = Math.Max(WeakMatchRetryFloor, Math.Round(best - 0.05, 2));
+                    parts.Add(string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Search once more with minScore {0:0.##} to see it, and tell the user the match is uncertain.",
+                        retry));
+                }
+                else
+                {
+                    parts.Add(string.Format(
+                        CultureInfo.InvariantCulture,
+                        "That is too low to be meaningful: do not lower minScore below {0:0.##}. Fetch the album tracklist or resolve the exact title externally instead.",
+                        WeakMatchRetryFloor));
+                }
+
+                break;
+        }
+
+        if (truncated)
+        {
+            parts.Add(string.Format(
+                CultureInfo.InvariantCulture,
+                "The candidate list was cut off at {0} tracks before ranking, so a better match may exist outside it. Narrow the search with personId or albumId.",
+                TrackCandidateCap));
+        }
+
+        return parts.Count == 0 ? null : string.Join(" ", parts);
     }
 
     /// <summary>
     /// Full disc/track tree for one album, including unplayable tracks (marked), so the
     /// agent can verify an externally-suggested title against what actually exists.
+    /// Returns null both when the album does not exist and when it is not visible to this
+    /// caller, deliberately: distinguishing them would confirm the existence of private albums.
     /// </summary>
     public async Task<AlbumTracklist> GetAlbumTracklistAsync(int albumId, bool allowOnlyPublicAlbums = true)
     {
@@ -650,11 +811,36 @@ public class MusicSearchService(
     /// Append tracks to the global stream queue (or insert at <paramref name="position"/>,
     /// shifting the rest). Tracks with no playable stream are skipped with a reason rather
     /// than failing the whole call. Returns what actually landed.
+    ///
+    /// <paramref name="allowOnlyPublicAlbums"/> is enforced here as well as on the reads: IDs
+    /// normally come from a filtered search, but the write must not be a way around the
+    /// visibility rules for a caller who obtained an ID some other way.
+    ///
+    /// <paramref name="playNow"/> advances the stream to the next queue entry, which is only
+    /// the caller's track if it was inserted at the front — so playNow forces front insertion
+    /// and rejects an explicit position elsewhere, rather than quietly playing someone else's
+    /// music.
     /// </summary>
-    public async Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, int? position = null, bool playNow = false)
+    public async Task<QueueAddResult> AddTracksToQueueAsync(
+        IReadOnlyList<int> trackIds,
+        int? position = null,
+        bool playNow = false,
+        bool allowOnlyPublicAlbums = true)
     {
         var added = new List<int>();
         var skipped = new List<SkippedTrack>();
+
+        if (playNow)
+        {
+            if (position is > 0)
+            {
+                throw new ArgumentException(
+                    "playNow advances the stream to the next queue entry, so it only plays the tracks being added when they go to the front. Use position 0, or omit position, together with playNow.",
+                    nameof(position));
+            }
+
+            position = 0;
+        }
 
         if (trackIds.Count == 0)
         {
@@ -662,10 +848,17 @@ public class MusicSearchService(
             return new QueueAddResult(added, skipped, emptyLen);
         }
 
-        // One lookup for all requested tracks: TrackStreamInfo is the playability gate.
-        Dictionary<int, TrackStreamInfo> infos = await dbContext.TrackStreamInfos
-            .Where(x => trackIds.Contains(x.TrackId))
-            .ToDictionaryAsync(x => x.TrackId);
+        // One lookup for all requested tracks: TrackStreamInfo is the playability gate, and
+        // the album's IsPublic flag is the visibility gate.
+        IQueryable<TrackStreamInfo> infoQuery = dbContext.TrackStreamInfos
+            .Where(x => trackIds.Contains(x.TrackId));
+
+        if (allowOnlyPublicAlbums)
+        {
+            infoQuery = infoQuery.Where(x => x.Track.Disc.Album.IsPublic);
+        }
+
+        Dictionary<int, TrackStreamInfo> infos = await infoQuery.ToDictionaryAsync(x => x.TrackId);
 
         int maxSort = await dbContext.StreamQueue.Select(s => (int?)s.SortOrder).MaxAsync() ?? -1;
         int insertAt = position ?? maxSort + 1;
@@ -681,7 +874,15 @@ public class MusicSearchService(
         {
             if (!infos.TryGetValue(id, out TrackStreamInfo info))
             {
-                skipped.Add(new SkippedTrack(id, "Track not found or has no playable stream (missing TrackStreamInfo)."));
+                // One reason for all three cases, so the response can't be used to probe
+                // which private albums exist.
+                skipped.Add(new SkippedTrack(id, "Track not found, has no playable stream, or is not available to you."));
+                continue;
+            }
+
+            if (cursor > ushort.MaxValue)
+            {
+                skipped.Add(new SkippedTrack(id, "The stream queue is full."));
                 continue;
             }
 
@@ -704,7 +905,14 @@ public class MusicSearchService(
 
             foreach (StreamQueue s in toShift)
             {
-                s.SortOrder = (ushort)(s.SortOrder + toAdd.Count);
+                int shifted = s.SortOrder + toAdd.Count;
+                if (shifted > ushort.MaxValue)
+                {
+                    // Nothing has been saved yet, so bailing out here leaves the queue intact.
+                    throw new InvalidOperationException("The stream queue is too long to insert this many tracks at that position.");
+                }
+
+                s.SortOrder = (ushort)shifted;
             }
         }
 
@@ -713,7 +921,7 @@ public class MusicSearchService(
 
         await cambion.PublishEventAsync(new PlaylistUpdated());
 
-        if (playNow)
+        if (playNow && added.Count > 0)
         {
             await cambion.PublishEventAsync(new PlayNextTrack());
         }
