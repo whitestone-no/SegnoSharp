@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Whitestone.SegnoSharp.Modules.AiAgentTools.Models.Enums;
+namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models.Enums;
 
 /// <summary>Outcome of a track search, so the agent can branch (e.g. go to external lookup on a miss).</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<SearchOutcome>))]

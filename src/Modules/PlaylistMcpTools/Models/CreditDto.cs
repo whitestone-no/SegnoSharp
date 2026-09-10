@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Whitestone.SegnoSharp.Modules.AiAgentTools.Models.Enums;
+using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models.Enums;
 
-namespace Whitestone.SegnoSharp.Modules.AiAgentTools.Models;
+namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 
 public record CreditDto(
     string Role,

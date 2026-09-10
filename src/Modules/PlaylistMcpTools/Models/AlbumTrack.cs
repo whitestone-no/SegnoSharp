@@ -1,4 +1,4 @@
-﻿namespace Whitestone.SegnoSharp.Modules.AiAgentTools.Models;
+﻿namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 
 public record AlbumTrack(
     byte DiscNumber,

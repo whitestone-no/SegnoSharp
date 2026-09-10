@@ -39,7 +39,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostgreSQL", "Migrations\Po
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashboard", "Modules\Dashboard\Dashboard.csproj", "{D66DCC3C-1A84-4E7D-CD52-57A4393E03ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiAgentTools", "Modules\AiAgentTools\AiAgentTools.csproj", "{AF902EE7-06BC-284B-F7BD-80E9947B506C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaylistMcpTools", "Modules\PlaylistMcpTools\PlaylistMcpTools.csproj", "{AF902EE7-06BC-284B-F7BD-80E9947B506C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

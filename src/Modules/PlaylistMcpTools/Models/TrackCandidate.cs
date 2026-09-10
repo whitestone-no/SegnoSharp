@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Whitestone.SegnoSharp.Modules.AiAgentTools.Models;
+namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 
 public record TrackCandidate(
     int TrackId,

@@ -1,4 +1,4 @@
-﻿namespace Whitestone.SegnoSharp.Modules.AiAgentTools.Models;
+﻿namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 
 /// <summary>
 /// Parameters for a track search. All are optional; combine as needed.

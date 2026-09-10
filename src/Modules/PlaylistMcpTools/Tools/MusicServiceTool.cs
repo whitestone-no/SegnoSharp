@@ -6,15 +6,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Whitestone.SegnoSharp.Modules.AiAgentTools.Models;
-using Whitestone.SegnoSharp.Modules.AiAgentTools.Services;
+using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
+using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Services;
 using Whitestone.SegnoSharp.Shared.Attributes.Security;
 using Whitestone.SegnoSharp.Shared.Helpers.Security;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Shared.Permissions;
 // ReSharper disable UnusedMember.Global - ReSharper reports that methods are not use, but these methods are just exposed externally, never called by SegnoSharp itself.
 
-namespace Whitestone.SegnoSharp.Modules.AiAgentTools.Tools;
+namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Tools;
 
 [McpServerToolType]
 public class MusicServiceTool(

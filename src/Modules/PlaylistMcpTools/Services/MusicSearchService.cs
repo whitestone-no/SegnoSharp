@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 using Whitestone.Cambion.Interfaces;
 using Whitestone.SegnoSharp.Database;
 using Whitestone.SegnoSharp.Database.Models;
-using Whitestone.SegnoSharp.Modules.AiAgentTools.Models;
-using Whitestone.SegnoSharp.Modules.AiAgentTools.Models.Enums;
+using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
+using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models.Enums;
 using Whitestone.SegnoSharp.Shared.Events;
 using Whitestone.SegnoSharp.Shared.Helpers;
 
 // ReSharper disable ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
 
-namespace Whitestone.SegnoSharp.Modules.AiAgentTools.Services;
+namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Services;
 
 // ReSharper disable EntityFramework.ClientSideDbFunctionCall - These warnings are not really client side as they are inside predicates and are mistakenly interpreted as client side. The predicate itself is used inside a query.
 

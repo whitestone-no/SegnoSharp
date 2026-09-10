@@ -2,10 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using Whitestone.SegnoSharp.Modules.AiAgentTools.Services;
+using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Services;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 
-namespace Whitestone.SegnoSharp.Modules.AiAgentTools;
+namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools;
 
 public class Module : IMcpProvider
 {
