@@ -7,9 +7,10 @@ using Whitestone.SegnoSharp.Shared.Interfaces;
 
 namespace Whitestone.SegnoSharp.Modules.AiAgentTools;
 
-public class Module : IModule
+public class Module : IModule, IMcpProvider
 {
     public Guid Id { get; } = Guid.NewGuid();
+    public string McpPrefix => "playlist_tools";
 
     public void ConfigureServices(IServiceCollection services, IHostEnvironment environment, IConfiguration configuration)
     {

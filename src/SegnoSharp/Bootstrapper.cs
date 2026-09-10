@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using ModelContextProtocol.Server;
 using Serilog;
 using Serilog.Events;
 using System;
@@ -28,6 +29,7 @@ using Whitestone.SegnoSharp.Services;
 using Whitestone.SegnoSharp.Shared.Extensions;
 using Whitestone.SegnoSharp.Shared.Interfaces;
 using Whitestone.SegnoSharp.Shared.Models.Configuration;
+using McpServerBuilderExtensions = Whitestone.SegnoSharp.Configuration.Extensions.McpServerBuilderExtensions;
 
 namespace Whitestone.SegnoSharp
 {
@@ -198,11 +200,36 @@ namespace Whitestone.SegnoSharp
             {
                 Assembly moduleAssembly = module.GetType().Assembly;
                 controllerBuilder.AddApplicationPart(moduleAssembly);
+
+                if (module is not IMcpProvider provider)
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(provider.McpPrefix))
+                {
+                    Log.Warning("Module {Module} returned an empty McpPrefix; skipping.", module.GetType().FullName);
+                    continue;
+                }
+
+                if (!McpServerBuilderExtensions.IsValidMcpPrefix(provider.McpPrefix))
+                {
+                    Log.Warning("Module {Module} returned an invalid McpPrefix {Prefix}; skipping.", module.GetType().FullName, provider.McpPrefix);
+                    continue;
+                }
+
+                // This call replaces `mcpBuilder.WithToolsFromAssembly()`
+                mcpBuilder.WithPrefixedToolsFromAssembly(
+                    module.GetType().Assembly,
+                    toolName => $"{provider.McpPrefix}__{toolName}",
+                    onLoadError: (ex, asm) => Log.Warning(ex, "Failed to load a type from {Assembly}", asm));
+
                 mcpBuilder
-                    .WithToolsFromAssembly(moduleAssembly)
                     .WithResourcesFromAssembly(moduleAssembly)
                     .WithPromptsFromAssembly(moduleAssembly);
             }
+
+            builder.Services.AddSingleton<IValidateOptions<McpServerOptions>, UniqueMcpToolNameValidator>();
 
             // Core module must be added last as its application parts have already been added.
             builder.Services.AddSingleton<IModule, CoreModule>();
