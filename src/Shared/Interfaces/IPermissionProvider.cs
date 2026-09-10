@@ -3,7 +3,7 @@ using Whitestone.SegnoSharp.Shared.Models.Security;
 
 namespace Whitestone.SegnoSharp.Shared.Interfaces;
 
-public interface IPermissionProvider
+public interface IPermissionProvider : IModule
 {
     string PermissionPrefix { get; }
 

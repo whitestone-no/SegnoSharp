@@ -9,7 +9,7 @@ using Whitestone.SegnoSharp.Shared.Permissions;
 
 namespace Whitestone.SegnoSharp.Modules;
 
-public class CoreModule : IModule, IPermissionProvider
+public class CoreModule : IPermissionProvider
 {
     public Guid Id => new("c661e55b-8dbf-4ca1-b35b-8f4345b4c983");
 

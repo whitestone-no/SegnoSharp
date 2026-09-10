@@ -218,18 +218,17 @@ namespace Whitestone.SegnoSharp
                     continue;
                 }
 
-                // This call replaces `mcpBuilder.WithToolsFromAssembly()`
-                mcpBuilder.WithPrefixedToolsFromAssembly(
-                    module.GetType().Assembly,
-                    toolName => $"{provider.McpPrefix}__{toolName}",
-                    onLoadError: (ex, asm) => Log.Warning(ex, "Failed to load a type from {Assembly}", asm));
+                mcpBuilder.WithPrefixedToolsFromAssembly(moduleAssembly, Rename, OnLoadError);
+                mcpBuilder.WithPrefixedPromptsFromAssembly(moduleAssembly, Rename, OnLoadError);
+                mcpBuilder.WithScopedResourcesFromAssembly(moduleAssembly, provider.ResourceUriScheme, OnLoadError);
+                continue;
 
-                mcpBuilder
-                    .WithResourcesFromAssembly(moduleAssembly)
-                    .WithPromptsFromAssembly(moduleAssembly);
+                string Rename(string derivedName) => $"{provider.McpPrefix}__{derivedName}";
+
+                static void OnLoadError(Exception ex, string asm) => Log.Warning(ex, "Failed to load a type from {Assembly}", asm);
             }
 
-            builder.Services.AddSingleton<IValidateOptions<McpServerOptions>, UniqueMcpToolNameValidator>();
+            builder.Services.AddSingleton<IValidateOptions<McpServerOptions>, UniqueMcpNameValidator>();
 
             // Core module must be added last as its application parts have already been added.
             builder.Services.AddSingleton<IModule, CoreModule>();
