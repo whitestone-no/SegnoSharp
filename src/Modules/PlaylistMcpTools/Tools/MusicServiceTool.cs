@@ -59,23 +59,32 @@ public class MusicServiceTool(
         return await musicSearchService.SearchPeopleAsync(query, role, limit, allowOnlyPublicAlbums);
     }
 
-    [McpServerTool(ReadOnly = true), Description("Resolve an album title to candidates with album-level credits and a match score. Prefer the plainest exact title match: sequels ('... II') and qualified editions ('... (Complete Rejected Score)', deluxe, live) should only be chosen when the user asked for them.")]
+    [McpServerTool(ReadOnly = true), Description("Resolve albums by title, by credited person, or both. Returns album-level credits, a match score, and totalMatches: the number of albums that matched before the limit was applied. When totalMatches is larger than the list you got back, you are holding a slice, not the whole set, so raise limit or say so. If truncated is true, a title search matched more albums than the ranking looks at, so the results came from a subset: search a more specific title or add a personId rather than trusting the order. At least one of query and personId is required. Use personId on its own to answer 'what else do we have by X'; do not group the results of a track search to answer that, because a track search stops at its own limit and will under-report. Prefer the plainest exact title match: sequels ('... II') and qualified editions ('... (Complete Rejected Score)', deluxe, live) should only be chosen when the user asked for them.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
-    public async Task<IReadOnlyList<AlbumResult>> SearchAlbums(
+    public async Task<AlbumSearchResult> SearchAlbums(
         ClaimsPrincipal user,
-        [Description("Free-text album title to search for.")] string query,
-        [Description("Maximum number of candidate albums to return (1-25).")] int limit = 5)
+        [Description("Optional free-text album title to search for. Leave empty to match on personId only.")] string query = null,
+        [Description("Optional person/group ID to filter by, as returned by playlist_tools__search_people. Matches albums credited to them at album level, and albums carrying a track credited to them. Use 0 or omit to not filter by person.")] int personId = 0,
+        [Description("Optional role filter. Valid values come from playlist_tools__get_roles. Call playlist_tools__get_roles if unsure. Do not invent other values. Only meaningful together with personId.")] string role = null,
+        [Description("Maximum number of albums to return (1-100). Compare it against totalMatches before calling a list complete. A person search is exact at any size; a title search ranks a capped candidate pool, so values much above 100 gain nothing there.")] int limit = 5)
     {
-        if (string.IsNullOrWhiteSpace(query))
+        int? personIdFilter = personId > 0 ? personId : null;
+
+        if (!string.IsNullOrWhiteSpace(role) && personIdFilter is null)
         {
-            throw new McpException("The query parameter is required.");
+            throw new McpException("The 'role' filter only works together with 'personId'. To filter by a named artist, first call playlist_tools__search_people to resolve them to a personId, then pass that personId here.");
         }
 
-        limit = Math.Clamp(limit, 1, 25);
+        if (string.IsNullOrWhiteSpace(query) && personIdFilter is null)
+        {
+            throw new McpException("Supply at least one of 'query' or 'personId'. An unfiltered album search returns arbitrary albums.");
+        }
+
+        limit = Math.Clamp(limit, 1, 100);
 
         bool allowOnlyPublicAlbums = !await permissionAuthorizer.HasAnyAsync(user, CorePermissions.AlbumsViewAll);
 
-        return await musicSearchService.SearchAlbumsAsync(query, limit, allowOnlyPublicAlbums);
+        return await musicSearchService.SearchAlbumsAsync(query, personIdFilter, role, limit, allowOnlyPublicAlbums);
     }
 
     [McpServerTool(ReadOnly = true), Description("Search playable tracks by any combination of title, person/group, role and album. Each result carries its album, year, length and full credits, so no extra lookup is needed to describe it. At least one of titleQuery, personId or albumId is required. Title matching ranks a capped set of candidates, so a title made of common words can crowd out the right track: resolve the person with playlist_tools__search_people or the album with playlist_tools__search_albums first and pass personId or albumId whenever you can, and narrow further if the result comes back with truncated true. The outcome field: Matched means at least one candidate reached minScore and is returned; WeakMatch means candidates exist but none reached minScore, so nothing is returned and topScore plus hint say how close the best one came; NoMatch means nothing exists in this scope. Read hint for the next step.")]
@@ -131,7 +140,7 @@ public class MusicServiceTool(
         return tracklist;
     }
 
-    [McpServerTool(ReadOnly = true), Description("Pick one or more random tracks credited to a person/group, for open-ended requests like 'play something by X'. Honours the stream's no-repeat rules, so recently played tracks and albums are excluded: it can return fewer tracks than requested, or none at all when everything by that person has played recently. The poolSize field is how many eligible tracks it chose from. Picks are always playable, and the score on a pick is not a match quality — ignore it.")]
+    [McpServerTool(ReadOnly = true), Description("Pick one or more random tracks credited to a person/group, for open-ended requests like 'play something by X'. Honours the stream's no-repeat rules, so recently played tracks and albums are excluded: it can return fewer tracks than requested, or none at all when everything by that person has played recently. poolSize is how many eligible tracks it chose from. Picks are always playable, and the score on a pick is not a match quality — ignore it.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
     public async Task<TrackPickResult> PickTracks(
         ClaimsPrincipal user,
@@ -166,7 +175,7 @@ public class MusicServiceTool(
 
     // Mutating tool: appends to shared queue state. Hints are set explicitly so clients can gate/approve it.
     // Destructive defaults to true; appending twice adds twice, so it is not idempotent.
-    [McpServerTool(Destructive = true, Idempotent = false), Description("Append tracks to the global stream queue that every listener hears, or insert at position, shifting the rest back. Returns the IDs that landed, the resulting queueLength, and a skipped list for IDs that could not be queued — these do not fail the call, so always check skipped and tell the user what did not make it. The queue cannot be listed, reordered or emptied through these tools.")]
+    [McpServerTool(Destructive = true, Idempotent = false), Description("Append tracks to the global stream queue that every listener hears, or insert at Position, shifting the rest back. Returns the IDs that landed, the resulting queueLength, and a skipped list for IDs that could not be queued — these do not fail the call, so always check skipped and tell the user what did not make it. The queue cannot be listed, reordered or emptied through these tools.")]
     [RequirePermission(CorePermissions.PlaylistEdit)]
     public async Task<QueueAddResult> AddToQueue(
         ClaimsPrincipal user,

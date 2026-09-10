@@ -12,6 +12,7 @@ using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models.Enums;
 using Whitestone.SegnoSharp.Shared.Events;
 using Whitestone.SegnoSharp.Shared.Helpers;
+using Whitestone.SegnoSharp.Shared.Helpers.Security;
 
 // ReSharper disable ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
 
@@ -23,7 +24,7 @@ public interface IMusicSearchService
 {
     Task<IReadOnlyList<RoleResult>> GetRolesAsync();
     Task<IReadOnlyList<PersonResult>> SearchPeopleAsync(string query, string role = null, int limit = 5, bool allowOnlyPublicAlbums = true);
-    Task<IReadOnlyList<AlbumResult>> SearchAlbumsAsync(string query, int limit = 5, bool allowOnlyPublicAlbums = true);
+    Task<AlbumSearchResult> SearchAlbumsAsync(string query = null, int? personId = null, string role = null, int limit = 5, bool allowOnlyPublicAlbums = true);
     Task<TrackSearchResult> SearchTracksAsync(TrackSearchQuery query, double minScore = 0.4, bool allowOnlyPublicAlbums = true);
     Task<AlbumTracklist> GetAlbumTracklistAsync(int albumId, bool allowOnlyPublicAlbums = true);
     Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, int? position = null, bool playNow = false, bool allowOnlyPublicAlbums = true);
@@ -64,10 +65,17 @@ public class MusicSearchService(
     ICambion cambion) : IMusicSearchService
 {
     // Stage-one candidate ceilings, so a vague query ("love") can't drag the whole
-    // library into memory. Hitting the cap is reported as Truncated rather than silently
-    // discarding rows the scorer never saw.
+    // library into memory. Hitting the track cap is reported as Truncated rather than
+    // silently discarding rows the scorer never saw.
+    //
+    // The track cap is low because a track candidate is fetched with its credits, which is
+    // an expensive projection; tiered LIKE predicates keep the 300 rows relevant. Person and
+    // album scans project only the columns needed to rank (id, name/title), so they can
+    // afford to scan the whole table and fetch the expensive parts afterwards for the
+    // winners alone. These two are ceilings against pathological data, not tuning knobs.
     private const int TrackCandidateCap = 300;
-    private const int NameCandidateCap = 200;
+    private const int PersonCandidateCap = 5000;
+    private const int AlbumTitleScanCap = 5000;
 
     // Below this score a "best available" candidate is noise rather than a near miss, so the
     // hint stops suggesting a lower threshold and points at the album tracklist instead.
@@ -128,7 +136,7 @@ public class MusicSearchService(
             .Where(predicate)
             .OrderBy(p => p.Id)
             .Select(p => new { p.Id, p.FirstName, p.LastName, p.Version })
-            .Take(NameCandidateCap)
+            .Take(PersonCandidateCap)
             .ToListAsync();
 
         // Rank in memory against the full name. Without a role filter the top `limit` is all
@@ -258,65 +266,146 @@ public class MusicSearchService(
         return results;
     }
 
-    /// <summary>Resolve an album title to candidates, with album-level credits for disambiguation.</summary>
-    public async Task<IReadOnlyList<AlbumResult>> SearchAlbumsAsync(string query, int limit = 5, bool allowOnlyPublicAlbums = true)
+    /// <summary>
+    /// Resolve albums by title, by credited person, or both, with album-level credits for
+    /// disambiguation. At least one of <paramref name="query"/> and <paramref name="personId"/>
+    /// is required.
+    ///
+    /// Person scope unions album-level credits with credits on the album's tracks, matching how
+    /// track search scopes by person, so a compilation carrying one track by them still counts.
+    /// With no title to rank against, results come back in release order and every hit scores 1.
+    ///
+    /// TotalMatches reports how many albums matched before the limit, so a caller can tell a
+    /// complete list from the first page of a longer one.
+    /// </summary>
+    public async Task<AlbumSearchResult> SearchAlbumsAsync(
+        string query = null, int? personId = null, string role = null, int limit = 5, bool allowOnlyPublicAlbums = true)
     {
-        List<string> tokens = TextSearch.Tokenize(query);
-        if (tokens.Count == 0)
+        List<string> tokens = string.IsNullOrWhiteSpace(query)
+            ? []
+            : TextSearch.Tokenize(query);
+
+        bool hasTitle = tokens.Count > 0;
+
+        if (!hasTitle && !personId.HasValue)
         {
-            return [];
+            throw new ArgumentException(
+                "At least one of query and personId must be supplied. An unfiltered album search returns arbitrary albums.",
+                nameof(query));
         }
 
-        Expression<Func<Album, bool>> predicate = PredicateBuilder.False<Album>();
-        foreach (string token in tokens)
-        {
-            string pattern = "%" + token + "%";
-            predicate = predicate.Or(a => EF.Functions.Like(a.Title.ToLower(), pattern));
-        }
-
-        // Projects a nested collection (Credits -> Persons); AsSplitQuery keeps EF from
-        // multiplying rows across the two collection levels. OrderBy makes the Take stable.
-        IQueryable<Album> albumQuery = dbContext.Albums
-            .Where(predicate);
+        IQueryable<Album> albumQuery = dbContext.Albums;
 
         if (allowOnlyPublicAlbums)
         {
             albumQuery = albumQuery.Where(a => a.IsPublic);
         }
 
-        var raw = await albumQuery
-            .OrderBy(a => a.Id)
-            .Select(a => new
-            {
-                a.Id,
-                a.Title,
-                a.Published,
-                Credits = a.AlbumPersonGroupPersonRelations.Select(r => new CreditRow
-                {
-                    Role = r.PersonGroup.Name,
-                    Persons = r.Persons.Select(p => new PersonRow
-                    {
-                        First = p.FirstName,
-                        Last = p.LastName,
-                        Version = p.Version
-                    }).ToList()
-                }).ToList()
-            })
-            .Take(NameCandidateCap)
-            .AsSplitQuery()
-            .ToListAsync();
+        if (personId.HasValue)
+        {
+            // Gather the credited album IDs from the relation side, the same way person search
+            // does. Reaching the tracks from the Album side would nest four levels of EXISTS
+            // (discs -> tracks -> relations -> persons); two flat queries stay readable and
+            // translate everywhere.
+            int pid = personId.Value;
 
-        return raw
-            .Select(a => new
+            List<int> albumCredited = await dbContext.AlbumPersonGroupsRelations
+                .Where(r => (role == null || r.PersonGroup.Name == role) && r.Persons.Any(p => p.Id == pid))
+                .Select(r => r.Parent.Id)
+                .Distinct()
+                .ToListAsync();
+
+            List<int> trackCredited = await dbContext.TrackPersonGroupsRelations
+                .Where(r => (role == null || r.PersonGroup.Name == role) && r.Persons.Any(p => p.Id == pid))
+                .Select(r => r.Parent.Disc.AlbumId)
+                .Distinct()
+                .ToListAsync();
+
+            List<int> creditedAlbumIds = albumCredited.Union(trackCredited).ToList();
+
+            if (creditedAlbumIds.Count == 0)
             {
-                a.Id,
-                a.Title,
-                a.Published,
-                a.Credits,
-                TextSearch.ScoreTitle(query, a.Title).Score
-            })
-            .OrderByDescending(x => x.Score)
-            .Take(limit)
+                return new AlbumSearchResult([], 0, false);
+            }
+
+            albumQuery = albumQuery.Where(a => creditedAlbumIds.Contains(a.Id));
+        }
+
+        if (hasTitle)
+        {
+            Expression<Func<Album, bool>> predicate = PredicateBuilder.False<Album>();
+            foreach (string token in tokens)
+            {
+                string pattern = "%" + token + "%";
+                predicate = predicate.Or(a => EF.Functions.Like(a.Title.ToLower(), pattern));
+            }
+
+            albumQuery = albumQuery.Where(predicate);
+        }
+
+        // Counted before any limit, so the caller can see when it is holding a slice.
+        int totalMatches = await albumQuery.CountAsync();
+
+        if (totalMatches == 0)
+        {
+            return new AlbumSearchResult([], 0, false);
+        }
+
+        List<AlbumRow> raw;
+        Dictionary<int, double> scores = null;
+        bool truncated = false;
+
+        if (hasTitle)
+        {
+            // Phase one: rank on id and title alone. Fetching credits here would mean pulling
+            // a nested collection for every album that shares a word with the query, purely
+            // to throw most of them away, which is what forced the old cap to be small enough
+            // to cut off real matches.
+            var titles = await albumQuery
+                .OrderBy(a => a.Id)
+                .Select(a => new { a.Id, a.Title })
+                .Take(AlbumTitleScanCap + 1)
+                .ToListAsync();
+
+            // One row past the ceiling, so hitting it is detectable rather than silent.
+            truncated = titles.Count > AlbumTitleScanCap;
+            if (truncated)
+            {
+                titles = titles.Take(AlbumTitleScanCap).ToList();
+            }
+
+            scores = titles
+                .Select(a => new { a.Id, TextSearch.ScoreTitle(query, a.Title).Score })
+                .OrderByDescending(x => x.Score)
+                .Take(limit)
+                .ToDictionary(x => x.Id, x => x.Score);
+
+            List<int> winners = scores.Keys.ToList();
+
+            // Phase two: the expensive projection, for the handful being returned.
+            raw = await dbContext.Albums
+                .Where(a => winners.Contains(a.Id))
+                .Select(AlbumRowSelector)
+                .AsSplitQuery()
+                .ToListAsync();
+        }
+        else
+        {
+            // Nothing to rank against, so order and slice in the database and fetch the
+            // credits for exactly the page being returned.
+            raw = await albumQuery
+                .OrderBy(a => a.Published).ThenBy(a => a.Title)
+                .Select(AlbumRowSelector)
+                .Take(limit)
+                .AsSplitQuery()
+                .ToListAsync();
+        }
+
+        IEnumerable<AlbumRow> ordered = hasTitle
+            ? raw.OrderByDescending(a => scores[a.Id])
+            : raw;
+
+        List<AlbumResult> albums = ordered
             .Select(a => new AlbumResult(
                 a.Id,
                 a.Title,
@@ -325,8 +414,11 @@ public class MusicSearchService(
                     c.Role,
                     c.Persons.Select(FormatName).ToList(),
                     CreditSource.Album)).ToList(),
-                Math.Round(a.Score, 3)))
+                // Nothing to rank against without a title, so every credited album is a full match.
+                hasTitle ? Math.Round(scores[a.Id], 3) : 1.0))
             .ToList();
+
+        return new AlbumSearchResult(albums, totalMatches, truncated);
     }
 
     // ---------- Track search (the crux) ----------
@@ -449,9 +541,10 @@ public class MusicSearchService(
             outcome,
             candidates,
             topScore.HasValue ? Math.Round(topScore.Value, 3) : null,
-            BuildSearchHint(outcome, hasTitle, topScore, minScore, truncated),
+            BuildSearchHint(outcome, hasTitle, topScore, minScore, truncated, scored.Count, query.Limit),
             query.AlbumId,
-            truncated);
+            truncated,
+            scored.Count);
     }
 
     /// <summary>
@@ -507,7 +600,7 @@ public class MusicSearchService(
     /// culture so a server running under a comma-decimal locale doesn't hand the model a
     /// threshold it can't pass back.
     /// </summary>
-    private static string BuildSearchHint(SearchOutcome outcome, bool hasTitle, double? topScore, double minScore, bool truncated)
+    private static string BuildSearchHint(SearchOutcome outcome, bool hasTitle, double? topScore, double minScore, bool truncated, int totalMatches, int limit)
     {
         var parts = new List<string>();
 
@@ -546,6 +639,15 @@ public class MusicSearchService(
                 }
 
                 break;
+        }
+
+        if (totalMatches > limit)
+        {
+            parts.Add(string.Format(
+                CultureInfo.InvariantCulture,
+                "Showing the best {0} of {1} matches. Raise limit to see more, and do not describe these as the complete set.",
+                limit,
+                totalMatches));
         }
 
         if (truncated)
@@ -986,6 +1088,25 @@ public class MusicSearchService(
         int index = nextRandom(candidates.Count);
         return candidates.OrderBy(t => t.TrackId).Skip(index).First();
     }
+
+    // Shared album projection, used by both branches of album search so the returned shape
+    // (and its split-query behaviour) stays identical whether or not a title was given.
+    private static readonly Expression<Func<Album, AlbumRow>> AlbumRowSelector = a => new AlbumRow
+    {
+        Id = a.Id,
+        Title = a.Title,
+        Published = a.Published,
+        Credits = a.AlbumPersonGroupPersonRelations.Select(r => new CreditRow
+        {
+            Role = r.PersonGroup.Name,
+            Persons = r.Persons.Select(p => new PersonRow
+            {
+                First = p.FirstName,
+                Last = p.LastName,
+                Version = p.Version
+            }).ToList()
+        }).ToList()
+    };
 
     // Shared track projection, used by both SearchTracksAsync and PickTracksAsync's hydrate
     // step so the returned shape (and its APPLY-free / split-query behaviour) stays identical.

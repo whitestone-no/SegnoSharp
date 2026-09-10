@@ -14,6 +14,10 @@ namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 /// <para><see cref="Truncated"/> means the database-side candidate gather hit its ceiling
 /// before ranking, so a better match may exist outside the rows that were scored. It is a
 /// signal to narrow the search by person or album, not to trust the result as complete.</para>
+///
+/// <para><see cref="TotalMatches"/> is how many candidates cleared minScore before the limit
+/// was applied. When it exceeds the number of <see cref="Candidates"/> returned, the list is
+/// a slice of a longer one and must not be described as everything there is.</para>
 /// </summary>
 public record TrackSearchResult(
     SearchOutcome Outcome,
@@ -21,4 +25,5 @@ public record TrackSearchResult(
     double? TopScore,
     string Hint,
     int? ScopeAlbumId,
-    bool Truncated);
+    bool Truncated,
+    int TotalMatches);
