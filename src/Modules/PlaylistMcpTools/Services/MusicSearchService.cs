@@ -27,6 +27,8 @@ public interface IMusicSearchService
     Task<AlbumSearchResult> SearchAlbumsAsync(string query = null, int? personId = null, string role = null, int limit = 5, bool allowOnlyPublicAlbums = true);
     Task<TrackSearchResult> SearchTracksAsync(TrackSearchQuery query, double minScore = 0.4, bool allowOnlyPublicAlbums = true);
     Task<AlbumTracklist> GetAlbumTracklistAsync(int albumId, bool allowOnlyPublicAlbums = true);
+    Task<QueueView> GetQueueAsync(int limit, DateTime now, bool allowOnlyPublicAlbums = true);
+    Task<HistoryView> GetHistoryAsync(int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true);
     Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, int? position = null, bool playNow = false, bool allowOnlyPublicAlbums = true);
     Task<TrackPickResult> PickTracksAsync(int personId, PickRules rules, DateTime now, Func<int, int> nextRandom, string role = null, int count = 1, bool allowOnlyPublicAlbums = true);
 }
@@ -76,6 +78,15 @@ public class MusicSearchService(
     private const int TrackCandidateCap = 300;
     private const int PersonCandidateCap = 5000;
     private const int AlbumTitleScanCap = 5000;
+
+    // Spelled-out explanations for entries the caller may not see. A boolean is easy for a
+    // consumer to overlook and quietly omit the entry; a sentence is not.
+    private const string HiddenNowPlayingNote =
+        "A track on an album you do not have access to. It is playing now, but its details are withheld.";
+    private const string HiddenQueueNote =
+        "A track on an album you do not have access to. It will play in this position, but its details are withheld.";
+    private const string HiddenHistoryNote =
+        "A track on an album you do not have access to. It played at this time, but its details are withheld.";
 
     // Below this score a "best available" candidate is noise rather than a near miss, so the
     // hint stops suggesting a lower threshold and points at the album tracklist instead.
@@ -907,6 +918,390 @@ public class MusicSearchService(
         return new TrackPickResult(picks, poolSize);
     }
 
+    // ---------- Stream state (read-only) ----------
+
+    /// <summary>
+    /// What is playing and what is queued behind it.
+    ///
+    /// The queue is always kept populated, partly by listeners and partly by the auto-playlist,
+    /// and nothing records which is which — so this reports what will play, never who asked
+    /// for it.
+    ///
+    /// <paramref name="now"/> comes from the caller's clock rather than DateTime.Now so the
+    /// comparison against StreamHistory.Played stays testable. Both are server-local wall
+    /// clock with an unspecified Kind; if Played ever moves to UTC, convert at the tool
+    /// boundary rather than here.
+    /// </summary>
+    public async Task<QueueView> GetQueueAsync(int limit, DateTime now, bool allowOnlyPublicAlbums = true)
+    {
+        limit = Math.Clamp(limit, 1, 100);
+
+        NowPlaying nowPlaying = await GetNowPlayingAsync(now, allowOnlyPublicAlbums);
+
+        int queueLength = await dbContext.StreamQueue.CountAsync();
+
+        var queueRows = await dbContext.StreamQueue
+            .AsNoTracking()
+            .OrderBy(q => q.SortOrder)
+            .Select(q => new
+            {
+                q.TrackStreamInfo.TrackId,
+                Length = (int)q.TrackStreamInfo.Track.Length
+            })
+            .Take(limit)
+            .ToListAsync();
+
+        Dictionary<int, TrackRow> tracks = await LoadTrackRowsAsync(
+            queueRows.Select(q => q.TrackId).Distinct().ToList(), allowOnlyPublicAlbums);
+
+        // Estimated start times run from the end of the current track, then accumulate. Every
+        // entry ahead of the ones being returned is inside this page (the page starts at the
+        // front of the queue), so the running total is complete.
+        DateTime cursor = nowPlaying == null ? now : now.AddSeconds(nowPlaying.RemainingSeconds);
+
+        var upcoming = new List<QueueEntry>(queueRows.Count);
+        for (int i = 0; i < queueRows.Count; i++)
+        {
+            var row = queueRows[i];
+            DateTime start = cursor;
+            cursor = cursor.AddSeconds(row.Length);
+
+            // An entry the caller may not see keeps its place and its timing; only its
+            // identity is withheld. Skipping it would leave a hole in the positions and make
+            // the queue look shorter than it is.
+            bool hidden = !tracks.TryGetValue(row.TrackId, out TrackRow track);
+
+            upcoming.Add(hidden
+                ? new QueueEntry(i + 1, null, null, null, [], row.Length, start, true, HiddenQueueNote)
+                : new QueueEntry(
+                    i + 1,
+                    track.Id,
+                    track.Title,
+                    track.AlbumTitle,
+                    BuildCredits(track),
+                    row.Length,
+                    start,
+                    false,
+                    null));
+        }
+
+        return new QueueView(now, nowPlaying, upcoming, queueLength);
+    }
+
+    /// <summary>
+    /// What has already played, newest first.
+    ///
+    /// Three shapes, in order of precedence: <paramref name="at"/> returns the track that was
+    /// playing around that moment with context either side; <paramref name="day"/> returns the
+    /// end of that day's playback; neither returns the most recent tracks.
+    ///
+    /// <paramref name="at"/> is treated as the start of a window <paramref name="atWindowSeconds"/>
+    /// long rather than an exact instant, because a clock time is only accurate to the minute
+    /// and a track boundary can fall anywhere inside it.
+    /// </summary>
+    public async Task<HistoryView> GetHistoryAsync(
+        int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true)
+    {
+        limit = Math.Clamp(limit, 1, 100);
+        atWindowSeconds = Math.Clamp(atWindowSeconds, 1, 3600);
+
+        NowPlaying nowPlaying = await GetNowPlayingAsync(now, allowOnlyPublicAlbums);
+
+        IQueryable<StreamHistory> scope = dbContext.StreamHistory.AsNoTracking();
+
+        List<HistoryRow> rows;
+        HistoryRow anchor = null;
+        DateTime? windowEnd = null;
+        string hint = null;
+
+        if (at.HasValue)
+        {
+            DateTime point = at.Value;
+
+            // Split the window around the anchor: the track spanning the requested moment,
+            // what led up to it, and what followed.
+            int before = Math.Max(1, limit / 2);
+            int after = Math.Max(0, limit - before - 1);
+
+            List<HistoryRow> older = await ProjectHistoryAsync(
+                scope.Where(h => h.Played <= point).OrderByDescending(h => h.Played).Take(before + 1));
+
+            List<HistoryRow> newer = await ProjectHistoryAsync(
+                scope.Where(h => h.Played > point).OrderBy(h => h.Played).Take(after + 1));
+
+            rows = newer.Concat(older).OrderByDescending(r => r.Played).ToList();
+
+            windowEnd = point.AddSeconds(atWindowSeconds);
+            anchor = ChooseAnchor(rows, point, atWindowSeconds, out bool overlapped);
+
+            if (rows.Count == 0)
+            {
+                hint = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "No playback recorded around {0:yyyy-MM-dd HH:mm}. The stream may not have been running then.",
+                    point);
+            }
+            else if (!overlapped)
+            {
+                hint = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Nothing was playing at {0:yyyy-MM-dd HH:mm}; the nearest play is the one flagged, and the rest are context around it.",
+                    point);
+            }
+        }
+        else if (day.HasValue)
+        {
+            DateTime dayStart = day.Value.ToDateTime(TimeOnly.MinValue);
+            DateTime dayEnd = dayStart.AddDays(1);
+
+            rows = await ProjectHistoryAsync(
+                scope.Where(h => h.Played >= dayStart && h.Played < dayEnd)
+                    .OrderByDescending(h => h.Played)
+                    .Take(limit + 1));
+
+            if (rows.Count == 0)
+            {
+                hint = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "No playback recorded on {0:yyyy-MM-dd}.",
+                    dayStart);
+            }
+        }
+        else
+        {
+            rows = await ProjectHistoryAsync(scope.OrderByDescending(h => h.Played).Take(limit + 1));
+
+            if (rows.Count == 0)
+            {
+                hint = "No playback has been recorded yet.";
+            }
+        }
+
+        Dictionary<int, TrackRow> tracks = await LoadTrackRowsAsync(
+            rows.Select(r => r.TrackId).Distinct().ToList(), allowOnlyPublicAlbums);
+
+        var entries = new List<HistoryEntry>(rows.Count);
+        foreach (HistoryRow row in rows)
+        {
+            DateTime ended = row.Played.AddSeconds(row.Length);
+            bool stillPlaying = ended > now;
+            bool bestMatch = anchor != null && ReferenceEquals(row, anchor);
+
+            // Broader than the best match: anything sounding during the requested window, so
+            // the caller can say "B was on, though A was still finishing" without comparing
+            // timestamps itself.
+            bool overlaps = windowEnd.HasValue && row.Played < windowEnd.Value && ended > at.Value;
+
+            // The track still playing is reported by nowPlaying. Listing it here as well would
+            // describe it as already played and give it an end time in the future. It belongs
+            // here only when it answers a point-in-time question, either as the best match or
+            // as something else that was sounding during the requested window.
+            if (stillPlaying && !bestMatch && !overlaps)
+            {
+                continue;
+            }
+
+            // A play the caller may not see keeps its times, so the timeline reads as
+            // continuous. Dropping it would leave an unexplained gap that looks like silence.
+            bool hidden = !tracks.TryGetValue(row.TrackId, out TrackRow track);
+
+            entries.Add(hidden
+                ? new HistoryEntry(row.Played, ended, null, null, null, [], row.Length, bestMatch, overlaps, stillPlaying, true, HiddenHistoryNote)
+                : new HistoryEntry(
+                    row.Played,
+                    ended,
+                    track.Id,
+                    track.Title,
+                    track.AlbumTitle,
+                    BuildCredits(track),
+                    row.Length,
+                    bestMatch,
+                    overlaps,
+                    stillPlaying,
+                    false,
+                    null));
+        }
+
+        if (entries.Count > limit)
+        {
+            entries = entries.Take(limit).ToList();
+        }
+
+        return new HistoryView(now, nowPlaying, entries, at, hint);
+    }
+
+    /// <summary>
+    /// The newest StreamHistory row, if it has not finished yet. A row is written when a track
+    /// starts, so anything whose start plus length is in the past means the stream is idle.
+    /// </summary>
+    private async Task<NowPlaying> GetNowPlayingAsync(DateTime now, bool allowOnlyPublicAlbums)
+    {
+        var current = await dbContext.StreamHistory
+            .AsNoTracking()
+            .OrderByDescending(h => h.Played)
+            .Select(h => new
+            {
+                h.Played,
+                h.TrackStreamInfo.TrackId,
+                Length = (int)h.TrackStreamInfo.Track.Length
+            })
+            .FirstOrDefaultAsync();
+
+        if (current == null)
+        {
+            return null;
+        }
+
+        DateTime ends = current.Played.AddSeconds(current.Length);
+        if (ends <= now)
+        {
+            return null; // nothing playing
+        }
+
+        Dictionary<int, TrackRow> track = await LoadTrackRowsAsync([current.TrackId], allowOnlyPublicAlbums);
+
+        int elapsed = (int)Math.Max(0, (now - current.Played).TotalSeconds);
+        int remaining = Math.Max(0, current.Length - elapsed);
+
+        // Something is playing either way. Returning null when the caller may not see it
+        // would report the stream as idle, which is a different and wrong answer.
+        if (!track.TryGetValue(current.TrackId, out TrackRow row))
+        {
+            return new NowPlaying(null, null, null, [], current.Played, current.Length, elapsed, remaining, true, HiddenNowPlayingNote);
+        }
+
+        return new NowPlaying(
+            row.Id,
+            row.Title,
+            row.AlbumTitle,
+            BuildCredits(row),
+            current.Played,
+            current.Length,
+            elapsed,
+            remaining,
+            false,
+            null);
+    }
+
+    /// <summary>
+    /// Pick the one play that best answers "what was on at T".
+    ///
+    /// <para>A clock time has minute granularity, so T is treated as the start of a window
+    /// rather than a knife-edge instant: a track beginning a second after T occupies almost
+    /// the whole minute the listener meant, while the one it replaced occupies almost none of
+    /// it. The entry covering the most of the window wins.</para>
+    ///
+    /// <para>When nothing overlaps at all — a real gap in playback — the nearest play is
+    /// chosen instead, so the caller always has a single entry to talk about. Whether it
+    /// overlapped is reported separately, because "this was on" and "nothing was on, but this
+    /// was closest" are different answers.</para>
+    /// </summary>
+    private static HistoryRow ChooseAnchor(List<HistoryRow> rows, DateTime point, int windowSeconds, out bool overlapped)
+    {
+        overlapped = false;
+
+        if (rows.Count == 0)
+        {
+            return null;
+        }
+
+        DateTime windowEnd = point.AddSeconds(windowSeconds);
+
+        HistoryRow best = null;
+        double bestOverlap = 0;
+
+        foreach (HistoryRow row in rows)
+        {
+            DateTime ended = row.Played.AddSeconds(row.Length);
+            double overlap = (Min(ended, windowEnd) - Max(row.Played, point)).TotalSeconds;
+
+            if (overlap > bestOverlap)
+            {
+                bestOverlap = overlap;
+                best = row;
+            }
+        }
+
+        if (best != null)
+        {
+            overlapped = true;
+            return best;
+        }
+
+        // Nothing was playing then. Fall back to whichever play sits closest to the window,
+        // measured from whichever edge of the track is nearer.
+        double bestDistance = double.MaxValue;
+
+        foreach (HistoryRow row in rows)
+        {
+            DateTime ended = row.Played.AddSeconds(row.Length);
+            double distance = row.Played > windowEnd
+                ? (row.Played - windowEnd).TotalSeconds
+                : (point - ended).TotalSeconds;
+
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                best = row;
+            }
+        }
+
+        return best;
+    }
+
+    private static DateTime Min(DateTime a, DateTime b) => a < b ? a : b;
+
+    private static DateTime Max(DateTime a, DateTime b) => a > b ? a : b;
+
+    private static Task<List<HistoryRow>> ProjectHistoryAsync(IQueryable<StreamHistory> query) =>
+        query
+            .Select(h => new HistoryRow
+            {
+                Played = h.Played,
+                TrackId = h.TrackStreamInfo.TrackId,
+                Length = (int)h.TrackStreamInfo.Track.Length
+            })
+            .ToListAsync();
+
+    private async Task<Dictionary<int, TrackRow>> LoadTrackRowsAsync(List<int> trackIds, bool allowOnlyPublicAlbums)
+    {
+        if (trackIds.Count == 0)
+        {
+            return [];
+        }
+
+        IQueryable<Track> query = dbContext.Tracks.AsNoTracking().Where(t => trackIds.Contains(t.Id));
+
+        if (allowOnlyPublicAlbums)
+        {
+            query = query.Where(t => t.Disc.Album.IsPublic);
+        }
+
+        List<TrackRow> rows = await query
+            .Select(TrackRowSelector)
+            .AsSplitQuery()
+            .ToListAsync();
+
+        return rows.ToDictionary(r => r.Id);
+    }
+
+    private static List<CreditDto> BuildCredits(TrackRow r)
+    {
+        var credits = new List<CreditDto>();
+
+        foreach (CreditRow c in r.TrackCredits)
+        {
+            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditSource.Track));
+        }
+
+        foreach (CreditRow c in r.AlbumCredits)
+        {
+            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditSource.Album));
+        }
+
+        return credits;
+    }
+
     // ---------- Write ----------
 
     /// <summary>
@@ -1036,21 +1431,9 @@ public class MusicSearchService(
 
     private static TrackCandidate ToCandidate(TrackRow r, double score, string matchedOn)
     {
-        var credits = new List<CreditDto>();
-
-        foreach (CreditRow c in r.TrackCredits)
-        {
-            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditSource.Track));
-        }
-
-        foreach (CreditRow c in r.AlbumCredits)
-        {
-            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditSource.Album));
-        }
-
         return new TrackCandidate(
             r.Id, r.Title, r.TrackNumber, r.DiscNumber, r.AlbumId, r.AlbumTitle,
-            r.Year, r.LengthSeconds, credits, Math.Round(score, 3), matchedOn);
+            r.Year, r.LengthSeconds, BuildCredits(r), Math.Round(score, 3), matchedOn);
     }
 
     private static string FormatName(PersonRow p) => FormatName(p.First, p.Last, p.Version);

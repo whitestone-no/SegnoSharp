@@ -4,6 +4,7 @@ using ModelContextProtocol.Server;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
@@ -31,6 +32,11 @@ public class MusicServiceTool(
     private const int MinutesBetweenTrackRepeat = 15480; // ~10.75 days
     private const int MinutesBetweenAlbumRepeat = 60;
     private const bool UseWeightedPicks = true;
+
+    // A requested clock time is accurate to the minute, so it is matched as a minute-long
+    // window and the play covering most of it wins, rather than whatever happened to be on
+    // at second zero.
+    private const int HistoryWindowSeconds = 60;
 
     [McpServerTool(ReadOnly = true), Description("List every credit role that can be passed as a 'role' filter, with the scopes (Album and/or Track) it applies to. Call this first if you are unsure which role values are valid, never pass a role string that did not come from here, and do not assume the list is fixed.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
@@ -171,6 +177,70 @@ public class MusicServiceTool(
             role,
             count,
             allowOnlyPublicAlbums);
+    }
+
+    [McpServerTool(ReadOnly = true), Description("What is playing right now and what is queued behind it. Returns serverTime (the clock everything here is relative to, and your only source of the current time), nowPlaying with how many seconds are elapsed and remaining, the next entries with their position and estimated start time, and queueLength for the whole queue. Use this for 'what is this', 'what is next', 'what is coming up'. estimatedStart assumes back-to-back playback: treat it as reliable for the next few entries and as a rough guide further out. Nothing records who or what added an entry, so never say a track was requested by anyone, not even one you queued yourself. An entry with hidden true is a real track on an album you may not see: it keeps its position and timing but its title and artist are withheld. Positions are always contiguous, so a hidden entry is never a gap or an error. Its note field explains this in words: relay that, never guess what the track is, and never leave the entry out when listing what is coming up.")]
+    [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
+    public async Task<QueueView> GetQueue(
+        ClaimsPrincipal user,
+        [Description("How many upcoming entries to return (1-100). Compare against queueLength before calling the list complete.")] int limit = 10)
+    {
+        limit = Math.Clamp(limit, 1, 100);
+
+        bool allowOnlyPublicAlbums = !await permissionAuthorizer.HasAnyAsync(user, CorePermissions.AlbumsViewAll);
+
+        return await musicSearchService.GetQueueAsync(limit, systemClock.Now, allowOnlyPublicAlbums);
+    }
+
+    [McpServerTool(ReadOnly = true), Description("What has already played, newest first, plus what is playing now. Returns serverTime, so you never have to guess the current date or time. With no parameters it returns the most recent tracks. Give minutesAgo for 'what was that ten minutes ago', or time (with date for a day other than today) for 'what was playing around 16:45' — either returns the track that was playing around that moment plus context either side. The time is matched as the minute that follows it. Exactly one entry carries bestMatch true: the play covering most of that minute, or the nearest play if nothing was on, in which case hint says so. overlapsRequestedTime is set on every entry sounding during that minute, which is often two when a track boundary falls inside it. Give date alone for 'what did we play on Monday'. entries are plays that have finished, newest first; the track still playing is reported separately as nowPlaying and is not repeated here, except when a point-in-time lookup lands inside it, where stillPlaying marks it and its endedAt is a projection rather than a fact. An entry with hidden true is a real play on an album you may not see: its times are accurate but its title and artist are withheld, so the timeline has no unexplained gaps. nowPlaying can be hidden too, which means something is playing that you cannot see, not that the stream is idle. Hidden entries carry a note field explaining them in words: relay it rather than omitting the entry. resolvedAt echoes the moment actually used, and hint explains an empty result.")]
+    [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
+    public async Task<HistoryView> GetHistory(
+        ClaimsPrincipal user,
+        [Description("How many past entries to return (1-100). For a point in time, they are split either side of it.")] int limit = 10,
+        [Description("Optional date as yyyy-MM-dd, in the server's local time. Defaults to today when a time is given. Resolve words like 'yesterday' or 'Monday' against serverTime from an earlier call rather than guessing.")] string date = null,
+        [Description("Optional clock time as HH:mm, 24-hour, server-local. Returns whatever was playing at that moment on the given date.")] string time = null,
+        [Description("Optional shortcut for a relative question: how many minutes before now to look. Takes precedence over date and time. Use 0 or omit when not asking about a relative moment.")] int minutesAgo = 0)
+    {
+        limit = Math.Clamp(limit, 1, 100);
+
+        DateTime now = systemClock.Now;
+        DateTime? at = null;
+        DateOnly? day = null;
+
+        DateOnly? parsedDate = null;
+        if (!string.IsNullOrWhiteSpace(date))
+        {
+            if (!DateOnly.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly parsed))
+            {
+                throw new McpException("The 'date' parameter must be formatted as yyyy-MM-dd, for example 2026-09-08.");
+            }
+
+            parsedDate = parsed;
+        }
+
+        if (minutesAgo > 0)
+        {
+            at = now.AddMinutes(-minutesAgo);
+        }
+        else if (!string.IsNullOrWhiteSpace(time))
+        {
+            if (!TimeOnly.TryParseExact(time, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly parsedTime))
+            {
+                throw new McpException("The 'time' parameter must be formatted as HH:mm on a 24-hour clock, for example 16:45.");
+            }
+
+            // A bare time means today unless a date says otherwise.
+            DateOnly onDate = parsedDate ?? DateOnly.FromDateTime(now);
+            at = onDate.ToDateTime(parsedTime);
+        }
+        else if (parsedDate.HasValue)
+        {
+            day = parsedDate;
+        }
+
+        bool allowOnlyPublicAlbums = !await permissionAuthorizer.HasAnyAsync(user, CorePermissions.AlbumsViewAll);
+
+        return await musicSearchService.GetHistoryAsync(limit, now, at, day, HistoryWindowSeconds, allowOnlyPublicAlbums);
     }
 
     // Mutating tool: appends to shared queue state. Hints are set explicitly so clients can gate/approve it.
