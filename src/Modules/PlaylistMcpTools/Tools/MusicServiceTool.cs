@@ -38,6 +38,13 @@ public class MusicServiceTool(
     // at second zero.
     private const int HistoryWindowSeconds = 60;
 
+    // A large add monopolises a shared stream, so past this many tracks the call is refused
+    // until the caller has told the user the size and been told to go ahead. Past the smaller
+    // threshold it succeeds but is told to mention the count, because a rule carried back in
+    // the response is followed far more often than one in a system prompt.
+    private const int ConfirmLargeAddThreshold = 25;
+    private const int AnnounceAddThreshold = 10;
+
     [McpServerTool(ReadOnly = true), Description("List every credit role that can be passed as a 'role' filter, with the scopes (Album and/or Track) it applies to. Call this first if you are unsure which role values are valid, never pass a role string that did not come from here, and do not assume the list is fixed.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
     public async Task<IReadOnlyList<RoleResult>> GetRoles()
@@ -152,7 +159,7 @@ public class MusicServiceTool(
         ClaimsPrincipal user,
         [Description("The person/group ID to pick tracks for, as returned by playlist_tools__search_people. Must be a positive ID.")] int personId,
         [Description("Optional role filter. Valid values come from playlist_tools__get_roles. Call playlist_tools__get_roles if unsure. Do not invent other values.")] string role = null,
-        [Description("Number of tracks to pick (1-50). Fewer may come back if the eligible pool is smaller.")] int count = 1)
+        [Description("Number of tracks to pick (1-50). Leave at 1 unless the user asked for several: 'play something by X' and 'put on some X' both mean one track. Fewer may come back than requested if the eligible pool is smaller.")] int count = 1)
     {
         if (personId <= 0)
         {
@@ -251,7 +258,8 @@ public class MusicServiceTool(
         ClaimsPrincipal user,
         [Description("Array of integer track IDs to enqueue, e.g. [123, 456]. Obtain these from playlist_tools__search_tracks, playlist_tools__pick_tracks or playlist_tools__get_album_tracklist.")] List<int> trackIds,
         [Description("Where to insert in the queue: omit or -1 = end of queue; 0 = start of queue.")] int position = -1,
-        [Description("If true, stop whatever is playing and start the tracks being added. Because it advances the stream to the next queue entry, it forces insertion at the front: use it with position 0 or with position omitted, never with a position further down the queue. It interrupts other listeners.")] bool playNow = false)
+        [Description("If true, stop whatever is playing and start the tracks being added, cutting off the current track for everyone listening. Only set this when the user explicitly asked for immediacy: now, immediately, right now, put it on. 'Play X', 'add X', 'queue X' and 'can we hear X' are all requests to append, not to interrupt. Because it advances the stream to the next queue entry it forces insertion at the front: use it with position 0 or with position omitted, never with a position further down the queue.")] bool playNow = false,
+        [Description("Set true only after the user has been told how many tracks this will add and has answered that they want it. Their answer, not your assumption. Required for large additions; leave false otherwise.")] bool confirmed = false)
     {
         if (trackIds == null || trackIds.Count == 0)
         {
@@ -263,12 +271,27 @@ public class MusicServiceTool(
             throw new McpException("playNow only plays the tracks you are adding when they go to the front of the queue. Use position 0, or omit position, together with playNow.");
         }
 
+        if (trackIds.Count > ConfirmLargeAddThreshold && !confirmed)
+        {
+            throw new McpException(
+                $"This would add {trackIds.Count} tracks to a queue everyone is listening to, which needs the user's agreement first. Tell them it is {trackIds.Count} tracks and ask whether to go ahead, using an ask-user tool if you have one. Do not call this again until they have actually answered; deciding for them is not agreement. When they agree, look the tracks up again and call this with confirmed set to true.");
+        }
+
         int? positionFilter = position >= 0 ? position : null;
 
         logger.LogInformation("AddToQueue called with trackIDs {trackIds} for position {position} with PlayNow: {playNow}", string.Join(", ", trackIds), position, playNow);
 
         bool allowOnlyPublicAlbums = !await permissionAuthorizer.HasAnyAsync(user, CorePermissions.AlbumsViewAll);
 
-        return await musicSearchService.AddTracksToQueueAsync(trackIds, positionFilter, playNow, allowOnlyPublicAlbums);
+        QueueAddResult result = await musicSearchService.AddTracksToQueueAsync(trackIds, positionFilter, playNow, allowOnlyPublicAlbums);
+
+        // Carried in the response rather than left to the system prompt, which is routinely
+        // dropped by the time a multi-track add completes.
+        if (result.AddedTrackIds.Count > AnnounceAddThreshold)
+        {
+            result = result with { Note = $"This added {result.AddedTrackIds.Count} tracks. Say how many when you confirm it to the user." };
+        }
+
+        return result;
     }
 }
