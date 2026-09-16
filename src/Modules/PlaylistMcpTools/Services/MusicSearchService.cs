@@ -1122,12 +1122,9 @@ public class MusicSearchService(
                     null));
         }
 
-        if (entries.Count > limit)
-        {
-            entries = entries.Take(limit).ToList();
-        }
-
-        // Entries run newest first, so the play before the match sits after it in the list.
+        // The neighbours are picked before trimming, so asking for a single entry still says
+        // what was around it. Entries run newest first, so the play before the match sits
+        // after it in the list.
         HistoryEntry precededBy = null;
         HistoryEntry followedBy = null;
 
@@ -1136,6 +1133,22 @@ public class MusicSearchService(
         {
             precededBy = matchIndex + 1 < entries.Count ? entries[matchIndex + 1] : null;
             followedBy = matchIndex - 1 >= 0 ? entries[matchIndex - 1] : null;
+        }
+
+        // Trim to the requested size. For a point in time, keep the window centred on the
+        // match: taking the newest entries instead would discard the anchor itself whenever
+        // it isn't among them, which is what happens as soon as the limit is small.
+        if (entries.Count > limit)
+        {
+            if (matchIndex < 0)
+            {
+                entries = entries.Take(limit).ToList();
+            }
+            else
+            {
+                int start = Math.Clamp(matchIndex - ((limit - 1) / 2), 0, entries.Count - limit);
+                entries = entries.Skip(start).Take(limit).ToList();
+            }
         }
 
         return new HistoryView(now, nowPlaying, entries, at, hint, precededBy, followedBy);
