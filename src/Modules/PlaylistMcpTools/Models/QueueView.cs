@@ -10,8 +10,9 @@ namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 /// no clock of its own can still reason about "in five minutes".</para>
 ///
 /// <para><see cref="QueueLength"/> is the whole queue; <see cref="Upcoming"/> is the first
-/// page of it. Entries on albums the caller may not see are omitted from the page but still
-/// counted, so positions match the real queue.</para>
+/// page of it. Entries on albums the caller may not see are still listed, in position, with
+/// their details withheld and Hidden set — so the page is contiguous and the positions are
+/// the real ones.</para>
 /// </summary>
 public record QueueView(
     DateTime ServerTime,

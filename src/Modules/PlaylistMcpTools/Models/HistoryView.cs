@@ -12,10 +12,18 @@ namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 ///
 /// <para><see cref="Hint"/> explains an empty or surprising result, e.g. no playback recorded
 /// on the requested day.</para>
+///
+/// <para><see cref="PrecededBy"/> and <see cref="FollowedBy"/> are the plays either side of
+/// the best match, pulled out by name rather than left to be worked out from the ordering of
+/// <see cref="Entries"/> (where they also appear). People misremember times by a few minutes,
+/// so these two are usually what they actually meant. <see cref="FollowedBy"/> in particular
+/// is easy to overlook, because a question about the past invites looking only backwards.</para>
 /// </summary>
 public record HistoryView(
     DateTime ServerTime,
     NowPlaying NowPlaying,
     IReadOnlyList<HistoryEntry> Entries,
     DateTime? ResolvedAt,
-    string Hint);
+    string Hint,
+    HistoryEntry PrecededBy,
+    HistoryEntry FollowedBy);

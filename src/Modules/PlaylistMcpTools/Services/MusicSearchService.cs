@@ -1127,7 +1127,18 @@ public class MusicSearchService(
             entries = entries.Take(limit).ToList();
         }
 
-        return new HistoryView(now, nowPlaying, entries, at, hint);
+        // Entries run newest first, so the play before the match sits after it in the list.
+        HistoryEntry precededBy = null;
+        HistoryEntry followedBy = null;
+
+        int matchIndex = entries.FindIndex(e => e.BestMatch);
+        if (matchIndex >= 0)
+        {
+            precededBy = matchIndex + 1 < entries.Count ? entries[matchIndex + 1] : null;
+            followedBy = matchIndex - 1 >= 0 ? entries[matchIndex - 1] : null;
+        }
+
+        return new HistoryView(now, nowPlaying, entries, at, hint, precededBy, followedBy);
     }
 
     /// <summary>
