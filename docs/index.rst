@@ -36,6 +36,7 @@ It will stream your music to a Shoutcast/Icecast server following a set of rules
    usage/mediaimporter
    usage/appinspector
    usage/bassinfo
+   usage/playlistmcptools
 
 .. toctree::
    :hidden:
