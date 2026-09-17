@@ -1448,7 +1448,45 @@ public class MusicSearchService(
         }
 
         int queueLength = await dbContext.StreamQueue.CountAsync();
-        return new QueueAddResult(added, skipped, queueLength);
+
+        int? firstAddedPosition = null;
+        if (toAdd.Count > 0)
+        {
+            ushort firstSort = toAdd[0].SortOrder;
+            firstAddedPosition = await dbContext.StreamQueue.CountAsync(s => s.SortOrder < firstSort) + 1;
+        }
+
+        return new QueueAddResult(added, skipped, queueLength, BuildQueueNote(firstAddedPosition, queueLength, playNow, added.Count), firstAddedPosition);
+    }
+
+    /// <summary>
+    /// A true sentence about when the added tracks will play, so the caller has no reason to
+    /// improvise one. Position claims are the thing callers most reliably get wrong: "up next"
+    /// for something at the back of a long queue, or a place in the order worked out from what
+    /// they queued earlier rather than from the queue itself.
+    /// </summary>
+    private static string BuildQueueNote(int? firstAddedPosition, int queueLength, bool playNow, int addedCount)
+    {
+        if (addedCount == 0 || firstAddedPosition is not { } position)
+        {
+            return null;
+        }
+
+        string subject = addedCount == 1 ? "This track" : $"These {addedCount} tracks";
+
+        if (playNow)
+        {
+            return $"{subject} started playing immediately, interrupting whatever was on.";
+        }
+
+        if (position <= 1)
+        {
+            return $"{subject} will play next, as soon as the current track finishes.";
+        }
+
+        string it = addedCount == 1 ? "it" : "the first of them";
+
+        return $"{subject} went to position {position} of {queueLength}. There are {position - 1} tracks ahead, so do not say {it} is up next or playing soon: say where in the queue it is, or call the queue tool if the user wants a time.";
     }
 
     // ---------- Helpers ----------

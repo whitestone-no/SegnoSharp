@@ -252,7 +252,7 @@ public class MusicServiceTool(
 
     // Mutating tool: appends to shared queue state. Hints are set explicitly so clients can gate/approve it.
     // Destructive defaults to true; appending twice adds twice, so it is not idempotent.
-    [McpServerTool(Destructive = true, Idempotent = false), Description("Append tracks to the global stream queue that every listener hears, or insert at Position, shifting the rest back. Returns the IDs that landed, the resulting queueLength, and a skipped list for IDs that could not be queued — these do not fail the call, so always check skipped and tell the user what did not make it. Adding is permanent: nothing can remove, reorder or empty the queue, so never offer to undo or change an add.")]
+    [McpServerTool(Destructive = true, Idempotent = false), Description("Append tracks to the global stream queue that every listener hears, or insert at Position, shifting the rest back. Returns the IDs that landed, the resulting queueLength, and a skipped list for IDs that could not be queued — these do not fail the call, so always check skipped and tell the user what did not make it. firstAddedPosition is where the first added track landed, counting from 1 at the front of the queue, and the note says in words when it will play — use them instead of describing the position yourself. Adding is permanent: nothing can remove, reorder or empty the queue, so never offer to undo or change an add.")]
     [RequirePermission(CorePermissions.PlaylistEdit)]
     public async Task<QueueAddResult> AddToQueue(
         ClaimsPrincipal user,
@@ -289,7 +289,7 @@ public class MusicServiceTool(
         // dropped by the time a multi-track add completes.
         if (result.AddedTrackIds.Count > AnnounceAddThreshold)
         {
-            result = result with { Note = $"This added {result.AddedTrackIds.Count} tracks. Say how many when you confirm it to the user." };
+            result = result with { Note = $"This added {result.AddedTrackIds.Count} tracks. Say how many when you confirm it to the user. {result.Note}".Trim() };
         }
 
         return result;
