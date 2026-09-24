@@ -31,6 +31,22 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
             "the", "a", "an", "of", "and", "in", "on", "to", "for", "from"
         };
 
+        /// <summary>
+        /// How much of the longer word a prefix has to cover before it counts as a full match.
+        ///
+        /// <para>Prefix matching exists so a truncated word still finds its target — "gladi"
+        /// finds "Gladiator", "fre" finds "Free". But with no minimum, any short word claims any
+        /// longer word it happens to start: "but" matched "Butcher" perfectly, and the "s" left
+        /// over when punctuation splits "Butcher's" matched "sink". At half, a genuine
+        /// truncation still counts and a short whole word no longer outscores real matches. It
+        /// still earns partial credit through edit distance, and still reaches the ranking,
+        /// since the database-side filter is a substring match and unaffected.</para>
+        ///
+        /// <para>Pass a different value to <see cref="ScoreTitle"/> to change it for one call;
+        /// 0 restores unrestricted prefix matching.</para>
+        /// </summary>
+        public const double DefaultMinPrefixCoverage = 0.5;
+
         /// <summary>Lowercase, strip diacritics, turn punctuation into spaces.</summary>
         public static string Normalize(string s)
         {
@@ -89,7 +105,7 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         /// higher so a correct-but-verbose title still scores well; precision breaks the tie.
         /// The result is in [0,1] by construction (no bonus that overshoots and gets clamped).
         /// </summary>
-        public static (double Score, string MatchedOn) ScoreTitle(string query, string title)
+        public static (double Score, string MatchedOn) ScoreTitle(string query, string title, double minPrefixCoverage = DefaultMinPrefixCoverage)
         {
             List<string> q = Tokenize(query, dropStopWords: true);
             List<string> t = Tokenize(title, dropStopWords: true);
@@ -108,7 +124,7 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
                 string bestTok = null;
                 foreach (string tt in t)
                 {
-                    double sim = TokenMatch(qt, tt);
+                    double sim = TokenMatch(qt, tt, minPrefixCoverage);
                     if (sim > best)
                     {
                         best = sim;
@@ -133,7 +149,7 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
                 double best = 0;
                 foreach (string qt in q)
                 {
-                    double sim = TokenMatch(qt, tt);
+                    double sim = TokenMatch(qt, tt, minPrefixCoverage);
                     if (sim > best)
                     {
                         best = sim;
@@ -147,7 +163,7 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
             double score = (0.7 * recall) + (0.3 * precision);
 
             // Small nudge down if the shared tokens appear out of order in the title.
-            if (!ContainsInOrder(t, q))
+            if (!ContainsInOrder(t, q, minPrefixCoverage))
             {
                 score *= 0.95;
             }
@@ -161,14 +177,30 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
             return (score, matchedOn);
         }
 
-        /// <summary>Token-to-token match: 1.0 on a prefix relationship, else normalized Levenshtein.</summary>
-        private static double TokenMatch(string a, string b) =>
-            a.StartsWith(b, StringComparison.Ordinal) || b.StartsWith(a, StringComparison.Ordinal)
-                ? 1.0
-                : Similarity(a, b);
+        /// <summary>
+        /// Token-to-token match: 1.0 when one is a prefix of the other covering enough of it,
+        /// else normalized Levenshtein. Identical tokens always match, whatever their length,
+        /// so a lone "2" still matches "2".
+        /// </summary>
+        private static double TokenMatch(string a, string b, double minPrefixCoverage) =>
+            IsPrefixMatch(a, b, minPrefixCoverage) ? 1.0 : Similarity(a, b);
+
+        /// <summary>Is the shorter token a prefix of the longer, covering at least the given share of it?</summary>
+        private static bool IsPrefixMatch(string a, string b, double minPrefixCoverage)
+        {
+            if (a.Length == 0 || b.Length == 0)
+            {
+                return false;
+            }
+
+            (string shorter, string longer) = a.Length <= b.Length ? (a, b) : (b, a);
+
+            return longer.StartsWith(shorter, StringComparison.Ordinal)
+                   && (double)shorter.Length / longer.Length >= minPrefixCoverage;
+        }
 
         /// <summary>Do the query tokens appear, in order, as a (prefix-matched) subsequence of the title tokens?</summary>
-        private static bool ContainsInOrder(List<string> titleTokens, List<string> queryTokens)
+        private static bool ContainsInOrder(List<string> titleTokens, List<string> queryTokens, double minPrefixCoverage)
         {
             int qi = 0;
             foreach (string tt in titleTokens)
@@ -178,8 +210,7 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
                     break;
                 }
 
-                if (tt.StartsWith(queryTokens[qi], StringComparison.Ordinal) ||
-                    queryTokens[qi].StartsWith(tt, StringComparison.Ordinal))
+                if (IsPrefixMatch(tt, queryTokens[qi], minPrefixCoverage))
                 {
                     qi++;
                 }

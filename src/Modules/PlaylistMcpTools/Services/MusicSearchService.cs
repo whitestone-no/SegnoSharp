@@ -92,6 +92,18 @@ public class MusicSearchService(
     // hint stops suggesting a lower threshold and points at the album tracklist instead.
     private const double WeakMatchRetryFloor = 0.3;
 
+    // A Matched result can still be a poor one. In a large library almost any query shares a
+    // word with some title, and one shared word scores in the 0.3-0.55 range however long the
+    // query is; a title the listener actually meant scores 0.75 and up. Below this line the
+    // top result is usually the former, and a caller left to work that out alone tends to keep
+    // searching to disprove it. The hint gives it permission to stop instead.
+    //
+    // Deliberately fixed rather than derived from minScore: it describes where ScoreTitle puts
+    // one-shared-word matches, which doesn't move when a caller raises its threshold. A caller
+    // asking for 0.7 already excluded everything below here, so the hint simply never fires.
+    // If ScoreTitle's weighting changes, re-check that the two clusters still sit either side.
+    private const double LooseMatchScore = 0.6;
+
     // A role-filtered person search has to compute credit counts before it knows whether a
     // candidate qualifies, so it walks further down the ranked list to fill its limit. This
     // bounds how far.
@@ -617,6 +629,13 @@ public class MusicSearchService(
 
         switch (outcome)
         {
+            case SearchOutcome.Matched when hasTitle && topScore is { } top && top < LooseMatchScore:
+                parts.Add(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "The best match scored {0:0.##}, which usually means it shares only a word or two with the request rather than being the track asked for. If its title doesn't resemble what was asked for, the track is probably not in the library: say so rather than searching further.",
+                    top));
+                break;
+
             case SearchOutcome.NoMatch when hasTitle:
                 parts.Add("No track title matched in this scope. Resolve the exact track name (e.g. via external lookup) and search again. If the album is known, get all tracks from the album for the real titles.");
                 break;
