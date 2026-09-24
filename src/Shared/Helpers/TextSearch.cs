@@ -14,13 +14,15 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
     /// Stage one runs in the database to gather a candidate set; stage two ranks the
     /// survivors here in C#, so none of the fuzzy logic depends on the SQL provider.
     ///
-    /// Stage one comes in three tiers of decreasing precision — <see cref="TitlePhraseLike"/>,
-    /// <see cref="TitleAllTokensLike"/>, <see cref="TitleLike"/>. The caller tries them in
-    /// order and stops at the first that returns anything. This matters because the caller
-    /// caps the candidate set before ranking: with only the broad OR tier, a query of common
-    /// words ("now we are free") fills the cap with rows matched on "%we%" and the real track
-    /// never reaches the scorer. The loose tier is still kept last, because a misspelling
-    /// ("Gladeator") produces nothing in the stricter tiers and only fuzzy scoring can recover it.
+    /// Stage one filters on the loosest predicate, <see cref="TitleLike"/>, and orders the
+    /// matches by <see cref="TitleMatchRank"/> so that titles containing the whole phrase come
+    /// first and titles containing every word come next. The caller caps the candidate set, and
+    /// this ordering is what keeps a strong match from being cut off by a flood of incidental
+    /// ones: without it, a query of common words ("now we are free") fills the cap with rows
+    /// matched on "%we%" and the real track never reaches the scorer. Filtering on the loosest
+    /// predicate rather than stopping at the first that returns anything matters too — a title
+    /// sharing only some of the words ("Everything Changes" for "everything about to change")
+    /// can still score well, and a misspelling ("Gladeator") only survives the loosest filter.
     /// </summary>
     public static class TextSearch
     {
@@ -72,8 +74,8 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         }
 
         /// <summary>
-        /// Normalized text collapsed to single spaces, for the exact-phrase candidate tier.
-        /// Stopwords are deliberately kept here: the phrase tier is matched as one contiguous
+        /// Normalized text collapsed to single spaces, for ranking exact-phrase matches first.
+        /// Stopwords are deliberately kept here: the phrase is matched as one contiguous
         /// substring, so dropping "the" would stop "Fellowship of the Ring" matching itself.
         /// </summary>
         public static string NormalizePhrase(string s)
@@ -262,12 +264,12 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         }
 
         /// <summary>
-        /// Stage-one tier 1 (tightest): the whole normalized query as one contiguous substring.
+        /// The whole normalized query as one contiguous substring — the strongest signal that
+        /// a title is the one asked for.
         /// Matches "Now We Are Free" and "Now We Are Free (Reprise)" but nothing built from the
-        /// individual words, so the candidate cap fills with rows that are actually plausible.
-        /// Only the query side is normalized — the database side is a plain LOWER() — so a title
-        /// whose punctuation sits inside the phrase ("Rock'n'Roll" vs "rock n roll") falls
-        /// through to a looser tier rather than matching here.
+        /// individual words. Only the query side is normalized — the database side is a plain
+        /// LOWER() — so a title whose punctuation sits inside the phrase ("Rock'n'Roll" vs
+        /// "rock n roll") misses here and is ranked with the all-words matches instead.
         /// </summary>
         public static Expression<Func<Track, bool>> TitlePhraseLike(string phrase)
         {
@@ -276,9 +278,9 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         }
 
         /// <summary>
-        /// Stage-one tier 2: AND of one LIKE per token. Every query word must appear somewhere
+        /// AND of one LIKE per token. Every query word must appear somewhere
         /// in the title, in any order, which catches "Free Now We Are" and subtitle reorderings
-        /// that the phrase tier misses, while still excluding titles that share only one word.
+        /// that the phrase misses, ranking them above titles that share only some of the words.
         /// </summary>
         public static Expression<Func<Track, bool>> TitleAllTokensLike(IReadOnlyList<string> tokens)
         {
@@ -294,14 +296,35 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         }
 
         /// <summary>
-        /// Stage-one tier 3 (loosest): OR of one LIKE per token — deliberately over-broad, and
-        /// the only tier that can survive a misspelled word, since the in-memory scorer is
+        /// The stage-one filter: OR of one LIKE per token — deliberately over-broad, and
+        /// the only one of the three a misspelled word can satisfy, since the in-memory scorer is
         /// typo-tolerant but the database LIKE is not. Both sides are lowercased so it stays
         /// case-insensitive across every provider (Postgres LIKE is case-sensitive otherwise).
         /// This is the one provider-touching spot; on SQLite, LOWER() is ASCII-only, so
         /// non-ASCII case variants may be missed at this stage (the in-memory scorer still
         /// normalizes them). Postgres users who care about that can swap in ILIKE / citext.
         /// </summary>
+        /// <summary>
+        /// How strongly a title matches, for ordering stage-one candidates before the cap is
+        /// applied: 2 for the whole phrase, 1 for every word, 0 for anything else. Built from
+        /// the same predicates as the filters, so it translates to a plain CASE WHEN ... LIKE on
+        /// every provider.
+        /// </summary>
+        public static Expression<Func<Track, int>> TitleMatchRank(string phrase, IReadOnlyList<string> tokens)
+        {
+            ParameterExpression track = Expression.Parameter(typeof(Track), "t");
+
+            Expression phraseMatch = PredicateBuilder.Rebind(TitlePhraseLike(phrase), track);
+            Expression allWordsMatch = PredicateBuilder.Rebind(TitleAllTokensLike(tokens), track);
+
+            Expression rank = Expression.Condition(
+                phraseMatch,
+                Expression.Constant(2),
+                Expression.Condition(allWordsMatch, Expression.Constant(1), Expression.Constant(0)));
+
+            return Expression.Lambda<Func<Track, int>>(rank, track);
+        }
+
         public static Expression<Func<Track, bool>> TitleLike(IReadOnlyList<string> tokens)
         {
             Expression<Func<Track, bool>> predicate = PredicateBuilder.False<Track>();
@@ -336,6 +359,10 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
         {
             return Combine(a, b, Expression.AndAlso);
         }
+
+        /// <summary>The body of <paramref name="lambda"/>, with its parameter replaced by <paramref name="parameter"/>.</summary>
+        internal static Expression Rebind(LambdaExpression lambda, ParameterExpression parameter) =>
+            new ReplaceParameterVisitor(lambda.Parameters[0], parameter).Visit(lambda.Body)!;
 
         private static Expression<Func<T, bool>> Combine<T>(
             Expression<Func<T, bool>> a,

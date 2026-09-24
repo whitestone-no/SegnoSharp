@@ -12,7 +12,6 @@ using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models.Enums;
 using Whitestone.SegnoSharp.Shared.Events;
 using Whitestone.SegnoSharp.Shared.Helpers;
-using Whitestone.SegnoSharp.Shared.Helpers.Security;
 
 // ReSharper disable ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
 
@@ -45,10 +44,11 @@ public interface IMusicSearchService
 ///
 /// Track search is two-stage: the database gathers candidates with a portable LIKE
 /// predicate, then ranking happens in memory so no fuzzy logic depends on the SQL provider.
-/// Because the candidate gather is capped, it runs in tiers (exact phrase, then all tokens,
-/// then any token) and stops at the first tier that returns rows — otherwise a query of
-/// common words fills the cap with noise before the scorer ever sees the right track. When
-/// the cap is hit anyway, <see cref="TrackSearchResult.Truncated"/> says so.
+/// Candidates are every title sharing a word with the query, ordered so whole-phrase and
+/// all-word matches come first — otherwise a query of common words fills the cap with noise
+/// before the scorer ever sees the right track. Only id and title are fetched for ranking;
+/// credits and album details are loaded afterwards for the page being returned. When the
+/// cap is hit anyway, <see cref="TrackSearchResult.Truncated"/> says so.
 ///
 /// minScore is a real filter: candidates below it are never returned. A WeakMatch therefore
 /// comes back empty, with TopScore and Hint telling the caller how close it got and what
@@ -70,12 +70,15 @@ public class MusicSearchService(
     // library into memory. Hitting the track cap is reported as Truncated rather than
     // silently discarding rows the scorer never saw.
     //
-    // The track cap is low because a track candidate is fetched with its credits, which is
-    // an expensive projection; tiered LIKE predicates keep the 300 rows relevant. Person and
-    // album scans project only the columns needed to rank (id, name/title), so they can
-    // afford to scan the whole table and fetch the expensive parts afterwards for the
-    // winners alone. These two are ceilings against pathological data, not tuning knobs.
+    // Title searches for tracks, people and albums all rank on the columns needed to score
+    // (id plus title or name) and fetch the expensive parts — credits, album details —
+    // afterwards for the winners alone, so each can afford to scan thousands of candidates.
+    // These are ceilings against pathological data, not tuning knobs.
+    //
+    // TrackCandidateCap is the exception: a track search with no title has nothing to rank
+    // on, so it fetches full rows directly and needs the lower ceiling.
     private const int TrackCandidateCap = 300;
+    private const int TrackTitleScanCap = 5000;
     private const int PersonCandidateCap = 5000;
     private const int AlbumTitleScanCap = 5000;
 
@@ -438,6 +441,7 @@ public class MusicSearchService(
                     c.Persons.Select(FormatName).ToList(),
                     CreditSource.Album)).ToList(),
                 // Nothing to rank against without a title, so every credited album is a full match.
+                // ReSharper disable once PossibleNullReferenceException - `scores` cannot be null here as it would have failed much earlier.
                 hasTitle ? Math.Round(scores[a.Id], 3) : 1.0))
             .ToList();
 
@@ -504,49 +508,71 @@ public class MusicSearchService(
                     r.Persons.Any(p => p.Id == personId)));
         }
 
-        (List<TrackRow> rows, bool truncated) = hasTitle
-            ? await GatherTitleCandidatesAsync(scope, query.TitleQuery, tokens)
-            : Cap(await TakeCandidatesAsync(scope));
-
-        List<(TrackRow Row, double Score, string MatchedOn)> scored;
+        List<TrackCandidate> candidates;
         double? topScore;
+        int totalMatches;
+        bool truncated;
+        bool anyRows;
 
         if (hasTitle)
         {
-            scored = rows
+            (List<(int Id, string Title)> titleRows, truncated) = await GatherTitleCandidatesAsync(scope, query.TitleQuery, tokens);
+            anyRows = titleRows.Count > 0;
+
+            // Phase one: rank on the title alone. Nothing heavier than id and title has been
+            // fetched, which is what lets the scan cover thousands of candidates cheaply.
+            var ranked = titleRows
                 .Select(r =>
                 {
                     (double score, string matchedOn) = TextSearch.ScoreTitle(query.TitleQuery, r.Title);
-                    return (Row: r, Score: score, MatchedOn: matchedOn);
+                    return (r.Id, Score: score, MatchedOn: matchedOn);
                 })
                 .OrderByDescending(x => x.Score)
+                .ThenBy(x => x.Id)
                 .ToList();
 
-            topScore = scored.Count == 0 ? null : scored[0].Score;
+            topScore = ranked.Count == 0 ? null : ranked[0].Score;
 
             // minScore is a filter, not a label. Everything below it is dropped, so a
             // WeakMatch hands back an empty list and the agent has to decide out loud
             // whether to retry lower or tell the user nothing good was found.
-            scored = scored.Where(x => x.Score >= minScore).ToList();
+            var passing = ranked.Where(x => x.Score >= minScore).ToList();
+            totalMatches = passing.Count;
+
+            // Phase two: credits and album details, for the page being returned only.
+            var page = passing.Take(query.Limit).ToList();
+            Dictionary<int, TrackRow> details = await LoadTrackRowsAsync(page.Select(x => x.Id).ToList(), allowOnlyPublicAlbums);
+
+            candidates = page
+                .Where(x => details.ContainsKey(x.Id))
+                .Select(x => ToCandidate(details[x.Id], x.Score, x.MatchedOn))
+                .ToList();
         }
         else
         {
             // Structural search ("something by X"): no title to rank on, so order for
             // stable output and treat every credited hit as a full match.
-            scored = rows
+            (List<TrackRow> rows, truncated) = Cap(await TakeCandidatesAsync(scope));
+            anyRows = rows.Count > 0;
+
+            List<TrackRow> ordered = rows
                 .OrderBy(r => r.AlbumTitle).ThenBy(r => r.DiscNumber).ThenBy(r => r.TrackNumber)
-                .Select(r => (Row: r, Score: 1.0, MatchedOn: "credit match"))
                 .ToList();
 
-            topScore = scored.Count == 0 ? null : 1.0;
+            topScore = ordered.Count == 0 ? null : 1.0;
+            totalMatches = ordered.Count;
+            candidates = ordered
+                .Take(query.Limit)
+                .Select(r => ToCandidate(r, 1.0, "credit match"))
+                .ToList();
         }
 
         SearchOutcome outcome;
-        if (rows.Count == 0)
+        if (!anyRows)
         {
             outcome = SearchOutcome.NoMatch;
         }
-        else if (scored.Count > 0)
+        else if (totalMatches > 0)
         {
             outcome = SearchOutcome.Matched;
         }
@@ -555,53 +581,44 @@ public class MusicSearchService(
             outcome = SearchOutcome.WeakMatch;
         }
 
-        List<TrackCandidate> candidates = scored
-            .Take(query.Limit)
-            .Select(x => ToCandidate(x.Row, x.Score, x.MatchedOn))
-            .ToList();
-
         return new TrackSearchResult(
             outcome,
             candidates,
             topScore.HasValue ? Math.Round(topScore.Value, 3) : null,
-            BuildSearchHint(outcome, hasTitle, topScore, minScore, truncated, scored.Count, query.Limit),
+            BuildSearchHint(outcome, hasTitle, topScore, minScore, truncated, totalMatches, query.Limit),
             query.AlbumId,
             truncated,
-            scored.Count);
+            totalMatches);
     }
 
     /// <summary>
-    /// Gather title candidates in tiers of decreasing precision, stopping at the first tier
-    /// that returns anything. The ranking cap is applied to whatever that tier produced, so a
-    /// query of common words no longer spends its 300 rows on incidental substring hits.
+    /// Gather title candidates for ranking: every title sharing at least one word with the
+    /// query, strongest first, up to the scan cap.
+    ///
+    /// The filter is the loosest predicate, so a title sharing only some of the words still
+    /// reaches the scorer — "Everything Changes" for "everything about to change" scores well,
+    /// but contains neither the phrase nor every word. Stopping at the first stricter predicate
+    /// that found anything, as this used to, silently excluded it. The ordering is what keeps
+    /// the loose filter from drowning strong matches: whole-phrase titles sort first and
+    /// all-words titles next, so they are always inside the cap however many incidental matches
+    /// follow. One query, and only id and title, so the cap can be large.
     /// </summary>
-    private async Task<(List<TrackRow> Rows, bool Truncated)> GatherTitleCandidatesAsync(
+    private async Task<(List<(int Id, string Title)> Rows, bool Truncated)> GatherTitleCandidatesAsync(
         IQueryable<Track> scope, string titleQuery, List<string> tokens)
     {
-        // Tier 1: the whole query as one contiguous phrase.
         string phrase = TextSearch.NormalizePhrase(titleQuery);
-        if (phrase.Length > 0)
-        {
-            List<TrackRow> phraseRows = await TakeCandidatesAsync(scope.Where(TextSearch.TitlePhraseLike(phrase)));
-            if (phraseRows.Count > 0)
-            {
-                return Cap(phraseRows);
-            }
-        }
 
-        // Tier 2: every token present, in any order. Only worth a round-trip for multi-token
-        // queries — with one token it is the same query as tier 3.
-        if (tokens.Count > 1)
-        {
-            List<TrackRow> allTokenRows = await TakeCandidatesAsync(scope.Where(TextSearch.TitleAllTokensLike(tokens)));
-            if (allTokenRows.Count > 0)
-            {
-                return Cap(allTokenRows);
-            }
-        }
+        var rows = await scope
+            .Where(TextSearch.TitleLike(tokens))
+            .OrderByDescending(TextSearch.TitleMatchRank(phrase, tokens))
+            .ThenBy(t => t.Id)
+            .Select(t => new { t.Id, t.Title })
+            .Take(TrackTitleScanCap + 1)   // one past the cap, so hitting it is detectable
+            .ToListAsync();
 
-        // Tier 3: any token. Over-broad by design, and the only tier that survives a typo.
-        return Cap(await TakeCandidatesAsync(scope.Where(TextSearch.TitleLike(tokens))));
+        bool truncated = rows.Count > TrackTitleScanCap;
+
+        return (rows.Take(TrackTitleScanCap).Select(r => (r.Id, r.Title)).ToList(), truncated);
     }
 
     // One row past the cap, so hitting it is detectable rather than silent.
@@ -629,7 +646,7 @@ public class MusicSearchService(
 
         switch (outcome)
         {
-            case SearchOutcome.Matched when hasTitle && topScore is { } top && top < LooseMatchScore:
+            case SearchOutcome.Matched when hasTitle && topScore is { } top and < LooseMatchScore:
                 parts.Add(string.Format(
                     CultureInfo.InvariantCulture,
                     "The best match scored {0:0.##}, which usually means it shares only a word or two with the request rather than being the track asked for. If its title doesn't resemble what was asked for, the track is probably not in the library: say so rather than searching further.",
@@ -682,10 +699,7 @@ public class MusicSearchService(
 
         if (truncated)
         {
-            parts.Add(string.Format(
-                CultureInfo.InvariantCulture,
-                "The candidate list was cut off at {0} tracks before ranking, so a better match may exist outside it. Narrow the search with personId or albumId.",
-                TrackCandidateCap));
+            parts.Add("The candidate list was cut off before ranking, so a better match may exist outside it. Narrow the search with personId or albumId.");
         }
 
         return parts.Count == 0 ? null : string.Join(" ", parts);
@@ -1302,7 +1316,7 @@ public class MusicSearchService(
             {
                 Played = h.Played,
                 TrackId = h.TrackStreamInfo.TrackId,
-                Length = (int)h.TrackStreamInfo.Track.Length
+                Length = h.TrackStreamInfo.Track.Length
             })
             .ToListAsync();
 
