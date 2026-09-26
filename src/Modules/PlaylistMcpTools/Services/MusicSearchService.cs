@@ -88,6 +88,8 @@ public class MusicSearchService(
         "A track on an album you do not have access to. It is playing now, but its details are withheld.";
     private const string HiddenQueueNote =
         "A track on an album you do not have access to. It will play in this position, but its details are withheld.";
+    private const string NoAlbumCreditsNote =
+        "Nobody is credited for this album as a whole. Credits on its tracks apply to those tracks only, so don't describe any track's artist as the album's.";
     private const string HiddenHistoryNote =
         "A track on an album you do not have access to. It played at this time, but its details are withheld.";
 
@@ -432,17 +434,24 @@ public class MusicSearchService(
             : raw;
 
         List<AlbumResult> albums = ordered
-            .Select(a => new AlbumResult(
-                a.Id,
-                a.Title,
-                a.Published,
-                a.Credits.Select(c => new CreditDto(
-                    c.Role,
-                    c.Persons.Select(FormatName).ToList(),
-                    CreditSource.Album)).ToList(),
-                // Nothing to rank against without a title, so every credited album is a full match.
-                // ReSharper disable once PossibleNullReferenceException - `scores` cannot be null here as it would have failed much earlier.
-                hasTitle ? Math.Round(scores[a.Id], 3) : 1.0))
+            .Select(a =>
+            {
+                List<CreditDto> credits = a.Credits
+                    .Where(c => c.Persons.Count > 0)
+                    .Select(c => new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditSource.Album))
+                    .ToList();
+
+                return new AlbumResult(
+                    a.Id,
+                    a.Title,
+                    a.Published,
+                    credits,
+                    // Nothing to rank against without a title, so every credited album is a full match.
+                    // ReSharper disable once PossibleNullReferenceException - `scores` cannot be null here as it would have failed much earlier.
+                    hasTitle ? Math.Round(scores[a.Id], 3) : 1.0,
+                    // An empty credit list is an absence, and callers fill it in; say it instead.
+                    credits.Count == 0 ? NoAlbumCreditsNote : null);
+            })
             .ToList();
 
         return new AlbumSearchResult(albums, totalMatches, truncated);
