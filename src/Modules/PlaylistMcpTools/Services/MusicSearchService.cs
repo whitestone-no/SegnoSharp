@@ -75,9 +75,8 @@ public class MusicSearchService(
     // afterwards for the winners alone, so each can afford to scan thousands of candidates.
     // These are ceilings against pathological data, not tuning knobs.
     //
-    // TrackCandidateCap is the exception: a track search with no title has nothing to rank
-    // on, so it fetches full rows directly and needs the lower ceiling.
-    private const int TrackCandidateCap = 300;
+    // A track search with no title needs no ceiling at all: it counts and sorts in the
+    // database and loads only the page it returns.
     private const int TrackTitleScanCap = 5000;
     private const int PersonCandidateCap = 5000;
     private const int AlbumTitleScanCap = 5000;
@@ -569,20 +568,30 @@ public class MusicSearchService(
         }
         else
         {
-            // Structural search ("something by X"): no title to rank on, so order for
-            // stable output and treat every credited hit as a full match.
-            (List<TrackRow> rows, truncated) = Cap(await TakeCandidatesAsync(scope));
-            anyRows = rows.Count > 0;
+            // Structural search ("something by X"): no title to rank on. Count exactly and sort
+            // in the database, then load details for the page being returned. Nothing is capped,
+            // so the total is the real one and the page is the real start of the list — not the
+            // start of an arbitrary few hundred, which is what fetching rows in id order and
+            // sorting them afterwards used to produce.
+            totalMatches = await scope.CountAsync();
+            anyRows = totalMatches > 0;
+            truncated = false;
 
-            List<TrackRow> ordered = rows
-                .OrderBy(r => r.AlbumTitle).ThenBy(r => r.DiscNumber).ThenBy(r => r.TrackNumber)
-                .ToList();
-
-            topScore = ordered.Count == 0 ? null : 1.0;
-            totalMatches = ordered.Count;
-            candidates = ordered
+            List<int> pageIds = await scope
+                .OrderBy(t => t.Disc.Album.Title)
+                .ThenBy(t => t.Disc.DiscNumber)
+                .ThenBy(t => t.TrackNumber)
+                .ThenBy(t => t.Id)
+                .Select(t => t.Id)
                 .Take(query.Limit)
-                .Select(r => ToCandidate(r, 1.0, "credit match"))
+                .ToListAsync();
+
+            Dictionary<int, TrackRow> details = await LoadTrackRowsAsync(pageIds, allowOnlyPublicAlbums);
+
+            topScore = anyRows ? 1.0 : null;
+            candidates = pageIds
+                .Where(details.ContainsKey)
+                .Select(id => ToCandidate(details[id], 1.0, "credit match"))
                 .ToList();
         }
 
@@ -639,20 +648,6 @@ public class MusicSearchService(
 
         return (rows.Take(TrackTitleScanCap).Select(r => (r.Id, r.Title)).ToList(), truncated);
     }
-
-    // One row past the cap, so hitting it is detectable rather than silent.
-    private static Task<List<TrackRow>> TakeCandidatesAsync(IQueryable<Track> scope) =>
-        scope
-            .OrderBy(t => t.Id)
-            .Select(TrackRowSelector)
-            .Take(TrackCandidateCap + 1)
-            .AsSplitQuery()
-            .ToListAsync();
-
-    private static (List<TrackRow> Rows, bool Truncated) Cap(List<TrackRow> rows) =>
-        rows.Count > TrackCandidateCap
-            ? (rows.Take(TrackCandidateCap).ToList(), true)
-            : (rows, false);
 
     /// <summary>
     /// Plain-language next step for the agent. Scores are formatted with the invariant
@@ -711,7 +706,9 @@ public class MusicSearchService(
         {
             parts.Add(string.Format(
                 CultureInfo.InvariantCulture,
-                "Showing the best {0} of {1} matches. Raise limit to see more, and do not describe these as the complete set.",
+                hasTitle
+                    ? "Showing the best {0} of {1} matches. Raise limit to see more, and do not describe these as the complete set."
+                    : "Showing the first {0} of {1} matches, in album order. Raise limit to see more, and do not describe these as the complete set.",
                 limit,
                 totalMatches));
         }
