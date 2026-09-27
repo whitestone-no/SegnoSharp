@@ -22,4 +22,5 @@ namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 public record AlbumSearchResult(
     IReadOnlyList<AlbumResult> Albums,
     int TotalMatches,
-    bool Truncated);
+    bool Truncated,
+    string Hint = null);

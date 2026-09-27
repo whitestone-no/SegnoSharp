@@ -454,7 +454,17 @@ public class MusicSearchService(
             })
             .ToList();
 
-        return new AlbumSearchResult(albums, totalMatches, truncated);
+        // The count alone gets read past, so say it: a caller handed a page of five tends to
+        // treat it as the whole answer.
+        string hint = totalMatches > albums.Count
+            ? string.Format(
+                CultureInfo.InvariantCulture,
+                "Showing {0} of {1} matching albums. Raise limit (up to 100) to see more, and don't describe these as the complete set.",
+                albums.Count,
+                totalMatches)
+            : null;
+
+        return new AlbumSearchResult(albums, totalMatches, truncated, hint);
     }
 
     // ---------- Track search (the crux) ----------
