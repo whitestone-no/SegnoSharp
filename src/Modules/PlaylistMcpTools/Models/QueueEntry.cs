@@ -17,6 +17,11 @@ namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 /// stay correctly placed, but the track, album and credits are withheld. Every position from
 /// 1 upwards is present; a hidden entry is a real track, not a gap.
 /// <see cref="Note"/> states this in words, for relaying to the listener; it is null otherwise.</para>
+///
+/// <para>When a moment ahead was asked about, <see cref="BestMatch"/> marks the single entry
+/// expected to be playing then, and <see cref="OverlapsTargetTime"/> every entry expected
+/// to be sounding during that minute — the same rule and the same meaning as on a history
+/// entry. Both are false otherwise.</para>
 /// </summary>
 public record QueueEntry(
     int Position,
@@ -27,4 +32,6 @@ public record QueueEntry(
     int LengthSeconds,
     DateTime EstimatedStart,
     bool Hidden,
-    string Note);
+    string Note,
+    bool BestMatch = false,
+    bool OverlapsTargetTime = false);

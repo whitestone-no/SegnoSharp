@@ -17,7 +17,7 @@ namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 /// that best answers it — the one covering most of the requested minute, or the nearest play
 /// when nothing was on. Exactly one entry carries it, so there is never a choice to make.</para>
 ///
-/// <para><see cref="OverlapsRequestedTime"/> is broader: it marks every entry that was playing
+/// <para><see cref="OverlapsTargetTime"/> is broader: it marks every entry that was playing
 /// at any point during the requested window. A track boundary often falls inside a minute, so
 /// two entries can overlap it while only one is the best match. It saves the caller from
 /// having to compare timestamps to work that out.</para>
@@ -36,7 +36,7 @@ public record HistoryEntry(
     IReadOnlyList<CreditDto> Credits,
     int LengthSeconds,
     bool BestMatch,
-    bool OverlapsRequestedTime,
+    bool OverlapsTargetTime,
     bool StillPlaying,
     bool Hidden,
     string Note);

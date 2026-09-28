@@ -6,7 +6,7 @@ namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 /// <summary>
 /// What has already played, newest first.
 ///
-/// <para><see cref="ResolvedAt"/> is the point in time the lookup actually used after
+/// <para><see cref="TargetTime"/> is the point in time the lookup actually used after
 /// interpreting the parameters, so a caller can state what it answered rather than what was
 /// asked. Null when no point in time was given.</para>
 ///
@@ -25,7 +25,7 @@ public record HistoryView(
     DateTime ServerTime,
     NowPlaying NowPlaying,
     IReadOnlyList<HistoryEntry> Entries,
-    DateTime? ResolvedAt,
+    DateTime? TargetTime,
     string Hint,
     HistoryEntry PrecededBy,
     HistoryEntry FollowedBy);

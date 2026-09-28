@@ -26,7 +26,7 @@ public interface IMusicSearchService
     Task<AlbumSearchResult> SearchAlbumsAsync(string query = null, int? personId = null, string role = null, int limit = 5, bool allowOnlyPublicAlbums = true);
     Task<TrackSearchResult> SearchTracksAsync(TrackSearchQuery query, double minScore = 0.4, bool allowOnlyPublicAlbums = true);
     Task<AlbumTracklist> GetAlbumTracklistAsync(int albumId, bool allowOnlyPublicAlbums = true);
-    Task<QueueView> GetQueueAsync(int limit, DateTime now, bool allowOnlyPublicAlbums = true);
+    Task<QueueView> GetQueueAsync(int limit, DateTime now, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true);
     Task<HistoryView> GetHistoryAsync(int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true);
     Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, int? position = null, bool playNow = false, bool allowOnlyPublicAlbums = true);
     Task<TrackPickResult> PickTracksAsync(int personId, PickRules rules, DateTime now, Func<int, int> nextRandom, string role = null, int count = 1, bool allowOnlyPublicAlbums = true);
@@ -981,15 +981,18 @@ public class MusicSearchService(
     /// clock with an unspecified Kind; if Played ever moves to UTC, convert at the tool
     /// boundary rather than here.
     /// </summary>
-    public async Task<QueueView> GetQueueAsync(int limit, DateTime now, bool allowOnlyPublicAlbums = true)
+    public async Task<QueueView> GetQueueAsync(
+        int limit, DateTime now, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true)
     {
         limit = Math.Clamp(limit, 1, 100);
+        atWindowSeconds = Math.Clamp(atWindowSeconds, 1, 3600);
 
         NowPlaying nowPlaying = await GetNowPlayingAsync(now, allowOnlyPublicAlbums);
 
-        int queueLength = await dbContext.StreamQueue.CountAsync();
-
-        var queueRows = await dbContext.StreamQueue
+        // The whole queue in order, but only the two columns the timing needs. That stays cheap
+        // for a long queue, and means every estimated start is computed from the front whichever
+        // page is returned — so a page centred an hour ahead is timed correctly too.
+        var order = await dbContext.StreamQueue
             .AsNoTracking()
             .OrderBy(q => q.SortOrder)
             .Select(q => new
@@ -997,44 +1000,116 @@ public class MusicSearchService(
                 q.TrackStreamInfo.TrackId,
                 Length = (int)q.TrackStreamInfo.Track.Length
             })
-            .Take(limit)
             .ToListAsync();
 
-        Dictionary<int, TrackRow> tracks = await LoadTrackRowsAsync(
-            queueRows.Select(q => q.TrackId).Distinct().ToList(), allowOnlyPublicAlbums);
-
-        // Estimated start times run from the end of the current track, then accumulate. Every
-        // entry ahead of the ones being returned is inside this page (the page starts at the
-        // front of the queue), so the running total is complete.
-        DateTime cursor = nowPlaying == null ? now : now.AddSeconds(nowPlaying.RemainingSeconds);
-
-        var upcoming = new List<QueueEntry>(queueRows.Count);
-        for (int i = 0; i < queueRows.Count; i++)
+        // Estimated starts run from the end of the current track, then accumulate. Expressing
+        // them as HistoryRows lets a moment ahead be matched by exactly the rule the history
+        // uses for a moment past.
+        DateTime firstStart = nowPlaying == null ? now : now.AddSeconds(nowPlaying.RemainingSeconds);
+        var timeline = new List<HistoryRow>(order.Count);
+        DateTime cursor = firstStart;
+        foreach (var row in order)
         {
-            var row = queueRows[i];
-            DateTime start = cursor;
+            timeline.Add(new HistoryRow { Played = cursor, TrackId = row.TrackId, Length = row.Length });
             cursor = cursor.AddSeconds(row.Length);
+        }
+
+        DateTime queueEnds = cursor;
+
+        int matchIndex = -1;
+        string hint = null;
+
+        // The requested minute, as one value. Start and end are set together or not at all,
+        // so nothing downstream has to infer that one being present means the other is.
+        (DateTime Start, DateTime End)? window = null;
+
+        if (at is { } point)
+        {
+            window = (point, point.AddSeconds(atWindowSeconds));
+
+            if (nowPlaying != null && point < firstStart)
+            {
+                hint = "That moment falls within the track playing now, which is reported as nowPlaying.";
+            }
+            else if (point >= queueEnds)
+            {
+                // Past the end of the queue nothing has been chosen yet: the auto-playlist
+                // fills it as it plays. Saying so matters, because otherwise the last entry in
+                // the list looks like the answer.
+                hint = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "The queue runs out at about {0}. Tracks after that are chosen automatically as it plays, so what will be on at {1} hasn't been decided yet.",
+                    DescribeMoment(queueEnds, now),
+                    DescribeMoment(point, now));
+            }
+            else
+            {
+                HistoryRow anchor = ChooseAnchor(timeline, point, atWindowSeconds, out _);
+                matchIndex = anchor == null ? -1 : timeline.IndexOf(anchor);
+            }
+        }
+
+        // The page: the front of the queue normally, or centred on the match for a moment ahead.
+        // A moment with no match gets no page at all. The front of the queue would answer a
+        // different question — what's next — and beside a hint saying nothing has been chosen
+        // yet, any entry listed reads as the answer.
+        int first = 0;
+        int last = Math.Min(limit, timeline.Count);
+
+        if (window.HasValue && matchIndex < 0)
+        {
+            last = 0;
+        }
+        else if (matchIndex >= 0 && timeline.Count > limit)
+        {
+            first = Math.Clamp(matchIndex - ((limit - 1) / 2), 0, timeline.Count - limit);
+            last = first + limit;
+        }
+
+        // Details for the page, plus the neighbours, which can fall just outside it.
+        var needed = new List<int>();
+        for (int i = first; i < last; i++)
+        {
+            needed.Add(timeline[i].TrackId);
+        }
+
+        if (matchIndex > 0)
+        {
+            needed.Add(timeline[matchIndex - 1].TrackId);
+        }
+
+        if (matchIndex >= 0 && matchIndex + 1 < timeline.Count)
+        {
+            needed.Add(timeline[matchIndex + 1].TrackId);
+        }
+
+        Dictionary<int, TrackRow> tracks = await LoadTrackRowsAsync(needed.Distinct().ToList(), allowOnlyPublicAlbums);
+
+        var upcoming = new List<QueueEntry>(last - first);
+        for (int i = first; i < last; i++)
+        {
+            upcoming.Add(Build(i));
+        }
+
+        // The track before the next one is the one playing now, which nowPlaying already reports.
+        QueueEntry precededBy = matchIndex > 0 ? Build(matchIndex - 1) : null;
+        QueueEntry followedBy = matchIndex >= 0 && matchIndex + 1 < timeline.Count ? Build(matchIndex + 1) : null;
+
+        return new QueueView(now, nowPlaying, upcoming, timeline.Count, at, hint, precededBy, followedBy);
+
+        QueueEntry Build(int i)
+        {
+            HistoryRow row = timeline[i];
+            bool bestMatch = i == matchIndex;
+            bool overlaps = window is { } w && row.Played < w.End && row.Played.AddSeconds(row.Length) > w.Start;
 
             // An entry the caller may not see keeps its place and its timing; only its
             // identity is withheld. Skipping it would leave a hole in the positions and make
             // the queue look shorter than it is.
-            bool hidden = !tracks.TryGetValue(row.TrackId, out TrackRow track);
-
-            upcoming.Add(hidden
-                ? new QueueEntry(i + 1, null, null, null, [], row.Length, start, true, HiddenQueueNote)
-                : new QueueEntry(
-                    i + 1,
-                    track.Id,
-                    track.Title,
-                    track.AlbumTitle,
-                    BuildCredits(track),
-                    row.Length,
-                    start,
-                    false,
-                    null));
+            return tracks.TryGetValue(row.TrackId, out TrackRow track)
+                ? new QueueEntry(i + 1, track.Id, track.Title, track.AlbumTitle, BuildCredits(track), row.Length, row.Played, false, null, bestMatch, overlaps)
+                : new QueueEntry(i + 1, null, null, null, [], row.Length, row.Played, true, HiddenQueueNote, bestMatch, overlaps);
         }
-
-        return new QueueView(now, nowPlaying, upcoming, queueLength);
     }
 
     /// <summary>
@@ -1060,12 +1135,14 @@ public class MusicSearchService(
 
         List<HistoryRow> rows;
         HistoryRow anchor = null;
-        DateTime? windowEnd = null;
         string hint = null;
 
-        if (at.HasValue)
+        // The requested minute, as one value. Start and end are set together or not at all,
+        // so nothing downstream has to infer that one being present means the other is.
+        (DateTime Start, DateTime End)? window = null;
+
+        if (at is { } point)
         {
-            DateTime point = at.Value;
 
             // Split the window around the anchor: the track spanning the requested moment,
             // what led up to it, and what followed.
@@ -1080,7 +1157,7 @@ public class MusicSearchService(
 
             rows = newer.Concat(older).OrderByDescending(r => r.Played).ToList();
 
-            windowEnd = point.AddSeconds(atWindowSeconds);
+            window = (point, point.AddSeconds(atWindowSeconds));
             anchor = ChooseAnchor(rows, point, atWindowSeconds, out bool overlapped);
 
             if (rows.Count == 0)
@@ -1139,7 +1216,7 @@ public class MusicSearchService(
             // Broader than the best match: anything sounding during the requested window, so
             // the caller can say "B was on, though A was still finishing" without comparing
             // timestamps itself.
-            bool overlaps = windowEnd.HasValue && row.Played < windowEnd.Value && ended > at.Value;
+            bool overlaps = window is { } w && row.Played < w.End && ended > w.Start;
 
             // The track still playing is reported by nowPlaying. Listing it here as well would
             // describe it as already played and give it an end time in the future. It belongs
@@ -1320,6 +1397,25 @@ public class MusicSearchService(
         }
 
         return best;
+    }
+
+    /// <summary>
+    /// A moment as a clock time, naming the day when it isn't today. A clock time asked of
+    /// the queue that has already passed rolls over to tomorrow, and a bare "21:15" in a hint
+    /// would hide that from the caller.
+    /// </summary>
+    private static string DescribeMoment(DateTime moment, DateTime now)
+    {
+        string clock = moment.ToString("HH:mm", CultureInfo.InvariantCulture);
+
+        if (moment.Date == now.Date)
+        {
+            return clock;
+        }
+
+        return moment.Date == now.Date.AddDays(1)
+            ? clock + " tomorrow"
+            : moment.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
     }
 
     private static DateTime Min(DateTime a, DateTime b) => a < b ? a : b;
