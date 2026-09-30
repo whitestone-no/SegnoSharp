@@ -26,8 +26,8 @@ public interface IMusicSearchService
     Task<AlbumSearchResult> SearchAlbumsAsync(string query = null, int? personId = null, string role = null, int limit = 5, bool allowOnlyPublicAlbums = true);
     Task<TrackSearchResult> SearchTracksAsync(TrackSearchQuery query, double minScore = 0.4, bool allowOnlyPublicAlbums = true);
     Task<AlbumTracklist> GetAlbumTracklistAsync(int albumId, bool allowOnlyPublicAlbums = true);
-    Task<QueueView> GetQueueAsync(int limit, DateTime now, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true);
-    Task<HistoryView> GetHistoryAsync(int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true);
+    Task<QueueView> GetQueueAsync(int limit, DateTime now, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null);
+    Task<HistoryView> GetHistoryAsync(int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null);
     Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, int? position = null, bool playNow = false, bool allowOnlyPublicAlbums = true);
     Task<TrackPickResult> PickTracksAsync(int personId, PickRules rules, DateTime now, Func<int, int> nextRandom, string role = null, int count = 1, bool allowOnlyPublicAlbums = true);
 }
@@ -982,7 +982,7 @@ public class MusicSearchService(
     /// boundary rather than here.
     /// </summary>
     public async Task<QueueView> GetQueueAsync(
-        int limit, DateTime now, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true)
+        int limit, DateTime now, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null)
     {
         limit = Math.Clamp(limit, 1, 100);
         atWindowSeconds = Math.Clamp(atWindowSeconds, 1, 3600);
@@ -1023,7 +1023,61 @@ public class MusicSearchService(
         // so nothing downstream has to infer that one being present means the other is.
         (DateTime Start, DateTime End)? window = null;
 
-        if (at is { } point)
+        if (trackIds is { Count: > 0 })
+        {
+            // Answer "where is this track" directly. Left to page through the queue, a caller
+            // that can't find a track it remembers queueing concludes the response is wrong.
+            // Matching by ID rather than position also finds a track someone has moved: paging
+            // would miss one moved past the end of the page and take it for removed. Several IDs
+            // — an album, or every version of a song — flag whichever of them comes first.
+            var ids = trackIds.ToHashSet();
+            bool single = ids.Count == 1;
+
+            List<int> positions = timeline
+                .Select((row, i) => (row.TrackId, i))
+                .Where(x => ids.Contains(x.TrackId))
+                .Select(x => x.i)
+                .ToList();
+
+            bool onePlayingNow = nowPlaying?.TrackId is { } playingId && ids.Contains(playingId);
+
+            if (positions.Count > 0)
+            {
+                matchIndex = positions[0];
+
+                var notes = new List<string>();
+                if (onePlayingNow)
+                {
+                    // Mid-album, "when will it play" is best answered "it already has".
+                    notes.Add(single ? "That track is also playing now." : "One of those tracks is playing now.");
+                }
+
+                if (positions.Count > 1)
+                {
+                    notes.Add(string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0} queued entries match; the first is flagged.",
+                        positions.Count));
+                }
+
+                hint = notes.Count == 0 ? null : string.Join(" ", notes);
+            }
+            else if (onePlayingNow)
+            {
+                hint = single
+                    ? "That track is playing now, which is reported as nowPlaying."
+                    : "One of those tracks is playing now, which is reported as nowPlaying. None of the others is queued.";
+            }
+            else
+            {
+                // Gone is not the same as removed: a track queued a while ago may simply have
+                // played. Say both, so the caller doesn't assert the wrong one.
+                hint = single
+                    ? "That track isn't in the queue. It has either been removed or already played; the history shows which."
+                    : "None of those tracks are in the queue. They have either been removed or already played; the history shows which.";
+            }
+        }
+        else if (at is { } point)
         {
             window = (point, point.AddSeconds(atWindowSeconds));
 
@@ -1049,14 +1103,16 @@ public class MusicSearchService(
             }
         }
 
-        // The page: the front of the queue normally, or centred on the match for a moment ahead.
-        // A moment with no match gets no page at all. The front of the queue would answer a
+        // The page: the front of the queue normally, or centred on the match for a lookup.
+        // A lookup with no match gets no page at all. The front of the queue would answer a
         // different question — what's next — and beside a hint saying nothing has been chosen
         // yet, any entry listed reads as the answer.
         int first = 0;
         int last = Math.Min(limit, timeline.Count);
 
-        if (window.HasValue && matchIndex < 0)
+        bool lookup = window.HasValue || trackIds is { Count: > 0 };
+
+        if (lookup && matchIndex < 0)
         {
             last = 0;
         }
@@ -1095,6 +1151,30 @@ public class MusicSearchService(
         QueueEntry precededBy = matchIndex > 0 ? Build(matchIndex - 1) : null;
         QueueEntry followedBy = matchIndex >= 0 && matchIndex + 1 < timeline.Count ? Build(matchIndex + 1) : null;
 
+        // Say whether the page is the whole queue. Given only queueLength, a caller that expects
+        // an entry and doesn't see it wonders whether its limit was too low, and fetches again.
+        if (upcoming.Count > 0)
+        {
+            string coverage = upcoming.Count == timeline.Count
+                ? string.Format(
+                    CultureInfo.InvariantCulture,
+                    "This is the whole queue: {0} {1} after the one playing now.",
+                    timeline.Count,
+                    timeline.Count == 1 ? "track" : "tracks")
+                : string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Showing positions {0}-{1} of {2}. Raise limit to see more, and don't describe these as the whole queue.",
+                    first + 1,
+                    last,
+                    timeline.Count);
+
+            hint = hint == null ? coverage : hint + " " + coverage;
+        }
+        else if (!lookup && timeline.Count == 0)
+        {
+            hint = "The queue is empty.";
+        }
+
         return new QueueView(now, nowPlaying, upcoming, timeline.Count, at, hint, precededBy, followedBy);
 
         QueueEntry Build(int i)
@@ -1124,7 +1204,7 @@ public class MusicSearchService(
     /// and a track boundary can fall anywhere inside it.
     /// </summary>
     public async Task<HistoryView> GetHistoryAsync(
-        int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true)
+        int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null)
     {
         limit = Math.Clamp(limit, 1, 100);
         atWindowSeconds = Math.Clamp(atWindowSeconds, 1, 3600);
@@ -1135,15 +1215,56 @@ public class MusicSearchService(
 
         List<HistoryRow> rows;
         HistoryRow anchor = null;
+        HistoryRow earlierRow = null;
         string hint = null;
 
         // The requested minute, as one value. Start and end are set together or not at all,
         // so nothing downstream has to infer that one being present means the other is.
         (DateTime Start, DateTime End)? window = null;
 
-        if (at is { } point)
+        if (trackIds is { Count: > 0 })
         {
+            // "When did we last hear it", for a song rather than one recording: the most recent
+            // play of any of the tracks given — an album edit, a radio edit, a remix — including
+            // one still in progress, which is then the answer. The play before it, whichever
+            // version, comes back as earlierPlay.
+            List<int> ids = trackIds.Distinct().ToList();
+            IQueryable<StreamHistory> plays = scope.Where(h => ids.Contains(h.TrackStreamInfo.TrackId));
 
+            // Two rows, however long the history is: the answer, and the time before it.
+            List<HistoryRow> latestTwo = await ProjectHistoryAsync(plays.OrderByDescending(h => h.Played).Take(2));
+
+            if (latestTwo.Count == 0)
+            {
+                rows = [];
+                hint = ids.Count == 1
+                    ? "There's no record of that track having played."
+                    : "There's no record of any of those tracks having played.";
+            }
+            else
+            {
+                HistoryRow latest = latestTwo[0];
+                earlierRow = latestTwo.Count > 1 ? latestTwo[1] : null;
+                DateTime played = latest.Played;
+
+                int before = Math.Max(1, limit / 2);
+                int after = Math.Max(0, limit - before - 1);
+
+                List<HistoryRow> older = await ProjectHistoryAsync(
+                    scope.Where(h => h.Played <= played).OrderByDescending(h => h.Played).Take(before + 1));
+
+                List<HistoryRow> newer = await ProjectHistoryAsync(
+                    scope.Where(h => h.Played > played).OrderBy(h => h.Played).Take(after + 1));
+
+                rows = newer.Concat(older).OrderByDescending(r => r.Played).ToList();
+
+                // By identity rather than by time. Looking up the minute it started would let a
+                // track shorter than a minute lose its own best match to the one after it.
+                anchor = rows.FirstOrDefault(r => r.Played == played && r.TrackId == latest.TrackId);
+            }
+        }
+        else if (at is { } point)
+        {
             // Split the window around the anchor: the track spanning the requested moment,
             // what led up to it, and what followed.
             int before = Math.Max(1, limit / 2);
@@ -1203,8 +1324,26 @@ public class MusicSearchService(
             }
         }
 
-        Dictionary<int, TrackRow> tracks = await LoadTrackRowsAsync(
-            rows.Select(r => r.TrackId).Distinct().ToList(), allowOnlyPublicAlbums);
+        List<int> neededTracks = rows.Select(r => r.TrackId).ToList();
+        if (earlierRow != null)
+        {
+            neededTracks.Add(earlierRow.TrackId);
+        }
+
+        Dictionary<int, TrackRow> tracks = await LoadTrackRowsAsync(neededTracks.Distinct().ToList(), allowOnlyPublicAlbums);
+
+        // One construction for every entry, so the earlier play is built exactly like the rest,
+        // hidden tracks included.
+        HistoryEntry ToEntry(HistoryRow row, bool bestMatch, bool overlaps, bool stillPlaying)
+        {
+            DateTime ended = row.Played.AddSeconds(row.Length);
+
+            // A play the caller may not see keeps its times, so the timeline reads as
+            // continuous. Dropping it would leave an unexplained gap that looks like silence.
+            return tracks.TryGetValue(row.TrackId, out TrackRow track)
+                ? new HistoryEntry(row.Played, ended, track.Id, track.Title, track.AlbumTitle, BuildCredits(track), row.Length, bestMatch, overlaps, stillPlaying, false, null)
+                : new HistoryEntry(row.Played, ended, null, null, null, [], row.Length, bestMatch, overlaps, stillPlaying, true, HiddenHistoryNote);
+        }
 
         var entries = new List<HistoryEntry>(rows.Count);
         foreach (HistoryRow row in rows)
@@ -1227,25 +1366,7 @@ public class MusicSearchService(
                 continue;
             }
 
-            // A play the caller may not see keeps its times, so the timeline reads as
-            // continuous. Dropping it would leave an unexplained gap that looks like silence.
-            bool hidden = !tracks.TryGetValue(row.TrackId, out TrackRow track);
-
-            entries.Add(hidden
-                ? new HistoryEntry(row.Played, ended, null, null, null, [], row.Length, bestMatch, overlaps, stillPlaying, true, HiddenHistoryNote)
-                : new HistoryEntry(
-                    row.Played,
-                    ended,
-                    track.Id,
-                    track.Title,
-                    track.AlbumTitle,
-                    BuildCredits(track),
-                    row.Length,
-                    bestMatch,
-                    overlaps,
-                    stillPlaying,
-                    false,
-                    null));
+            entries.Add(ToEntry(row, bestMatch, overlaps, stillPlaying));
         }
 
         // The neighbours are picked before trimming, so asking for a single entry still says
@@ -1277,7 +1398,11 @@ public class MusicSearchService(
             }
         }
 
-        return new HistoryView(now, nowPlaying, entries, at, hint, precededBy, followedBy);
+        // The earlier play can't be playing now — the flagged one is later — and it answers
+        // "when before that", not a question about a moment, so neither flag applies.
+        HistoryEntry earlierPlay = earlierRow == null ? null : ToEntry(earlierRow, false, false, false);
+
+        return new HistoryView(now, nowPlaying, entries, at, hint, precededBy, followedBy, earlierPlay);
     }
 
     /// <summary>

@@ -20,6 +20,13 @@ namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 /// because a question about the past invites looking only backwards. They are chosen before
 /// the entry list is trimmed, so asking for a single entry still says what surrounded it —
 /// which means either may name a play that is not in <see cref="Entries"/>.</para>
+///
+/// <para><see cref="EarlierPlay"/> is set by a track lookup: the play before the flagged one, of
+/// any of the tracks asked about, whichever version it was. It is not a neighbour — that is
+/// <see cref="PrecededBy"/>, the track that played just before whatever it was — but the
+/// previous time the listener heard the song, which may be weeks earlier. It matters most when
+/// the flagged play is the one happening now, and "when did we last hear it" means the time
+/// before. Null when there is no earlier play, or when the lookup wasn't by track.</para>
 /// </summary>
 public record HistoryView(
     DateTime ServerTime,
@@ -28,4 +35,5 @@ public record HistoryView(
     DateTime? TargetTime,
     string Hint,
     HistoryEntry PrecededBy,
-    HistoryEntry FollowedBy);
+    HistoryEntry FollowedBy,
+    HistoryEntry EarlierPlay = null);

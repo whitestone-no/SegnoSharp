@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
@@ -205,24 +206,28 @@ public class MusicServiceTool(
             allowOnlyPublicAlbums);
     }
 
-    [McpServerTool(ReadOnly = true), Description("What is playing right now and what is queued behind it. Returns serverTime (the clock everything here is relative to), nowPlaying with how many seconds are elapsed and remaining, the next entries with their position and estimated start time, and queueLength, the number of tracks waiting behind the one playing now. The playing track is never counted in it, and positions start at 1 for the track that plays next. Use this for 'what is this', 'what is next', 'what is coming up'. Give minutesAhead for 'what's playing in an hour', or time for 'what will play at 21:15': the entry expected then carries bestMatch, overlapsTargetTime marks everything expected during that minute, precededBy and followedBy name its neighbours, and targetTime echoes the moment used — the same fields get_history returns for a moment past. If the moment is still inside the track playing now, or lies past the end of the queue, upcoming is empty and hint says which. Past the end, tracks haven't been chosen yet, so never name the last entry as the answer. estimatedStart assumes back-to-back playback: treat it as reliable for the next few entries and as a rough guide further out. Nothing records who or what added an entry, so never say a track was requested by anyone, not even one you queued yourself. An entry with hidden true is a real track on an album you may not see: it keeps its position and timing but its title and artist are withheld. Positions are always contiguous, so a hidden entry is never a gap or an error. Its note field explains this in words: relay that, never guess what the track is, and never leave the entry out when listing what is coming up.")]
+    [McpServerTool(ReadOnly = true), Description("What is playing right now and what is queued behind it. Returns serverTime (the clock everything here is relative to), nowPlaying with how many seconds are elapsed and remaining, the next entries with their position and estimated start time, and queueLength, the number of tracks waiting behind the one playing now. The playing track is never counted in it, and positions start at 1 for the track that plays next. Use this for 'what is this', 'what is next', 'what is coming up'. For 'when will [track] play' or 'is it still queued', pass trackIds rather than paging through the queue looking for it. hint always says whether upcoming is the whole queue or only part of it. The queue moves constantly — tracks finish and the next one starts, tracks are added automatically, other people add and remove — so two calls can disagree without anything being wrong: compare their serverTime. Give minutesAhead for 'what's playing in an hour', or time for 'what will play at 21:15': the entry expected then carries bestMatch, overlapsTargetTime marks everything expected during that minute, precededBy and followedBy name its neighbours, and targetTime echoes the moment used — the same fields get_history returns for a moment past. If the moment is still inside the track playing now, or lies past the end of the queue, upcoming is empty and hint says which. Past the end, tracks haven't been chosen yet, so never name the last entry as the answer. estimatedStart assumes back-to-back playback: treat it as reliable for the next few entries and as a rough guide further out. Nothing records who or what added an entry, so never say a track was requested by anyone, not even one you queued yourself. An entry with hidden true is a real track on an album you may not see: it keeps its position and timing but its title and artist are withheld. Positions are always contiguous, so a hidden entry is never a gap or an error. Its note field explains this in words: relay that, never guess what the track is, and never leave the entry out when listing what is coming up.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
     public async Task<QueueView> GetQueue(
         ClaimsPrincipal user,
         [Description("How many upcoming entries to return (1-100). Compare against queueLength before calling the list complete. For a moment ahead, they are split either side of it.")] int limit = DefaultPlaybackLimit,
         [Description("Optional: how many minutes from now to look, for 'what's playing in an hour'. Returns the entry expected to be playing then, with context either side. Takes precedence over time. Use 0 or omit to see what's next.")] int minutesAhead = 0,
-        [Description("Optional clock time as HH:mm, 24-hour, server-local, for 'what will play at 21:15'. Means the next time the clock reads that: later today, or tomorrow if today's has already passed. If the listener's time could be read two ways, as '9:15' can, use whichever comes next from now, and say which you used so they can correct it.")] string time = null)
+        [Description("Optional clock time as HH:mm, 24-hour, server-local, for 'what will play at 21:15'. Means the next time the clock reads that: later today, or tomorrow if today's has already passed. If the listener's time could be read two ways, as '9:15' can, use whichever comes next from now, and say which you used so they can correct it.")] string time = null,
+        [Description("Optional: track IDs from earlier results, for 'when will it play' or 'is it still queued'. Pass several for an album, or for every version of a song: whichever of them comes first in the queue is flagged bestMatch, with its position and estimated start, and hint says how many of them are queued and whether one is playing now. A track is found wherever it now sits, so if someone has moved it, its position differs from where you queued it — that is the queue changing, not an error. If none of them is in the queue, upcoming is empty and hint says so. Takes precedence over minutesAhead and time. At most 100.")] List<int> trackIds = null)
     {
         limit = Math.Clamp(limit, 1, MaxResultLimit);
 
         DateTime now = systemClock.Now;
         DateTime? at = null;
+        List<int> trackFilter = NormalizeTrackIds(trackIds);
 
-        if (minutesAhead > 0)
+        // Looking up a track is a different question from looking up a moment, so the moment
+        // parameters are ignored rather than combined with it.
+        if (trackFilter is null && minutesAhead > 0)
         {
             at = now.AddMinutes(minutesAhead);
         }
-        else if (!string.IsNullOrWhiteSpace(time))
+        else if (trackFilter is null && !string.IsNullOrWhiteSpace(time))
         {
             if (!TimeOnly.TryParseExact(time, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly parsedTime))
             {
@@ -237,23 +242,25 @@ public class MusicServiceTool(
 
         bool allowOnlyPublicAlbums = !await permissionAuthorizer.HasAnyAsync(user, CorePermissions.AlbumsViewAll);
 
-        return await musicSearchService.GetQueueAsync(limit, now, at, PointInTimeWindowSeconds, allowOnlyPublicAlbums);
+        return await musicSearchService.GetQueueAsync(limit, now, at, PointInTimeWindowSeconds, allowOnlyPublicAlbums, trackIds: trackFilter);
     }
 
-    [McpServerTool(ReadOnly = true), Description("What has already played, newest first, plus what is playing now. Returns serverTime, so you never have to guess the current date or time. There are four ways to call it: with no parameters for the most recent tracks; with minutesAgo for 'what was that ten minutes ago'; with time, plus date for a day other than today, for 'what was playing around 16:45'; or with date alone for 'what did we play on Monday'. The minutesAgo and time forms ask about a moment, and return context either side of it. A clock time is matched as the minute that follows it. For a point in time, exactly one entry carries bestMatch true: the play covering most of that minute, or the nearest play if nothing was on, in which case hint says so. overlapsTargetTime is set on every entry sounding during that minute, often two when a track boundary falls inside it. precededBy and followedBy are the plays either side of the match: name all three when you answer, because the listener's time is usually approximate and the one they meant is often a neighbour rather than the match. targetTime echoes the moment actually used. entries are plays that have finished; the track still playing is reported separately as nowPlaying and is not repeated, except when a point-in-time lookup lands inside it, where stillPlaying marks it and its endedAt is a projection rather than a fact. An entry with hidden true is a real play on an album you may not see: its times are accurate but its title and artist are withheld, so the timeline has no unexplained gaps. nowPlaying can be hidden too, which means something is playing that you cannot see, not that the stream is idle. Hidden entries carry a note field explaining them in words: relay it rather than omitting the entry. hint explains an empty result.")]
+    [McpServerTool(ReadOnly = true), Description("What has already played, newest first, plus what is playing now. Returns serverTime, so you never have to guess the current date or time. There are five ways to call it: with no parameters for the most recent tracks; with minutesAgo for 'what was that ten minutes ago'; with time, plus date for a day other than today, for 'what was playing around 16:45'; with date alone for 'what did we play on Monday'; or with trackIds for 'when did we last hear it'. The minutesAgo and time forms ask about a moment, and return context either side of it. A clock time is matched as the minute that follows it. For a point in time, exactly one entry carries bestMatch true: the play covering most of that minute, or the nearest play if nothing was on, in which case hint says so. overlapsTargetTime is set on every entry sounding during that minute, often two when a track boundary falls inside it. precededBy and followedBy are the plays either side of the match: name all three when you answer, because the listener's time is usually approximate and the one they meant is often a neighbour rather than the match. targetTime echoes the moment actually used. entries are plays that have finished; the track still playing is reported separately as nowPlaying and is not repeated, except when a point-in-time lookup lands inside it, where stillPlaying marks it and its endedAt is a projection rather than a fact. An entry with hidden true is a real play on an album you may not see: its times are accurate but its title and artist are withheld, so the timeline has no unexplained gaps. nowPlaying can be hidden too, which means something is playing that you cannot see, not that the stream is idle. Hidden entries carry a note field explaining them in words: relay it rather than omitting the entry. hint explains an empty result.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
     public async Task<HistoryView> GetHistory(
         ClaimsPrincipal user,
         [Description("How many past entries to return (1-100). For a point in time, they are split either side of it.")] int limit = DefaultPlaybackLimit,
         [Description("Optional date as yyyy-MM-dd, in the server's local time. Defaults to today when a time is given. Resolve words like 'yesterday' or 'Monday' against the serverTime from the most recent tool response rather than guessing, and rather than one you read earlier in the conversation.")] string date = null,
         [Description("Optional clock time as HH:mm, 24-hour, server-local. Returns whatever was playing at that moment on the given date. If the listener's time could be read two ways, as '9:15' can, use whichever was most recent, and say which you used so they can correct it.")] string time = null,
-        [Description("Optional shortcut for a relative question: how many minutes before now to look. Takes precedence over date and time. Use 0 or omit when not asking about a relative moment.")] int minutesAgo = 0)
+        [Description("Optional shortcut for a relative question: how many minutes before now to look. Takes precedence over date and time. Use 0 or omit when not asking about a relative moment.")] int minutesAgo = 0,
+        [Description("Optional: track IDs from earlier results, for 'when did we last hear it'. Pass every version of a song — album edit, radio edit, remix — to ask about the song rather than one recording. Returns the page centred on the most recent play of any of them, flagged bestMatch, including a play still in progress, marked stillPlaying. earlierPlay is the play before that of any of them, whichever version it was. If none has played, entries is empty and hint says so. Takes precedence over minutesAgo, time and date. At most 100.")] List<int> trackIds = null)
     {
         limit = Math.Clamp(limit, 1, MaxResultLimit);
 
         DateTime now = systemClock.Now;
         DateTime? at = null;
         DateOnly? day = null;
+        List<int> trackFilter = NormalizeTrackIds(trackIds);
 
         DateOnly? parsedDate = null;
         if (!string.IsNullOrWhiteSpace(date))
@@ -266,11 +273,13 @@ public class MusicServiceTool(
             parsedDate = parsed;
         }
 
-        if (minutesAgo > 0)
+        // Looking up a track is a different question from looking up a moment or a day, so those
+        // parameters are ignored rather than combined with it.
+        if (trackFilter is null && minutesAgo > 0)
         {
             at = now.AddMinutes(-minutesAgo);
         }
-        else if (!string.IsNullOrWhiteSpace(time))
+        else if (trackFilter is null && !string.IsNullOrWhiteSpace(time))
         {
             if (!TimeOnly.TryParseExact(time, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly parsedTime))
             {
@@ -281,14 +290,36 @@ public class MusicServiceTool(
             DateOnly onDate = parsedDate ?? DateOnly.FromDateTime(now);
             at = onDate.ToDateTime(parsedTime);
         }
-        else if (parsedDate.HasValue)
+        else if (trackFilter is null && parsedDate.HasValue)
         {
             day = parsedDate;
         }
 
         bool allowOnlyPublicAlbums = !await permissionAuthorizer.HasAnyAsync(user, CorePermissions.AlbumsViewAll);
 
-        return await musicSearchService.GetHistoryAsync(limit, now, at, day, PointInTimeWindowSeconds, allowOnlyPublicAlbums);
+        return await musicSearchService.GetHistoryAsync(limit, now, at, day, PointInTimeWindowSeconds, allowOnlyPublicAlbums, trackIds: trackFilter);
+    }
+
+    /// <summary>
+    /// The track IDs a lookup should use: positive, without duplicates, at most the result
+    /// ceiling so the database query stays inside every provider's parameter limits. Null when
+    /// none are usable, which means "no track lookup" rather than "look up nothing".
+    /// </summary>
+    private static List<int> NormalizeTrackIds(List<int> trackIds)
+    {
+        if (trackIds == null)
+        {
+            return null;
+        }
+
+        List<int> usable = trackIds.Where(id => id > 0).Distinct().ToList();
+
+        if (usable.Count > MaxResultLimit)
+        {
+            throw new McpException($"Pass at most {MaxResultLimit} track IDs. For more than that, look the tracks up in smaller groups.");
+        }
+
+        return usable.Count == 0 ? null : usable;
     }
 
     // Mutating tool: appends to shared queue state. Hints are set explicitly so clients can gate/approve it.
