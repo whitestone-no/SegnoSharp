@@ -155,7 +155,7 @@ public class MusicServiceTool(
         return await musicSearchService.SearchTracksAsync(query, minScore, allowOnlyPublicAlbums);
     }
 
-    [McpServerTool(ReadOnly = true), Description("Full disc/track tree for one album, in order, including unplayable tracks (isPlayable false), for verifying an externally-suggested title against what actually exists and for queueing a complete album. Never pass a track with isPlayable false to playlist_tools__add_to_queue.")]
+    [McpServerTool(ReadOnly = true), Description("Full disc/track tree for one album, in order, including unplayable tracks (isPlayable false): for verifying an externally-suggested title against what actually exists, for queueing a complete album, and for saying who is on an album. Credits for the album as a whole are listed once and apply to every track; each track carries only its own. On a compilation the album usually has none, which hint says, and the track credits name each performer. Never pass a track with isPlayable false to playlist_tools__add_to_queue.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
     public async Task<AlbumTracklist> GetAlbumTracklist(
         ClaimsPrincipal user,

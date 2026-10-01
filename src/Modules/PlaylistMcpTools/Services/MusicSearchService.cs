@@ -91,6 +91,8 @@ public class MusicSearchService(
     // by the time the listener reads about it.
     private const int NearlyFinishedSeconds = 30;
 
+    // An album's note in search results, where the album is one entry among several, and a
+    // tracklist's hint, where the album is the whole response.
     private const string NoAlbumCreditsNote =
         "Nobody is credited for this album as a whole. Credits on its tracks apply to those tracks only, so don't describe any track's artist as the album's.";
     private const string HiddenHistoryNote =
@@ -718,13 +720,16 @@ public class MusicSearchService(
 
     /// <summary>
     /// Full disc/track tree for one album, including unplayable tracks (marked), so the
-    /// agent can verify an externally-suggested title against what actually exists.
-    /// Returns null both when the album does not exist and when it is not visible to this
-    /// caller, deliberately: distinguishing them would confirm the existence of private albums.
+    /// agent can verify an externally-suggested title against what actually exists, and with
+    /// credits, so it can say who is on the album: the album's own once, each track's on the
+    /// track. Returns null both when the album does not exist and when it is not visible to
+    /// this caller, deliberately: distinguishing them would confirm the existence of private
+    /// albums.
     /// </summary>
     public async Task<AlbumTracklist> GetAlbumTracklistAsync(int albumId, bool allowOnlyPublicAlbums = true)
     {
-        // Album title (and existence check) in one flat query.
+        // The album, its own credits and the existence check together, through the same
+        // projection album search uses, so the credits read the same way in both.
         IQueryable<Album> albumQuery = dbContext.Albums
             .Where(a => a.Id == albumId);
 
@@ -733,8 +738,10 @@ public class MusicSearchService(
             albumQuery = albumQuery.Where(a => a.IsPublic);
         }
 
-        var album = await albumQuery
-            .Select(a => new { a.Id, a.Title })
+        AlbumRow album = await albumQuery
+            .OrderBy(a => a.Id)
+            .Select(AlbumRowSelector)
+            .AsSplitQuery()
             .FirstOrDefaultAsync();
 
         if (album == null)
@@ -754,21 +761,41 @@ public class MusicSearchService(
             trackQuery = trackQuery.Where(t => t.Disc.Album.IsPublic);
         }
 
-        List<AlbumTrack> tracks = await trackQuery
-            .Select(t => new AlbumTrack(
+        // Each track with its own credits only. The album's apply to every track and are
+        // listed once on the tracklist instead: repeated per track they add size without
+        // information, and a compilation's per-track credits stay plainly per track.
+        var rows = await trackQuery
+            .Select(t => new
+            {
                 t.Disc.DiscNumber,
                 t.TrackNumber,
                 t.Id,
                 t.Title,
-                t.TrackStreamInfo != null))
+                IsPlayable = t.TrackStreamInfo != null,
+                Credits = t.TrackPersonGroupPersonRelations.Select(r => new CreditRow
+                {
+                    Role = r.PersonGroup.Name,
+                    Persons = r.Persons.Select(p => new PersonRow
+                    {
+                        First = p.FirstName,
+                        Last = p.LastName,
+                        Version = p.Version
+                    }).ToList()
+                }).ToList()
+            })
+            .AsSplitQuery()
             .ToListAsync();
 
-        List<AlbumTrack> ordered = tracks
+        List<AlbumTrack> ordered = rows
             .OrderBy(t => t.DiscNumber)
             .ThenBy(t => t.TrackNumber)
+            .Select(t => new AlbumTrack(t.DiscNumber, t.TrackNumber, t.Id, t.Title, t.IsPlayable, ToCredits(t.Credits, CreditSource.Track)))
             .ToList();
 
-        return new AlbumTracklist(album.Id, album.Title, ordered);
+        List<CreditDto> albumCredits = ToCredits(album.Credits, CreditSource.Album);
+
+        // An empty credit list is an absence, and callers fill it in; say it instead.
+        return new AlbumTracklist(album.Id, album.Title, albumCredits, ordered, albumCredits.Count == 0 ? NoAlbumCreditsNote : null);
     }
 
     // ---------- Pick (weighted, no-repeat "play something by X") ----------
@@ -1681,6 +1708,13 @@ public class MusicSearchService(
 
         return rows.ToDictionary(r => r.Id);
     }
+
+    // Credits as returned to callers, leaving out any role that has nobody in it.
+    private static List<CreditDto> ToCredits(IEnumerable<CreditRow> rows, CreditSource appliesTo) =>
+        rows
+            .Where(c => c.Persons.Count > 0)
+            .Select(c => new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), appliesTo))
+            .ToList();
 
     private static List<CreditDto> BuildCredits(TrackRow r)
     {
