@@ -1893,7 +1893,7 @@ public class MusicSearchService(
 
         string it = addedCount == 1 ? "it" : "the first of them";
 
-        return $"{subject} went to position {position} of {queueLength}. There are {position - 1} tracks ahead, so do not say {it} is up next or playing soon: say where in the queue it is, or call the queue tool if the user wants a time.";
+        return $"{subject} went to position {position} of {queueLength}. There are {position - 1} tracks ahead, so do not say {it} is up next or playing soon: say where in the queue it is, or call playlist_tools__get_queue with its ID in trackIds if the user wants a time.";
     }
 
     // ---------- Helpers ----------
