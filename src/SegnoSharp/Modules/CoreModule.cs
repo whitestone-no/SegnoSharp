@@ -27,6 +27,7 @@ public class CoreModule : IPermissionProvider
         new() { Name = CorePermissions.AlbumsEdit, DisplayName = "Edit albums", Description = "Edit albums, their content, and metadata." },
         new() { Name = CorePermissions.PlaylistView, DisplayName = "View playlist", Description = "View the playlist." },
         new() { Name = CorePermissions.PlaylistEdit, DisplayName = "Edit playlist", Description = "Edit the playlist." },
+        new() { Name = CorePermissions.PlaylistRulesIgnore, DisplayName = "Ignore playlist rules", Description = "Ignore the playlist rules when editing the playlist." },
         new() { Name = CorePermissions.SecurityEdit, DisplayName = "Edit security settings", Description = "Edit roles, permissions, and API keys, in security settings.", AllowForApiClients = false}
     ];
 }

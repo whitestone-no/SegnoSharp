@@ -120,7 +120,7 @@ public class MusicServiceTool(
         return await musicSearchService.SearchAlbumsAsync(query, personIdFilter, role, limit, allowOnlyPublicAlbums);
     }
 
-    [McpServerTool(ReadOnly = true), Description("Search playable tracks by any combination of title, person/group, role and album. Each result carries its album, year, length and full credits, so no extra lookup is needed to describe it. At least one of titleQuery, personId or albumId is required. Title matching ranks a capped set of candidates, so a title made of common words can crowd out the right track: resolve the person with playlist_tools__search_people or the album with playlist_tools__search_albums first and pass personId or albumId whenever you can, and narrow further if the result comes back with truncated true. outcome reports how the search went. Matched means at least one candidate reached minScore and is returned; WeakMatch means candidates exist but none reached minScore, so nothing is returned and topScore plus hint say how close the best one came; NoMatch means nothing exists in this scope. Read hint for the next step.")]
+    [McpServerTool(ReadOnly = true), Description("Search playable tracks by any combination of title, person/group, role and album. Each result carries its album, year, length and full credits, so no extra lookup is needed to describe it. At least one of titleQuery, personId or albumId is required. Title matching ranks a capped set of candidates, so a title made of common words can crowd out the right track: resolve the person with playlist_tools__search_people or the album with playlist_tools__search_albums first and pass personId or albumId whenever you can, and narrow further if the result comes back with truncated true. outcome reports how the search went. Matched means at least one candidate reached minScore and is returned; WeakMatch means candidates exist but none reached minScore, so nothing is returned and topScore plus hint say how close the best one came; NoMatch means nothing exists in this scope. A search with no titleQuery has nothing to rank against, so anything credited comes back Matched. Read hint for the next step.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
     public async Task<TrackSearchResult> SearchTracks(
         ClaimsPrincipal user,
@@ -173,17 +173,26 @@ public class MusicServiceTool(
         return tracklist;
     }
 
-    [McpServerTool(ReadOnly = true), Description("Pick one or more random tracks credited to a person/group, for open-ended requests like 'play something by X'. Honours the stream's no-repeat rules, so recently played tracks and albums are excluded: it can return fewer tracks than requested, or none at all when everything by that person has played recently. poolSize is how many eligible tracks it chose from. Picks are always playable, and the score on a pick is not a match quality — ignore it.")]
+    [McpServerTool(ReadOnly = true), Description("Pick one or more random tracks for open-ended requests: by a person or group ('play something by X'), from an album ('play something from Gladiator'), or both together ('something from Gladiator by Hans Zimmer'). Prefer this to choosing from a search yourself: a search returns its first page, so a choice from it isn't random and can't reach the rest. Honours the stream's no-repeat rules. When they leave nothing to pick, it may relax them itself, one at a time, depending on this connection's permissions. hint says when that happened, so the pick may have played recently, or why picks is empty: nothing matches at all, or everything that matches has played recently. poolSize is how many eligible tracks it chose from. Picks are always playable, and the score on a pick is not a match quality — ignore it.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
     public async Task<TrackPickResult> PickTracks(
         ClaimsPrincipal user,
-        [Description("The person/group ID to pick tracks for, as returned by playlist_tools__search_people. Must be a positive ID.")] int personId,
-        [Description("Optional role filter. Valid values come from playlist_tools__get_roles. Call playlist_tools__get_roles if unsure. Do not invent other values.")] string role = null,
+        [Description("Optional: the person or group to pick from, as returned by playlist_tools__search_people. At least one of personId and albumId is required.")] int personId = 0,
+        [Description("Optional: the album to pick from, as returned by playlist_tools__search_albums. Together with personId, picks only tracks on that album credited to them.")] int albumId = 0,
+        [Description("Optional role filter for personId. Valid values come from playlist_tools__get_roles. Call playlist_tools__get_roles if unsure. Do not invent other values. Only meaningful together with personId.")] string role = null,
         [Description("Number of tracks to pick (1-50). Leave at 1 unless the user asked for several: 'play something by X' and 'put on some X' both mean one track. Fewer may come back than requested if the eligible pool is smaller.")] int count = 1)
     {
-        if (personId <= 0)
+        int? personFilter = personId > 0 ? personId : null;
+        int? albumFilter = albumId > 0 ? albumId : null;
+
+        if (personFilter is null && albumFilter is null)
         {
-            throw new McpException("personId must be a positive ID, as returned by playlist_tools__search_people.");
+            throw new McpException("Supply personId, albumId or both: a person from playlist_tools__search_people, an album from playlist_tools__search_albums.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(role) && personFilter is null)
+        {
+            throw new McpException("The 'role' filter only works together with 'personId'. To filter by a named person, first call playlist_tools__search_people to resolve them to a personId, then pass that personId here.");
         }
 
         // Clamp to a sane range. The service also floors count at 1, but we enforce both bounds here explicitly.
@@ -194,15 +203,18 @@ public class MusicServiceTool(
             MinutesBetweenAlbumRepeat,
             UseWeightedPicks);
 
+        bool allowIgnoringRules = await permissionAuthorizer.HasAnyAsync(user, CorePermissions.PlaylistRulesIgnore);
         bool allowOnlyPublicAlbums = !await permissionAuthorizer.HasAnyAsync(user, CorePermissions.AlbumsViewAll);
 
         return await musicSearchService.PickTracksAsync(
-            personId,
             rules,
             systemClock.Now,
             randomGenerator.GetInt,
-            role,
+            personFilter,
+            personFilter.HasValue ? role : null,
+            albumFilter,
             count,
+            allowIgnoringRules,
             allowOnlyPublicAlbums);
     }
 
@@ -242,7 +254,7 @@ public class MusicServiceTool(
 
         bool allowOnlyPublicAlbums = !await permissionAuthorizer.HasAnyAsync(user, CorePermissions.AlbumsViewAll);
 
-        return await musicSearchService.GetQueueAsync(limit, now, at, PointInTimeWindowSeconds, allowOnlyPublicAlbums, trackIds: trackFilter);
+        return await musicSearchService.GetQueueAsync(limit, now, trackFilter, at, PointInTimeWindowSeconds, allowOnlyPublicAlbums);
     }
 
     [McpServerTool(ReadOnly = true), Description("What has already played, newest first, plus what is playing now. Returns serverTime, so you never have to guess the current date or time. There are six ways to call it: with no parameters for the most recent tracks; with minutesAgo for 'what was that ten minutes ago'; with time, plus date for a day other than today, for 'what was playing around 16:45'; with date alone for 'what did we play on Monday'; with trackIds for 'when did we last hear it'; or with personId for 'when did we last hear something by Toto'. The minutesAgo and time forms ask about a moment, and return context either side of it. A clock time is matched as the minute that follows it. For a point in time, exactly one entry carries bestMatch true: the play covering most of that minute, or the nearest play if nothing was on, in which case hint says so. overlapsTargetTime is set on every entry sounding during that minute, often two when a track boundary falls inside it. precededBy and followedBy are the plays either side of the match: name all three when you answer, because the listener's time is usually approximate and the one they meant is often a neighbour rather than the match. targetTime echoes the moment actually used. entries are plays that have finished; the track still playing is reported separately as nowPlaying and is not repeated, except when a point-in-time lookup lands inside it, where stillPlaying marks it and its endedAt is a projection rather than a fact. An entry with hidden true is a real play on an album you may not see: its times are accurate but its title and artist are withheld, so the timeline has no unexplained gaps. nowPlaying can be hidden too, which means something is playing that you cannot see, not that the stream is idle. Hidden entries carry a note field explaining them in words: relay it rather than omitting the entry. hint explains an empty result.")]
@@ -308,7 +320,7 @@ public class MusicServiceTool(
 
         bool allowOnlyPublicAlbums = !await permissionAuthorizer.HasAnyAsync(user, CorePermissions.AlbumsViewAll);
 
-        return await musicSearchService.GetHistoryAsync(limit, now, at, day, PointInTimeWindowSeconds, allowOnlyPublicAlbums, trackIds: trackFilter, personId: personFilter, role: personFilter.HasValue ? role : null);
+        return await musicSearchService.GetHistoryAsync(limit, now, trackFilter, personFilter, personFilter.HasValue ? role : null, at, PointInTimeWindowSeconds, day, allowOnlyPublicAlbums);
     }
 
     /// <summary>
@@ -335,7 +347,7 @@ public class MusicServiceTool(
 
     // Mutating tool: appends to shared queue state. Hints are set explicitly so clients can gate/approve it.
     // Destructive defaults to true; appending twice adds twice, so it is not idempotent.
-    [McpServerTool(Destructive = true, Idempotent = false), Description("Append tracks to the global stream queue that every listener hears, or insert at Position, shifting the rest back. Returns the IDs that landed, the resulting queueLength (tracks waiting behind the one playing, which is not counted), and a skipped list for IDs that could not be queued — these do not fail the call, so always check skipped and tell the user what did not make it. firstAddedPosition is where the first added track landed, counting from 1 at the front of the queue, and the note says in words when it will play — use them instead of describing the position yourself. Adding is permanent: nothing can remove, reorder or empty the queue, so never offer to undo or change an add.")]
+    [McpServerTool(Destructive = true, Idempotent = false), Description("Append tracks to the global stream queue that every listener hears, or insert at Position, shifting the rest back. Returns the IDs that landed, the resulting queueLength (tracks waiting behind the one playing, which is not counted), and a skipped list for IDs that could not be queued — these do not fail the call, so always check skipped and tell the user what did not make it. firstAddedPosition is where the first added track landed, counting from 1 at the front of the queue, and the hint says in words when it will play — use them instead of describing the position yourself. Adding is permanent: nothing can remove, reorder or empty the queue, so never offer to undo or change an add.")]
     [RequirePermission(CorePermissions.PlaylistEdit)]
     public async Task<QueueAddResult> AddToQueue(
         ClaimsPrincipal user,
@@ -372,7 +384,7 @@ public class MusicServiceTool(
         // dropped by the time a multi-track add completes.
         if (result.AddedTrackIds.Count > AnnounceAddThreshold)
         {
-            result = result with { Note = $"This added {result.AddedTrackIds.Count} tracks. Say how many when you confirm it to the user. {result.Note}".Trim() };
+            result = result with { Hint = $"This added {result.AddedTrackIds.Count} tracks. Say how many when you confirm it to the user. {result.Hint}".Trim() };
         }
 
         return result;

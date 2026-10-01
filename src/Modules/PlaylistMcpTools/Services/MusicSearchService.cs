@@ -26,10 +26,10 @@ public interface IMusicSearchService
     Task<AlbumSearchResult> SearchAlbumsAsync(string query = null, int? personId = null, string role = null, int limit = 5, bool allowOnlyPublicAlbums = true);
     Task<TrackSearchResult> SearchTracksAsync(TrackSearchQuery query, double minScore = 0.4, bool allowOnlyPublicAlbums = true);
     Task<AlbumTracklist> GetAlbumTracklistAsync(int albumId, bool allowOnlyPublicAlbums = true);
-    Task<QueueView> GetQueueAsync(int limit, DateTime now, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null);
-    Task<HistoryView> GetHistoryAsync(int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null, int? personId = null, string role = null);
+    Task<QueueView> GetQueueAsync(int limit, DateTime now, IReadOnlyList<int> trackIds = null, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true);
+    Task<HistoryView> GetHistoryAsync(int limit, DateTime now, IReadOnlyList<int> trackIds = null, int? personId = null, string role = null, DateTime? at = null, int atWindowSeconds = 60, DateOnly? day = null, bool allowOnlyPublicAlbums = true);
     Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, int? position = null, bool playNow = false, bool allowOnlyPublicAlbums = true);
-    Task<TrackPickResult> PickTracksAsync(int personId, PickRules rules, DateTime now, Func<int, int> nextRandom, string role = null, int count = 1, bool allowOnlyPublicAlbums = true);
+    Task<TrackPickResult> PickTracksAsync(PickRules rules, DateTime now, Func<int, int> nextRandom, int? personId = null, string role = null, int? albumId = null, int count = 1, bool allowIgnoringRules = false, bool allowOnlyPublicAlbums = true);
 }
 
 /// <summary>
@@ -87,6 +87,10 @@ public class MusicSearchService(
         "A track on an album you do not have access to. It is playing now, but its details are withheld.";
     private const string HiddenQueueNote =
         "A track on an album you do not have access to. It will play in this position, but its details are withheld.";
+    // A reply can take a while to arrive, so a track this close to its end may have finished
+    // by the time the listener reads about it.
+    private const int NearlyFinishedSeconds = 30;
+
     private const string NoAlbumCreditsNote =
         "Nobody is credited for this album as a whole. Credits on its tracks apply to those tracks only, so don't describe any track's artist as the album's.";
     private const string HiddenHistoryNote =
@@ -775,7 +779,9 @@ public class MusicSearchService(
     /// "play something by X" case: it ignores <c>IncludeInAutoPlaylist</c> (can pick anything
     /// in the library), skips the artist-repeat rule entirely (we *want* this artist), and
     /// scopes straight to the person instead of computing exclusions across all artists.
-    /// Track- and album-repeat rules are still honoured, and within a single multi-pick call
+    /// Track- and album-repeat rules are still honoured, and set aside one at a time when they
+    /// leave nothing to pick only if <paramref name="allowIgnoringRules"/> is true — a permission
+    /// of the caller, never a choice of the model. Within a single multi-pick call
     /// the same album won't be chosen twice while distinct albums remain.
     ///
     /// The volatile collaborators are passed in rather than injected, so this service stays
@@ -792,12 +798,14 @@ public class MusicSearchService(
     /// in chat about extracting a single shared selection core that both call.
     /// </summary>
     public async Task<TrackPickResult> PickTracksAsync(
-        int personId,
         PickRules rules,
         DateTime now,
         Func<int, int> nextRandom,
+        int? personId = null,
         string role = null,
+        int? albumId = null,
         int count = 1,
+        bool allowIgnoringRules = false,
         bool allowOnlyPublicAlbums = true)
     {
         if (count < 1)
@@ -880,24 +888,80 @@ public class MusicSearchService(
             eligibleQuery = eligibleQuery.Where(tsi => tsi.Track.Disc.Album.IsPublic);
         }
 
-        var poolRaw = await eligibleQuery
-            .Where(tsi =>
-                (tsi.Track.TrackPersonGroupPersonRelations.Any(r =>
-                     (role == null || r.PersonGroup.Name == role) && r.Persons.Any(p => p.Id == personId))
-                 || tsi.Track.Disc.Album.AlbumPersonGroupPersonRelations.Any(r =>
-                     (role == null || r.PersonGroup.Name == role) && r.Persons.Any(p => p.Id == personId)))
-                && !trackExclusions.Contains(tsi.TrackId)
-                && !albumExclusions.Contains(tsi.Track.Disc.AlbumId))
-            .Select(tsi => new { tsi.TrackId, tsi.Track.Disc.AlbumId, tsi.Weight })
-            .ToListAsync();
+        // The pool: tracks credited to the person, on the album, or both. Credits count by the
+        // same rule as every other person-scoped lookup.
+        IQueryable<TrackStreamInfo> scoped = eligibleQuery;
 
-        int poolSize = poolRaw.Count;
-        if (poolSize == 0)
+        if (personId is { } pickPerson)
         {
-            return new TrackPickResult([], 0);
+            IQueryable<int> theirTracks = CreditedTo(dbContext.Tracks, pickPerson, role).Select(t => t.Id);
+            scoped = scoped.Where(tsi => theirTracks.Contains(tsi.TrackId));
         }
 
-        List<PoolTrack> pool = poolRaw.Select(x => new PoolTrack(x.TrackId, x.AlbumId, x.Weight)).ToList();
+        if (albumId is { } pickAlbum)
+        {
+            scoped = scoped.Where(tsi => tsi.Track.Disc.AlbumId == pickAlbum);
+        }
+
+        // The repeat rules hold while they leave anything to pick, and are relaxed one at a time
+        // when they don't. The album rule goes first because it excludes a whole album at once —
+        // for a request naming that album, everything on it. Relaxing only as far as needed means
+        // an album heard an hour ago still yields a track not heard for days, rather than
+        // yesterday's. The hints say what happened; the caller decides how to put it.
+        var tiers = new (bool KeepTrackRule, bool KeepAlbumRule, string Hint)[]
+        {
+            (true, true, null),
+            (true, false, "Nothing was eligible under the repeat rules, so the rule against repeating an album within the hour was set aside."),
+            (false, false, "Nothing was eligible even with the album rule set aside, so the rule against repeating a recently played track was set aside too: this has played recently."),
+        };
+
+        List<PoolTrack> pool = [];
+        string hint = null;
+
+        // Setting the rules aside is a permission, not a default: without it only the first tier
+        // runs, and an empty pool stays empty.
+        foreach (var tier in allowIgnoringRules ? tiers : tiers[..1])
+        {
+            IQueryable<TrackStreamInfo> tierQuery = scoped;
+
+            if (tier.KeepTrackRule)
+            {
+                tierQuery = tierQuery.Where(tsi => !trackExclusions.Contains(tsi.TrackId));
+            }
+
+            if (tier.KeepAlbumRule)
+            {
+                tierQuery = tierQuery.Where(tsi => !albumExclusions.Contains(tsi.Track.Disc.AlbumId));
+            }
+
+            var found = await tierQuery
+                .Select(tsi => new { tsi.TrackId, tsi.Track.Disc.AlbumId, tsi.Weight })
+                .ToListAsync();
+
+            if (found.Count > 0)
+            {
+                pool = found.Select(x => new PoolTrack(x.TrackId, x.AlbumId, x.Weight)).ToList();
+                hint = tier.Hint;
+                break;
+            }
+        }
+
+        int poolSize = pool.Count;
+        if (poolSize == 0)
+        {
+            if (allowIgnoringRules)
+            {
+                // Every rule relaxed and still nothing: there is genuinely nothing playable here.
+                return new TrackPickResult([], 0, "Nothing playable matches, even with the repeat rules set aside.");
+            }
+
+            // Without the permission, empty has two causes, and they mean opposite things to a
+            // listener: nothing by them at all, or plenty that has all played recently. Reported
+            // as one, the second reads as the first.
+            return await scoped.AnyAsync()
+                ? new TrackPickResult([], 0, "Everything that matches has played recently, so the repeat rules leave nothing to pick.")
+                : new TrackPickResult([], 0, "Nothing playable matches.");
+        }
 
         // Weighted (or uniform) sampling without replacement. Prefer an unused album each
         // step; only reuse an album once distinct ones run out, rather than under-filling.
@@ -955,7 +1019,7 @@ public class MusicSearchService(
             picks.Add(ToCandidate(row, 0, how));
         }
 
-        return new TrackPickResult(picks, poolSize);
+        return new TrackPickResult(picks, poolSize, hint);
     }
 
     // ---------- Stream state (read-only) ----------
@@ -973,7 +1037,7 @@ public class MusicSearchService(
     /// boundary rather than here.
     /// </summary>
     public async Task<QueueView> GetQueueAsync(
-        int limit, DateTime now, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null)
+        int limit, DateTime now, IReadOnlyList<int> trackIds = null, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true)
     {
         limit = Math.Clamp(limit, 1, 100);
         atWindowSeconds = Math.Clamp(atWindowSeconds, 1, 3600);
@@ -1166,6 +1230,18 @@ public class MusicSearchService(
             hint = "The queue is empty.";
         }
 
+        // A fact about timing, not a sentence to repeat: the caller words it however it likes.
+        if (nowPlaying is { RemainingSeconds: < NearlyFinishedSeconds } ending)
+        {
+            string soon = string.Format(
+                CultureInfo.InvariantCulture,
+                "The track playing now has {0} seconds left, so it may have finished by the time this is read; {1}.",
+                ending.RemainingSeconds,
+                timeline.Count > 0 ? "position 1 in the queue plays next" : "nothing is queued after it yet");
+
+            hint = hint == null ? soon : hint + " " + soon;
+        }
+
         return new QueueView(now, nowPlaying, upcoming, timeline.Count, at, hint, precededBy, followedBy);
 
         QueueEntry Build(int i)
@@ -1186,16 +1262,20 @@ public class MusicSearchService(
     /// <summary>
     /// What has already played, newest first.
     ///
-    /// Three shapes, in order of precedence: <paramref name="at"/> returns the track that was
-    /// playing around that moment with context either side; <paramref name="day"/> returns the
-    /// end of that day's playback; neither returns the most recent tracks.
+    /// Five shapes, in order of precedence, which is also the order of the parameters:
+    /// <paramref name="trackIds"/> returns the most recent play of any of those tracks;
+    /// <paramref name="personId"/> the most recent play of anything credited to them; both with
+    /// context either side and the play before as EarlierPlay. <paramref name="at"/> returns the
+    /// track that was playing around that moment, with context either side;
+    /// <paramref name="day"/> the end of that day's playback; none of them the most recent
+    /// tracks.
     ///
     /// <paramref name="at"/> is treated as the start of a window <paramref name="atWindowSeconds"/>
     /// long rather than an exact instant, because a clock time is only accurate to the minute
     /// and a track boundary can fall anywhere inside it.
     /// </summary>
     public async Task<HistoryView> GetHistoryAsync(
-        int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null, int? personId = null, string role = null)
+        int limit, DateTime now, IReadOnlyList<int> trackIds = null, int? personId = null, string role = null, DateTime? at = null, int atWindowSeconds = 60, DateOnly? day = null, bool allowOnlyPublicAlbums = true)
     {
         limit = Math.Clamp(limit, 1, 100);
         atWindowSeconds = Math.Clamp(atWindowSeconds, 1, 3600);
@@ -1340,19 +1420,6 @@ public class MusicSearchService(
 
         Dictionary<int, TrackRow> tracks = await LoadTrackRowsAsync(neededTracks.Distinct().ToList(), allowOnlyPublicAlbums);
 
-        // One construction for every entry, so the earlier play is built exactly like the rest,
-        // hidden tracks included.
-        HistoryEntry ToEntry(HistoryRow row, bool bestMatch, bool overlaps, bool stillPlaying)
-        {
-            DateTime ended = row.Played.AddSeconds(row.Length);
-
-            // A play the caller may not see keeps its times, so the timeline reads as
-            // continuous. Dropping it would leave an unexplained gap that looks like silence.
-            return tracks.TryGetValue(row.TrackId, out TrackRow track)
-                ? new HistoryEntry(row.Played, ended, track.Id, track.Title, track.AlbumTitle, BuildCredits(track), row.Length, bestMatch, overlaps, stillPlaying, false, null)
-                : new HistoryEntry(row.Played, ended, null, null, null, [], row.Length, bestMatch, overlaps, stillPlaying, true, HiddenHistoryNote);
-        }
-
         var entries = new List<HistoryEntry>(rows.Count);
         foreach (HistoryRow row in rows)
         {
@@ -1411,6 +1478,19 @@ public class MusicSearchService(
         HistoryEntry earlierPlay = earlierRow == null ? null : ToEntry(earlierRow, false, false, false);
 
         return new HistoryView(now, nowPlaying, entries, at, hint, precededBy, followedBy, earlierPlay);
+
+        // One construction for every entry, so the earlier play is built exactly like the rest,
+        // hidden tracks included.
+        HistoryEntry ToEntry(HistoryRow row, bool bestMatch, bool overlaps, bool stillPlaying)
+        {
+            DateTime ended = row.Played.AddSeconds(row.Length);
+
+            // A play the caller may not see keeps its times, so the timeline reads as
+            // continuous. Dropping it would leave an unexplained gap that looks like silence.
+            return tracks.TryGetValue(row.TrackId, out TrackRow track)
+                ? new HistoryEntry(row.Played, ended, track.Id, track.Title, track.AlbumTitle, BuildCredits(track), row.Length, bestMatch, overlaps, stillPlaying, false, null)
+                : new HistoryEntry(row.Played, ended, null, null, null, [], row.Length, bestMatch, overlaps, stillPlaying, true, HiddenHistoryNote);
+        }
     }
 
     /// <summary>
@@ -1749,7 +1829,7 @@ public class MusicSearchService(
             firstAddedPosition = await dbContext.StreamQueue.CountAsync(s => s.SortOrder < firstSort) + 1;
         }
 
-        return new QueueAddResult(added, skipped, queueLength, BuildQueueNote(firstAddedPosition, queueLength, playNow, added.Count), firstAddedPosition);
+        return new QueueAddResult(added, skipped, queueLength, BuildQueueHint(firstAddedPosition, queueLength, playNow, added.Count), firstAddedPosition);
     }
 
     /// <summary>
@@ -1758,7 +1838,7 @@ public class MusicSearchService(
     /// for something at the back of a long queue, or a place in the order worked out from what
     /// they queued earlier rather than from the queue itself.
     /// </summary>
-    private static string BuildQueueNote(int? firstAddedPosition, int queueLength, bool playNow, int addedCount)
+    private static string BuildQueueHint(int? firstAddedPosition, int queueLength, bool playNow, int addedCount)
     {
         if (addedCount == 0 || firstAddedPosition is not { } position)
         {

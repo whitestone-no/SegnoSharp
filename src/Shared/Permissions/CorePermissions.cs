@@ -7,5 +7,6 @@ public sealed class CorePermissions
     public const string AlbumsEdit = "core:albums:edit";
     public const string PlaylistView = "core:playlist:view";
     public const string PlaylistEdit = "core:playlist:edit";
+    public const string PlaylistRulesIgnore = "core:playlist:rules:ignore";
     public const string SecurityEdit = "core:security:edit";
 }
