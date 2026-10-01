@@ -56,6 +56,12 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         {
             DbContext.ChangeTracker.Clear();
 
+            if (string.IsNullOrEmpty(SearchQuery))
+            {
+                PersonResults = [];
+                return;
+            }
+
             string query = SearchQuery.Trim();
 
             PersonResults = await DbContext.Persons
