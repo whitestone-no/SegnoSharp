@@ -245,7 +245,7 @@ public class MusicServiceTool(
         return await musicSearchService.GetQueueAsync(limit, now, at, PointInTimeWindowSeconds, allowOnlyPublicAlbums, trackIds: trackFilter);
     }
 
-    [McpServerTool(ReadOnly = true), Description("What has already played, newest first, plus what is playing now. Returns serverTime, so you never have to guess the current date or time. There are five ways to call it: with no parameters for the most recent tracks; with minutesAgo for 'what was that ten minutes ago'; with time, plus date for a day other than today, for 'what was playing around 16:45'; with date alone for 'what did we play on Monday'; or with trackIds for 'when did we last hear it'. The minutesAgo and time forms ask about a moment, and return context either side of it. A clock time is matched as the minute that follows it. For a point in time, exactly one entry carries bestMatch true: the play covering most of that minute, or the nearest play if nothing was on, in which case hint says so. overlapsTargetTime is set on every entry sounding during that minute, often two when a track boundary falls inside it. precededBy and followedBy are the plays either side of the match: name all three when you answer, because the listener's time is usually approximate and the one they meant is often a neighbour rather than the match. targetTime echoes the moment actually used. entries are plays that have finished; the track still playing is reported separately as nowPlaying and is not repeated, except when a point-in-time lookup lands inside it, where stillPlaying marks it and its endedAt is a projection rather than a fact. An entry with hidden true is a real play on an album you may not see: its times are accurate but its title and artist are withheld, so the timeline has no unexplained gaps. nowPlaying can be hidden too, which means something is playing that you cannot see, not that the stream is idle. Hidden entries carry a note field explaining them in words: relay it rather than omitting the entry. hint explains an empty result.")]
+    [McpServerTool(ReadOnly = true), Description("What has already played, newest first, plus what is playing now. Returns serverTime, so you never have to guess the current date or time. There are six ways to call it: with no parameters for the most recent tracks; with minutesAgo for 'what was that ten minutes ago'; with time, plus date for a day other than today, for 'what was playing around 16:45'; with date alone for 'what did we play on Monday'; with trackIds for 'when did we last hear it'; or with personId for 'when did we last hear something by Toto'. The minutesAgo and time forms ask about a moment, and return context either side of it. A clock time is matched as the minute that follows it. For a point in time, exactly one entry carries bestMatch true: the play covering most of that minute, or the nearest play if nothing was on, in which case hint says so. overlapsTargetTime is set on every entry sounding during that minute, often two when a track boundary falls inside it. precededBy and followedBy are the plays either side of the match: name all three when you answer, because the listener's time is usually approximate and the one they meant is often a neighbour rather than the match. targetTime echoes the moment actually used. entries are plays that have finished; the track still playing is reported separately as nowPlaying and is not repeated, except when a point-in-time lookup lands inside it, where stillPlaying marks it and its endedAt is a projection rather than a fact. An entry with hidden true is a real play on an album you may not see: its times are accurate but its title and artist are withheld, so the timeline has no unexplained gaps. nowPlaying can be hidden too, which means something is playing that you cannot see, not that the stream is idle. Hidden entries carry a note field explaining them in words: relay it rather than omitting the entry. hint explains an empty result.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
     public async Task<HistoryView> GetHistory(
         ClaimsPrincipal user,
@@ -253,7 +253,9 @@ public class MusicServiceTool(
         [Description("Optional date as yyyy-MM-dd, in the server's local time. Defaults to today when a time is given. Resolve words like 'yesterday' or 'Monday' against the serverTime from the most recent tool response rather than guessing, and rather than one you read earlier in the conversation.")] string date = null,
         [Description("Optional clock time as HH:mm, 24-hour, server-local. Returns whatever was playing at that moment on the given date. If the listener's time could be read two ways, as '9:15' can, use whichever was most recent, and say which you used so they can correct it.")] string time = null,
         [Description("Optional shortcut for a relative question: how many minutes before now to look. Takes precedence over date and time. Use 0 or omit when not asking about a relative moment.")] int minutesAgo = 0,
-        [Description("Optional: track IDs from earlier results, for 'when did we last hear it'. Pass every version of a song — album edit, radio edit, remix — to ask about the song rather than one recording. Returns the page centred on the most recent play of any of them, flagged bestMatch, including a play still in progress, marked stillPlaying. earlierPlay is the play before that of any of them, whichever version it was. If none has played, entries is empty and hint says so. Takes precedence over minutesAgo, time and date. At most 100.")] List<int> trackIds = null)
+        [Description("Optional: track IDs from earlier results, for 'when did we last hear it'. Pass every version of a song — album edit, radio edit, remix — to ask about the song rather than one recording. Returns the page centred on the most recent play of any of them, flagged bestMatch, including a play still in progress, marked stillPlaying. earlierPlay is the play before that of any of them, whichever version it was. If none has played, entries is empty and hint says so. Takes precedence over minutesAgo, time and date. At most 100.")] List<int> trackIds = null,
+        [Description("Optional: a person or group ID from playlist_tools__search_people, for 'when did we last hear something by Toto'. Returns the page centred on the most recent play of anything credited to them, at track or album level, flagged bestMatch, with earlierPlay the play before that. For two people who share a name, look each up separately. Takes precedence over minutesAgo, time and date; trackIds takes precedence over it. Use 0 or omit otherwise.")] int personId = 0,
+        [Description("Optional role filter for personId, for 'composed by' rather than any credit. Valid values come from playlist_tools__get_roles. Only meaningful together with personId.")] string role = null)
     {
         limit = Math.Clamp(limit, 1, MaxResultLimit);
 
@@ -261,6 +263,17 @@ public class MusicServiceTool(
         DateTime? at = null;
         DateOnly? day = null;
         List<int> trackFilter = NormalizeTrackIds(trackIds);
+
+        if (!string.IsNullOrWhiteSpace(role) && personId <= 0)
+        {
+            throw new McpException("The 'role' filter only works together with 'personId'. To filter by a named person, first call playlist_tools__search_people to resolve them to a personId, then pass that personId here.");
+        }
+
+        int? personFilter = trackFilter is null && personId > 0 ? personId : null;
+
+        // A lookup by track or by person is a different question from one about a moment or a
+        // day, so those parameters are ignored rather than combined with it.
+        bool lookup = trackFilter != null || personFilter != null;
 
         DateOnly? parsedDate = null;
         if (!string.IsNullOrWhiteSpace(date))
@@ -273,13 +286,11 @@ public class MusicServiceTool(
             parsedDate = parsed;
         }
 
-        // Looking up a track is a different question from looking up a moment or a day, so those
-        // parameters are ignored rather than combined with it.
-        if (trackFilter is null && minutesAgo > 0)
+        if (!lookup && minutesAgo > 0)
         {
             at = now.AddMinutes(-minutesAgo);
         }
-        else if (trackFilter is null && !string.IsNullOrWhiteSpace(time))
+        else if (!lookup && !string.IsNullOrWhiteSpace(time))
         {
             if (!TimeOnly.TryParseExact(time, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly parsedTime))
             {
@@ -290,14 +301,14 @@ public class MusicServiceTool(
             DateOnly onDate = parsedDate ?? DateOnly.FromDateTime(now);
             at = onDate.ToDateTime(parsedTime);
         }
-        else if (trackFilter is null && parsedDate.HasValue)
+        else if (!lookup && parsedDate.HasValue)
         {
             day = parsedDate;
         }
 
         bool allowOnlyPublicAlbums = !await permissionAuthorizer.HasAnyAsync(user, CorePermissions.AlbumsViewAll);
 
-        return await musicSearchService.GetHistoryAsync(limit, now, at, day, PointInTimeWindowSeconds, allowOnlyPublicAlbums, trackIds: trackFilter);
+        return await musicSearchService.GetHistoryAsync(limit, now, at, day, PointInTimeWindowSeconds, allowOnlyPublicAlbums, trackIds: trackFilter, personId: personFilter, role: personFilter.HasValue ? role : null);
     }
 
     /// <summary>

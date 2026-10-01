@@ -27,7 +27,7 @@ public interface IMusicSearchService
     Task<TrackSearchResult> SearchTracksAsync(TrackSearchQuery query, double minScore = 0.4, bool allowOnlyPublicAlbums = true);
     Task<AlbumTracklist> GetAlbumTracklistAsync(int albumId, bool allowOnlyPublicAlbums = true);
     Task<QueueView> GetQueueAsync(int limit, DateTime now, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null);
-    Task<HistoryView> GetHistoryAsync(int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null);
+    Task<HistoryView> GetHistoryAsync(int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null, int? personId = null, string role = null);
     Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, int? position = null, bool playNow = false, bool allowOnlyPublicAlbums = true);
     Task<TrackPickResult> PickTracksAsync(int personId, PickRules rules, DateTime now, Func<int, int> nextRandom, string role = null, int count = 1, bool allowOnlyPublicAlbums = true);
 }
@@ -514,16 +514,7 @@ public class MusicSearchService(
 
         if (query.PersonId.HasValue)
         {
-            int personId = query.PersonId.Value;
-            string role = query.Role;
-            scope = scope.Where(t =>
-                t.TrackPersonGroupPersonRelations.Any(r =>
-                    (role == null || r.PersonGroup.Name == role) &&
-                    r.Persons.Any(p => p.Id == personId))
-                ||
-                t.Disc.Album.AlbumPersonGroupPersonRelations.Any(r =>
-                    (role == null || r.PersonGroup.Name == role) &&
-                    r.Persons.Any(p => p.Id == personId)));
+            scope = CreditedTo(scope, query.PersonId.Value, query.Role);
         }
 
         List<TrackCandidate> candidates;
@@ -1204,7 +1195,7 @@ public class MusicSearchService(
     /// and a track boundary can fall anywhere inside it.
     /// </summary>
     public async Task<HistoryView> GetHistoryAsync(
-        int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null)
+        int limit, DateTime now, DateTime? at = null, DateOnly? day = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true, IReadOnlyList<int> trackIds = null, int? personId = null, string role = null)
     {
         limit = Math.Clamp(limit, 1, 100);
         atWindowSeconds = Math.Clamp(atWindowSeconds, 1, 3600);
@@ -1222,24 +1213,41 @@ public class MusicSearchService(
         // so nothing downstream has to infer that one being present means the other is.
         (DateTime Start, DateTime End)? window = null;
 
+        // A lookup by track or by person is one question — which plays count — answered the
+        // same way: the most recent of them, including one still in progress, which is then
+        // the answer, and the one before it, whatever it was, as earlierPlay.
+        IQueryable<StreamHistory> plays = null;
+        string noPlaysHint = null;
+
         if (trackIds is { Count: > 0 })
         {
-            // "When did we last hear it", for a song rather than one recording: the most recent
-            // play of any of the tracks given — an album edit, a radio edit, a remix — including
-            // one still in progress, which is then the answer. The play before it, whichever
-            // version, comes back as earlierPlay.
+            // For a song rather than one recording: any of the versions given — an album edit,
+            // a radio edit, a remix.
             List<int> ids = trackIds.Distinct().ToList();
-            IQueryable<StreamHistory> plays = scope.Where(h => ids.Contains(h.TrackStreamInfo.TrackId));
+            plays = scope.Where(h => ids.Contains(h.TrackStreamInfo.TrackId));
+            noPlaysHint = ids.Count == 1
+                ? "There's no record of that track having played."
+                : "There's no record of any of those tracks having played.";
+        }
+        else if (personId is { } pid)
+        {
+            // Anything credited to them, by the same rule a track search uses. A subquery rather
+            // than a list of their track IDs, so a prolific artist can't run past a provider's
+            // parameter limit.
+            IQueryable<int> theirTracks = CreditedTo(dbContext.Tracks, pid, role).Select(t => t.Id);
+            plays = scope.Where(h => theirTracks.Contains(h.TrackStreamInfo.TrackId));
+            noPlaysHint = "There's no record of anything credited to that person having played.";
+        }
 
+        if (plays != null)
+        {
             // Two rows, however long the history is: the answer, and the time before it.
             List<HistoryRow> latestTwo = await ProjectHistoryAsync(plays.OrderByDescending(h => h.Played).Take(2));
 
             if (latestTwo.Count == 0)
             {
                 rows = [];
-                hint = ids.Count == 1
-                    ? "There's no record of that track having played."
-                    : "There's no record of any of those tracks having played.";
+                hint = noPlaysHint;
             }
             else
             {
@@ -1546,6 +1554,21 @@ public class MusicSearchService(
     private static DateTime Min(DateTime a, DateTime b) => a < b ? a : b;
 
     private static DateTime Max(DateTime a, DateTime b) => a > b ? a : b;
+
+    /// <summary>
+    /// Tracks credited to a person, at track level or through their album. The one rule every
+    /// person-scoped lookup uses, so "credited to" means the same thing wherever it appears:
+    /// a track on a soundtrack credited to its composer counts even with no credit of its own.
+    /// </summary>
+    private static IQueryable<Track> CreditedTo(IQueryable<Track> tracks, int personId, string role) =>
+        tracks.Where(t =>
+            t.TrackPersonGroupPersonRelations.Any(r =>
+                (role == null || r.PersonGroup.Name == role) &&
+                r.Persons.Any(p => p.Id == personId))
+            ||
+            t.Disc.Album.AlbumPersonGroupPersonRelations.Any(r =>
+                (role == null || r.PersonGroup.Name == role) &&
+                r.Persons.Any(p => p.Id == personId)));
 
     private static Task<List<HistoryRow>> ProjectHistoryAsync(IQueryable<StreamHistory> query) =>
         query
