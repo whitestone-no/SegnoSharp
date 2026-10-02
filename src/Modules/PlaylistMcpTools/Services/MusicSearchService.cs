@@ -28,7 +28,7 @@ public interface IMusicSearchService
     Task<AlbumTracklist> GetAlbumTracklistAsync(int albumId, bool allowOnlyPublicAlbums = true);
     Task<QueueView> GetQueueAsync(int limit, DateTime now, IReadOnlyList<int> trackIds = null, DateTime? at = null, int atWindowSeconds = 60, bool allowOnlyPublicAlbums = true);
     Task<HistoryView> GetHistoryAsync(int limit, DateTime now, IReadOnlyList<int> trackIds = null, int? personId = null, string role = null, DateTime? at = null, int atWindowSeconds = 60, DateOnly? day = null, bool allowOnlyPublicAlbums = true);
-    Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, int? position = null, bool playNow = false, bool allowOnlyPublicAlbums = true);
+    Task<QueueAddResult> AddTracksToQueueAsync(IReadOnlyList<int> trackIds, PickRules rules, DateTime now, int? position = null, bool playNow = false, bool allowIgnoringRules = false, bool allowOnlyPublicAlbums = true);
     Task<TrackPickResult> PickTracksAsync(PickRules rules, DateTime now, Func<int, int> nextRandom, int? personId = null, string role = null, int? albumId = null, int count = 1, bool allowIgnoringRules = false, bool allowOnlyPublicAlbums = true);
 }
 
@@ -126,14 +126,14 @@ public class MusicSearchService(
             .Select(pg => new { pg.Name, pg.Type })
             .ToListAsync();
 
-        // The table holds a row per name/scope pair, but callers filter on the name alone,
-        // so collapse to one entry per distinct name carrying the scopes it covers.
+        // The table holds a row per name and type, but callers filter on the name alone, so
+        // collapse to one entry per distinct name, with the types it covers as AppliesTo.
         return raw
             .GroupBy(pg => pg.Name, StringComparer.OrdinalIgnoreCase)
             .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
             .Select(g => new RoleResult(
                 g.First().Name,
-                g.Select(pg => ToCreditSource(pg.Type)).Distinct().OrderBy(s => s).ToList()))
+                g.Select(pg => ToCreditLevel(pg.Type)).Distinct().OrderBy(s => s).ToList()))
             .ToList();
     }
 
@@ -306,7 +306,7 @@ public class MusicSearchService(
     ///
     /// Person scope unions album-level credits with credits on the album's tracks, matching how
     /// track search scopes by person, so a compilation carrying one track by them still counts.
-    /// With no title to rank against, results come back in release order and every hit scores 1.
+    /// With no title to rank against, results come back in title order and every hit scores 1.
     ///
     /// TotalMatches reports how many albums matched before the limit, so a caller can tell a
     /// complete list from the first page of a longer one.
@@ -427,7 +427,7 @@ public class MusicSearchService(
             // Nothing to rank against, so order and slice in the database and fetch the
             // credits for exactly the page being returned.
             raw = await albumQuery
-                .OrderBy(a => a.Published).ThenBy(a => a.Title)
+                .OrderBy(a => a.Title).ThenBy(a => a.Published).ThenBy(a => a.Id)
                 .Select(AlbumRowSelector)
                 .Take(limit)
                 .AsSplitQuery()
@@ -443,7 +443,7 @@ public class MusicSearchService(
             {
                 List<CreditDto> credits = a.Credits
                     .Where(c => c.Persons.Count > 0)
-                    .Select(c => new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditSource.Album))
+                    .Select(c => new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditLevel.Album))
                     .ToList();
 
                 return new AlbumResult(
@@ -610,7 +610,9 @@ public class MusicSearchService(
             outcome,
             candidates,
             topScore.HasValue ? Math.Round(topScore.Value, 3) : null,
-            BuildSearchHint(outcome, hasTitle, topScore, minScore, truncated, totalMatches, query.Limit),
+            JoinHints(
+                BuildSearchHint(outcome, hasTitle, topScore, minScore, truncated, totalMatches, query.Limit),
+                hasTitle && outcome == SearchOutcome.Matched ? SharedTitleHint(candidates) : null),
             query.AlbumId,
             truncated,
             totalMatches);
@@ -651,6 +653,41 @@ public class MusicSearchService(
     /// culture so a server running under a comma-decimal locale doesn't hand the model a
     /// threshold it can't pass back.
     /// </summary>
+    /// <summary>
+    /// When the best title appears on several albums, say so. Which album a track came from is
+    /// the part of an answer callers most often leave out, and the server can see the overlap
+    /// where the caller has to notice it.
+    /// </summary>
+    private static string SharedTitleHint(IReadOnlyList<TrackCandidate> candidates)
+    {
+        if (candidates.Count < 2)
+        {
+            return null;
+        }
+
+        string title = candidates[0].Title?.Trim();
+        List<TrackCandidate> sharing = candidates
+            .Where(c => string.Equals(c.Title?.Trim(), title, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        int albums = sharing.Select(c => c.AlbumId).Distinct().Count();
+
+        return albums < 2
+            ? null
+            : string.Format(
+                CultureInfo.InvariantCulture,
+                "{0} of these share the title \"{1}\", on {2} different albums. If you queue one, say which album it is from and name the others.",
+                sharing.Count,
+                candidates[0].Title,
+                albums);
+    }
+
+    private static string JoinHints(params string[] hints)
+    {
+        string joined = string.Join(" ", hints.Where(h => !string.IsNullOrEmpty(h)));
+        return joined.Length == 0 ? null : joined;
+    }
+
     private static string BuildSearchHint(SearchOutcome outcome, bool hasTitle, double? topScore, double minScore, bool truncated, int totalMatches, int limit)
     {
         var parts = new List<string>();
@@ -789,10 +826,10 @@ public class MusicSearchService(
         List<AlbumTrack> ordered = rows
             .OrderBy(t => t.DiscNumber)
             .ThenBy(t => t.TrackNumber)
-            .Select(t => new AlbumTrack(t.DiscNumber, t.TrackNumber, t.Id, t.Title, t.IsPlayable, ToCredits(t.Credits, CreditSource.Track)))
+            .Select(t => new AlbumTrack(t.DiscNumber, t.TrackNumber, t.Id, t.Title, t.IsPlayable, ToCredits(t.Credits, CreditLevel.Track)))
             .ToList();
 
-        List<CreditDto> albumCredits = ToCredits(album.Credits, CreditSource.Album);
+        List<CreditDto> albumCredits = ToCredits(album.Credits, CreditLevel.Album);
 
         // An empty credit list is an absence, and callers fill it in; say it instead.
         return new AlbumTracklist(album.Id, album.Title, albumCredits, ordered, albumCredits.Count == 0 ? NoAlbumCreditsNote : null);
@@ -840,70 +877,7 @@ public class MusicSearchService(
             count = 1;
         }
 
-        // Queue end time: summed lengths of everything queued, plus the remainder of whatever
-        // is currently playing. Repeat cutoffs are measured from here, because that is when a
-        // newly-picked track would actually play.
-        List<int> queueLengths = await dbContext.StreamQueue
-            .AsNoTracking()
-            .Select(q => (int)q.TrackStreamInfo.Track.Length)
-            .ToListAsync();
-        int queueSum = queueLengths.Sum();
-
-        var currentlyPlaying = await dbContext.StreamHistory
-            .AsNoTracking()
-            .OrderByDescending(h => h.Played)
-            .Select(h => new { h.Played, Length = (int)h.TrackStreamInfo.Track.Length })
-            .FirstOrDefaultAsync();
-
-        DateTime currentlyPlayingEnding = now;
-        if (currentlyPlaying != null)
-        {
-            DateTime ending = currentlyPlaying.Played.AddSeconds(currentlyPlaying.Length);
-            currentlyPlayingEnding = ending < now ? now : ending;
-            double delta = (currentlyPlayingEnding - now).TotalSeconds;
-            if (delta > 0)
-            {
-                queueSum += (int)delta;
-            }
-        }
-
-        DateTime endOfQueue = now.AddSeconds(queueSum);
-        DateTime trackRepeatCutoff = endOfQueue.AddMinutes(-rules.MinutesBetweenTrackRepeat);
-        DateTime albumRepeatCutoff = endOfQueue.AddMinutes(-rules.MinutesBetweenAlbumRepeat);
-
-        // Track and album no-repeat exclusions (artist-repeat intentionally NOT computed).
-        // Same shape as the auto-playlist: a track/album is excluded if it appears far enough
-        // into the queue, or — when the repeat window outlasts the whole queue — if it was
-        // played recently per StreamHistory.
-        List<int> trackExclusions = await dbContext.TrackStreamInfos
-            .AsNoTracking()
-            .Where(tsi =>
-                tsi.StreamQueue.Any(sq =>
-                    currentlyPlayingEnding.AddSeconds(
-                        tsi.StreamQueue
-                            .Where(q => q.SortOrder <= sq.SortOrder)
-                            .Sum(q => q.TrackStreamInfo.Track.Length)
-                    ) > trackRepeatCutoff)
-                || (rules.MinutesBetweenTrackRepeat * 60 >= queueSum
-                    && tsi.StreamHistory.Any(h => h.Played > trackRepeatCutoff)))
-            .Select(tsi => tsi.TrackId)
-            .Distinct()
-            .ToListAsync();
-
-        List<int> albumExclusions = await dbContext.TrackStreamInfos
-            .AsNoTracking()
-            .Where(tsi =>
-                tsi.StreamQueue.Any(sq =>
-                    currentlyPlayingEnding.AddSeconds(
-                        tsi.StreamQueue
-                            .Where(q => q.SortOrder <= sq.SortOrder)
-                            .Sum(q => q.TrackStreamInfo.Track.Length)
-                    ) > albumRepeatCutoff)
-                || (rules.MinutesBetweenAlbumRepeat * 60 >= queueSum
-                    && tsi.StreamHistory.Any(h => h.Played > albumRepeatCutoff)))
-            .Select(tsi => tsi.Track.Disc.AlbumId)
-            .Distinct()
-            .ToListAsync();
+        (List<int> trackExclusions, List<int> albumExclusions) = await GetRepeatExclusionsAsync(rules, now);
 
         // Eligible pool: scoped to the person (track- or album-level credit), minus the
         // track/album exclusions. No IncludeInAutoPlaylist filter, no artist-repeat filter.
@@ -986,7 +960,7 @@ public class MusicSearchService(
             // listener: nothing by them at all, or plenty that has all played recently. Reported
             // as one, the second reads as the first.
             return await scoped.AnyAsync()
-                ? new TrackPickResult([], 0, "Everything that matches has played recently, so the repeat rules leave nothing to pick.")
+                ? new TrackPickResult([], 0, "Everything that matches has played recently, so the repeat rules leave nothing to pick. They apply however a track is chosen, so tell the listener rather than looking for one another way.")
                 : new TrackPickResult([], 0, "Nothing playable matches.");
         }
 
@@ -1264,7 +1238,11 @@ public class MusicSearchService(
                 CultureInfo.InvariantCulture,
                 "The track playing now has {0} seconds left, so it may have finished by the time this is read; {1}.",
                 ending.RemainingSeconds,
-                timeline.Count > 0 ? "position 1 in the queue plays next" : "nothing is queued after it yet");
+                timeline.Count == 0
+                    ? "nothing is queued after it yet"
+                    : first == 0 && upcoming.Count > 0 && !upcoming[0].Hidden
+                        ? string.Format(CultureInfo.InvariantCulture, "next is \"{0}\" from {1}", upcoming[0].Title, upcoming[0].AlbumTitle)
+                        : "position 1 in the queue plays next");
 
             hint = hint == null ? soon : hint + " " + soon;
         }
@@ -1663,6 +1641,89 @@ public class MusicSearchService(
     private static DateTime Max(DateTime a, DateTime b) => a > b ? a : b;
 
     /// <summary>
+    /// The tracks and albums the stream's repeat rules keep out for now. The one definition
+    /// both picking and adding use, so an add can't get round what a pick refuses.
+    /// </summary>
+    private async Task<(List<int> Tracks, List<int> Albums)> GetRepeatExclusionsAsync(PickRules rules, DateTime now)
+    {
+        // Queue end time: summed lengths of everything queued, plus the remainder of whatever
+        // is currently playing. Repeat cutoffs are measured from here, because that is when a
+        // newly-picked track would actually play.
+        List<int> queueLengths = await dbContext.StreamQueue
+            .AsNoTracking()
+            .Select(q => (int)q.TrackStreamInfo.Track.Length)
+            .ToListAsync();
+        int queueSum = queueLengths.Sum();
+
+        var currentlyPlaying = await dbContext.StreamHistory
+            .AsNoTracking()
+            .OrderByDescending(h => h.Played)
+            .Select(h => new { h.Played, Length = (int)h.TrackStreamInfo.Track.Length })
+            .FirstOrDefaultAsync();
+
+        DateTime currentlyPlayingEnding = now;
+        if (currentlyPlaying != null)
+        {
+            DateTime ending = currentlyPlaying.Played.AddSeconds(currentlyPlaying.Length);
+            currentlyPlayingEnding = ending < now ? now : ending;
+            double delta = (currentlyPlayingEnding - now).TotalSeconds;
+            if (delta > 0)
+            {
+                queueSum += (int)delta;
+            }
+        }
+
+        DateTime endOfQueue = now.AddSeconds(queueSum);
+        DateTime trackRepeatCutoff = endOfQueue.AddMinutes(-rules.MinutesBetweenTrackRepeat);
+        DateTime albumRepeatCutoff = endOfQueue.AddMinutes(-rules.MinutesBetweenAlbumRepeat);
+
+        // Track and album no-repeat exclusions (artist-repeat intentionally NOT computed).
+        // Same shape as the auto-playlist: a track/album is excluded if it appears far enough
+        // into the queue, or — when the repeat window outlasts the whole queue — if it was
+        // played recently per StreamHistory.
+        List<int> trackExclusions = await dbContext.TrackStreamInfos
+            .AsNoTracking()
+            .Where(tsi =>
+                tsi.StreamQueue.Any(sq =>
+                    currentlyPlayingEnding.AddSeconds(
+                        tsi.StreamQueue
+                            .Where(q => q.SortOrder <= sq.SortOrder)
+                            .Sum(q => q.TrackStreamInfo.Track.Length)
+                    ) > trackRepeatCutoff)
+                || (rules.MinutesBetweenTrackRepeat * 60 >= queueSum
+                    && tsi.StreamHistory.Any(h => h.Played > trackRepeatCutoff)))
+            .Select(tsi => tsi.TrackId)
+            .Distinct()
+            .ToListAsync();
+
+        List<int> albumExclusions = await dbContext.TrackStreamInfos
+            .AsNoTracking()
+            .Where(tsi =>
+                tsi.StreamQueue.Any(sq =>
+                    currentlyPlayingEnding.AddSeconds(
+                        tsi.StreamQueue
+                            .Where(q => q.SortOrder <= sq.SortOrder)
+                            .Sum(q => q.TrackStreamInfo.Track.Length)
+                    ) > albumRepeatCutoff)
+                || (rules.MinutesBetweenAlbumRepeat * 60 >= queueSum
+                    && tsi.StreamHistory.Any(h => h.Played > albumRepeatCutoff)))
+            .Select(tsi => tsi.Track.Disc.AlbumId)
+            .Distinct()
+            .ToListAsync();
+
+        return (trackExclusions, albumExclusions);
+    }
+
+    // A repeat window in words, for a skip reason the caller can pass on.
+    private static string DescribeWindow(int minutes) => minutes switch
+    {
+        >= 2 * 1440 => string.Format(CultureInfo.InvariantCulture, "{0:0} days", Math.Round(minutes / 1440.0)),
+        >= 120 => string.Format(CultureInfo.InvariantCulture, "{0:0} hours", Math.Round(minutes / 60.0)),
+        60 => "hour",
+        _ => string.Format(CultureInfo.InvariantCulture, "{0} minutes", minutes),
+    };
+
+    /// <summary>
     /// Tracks credited to a person, at track level or through their album. The one rule every
     /// person-scoped lookup uses, so "credited to" means the same thing wherever it appears:
     /// a track on a soundtrack credited to its composer counts even with no credit of its own.
@@ -1710,7 +1771,7 @@ public class MusicSearchService(
     }
 
     // Credits as returned to callers, leaving out any role that has nobody in it.
-    private static List<CreditDto> ToCredits(IEnumerable<CreditRow> rows, CreditSource appliesTo) =>
+    private static List<CreditDto> ToCredits(IEnumerable<CreditRow> rows, CreditLevel appliesTo) =>
         rows
             .Where(c => c.Persons.Count > 0)
             .Select(c => new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), appliesTo))
@@ -1722,12 +1783,12 @@ public class MusicSearchService(
 
         foreach (CreditRow c in r.TrackCredits)
         {
-            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditSource.Track));
+            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditLevel.Track));
         }
 
         foreach (CreditRow c in r.AlbumCredits)
         {
-            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditSource.Album));
+            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditLevel.Album));
         }
 
         return credits;
@@ -1751,8 +1812,11 @@ public class MusicSearchService(
     /// </summary>
     public async Task<QueueAddResult> AddTracksToQueueAsync(
         IReadOnlyList<int> trackIds,
+        PickRules rules,
+        DateTime now,
         int? position = null,
         bool playNow = false,
+        bool allowIgnoringRules = false,
         bool allowOnlyPublicAlbums = true)
     {
         var added = new List<int>();
@@ -1788,6 +1852,31 @@ public class MusicSearchService(
 
         Dictionary<int, TrackStreamInfo> infos = await infoQuery.ToDictionaryAsync(x => x.TrackId);
 
+        // The repeat rules bind every add unless the caller may set them aside, explicit
+        // requests included. They are the pick's own rules, measured from the end of the queue;
+        // for an insert nearer the front that is slightly stricter than it needs to be, never
+        // laxer.
+        var excludedTracks = new HashSet<int>();
+        var excludedAlbums = new HashSet<int>();
+        var albumOf = new Dictionary<int, int>();
+
+        if (!allowIgnoringRules && infos.Count > 0)
+        {
+            (List<int> tracks, List<int> albums) = await GetRepeatExclusionsAsync(rules, now);
+            excludedTracks = new HashSet<int>(tracks);
+            excludedAlbums = new HashSet<int>(albums);
+
+            List<int> found = [.. infos.Keys];
+            albumOf = await dbContext.TrackStreamInfos
+                .Where(x => found.Contains(x.TrackId))
+                .Select(x => new { x.TrackId, x.Track.Disc.AlbumId })
+                .ToDictionaryAsync(x => x.TrackId, x => x.AlbumId);
+        }
+
+        string trackRuleReason = $"It has played within the last {DescribeWindow(rules.MinutesBetweenTrackRepeat)} or is already queued, so the stream's repeat rules keep it out for now.";
+        string albumRuleReason = $"Its album has played within the last {DescribeWindow(rules.MinutesBetweenAlbumRepeat)} or is already queued, so the stream's repeat rules keep it out for now.";
+        int ruleSkips = 0;
+
         int maxSort = await dbContext.StreamQueue.Select(s => (int?)s.SortOrder).MaxAsync() ?? -1;
         int insertAt = position ?? maxSort + 1;
         if (insertAt <= 0)
@@ -1805,6 +1894,20 @@ public class MusicSearchService(
                 // One reason for all three cases, so the response can't be used to probe
                 // which private albums exist.
                 skipped.Add(new SkippedTrack(id, "Track not found, has no playable stream, or is not available to you."));
+                continue;
+            }
+
+            if (excludedTracks.Contains(id))
+            {
+                skipped.Add(new SkippedTrack(id, trackRuleReason));
+                ruleSkips++;
+                continue;
+            }
+
+            if (albumOf.TryGetValue(id, out int albumId) && excludedAlbums.Contains(albumId))
+            {
+                skipped.Add(new SkippedTrack(id, albumRuleReason));
+                ruleSkips++;
                 continue;
             }
 
@@ -1863,7 +1966,14 @@ public class MusicSearchService(
             firstAddedPosition = await dbContext.StreamQueue.CountAsync(s => s.SortOrder < firstSort) + 1;
         }
 
-        return new QueueAddResult(added, skipped, queueLength, BuildQueueHint(firstAddedPosition, queueLength, playNow, added.Count), firstAddedPosition);
+        // When the rules kept everything out, say so in the hint as well as per track: the
+        // tempting next move is to queue something else in its place.
+        string hint = BuildQueueHint(firstAddedPosition, queueLength, playNow, added.Count)
+            ?? (added.Count == 0 && ruleSkips > 0
+                ? "Nothing was added: the stream's repeat rules keep these tracks out for now. Tell the listener so, rather than queueing something else in their place."
+                : null);
+
+        return new QueueAddResult(added, skipped, queueLength, hint, firstAddedPosition);
     }
 
     /// <summary>
@@ -1994,12 +2104,12 @@ public class MusicSearchService(
         }).ToList()
     };
 
-    private static CreditSource ToCreditSource(PersonGroupType personGroup)
+    private static CreditLevel ToCreditLevel(PersonGroupType personGroup)
     {
         return personGroup switch
         {
-            PersonGroupType.Album => CreditSource.Album,
-            PersonGroupType.Track => CreditSource.Track,
+            PersonGroupType.Album => CreditLevel.Album,
+            PersonGroupType.Track => CreditLevel.Track,
             _ => throw new ArgumentOutOfRangeException(nameof(personGroup), personGroup, null)
         };
     }

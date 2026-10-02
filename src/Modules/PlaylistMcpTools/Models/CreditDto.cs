@@ -16,4 +16,4 @@ namespace Whitestone.SegnoSharp.Modules.PlaylistMcpTools.Models;
 public record CreditDto(
     string Role,
     IReadOnlyList<string> Persons,
-    CreditSource AppliesTo);
+    CreditLevel AppliesTo);
