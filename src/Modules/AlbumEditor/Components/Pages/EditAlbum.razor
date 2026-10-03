@@ -6,6 +6,12 @@
 @using Whitestone.SegnoSharp.Modules.AlbumEditor.Extensions
 @attribute [Authorize]
 
+@if (_isLoading)
+{
+    <div class="alert alert-info">Loading…</div>
+    return;
+}
+
 @if (Album == null)
 {
     <div class="alert alert-error">Album not found</div>

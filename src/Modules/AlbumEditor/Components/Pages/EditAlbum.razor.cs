@@ -30,6 +30,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
         private List<MediaType> MediaTypes { get; set; }
 
         private EditContext _editContext;
+        private bool _isLoading = true;
 
         private Track _currentlyDraggingTrack;
         private TrackGroup _currentlyDraggingTrackGroup;
@@ -37,6 +38,8 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            try
+            {
             DbContext = await DbFactory.CreateDbContextAsync();
 
             if (Id == 0)
@@ -72,6 +75,11 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Pages
                 .ToListAsync();
 
             MediaTypes = await DbContext.MediaTypes.ToListAsync();
+        }
+            finally
+            {
+                _isLoading = false;
+            }
         }
 
         private async Task<IEnumerable<Genre>> ExecuteGenreSearch(string searchTerm)
