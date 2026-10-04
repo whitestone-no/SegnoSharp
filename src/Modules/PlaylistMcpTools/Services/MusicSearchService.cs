@@ -109,7 +109,7 @@ public class MusicSearchService(
     // search one variation at a time took ten calls in practice, and picking from memory is a
     // guess. Once a search misses, its real title has to come from outside.
     private const string DescriptionToWeb =
-        "If the words describe a piece rather than name it, as in 'the theme from X', don't try other wordings or pick from memory: use search_web now to find its title, then search for that.";
+        "If the words describe a piece rather than name it, as in 'the theme from X', don't try other wordings or pick from memory: use search_web now to find its title, then search for that. A description can fit several works, such as a film and the series it came from, so when a search has shown which one the library holds, name it in the web search. If the title the web gives isn't in the library, search the web once more for the version the library holds rather than choosing from memory.";
 
     private const string NoAlbumMatchHint =
         "No album title matched. " + TryTrackSearch + " " + DescriptionToWeb + " Otherwise check the spelling, or resolve the exact title externally.";
