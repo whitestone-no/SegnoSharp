@@ -100,13 +100,13 @@ public class MusicSearchService(
     // match is a result containing every word asked for (TextSearch.ContainsAllWords). The exit
     // clause stops the two searches sending a caller back and forth.
     private const string TryAlbumSearch =
-        "The words may name an album rather than a track: if so, playlist_tools__search_albums will find it, unless an album search for these words has already found no close match.";
+        "The words may name an album rather than a track. If so, playlist_tools__search_albums will find it, and the request is then about that album as a whole — its tracks and credits — not about a track of the same name. Skip this if an album search for these words has already found no close match.";
 
     private const string TryTrackSearch =
-        "The words may name a track rather than an album: if so, playlist_tools__search_tracks will find it, unless a track search for these words has already found no close match.";
+        "The words may name a track rather than an album. If so, playlist_tools__search_tracks will find it, and the request is then about that track, not about an album of the same name. Skip this if a track search for these words has already found no close match.";
 
     private const string NoAlbumMatchHint =
-        "No album title matched. " + TryTrackSearch + " Otherwise check the spelling, or resolve the exact title externally.";
+        "No album title matched. " + TryTrackSearch + " If it is neither, check the spelling, or resolve the exact title externally.";
 
     private const string NoAlbumCreditsNote =
         "Nobody is credited for this album as a whole. Credits on its tracks apply to those tracks only, so don't describe any track's artist as the album's.";
@@ -792,7 +792,7 @@ public class MusicSearchService(
                 break;
 
             case SearchOutcome.NoMatch when hasTitle:
-                parts.Add("No track title matched in this scope." + tryAlbums + " Otherwise check the spelling, narrow by person or album, or resolve the exact title externally and search again.");
+                parts.Add("No track title matched in this scope." + tryAlbums + " If it is neither, check the spelling, narrow by person or album, or resolve the exact title externally and search again.");
                 break;
 
             case SearchOutcome.NoMatch:
