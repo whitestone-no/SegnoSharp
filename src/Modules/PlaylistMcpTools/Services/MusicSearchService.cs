@@ -100,13 +100,19 @@ public class MusicSearchService(
     // match is a result containing every word asked for (TextSearch.ContainsAllWords). The exit
     // clause stops the two searches sending a caller back and forth.
     private const string TryAlbumSearch =
-        "The words may name an album rather than a track. If so, playlist_tools__search_albums will find it, and the request is then about that album as a whole — its tracks and credits — not about a track of the same name. Skip this if an album search for these words has already found no close match.";
+        "The words may name an album rather than a track. If so, playlist_tools__search_albums will find it, and if the words are the album's title, the request is about that album as a whole — its tracks and credits — not about a track of the same name. Skip this if an album search for these words has already found no close match.";
 
     private const string TryTrackSearch =
-        "The words may name a track rather than an album. If so, playlist_tools__search_tracks will find it, and the request is then about that track, not about an album of the same name. Skip this if a track search for these words has already found no close match.";
+        "The words may name a track rather than an album. If so, playlist_tools__search_tracks will find it, and if the words are the track's title, the request is about that track, not about an album of the same name. Skip this if a track search for these words has already found no close match.";
+
+    // A described piece ("the theme from X") has no title in the words to find: rewording the
+    // search one variation at a time took ten calls in practice, and picking from memory is a
+    // guess. Once a search misses, its real title has to come from outside.
+    private const string DescriptionToWeb =
+        "If the words describe a piece rather than name it, as in 'the theme from X', don't try other wordings or pick from memory: use search_web now to find its title, then search for that.";
 
     private const string NoAlbumMatchHint =
-        "No album title matched. " + TryTrackSearch + " If it is neither, check the spelling, or resolve the exact title externally.";
+        "No album title matched. " + TryTrackSearch + " " + DescriptionToWeb + " Otherwise check the spelling, or resolve the exact title externally.";
 
     private const string NoAlbumCreditsNote =
         "Nobody is credited for this album as a whole. Credits on its tracks apply to those tracks only, so don't describe any track's artist as the album's.";
@@ -481,9 +487,10 @@ public class MusicSearchService(
         string loose = hasTitle && !albums.Any(a => TextSearch.ContainsAllWords(query, a.Title))
             ? string.Format(
                 CultureInfo.InvariantCulture,
-                "None of these albums contains every word asked for: the best, scoring {0:0.##}, shares only some of them. {1} If nothing fits, it is probably not in the library: say so rather than searching further.",
+                "None of these albums contains every word asked for: the best, scoring {0:0.##}, shares only some of them. {1} {2} If the words name a title and nothing fits, it is probably not in the library: say so rather than searching further.",
                 albums.Count > 0 ? albums.Max(a => a.Score) : 0,
-                TryTrackSearch)
+                TryTrackSearch,
+                DescriptionToWeb)
             : null;
 
         string hint = JoinHints(loose, slice);
@@ -774,8 +781,10 @@ public class MusicSearchService(
     {
         var parts = new List<string>();
 
-        // Within a known album there's no other kind of title to suggest.
+        // Within a known album there's no other kind of title to suggest. A described piece
+        // still needs its real title, wherever the search was made.
         string tryAlbums = hasTitle && !albumScoped ? " " + TryAlbumSearch : "";
+        string describe = hasTitle ? " " + DescriptionToWeb : "";
 
         switch (outcome)
         {
@@ -786,13 +795,14 @@ public class MusicSearchService(
             case SearchOutcome.Matched when hasTitle && !closeMatch:
                 parts.Add(string.Format(
                     CultureInfo.InvariantCulture,
-                    "None of these contains every word asked for: the best, scoring {0:0.##}, shares only some of them, so it is probably not the track asked for.{1} If nothing fits, it is probably not in the library: say so rather than searching further.",
+                    "None of these contains every word asked for: the best, scoring {0:0.##}, shares only some of them, so it is probably not the track asked for.{1}{2} If the words name a title and nothing fits, it is probably not in the library: say so rather than searching further.",
                     topScore ?? 0,
-                    tryAlbums));
+                    tryAlbums,
+                    describe));
                 break;
 
             case SearchOutcome.NoMatch when hasTitle:
-                parts.Add("No track title matched in this scope." + tryAlbums + " If it is neither, check the spelling, narrow by person or album, or resolve the exact title externally and search again.");
+                parts.Add("No track title matched in this scope." + tryAlbums + describe + " Otherwise check the spelling, narrow by person or album, or resolve the exact title externally and search again.");
                 break;
 
             case SearchOutcome.NoMatch:
@@ -803,17 +813,18 @@ public class MusicSearchService(
                 double best = topScore ?? 0;
                 parts.Add(string.Format(
                     CultureInfo.InvariantCulture,
-                    "Nothing reached minScore {0:0.##}; the best available scored {1:0.##}, and candidates below minScore are not returned.{2}",
+                    "Nothing reached minScore {0:0.##}; the best available scored {1:0.##}, and candidates below minScore are not returned.{2}{3}",
                     minScore,
                     best,
-                    tryAlbums));
+                    tryAlbums,
+                    describe));
 
                 if (best >= WeakMatchRetryFloor)
                 {
                     double retry = Math.Max(WeakMatchRetryFloor, Math.Round(best - 0.05, 2));
                     parts.Add(string.Format(
                         CultureInfo.InvariantCulture,
-                        "Search once more with minScore {0:0.##} to see it, and tell the user the match is uncertain.",
+                        "If the words name a title, search once more with minScore {0:0.##} to see it, and tell the user the match is uncertain.",
                         retry));
                 }
                 else
