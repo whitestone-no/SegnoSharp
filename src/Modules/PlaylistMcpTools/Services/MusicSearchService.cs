@@ -93,8 +93,20 @@ public class MusicSearchService(
 
     // An album's note in search results, where the album is one entry among several, and a
     // tracklist's hint, where the album is the whole response.
+    // Searches without a close match point at the other kind before anything else. A title
+    // made of ordinary words almost always shares a word with some other title, so a title
+    // taken for the wrong kind comes back with loose matches, not with nothing: the pointer
+    // has to sit on every outcome without a close match, not only on an empty one. A close
+    // match is a result containing every word asked for (TextSearch.ContainsAllWords). The exit
+    // clause stops the two searches sending a caller back and forth.
+    private const string TryAlbumSearch =
+        "The words may name an album rather than a track: if so, playlist_tools__search_albums will find it, unless an album search for these words has already found no close match.";
+
+    private const string TryTrackSearch =
+        "The words may name a track rather than an album: if so, playlist_tools__search_tracks will find it, unless a track search for these words has already found no close match.";
+
     private const string NoAlbumMatchHint =
-        "No album title matched. The words may name a track rather than an album: if so, playlist_tools__search_tracks will find it. If a track search for these words has already come back empty too, don't go back to it: check the spelling, or resolve the exact title externally.";
+        "No album title matched. " + TryTrackSearch + " Otherwise check the spelling, or resolve the exact title externally.";
 
     private const string NoAlbumCreditsNote =
         "Nobody is credited for this album as a whole. Credits on its tracks apply to those tracks only, so don't describe any track's artist as the album's.";
@@ -104,18 +116,6 @@ public class MusicSearchService(
     // Below this score a "best available" candidate is noise rather than a near miss, so the
     // hint stops suggesting a lower threshold and points at the album tracklist instead.
     private const double WeakMatchRetryFloor = 0.3;
-
-    // A Matched result can still be a poor one. In a large library almost any query shares a
-    // word with some title, and one shared word scores in the 0.3-0.55 range however long the
-    // query is; a title the listener actually meant scores 0.75 and up. Below this line the
-    // top result is usually the former, and a caller left to work that out alone tends to keep
-    // searching to disprove it. The hint gives it permission to stop instead.
-    //
-    // Deliberately fixed rather than derived from minScore: it describes where ScoreTitle puts
-    // one-shared-word matches, which doesn't move when a caller raises its threshold. A caller
-    // asking for 0.7 already excluded everything below here, so the hint simply never fires.
-    // If ScoreTitle's weighting changes, re-check that the two clusters still sit either side.
-    private const double LooseMatchScore = 0.6;
 
     // A role-filtered person search has to compute credit counts before it knows whether a
     // candidate qualifies, so it walks further down the ranked list to fill its limit. This
@@ -467,13 +467,26 @@ public class MusicSearchService(
 
         // The count alone gets read past, so say it: a caller handed a page of five tends to
         // treat it as the whole answer.
-        string hint = totalMatches > albums.Count
+        string slice = totalMatches > albums.Count
             ? string.Format(
                 CultureInfo.InvariantCulture,
                 "Showing {0} of {1} matching albums. Raise limit (up to 100) to see more, and don't describe these as the complete set.",
                 albums.Count,
                 totalMatches)
             : null;
+
+        // Albums that share only some of the words asked for are no answer, and may mean the
+        // words were a track's title all along. The same test as the track search: every word
+        // present, not a score.
+        string loose = hasTitle && !albums.Any(a => TextSearch.ContainsAllWords(query, a.Title))
+            ? string.Format(
+                CultureInfo.InvariantCulture,
+                "None of these albums contains every word asked for: the best, scoring {0:0.##}, shares only some of them. {1} If nothing fits, it is probably not in the library: say so rather than searching further.",
+                albums.Count > 0 ? albums.Max(a => a.Score) : 0,
+                TryTrackSearch)
+            : null;
+
+        string hint = JoinHints(loose, slice);
 
         return new AlbumSearchResult(albums, totalMatches, truncated, hint);
     }
@@ -617,7 +630,8 @@ public class MusicSearchService(
             candidates,
             topScore.HasValue ? Math.Round(topScore.Value, 3) : null,
             JoinHints(
-                BuildSearchHint(outcome, hasTitle, topScore, minScore, truncated, totalMatches, query.Limit),
+                BuildSearchHint(outcome, hasTitle, topScore, minScore, truncated, totalMatches, query.Limit, query.AlbumId.HasValue,
+                    hasTitle && candidates.Any(c => TextSearch.ContainsAllWords(query.TitleQuery, c.Title))),
                 hasTitle && outcome == SearchOutcome.Matched ? SharedTitleHint(candidates) : null),
             query.AlbumId,
             truncated,
@@ -756,21 +770,29 @@ public class MusicSearchService(
         return joined.Length == 0 ? null : joined;
     }
 
-    private static string BuildSearchHint(SearchOutcome outcome, bool hasTitle, double? topScore, double minScore, bool truncated, int totalMatches, int limit)
+    private static string BuildSearchHint(SearchOutcome outcome, bool hasTitle, double? topScore, double minScore, bool truncated, int totalMatches, int limit, bool albumScoped, bool closeMatch)
     {
         var parts = new List<string>();
 
+        // Within a known album there's no other kind of title to suggest.
+        string tryAlbums = hasTitle && !albumScoped ? " " + TryAlbumSearch : "";
+
         switch (outcome)
         {
-            case SearchOutcome.Matched when hasTitle && topScore is { } top and < LooseMatchScore:
+            // A Matched result can still be a poor one: in a large library almost any query
+            // shares a word with some title. Whether any result has every word asked for is the
+            // test, not the score, which counts merely similar words too: one shared word of
+            // two scored 0.634 in practice.
+            case SearchOutcome.Matched when hasTitle && !closeMatch:
                 parts.Add(string.Format(
                     CultureInfo.InvariantCulture,
-                    "The best match scored {0:0.##}, which usually means it shares only a word or two with the request rather than being the track asked for. If its title doesn't resemble what was asked for, the track is probably not in the library: say so rather than searching further.",
-                    top));
+                    "None of these contains every word asked for: the best, scoring {0:0.##}, shares only some of them, so it is probably not the track asked for.{1} If nothing fits, it is probably not in the library: say so rather than searching further.",
+                    topScore ?? 0,
+                    tryAlbums));
                 break;
 
             case SearchOutcome.NoMatch when hasTitle:
-                parts.Add("No track title matched in this scope. The words may name an album rather than a track: if so, playlist_tools__search_albums will find it. If an album search for these words has already come back empty too, don't go back to it: check the spelling, narrow by person or album, or resolve the exact title externally and search again.");
+                parts.Add("No track title matched in this scope." + tryAlbums + " Otherwise check the spelling, narrow by person or album, or resolve the exact title externally and search again.");
                 break;
 
             case SearchOutcome.NoMatch:
@@ -781,9 +803,10 @@ public class MusicSearchService(
                 double best = topScore ?? 0;
                 parts.Add(string.Format(
                     CultureInfo.InvariantCulture,
-                    "Nothing reached minScore {0:0.##}; the best available scored {1:0.##}, and candidates below minScore are not returned.",
+                    "Nothing reached minScore {0:0.##}; the best available scored {1:0.##}, and candidates below minScore are not returned.{2}",
                     minScore,
-                    best));
+                    best,
+                    tryAlbums));
 
                 if (best >= WeakMatchRetryFloor)
                 {

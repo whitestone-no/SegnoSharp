@@ -179,6 +179,27 @@ namespace Whitestone.SegnoSharp.Shared.Helpers
             return (score, matchedOn);
         }
 
+        // A word misspelt by a letter or two still counts as present: one wrong letter in five
+        // is 0.8. Shorter words with a letter wrong fall below it, which is right, since those
+        // are as likely to be different words.
+        private const double MisspeltWordSimilarity = 0.8;
+
+        /// <summary>
+        /// Does the title contain every word of the query, each exactly, as an accepted prefix,
+        /// or misspelt by a letter or two? This is the plain test of whether a result is what
+        /// was asked for. The score can't answer it: it blends exact words with merely similar
+        /// ones, so a title sharing one word of two, with some letters in common on the other,
+        /// can score above 0.6.
+        /// </summary>
+        public static bool ContainsAllWords(string query, string title, double minPrefixCoverage = DefaultMinPrefixCoverage)
+        {
+            List<string> q = Tokenize(query, dropStopWords: true);
+            List<string> t = Tokenize(title, dropStopWords: true);
+
+            return q.Count > 0
+                && q.All(qt => t.Any(tt => TokenMatch(qt, tt, minPrefixCoverage) >= MisspeltWordSimilarity));
+        }
+
         /// <summary>
         /// Token-to-token match: 1.0 when one is a prefix of the other covering enough of it,
         /// else normalized Levenshtein. Identical tokens always match, whatever their length,
