@@ -654,32 +654,94 @@ public class MusicSearchService(
     /// threshold it can't pass back.
     /// </summary>
     /// <summary>
-    /// When the best title appears on several albums, say so. Which album a track came from is
-    /// the part of an answer callers most often leave out, and the server can see the overlap
-    /// where the caller has to notice it.
+    /// When a title appears on several albums, say so, with the facts that tell one piece from
+    /// several: which albums, how long each copy is, and whether anyone is credited on all of
+    /// them. Which album a track came from is the part of an answer callers most often leave
+    /// out, and the server can see the overlap where the caller has to notice it. Every title is
+    /// checked, not only the best match's: a caller often picks a candidate further down, for
+    /// instance when an outside lookup gave it the exact title.
+    ///
+    /// The server gives no verdict, because it can't know what a piece is. A shared title and a
+    /// shared composer are weak evidence: "Main Title" from two films by the same composer is two
+    /// pieces, while the same theme on a soundtrack and a compilation is one. The album names
+    /// usually settle it, and the caller can read them. When it can't tell, it is told to treat
+    /// the copies as different — an unneeded question rather than a wrong track.
     /// </summary>
     private static string SharedTitleHint(IReadOnlyList<TrackCandidate> candidates)
     {
-        if (candidates.Count < 2)
-        {
-            return null;
-        }
-
-        string title = candidates[0].Title?.Trim();
-        List<TrackCandidate> sharing = candidates
-            .Where(c => string.Equals(c.Title?.Trim(), title, StringComparison.OrdinalIgnoreCase))
+        List<string> notes = candidates
+            .Where(c => !string.IsNullOrWhiteSpace(c.Title))
+            .GroupBy(c => c.Title.Trim(), StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.ToList())
+            .Where(copies => copies.Select(c => c.AlbumId).Distinct().Count() > 1)
+            .Take(3)
+            .Select(DescribeSharedTitle)
             .ToList();
 
-        int albums = sharing.Select(c => c.AlbumId).Distinct().Count();
+        return notes.Count == 0 ? null : string.Join(" ", notes);
+    }
 
-        return albums < 2
-            ? null
-            : string.Format(
+    private static string DescribeSharedTitle(List<TrackCandidate> copies)
+    {
+        string title = copies[0].Title.Trim();
+
+        // One copy per album, in ranking order, each with its length: a 5:23 main title and a
+        // 2:20 one are plainly different pieces.
+        List<TrackCandidate> perAlbum = copies
+            .GroupBy(c => c.AlbumId)
+            .Select(g => g.First())
+            .ToList();
+
+        List<string> shown = perAlbum
+            .Take(3)
+            .Select(c => string.Format(
                 CultureInfo.InvariantCulture,
-                "{0} of these share the title \"{1}\", on {2} different albums. If you queue one, say which album it is from and name the others.",
-                sharing.Count,
-                candidates[0].Title,
-                albums);
+                "\"{0}\" ({1}:{2:00})",
+                c.AlbumTitle,
+                c.LengthSeconds / 60,
+                c.LengthSeconds % 60))
+            .ToList();
+
+        string albums = shown.Count == 1
+            ? shown[0]
+            : string.Join(", ", shown.Take(shown.Count - 1)) + " and " + shown[^1];
+
+        if (perAlbum.Count > shown.Count)
+        {
+            albums += string.Format(CultureInfo.InvariantCulture, ", and {0} more", perAlbum.Count - shown.Count);
+        }
+
+        // Someone credited on every copy, at each copy's most specific level. One fact among
+        // the others, not a verdict.
+        var common = new HashSet<string>(MostSpecificPeople(copies[0]), StringComparer.OrdinalIgnoreCase);
+        foreach (TrackCandidate copy in copies.Skip(1))
+        {
+            common.IntersectWith(MostSpecificPeople(copy));
+        }
+
+        return string.Format(
+            CultureInfo.InvariantCulture,
+            "\"{0}\" is on {1} albums: {2}, with {3} credited on all of them. If these are one piece, say which album you used and name the others. If they may be different pieces, ask which is meant when playing, and answer for each when asked about one. When unsure, treat them as different.",
+            title,
+            perAlbum.Count,
+            albums,
+            common.Count > 0 ? "someone" : "nobody");
+    }
+
+    /// <summary>
+    /// The people who made a track, at its most specific level: its own credits if it has any,
+    /// its album's otherwise. Roles are ignored, since one person can be the Artist on one release
+    /// and the Composer on another. Album credits count only when a track has nothing more
+    /// specific, so a broad one — "Various Artists" on a compilation, an orchestra across
+    /// unrelated pieces — can't make different songs look like the same one.
+    /// </summary>
+    private static IEnumerable<string> MostSpecificPeople(TrackCandidate track)
+    {
+        IReadOnlyList<CreditDto> credits = track.Credits ?? [];
+        List<CreditDto> own = credits.Where(c => c.AppliesTo == CreditLevel.Track).ToList();
+
+        return (own.Count > 0 ? own : credits.Where(c => c.AppliesTo == CreditLevel.Album))
+            .SelectMany(c => c.Persons);
     }
 
     private static string JoinHints(params string[] hints)
@@ -1231,18 +1293,21 @@ public class MusicSearchService(
             hint = "The queue is empty.";
         }
 
-        // A fact about timing, not a sentence to repeat: the caller words it however it likes.
+        // A fact about timing and why it matters, not a sentence to repeat: the caller words it
+        // however it likes. The fact alone read as background, and the next track went
+        // unmentioned until the hint said why it mattered.
         if (nowPlaying is { RemainingSeconds: < NearlyFinishedSeconds } ending)
         {
             string soon = string.Format(
                 CultureInfo.InvariantCulture,
-                "The track playing now has {0} seconds left, so it may have finished by the time this is read; {1}.",
+                "The track playing now has {0} seconds left, so it may have finished by the time the listener reads your reply; {1}",
                 ending.RemainingSeconds,
                 timeline.Count == 0
-                    ? "nothing is queued after it yet"
-                    : first == 0 && upcoming.Count > 0 && !upcoming[0].Hidden
+                    ? "nothing is queued after it yet."
+                    : (first == 0 && upcoming.Count > 0 && !upcoming[0].Hidden
                         ? string.Format(CultureInfo.InvariantCulture, "next is \"{0}\" from {1}", upcoming[0].Title, upcoming[0].AlbumTitle)
-                        : "position 1 in the queue plays next");
+                        : "position 1 in the queue plays next")
+                      + ". Say what plays next as well as what is playing, so the answer is still true when it arrives.");
 
             hint = hint == null ? soon : hint + " " + soon;
         }
