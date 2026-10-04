@@ -72,7 +72,7 @@ public class MusicServiceTool(
         return await musicSearchService.GetRolesAsync();
     }
 
-    [McpServerTool(ReadOnly = true), Description("Resolve a person/group name to candidates with per-role credit counts and sample works. Use creditCounts and sampleWorks to tell same-named people apart (the film composer versus the guitarist); a number in parentheses after a name marks a second person with that name.")]
+    [McpServerTool(ReadOnly = true), Description("Resolve a person/group name to candidates with per-role credit counts and sample works. Use creditCounts and sampleWorks to tell same-named people apart (the film composer versus the guitarist); a number in parentheses after a name marks a second person with that name. If several fit and nothing tells them apart, don't pick silently: ask which is meant, with ask_user if you have it, or say which you chose and name the other.")]
     [RequirePermission(CorePermissions.AlbumsView, CorePermissions.AlbumsViewAll)]
     public async Task<IReadOnlyList<PersonResult>> SearchPeople(
         ClaimsPrincipal user,
@@ -369,7 +369,7 @@ public class MusicServiceTool(
         if (trackIds.Count > ConfirmLargeAddThreshold && !confirmed)
         {
             throw new McpException(
-                $"This would add {trackIds.Count} tracks to a queue everyone is listening to, which needs the user's agreement first. Tell them it is {trackIds.Count} tracks and ask whether to go ahead. Do not call this again until they have actually answered; deciding for them is not agreement. When they agree, look the tracks up again and call this with confirmed set to true.");
+                $"This would add {trackIds.Count} tracks to a queue everyone is listening to, which needs the user's agreement first. Tell them it is {trackIds.Count} tracks and ask whether to go ahead, with ask_user if you have it. Do not call this again until they have actually answered; deciding for them is not agreement. When they agree, look the tracks up again and call this with confirmed set to true.");
         }
 
         int? positionFilter = position >= 0 ? position : null;

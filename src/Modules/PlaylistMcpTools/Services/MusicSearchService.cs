@@ -93,6 +93,9 @@ public class MusicSearchService(
 
     // An album's note in search results, where the album is one entry among several, and a
     // tracklist's hint, where the album is the whole response.
+    private const string NoAlbumMatchHint =
+        "No album title matched. The words may name a track rather than an album: if so, playlist_tools__search_tracks will find it. If a track search for these words has already come back empty too, don't go back to it: check the spelling, or resolve the exact title externally.";
+
     private const string NoAlbumCreditsNote =
         "Nobody is credited for this album as a whole. Credits on its tracks apply to those tracks only, so don't describe any track's artist as the album's.";
     private const string HiddenHistoryNote =
@@ -381,7 +384,10 @@ public class MusicSearchService(
 
         if (totalMatches == 0)
         {
-            return new AlbumSearchResult([], 0, false);
+            // A miss on a title points at the track search before anything else: the words may
+            // be a track's title taken for an album's, and an empty answer leaves the web as the
+            // obvious next guess.
+            return new AlbumSearchResult([], 0, false, hasTitle ? NoAlbumMatchHint : null);
         }
 
         List<AlbumRow> raw;
@@ -721,7 +727,7 @@ public class MusicSearchService(
 
         return string.Format(
             CultureInfo.InvariantCulture,
-            "\"{0}\" is on {1} albums: {2}, with {3} credited on all of them. If these are one piece, say which album you used and name the others. If they may be different pieces, ask which is meant when playing, and answer for each when asked about one. When unsure, treat them as different.",
+            "\"{0}\" is on {1} albums: {2}, with {3} credited on all of them. If these are one piece, say which album you used and name the others. If they may be different pieces, ask which is meant when playing, with ask_user if you have it, and answer for each when asked about one. When unsure, treat them as different.",
             title,
             perAlbum.Count,
             albums,
@@ -764,7 +770,7 @@ public class MusicSearchService(
                 break;
 
             case SearchOutcome.NoMatch when hasTitle:
-                parts.Add("No track title matched in this scope. Resolve the exact track name (e.g. via external lookup) and search again. If the album is known, get all tracks from the album for the real titles.");
+                parts.Add("No track title matched in this scope. The words may name an album rather than a track: if so, playlist_tools__search_albums will find it. If an album search for these words has already come back empty too, don't go back to it: check the spelling, narrow by person or album, or resolve the exact title externally and search again.");
                 break;
 
             case SearchOutcome.NoMatch:
@@ -1191,8 +1197,8 @@ public class MusicSearchService(
                 // Gone is not the same as removed: a track queued a while ago may simply have
                 // played. Say both, so the caller doesn't assert the wrong one.
                 hint = single
-                    ? "That track isn't in the queue. It has either been removed or already played; the history shows which."
-                    : "None of those tracks are in the queue. They have either been removed or already played; the history shows which.";
+                    ? "That track isn't in the queue. It has either been removed or already played; the history shows which. Don't queue it again unless the listener asks you to."
+                    : "None of those tracks are in the queue. They have either been removed or already played; the history shows which. Don't queue them again unless the listener asks you to.";
             }
         }
         else if (at is { } point)
