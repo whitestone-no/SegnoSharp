@@ -73,7 +73,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages
             HistoryCurrentPage = page;
             DateTime now = SystemClock.Now;
 
-            SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
             HistoryTotalPages = (int)Math.Ceiling(await dbContext.StreamHistory
                 .AsNoTracking()

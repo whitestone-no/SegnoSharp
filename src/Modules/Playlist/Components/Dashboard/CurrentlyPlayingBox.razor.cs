@@ -37,7 +37,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Dashboard
         {
             try
             {
-                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+                await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
                 DateTime now = SystemClock.Now;
 

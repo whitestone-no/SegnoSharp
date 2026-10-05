@@ -48,7 +48,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                 SearchCurrentPage = 1;
             }
 
-            SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
             SearchTotalPages = (int)Math.Ceiling(await dbContext.TrackStreamInfos
                 .AsNoTracking()
@@ -101,7 +101,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
         {
             SearchCurrentPage = page;
 
-            SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+            await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
             SearchResults = await dbContext.TrackStreamInfos
                 .AsNoTracking()
@@ -179,7 +179,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
             {
                 await QueueLocker.LockQueueAsync();
 
-                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+                await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
                 PlaylistModel = await dbContext.StreamQueue
                     .AsNoTracking()
@@ -318,7 +318,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
             {
                 await QueueLocker.LockQueueAsync();
 
-                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+                await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
                 List<StreamQueue> queue = await dbContext.StreamQueue.ToListAsync();
 
@@ -349,7 +349,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
             {
                 await QueueLocker.LockQueueAsync();
 
-                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+                await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
                 ushort maxSortOrder = await dbContext.StreamQueue.MaxAsync(q => q.SortOrder);
 
@@ -375,7 +375,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
             {
                 await QueueLocker.LockQueueAsync();
 
-                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+                await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
                 StreamQueue queueItem = await dbContext.StreamQueue.FirstOrDefaultAsync(q => q.Id == playlistItem.QueueId);
 

@@ -31,7 +31,7 @@ namespace Whitestone.SegnoSharp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index([FromRoute] int albumId, [FromQuery] string hash, [FromQuery(Name = "w")] int width = 500)
         {
-            SegnoSharpDbContext dbContext = await dbContextFactory.CreateDbContextAsync();
+            await using SegnoSharpDbContext dbContext = await dbContextFactory.CreateDbContextAsync();
 
             AlbumCover cover = await dbContext.AlbumCovers
                 .AsNoTracking()

@@ -36,7 +36,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages
 
             try
             {
-                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+                await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
                 PlaylistItems = await dbContext.StreamQueue
                     .AsNoTracking()

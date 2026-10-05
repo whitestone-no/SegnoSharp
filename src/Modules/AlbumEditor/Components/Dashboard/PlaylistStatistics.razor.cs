@@ -29,7 +29,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Dashboard
         {
             try
             {
-                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+                await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
                 
                 IQueryable<TrackStreamInfo> baseQuery = dbContext.TrackStreamInfos
                     .AsNoTracking()
