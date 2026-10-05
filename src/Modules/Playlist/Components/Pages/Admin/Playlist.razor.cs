@@ -231,13 +231,17 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
 
         private async Task HandleDrop(PlaylistViewModel targetPlaylistItem)
         {
+            // Take a snapshot before any await. Other events may modify the fields later due to async operations can make the UI continue while this method is waiting.
+            SearchResultViewModel draggingSearchItem = _currentlyDraggingSearchItem;
+            PlaylistViewModel draggingPlaylistItem = _currentlyDraggingPlaylistItem;
+
             try
             {
                 await QueueLocker.LockQueueAsync();
 
-                SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
+                await using SegnoSharpDbContext dbContext = await DbFactory.CreateDbContextAsync();
 
-                if (_currentlyDraggingSearchItem != null)
+                if (draggingSearchItem != null)
                 {
                     var newSortOrder = (ushort)(targetPlaylistItem?.SortOrder ?? PlaylistModel.Max(p => p.SortOrder) + 1);
 
@@ -250,19 +254,17 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                     {
                         SortOrder = newSortOrder,
                         TrackStreamInfo = await dbContext.TrackStreamInfos
-                            .FirstOrDefaultAsync(tsi => tsi.Id == _currentlyDraggingSearchItem.TrackStreamInfoId)
+                            .FirstOrDefaultAsync(tsi => tsi.Id == draggingSearchItem.TrackStreamInfoId)
                     });
 
                     await dbContext.SaveChangesAsync();
 
                     await Cambion.PublishEventAsync(new PlaylistUpdated());
                 }
-                else if (_currentlyDraggingPlaylistItem != null)
+                else if (draggingPlaylistItem != null)
                 {
-
-
                     var newSortOrder = (ushort)(targetPlaylistItem?.SortOrder ?? PlaylistModel.Max(p => p.SortOrder) + 1);
-                    ushort oldSortOrder = _currentlyDraggingPlaylistItem.SortOrder;
+                    ushort oldSortOrder = draggingPlaylistItem.SortOrder;
 
                     // If moving "down"
                     if (newSortOrder > oldSortOrder)
@@ -282,7 +284,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                         }
                     }
 
-                    StreamQueue currentlyDragging = await dbContext.StreamQueue.FirstAsync(q => q.Id == _currentlyDraggingPlaylistItem.QueueId);
+                    StreamQueue currentlyDragging = await dbContext.StreamQueue.FirstAsync(q => q.Id == draggingPlaylistItem.QueueId);
                     currentlyDragging.SortOrder = newSortOrder;
 
                     await dbContext.SaveChangesAsync();
