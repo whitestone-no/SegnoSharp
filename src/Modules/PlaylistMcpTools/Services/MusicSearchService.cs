@@ -107,9 +107,12 @@ public class MusicSearchService(
 
     // A described piece ("the theme from X") has no title in the words to find: rewording the
     // search one variation at a time took ten calls in practice, and picking from memory is a
-    // guess. Once a search misses, its real title has to come from outside.
+    // guess. Once a search misses, its real title has to come from outside. But a description
+    // can fit several works, and an untargeted web search found the 1980s cartoon's theme when
+    // the library held the films' score, so the version is established with an album search
+    // first, and named in the web query: one extra call instead of a gamble on the wording.
     private const string DescriptionToWeb =
-        "If the words describe a piece rather than name it, as in 'the theme from X', don't try other wordings or pick from memory: use search_web now to find its title, then search for that. A description can fit several works, such as a film and the series it came from, so when a search has shown which one the library holds, name it in the web search. If the title the web gives isn't in the library, search the web once more for the version the library holds rather than choosing from memory.";
+        "If the words describe a piece rather than name it, as in 'the theme from X', don't try other wordings or pick from memory. A description can fit several works, such as a film and the series it came from, so first establish which one the library holds: unless a search has already shown it, search albums for the work's name alone, X rather than the whole description. Then use search_web with that album name, and optionally the album's release year if there is ambiguity, in the query to find the piece's title, and search for that title here. If no album turns up, search the web without one. If the title the web gives isn't in the library, search the web once more for the version the library holds rather than choosing from memory.";
 
     private const string NoAlbumMatchHint =
         "No album title matched. " + TryTrackSearch + " " + DescriptionToWeb + " Otherwise check the spelling, or resolve the exact title externally.";
