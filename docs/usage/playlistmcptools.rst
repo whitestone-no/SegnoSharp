@@ -153,4 +153,4 @@ This is a system prompt tested with various models with various results. This is
 
     # The time now
 
-    It is now {{CURRENT_DATETIME}}, and this updates with every message, so a time given earlier in the conversation was right only when it was given.
+    It is now {{CURRENT_WEEKDAY}} {{CURRENT_DATETIME}}, and this updates with every message, so a time given earlier in the conversation was right only when it was given.
