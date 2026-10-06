@@ -743,10 +743,10 @@ public class MusicSearchService(
 
         // Someone credited on every copy, at each copy's most specific level. One fact among
         // the others, not a verdict.
-        var common = new HashSet<string>(MostSpecificPeople(copies[0]), StringComparer.OrdinalIgnoreCase);
+        var common = new HashSet<string>(MostSpecificPeople(copies[0].Credits), StringComparer.OrdinalIgnoreCase);
         foreach (TrackCandidate copy in copies.Skip(1))
         {
-            common.IntersectWith(MostSpecificPeople(copy));
+            common.IntersectWith(MostSpecificPeople(copy.Credits));
         }
 
         return string.Format(
@@ -759,15 +759,46 @@ public class MusicSearchService(
     }
 
     /// <summary>
+    /// When the tracks in a history lookup have nobody credited in common, at each one's most
+    /// specific level, they may be different songs sharing a title rather than versions of one.
+    /// </summary>
+    private async Task<string> DifferentSongsHintAsync(List<int> ids, bool allowOnlyPublicAlbums)
+    {
+        Dictionary<int, TrackRow> found = await LoadTrackRowsAsync(ids, allowOnlyPublicAlbums);
+        if (found.Count < 2)
+        {
+            return null;
+        }
+
+        HashSet<string> common = null;
+        foreach (TrackRow row in found.Values)
+        {
+            var people = new HashSet<string>(MostSpecificPeople(BuildCredits(row)), StringComparer.OrdinalIgnoreCase);
+            if (common == null)
+            {
+                common = people;
+            }
+            else
+            {
+                common.IntersectWith(people);
+            }
+        }
+
+        return common is { Count: > 0 }
+            ? null
+            : "These tracks have nobody credited in common, so they may be different songs that share a title. One lookup returns only the most recent play of any of them: look each song up separately, and answer for each.";
+    }
+
+    /// <summary>
     /// The people who made a track, at its most specific level: its own credits if it has any,
     /// its album's otherwise. Roles are ignored, since one person can be the Artist on one release
     /// and the Composer on another. Album credits count only when a track has nothing more
     /// specific, so a broad one — "Various Artists" on a compilation, an orchestra across
     /// unrelated pieces — can't make different songs look like the same one.
     /// </summary>
-    private static IEnumerable<string> MostSpecificPeople(TrackCandidate track)
+    private static IEnumerable<string> MostSpecificPeople(IReadOnlyList<CreditDto> trackCredits)
     {
-        IReadOnlyList<CreditDto> credits = track.Credits ?? [];
+        IReadOnlyList<CreditDto> credits = trackCredits ?? [];
         List<CreditDto> own = credits.Where(c => c.AppliesTo == CreditLevel.Track).ToList();
 
         return (own.Count > 0 ? own : credits.Where(c => c.AppliesTo == CreditLevel.Album))
@@ -1329,6 +1360,10 @@ public class MusicSearchService(
                     last,
                     timeline.Count);
 
+            // A result left in the conversation gets reread to answer later questions, so it
+            // carries its own expiry.
+            coverage += " It changes as tracks finish and others add or remove, so for any later question, call this again rather than answering from this result.";
+
             hint = hint == null ? coverage : hint + " " + coverage;
         }
         else if (!lookup && timeline.Count == 0)
@@ -1411,6 +1446,7 @@ public class MusicSearchService(
         // the answer, and the one before it, whatever it was, as earlierPlay.
         IQueryable<StreamHistory> plays = null;
         string noPlaysHint = null;
+        string differentSongs = null;
 
         if (trackIds is { Count: > 0 })
         {
@@ -1421,6 +1457,10 @@ public class MusicSearchService(
             noPlaysHint = ids.Count == 1
                 ? "There's no record of that track having played."
                 : "There's no record of any of those tracks having played.";
+
+            // Several IDs are meant to be versions of one song. If nobody is credited on all of
+            // them, they may be different songs, and one lookup answers only for the latest.
+            differentSongs = ids.Count > 1 ? await DifferentSongsHintAsync(ids, allowOnlyPublicAlbums) : null;
         }
         else if (personId is { } pid)
         {
@@ -1440,7 +1480,7 @@ public class MusicSearchService(
             if (latestTwo.Count == 0)
             {
                 rows = [];
-                hint = noPlaysHint;
+                hint = JoinHints(noPlaysHint, differentSongs);
             }
             else
             {
@@ -1462,6 +1502,15 @@ public class MusicSearchService(
                 // By identity rather than by time. Looking up the minute it started would let a
                 // track shorter than a minute lose its own best match to the one after it.
                 anchor = rows.FirstOrDefault(r => r.Played == played && r.TrackId == latest.TrackId);
+
+                // The context a listener needs to place the answer, stated as what to do with
+                // it: left to judge whether it "told the listener something", the caller
+                // almost never gave it.
+                hint = JoinHints(
+                    differentSongs,
+                    earlierRow != null
+                        ? "In your reply, say when it played, name the tracks either side of it (precededBy and followedBy), and say when it played before that (earlierPlay), so the listener can place it."
+                        : "In your reply, say when it played and name the tracks either side of it (precededBy and followedBy), so the listener can place it.");
             }
         }
         else if (at is { } point)
@@ -2076,10 +2125,11 @@ public class MusicSearchService(
 
         // When the rules kept everything out, say so in the hint as well as per track: the
         // tempting next move is to queue something else in its place.
-        string hint = BuildQueueHint(firstAddedPosition, queueLength, playNow, added.Count)
-            ?? (added.Count == 0 && ruleSkips > 0
-                ? "Nothing was added: the stream's repeat rules keep these tracks out for now. Tell the listener so, rather than queueing something else in their place."
-                : null);
+        string hint = JoinHints(
+            BuildQueueHint(firstAddedPosition, queueLength, playNow, added.Count)
+                ?? (added.Count == 0 && ruleSkips > 0
+                    ? "Nothing was added: the stream's repeat rules keep these tracks out for now. Tell the listener so, rather than queueing something else in their place."
+                    : null));
 
         return new QueueAddResult(added, skipped, queueLength, hint, firstAddedPosition);
     }

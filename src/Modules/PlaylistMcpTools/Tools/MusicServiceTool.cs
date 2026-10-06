@@ -369,7 +369,7 @@ public class MusicServiceTool(
         if (trackIds.Count > ConfirmLargeAddThreshold && !confirmed)
         {
             throw new McpException(
-                $"This would add {trackIds.Count} tracks to a queue everyone is listening to, which needs the user's agreement first. Tell them it is {trackIds.Count} tracks and ask whether to go ahead, with a tool for asking if you have one. Do not call this again until they have actually answered; deciding for them is not agreement. When they agree, look the tracks up again and call this with confirmed set to true.");
+                $"This would add {trackIds.Count} tracks to a queue everyone is listening to, which needs the user's agreement first. Tell them it is {trackIds.Count} tracks and ask whether to go ahead, with a tool for asking if you have one. Do not call this again until they have actually answered; deciding for them is not agreement. When they agree, call this again with the same track IDs and confirmed set to true.");
         }
 
         int? positionFilter = position >= 0 ? position : null;
