@@ -1265,8 +1265,8 @@ public class MusicSearchService(
                 // Gone is not the same as removed: a track queued a while ago may simply have
                 // played. Say both, so the caller doesn't assert the wrong one.
                 hint = single
-                    ? "That track isn't in the queue. It has either been removed or already played; the history shows which. Don't queue it again unless the listener asks you to; if you offer to, ask the listener, with a tool for asking if you have one."
-                    : "None of those tracks are in the queue. They have either been removed or already played; the history shows which. Don't queue them again unless the listener asks you to; if you offer to, ask the listener, with a tool for asking if you have one.";
+                    ? "That track isn't in the queue. It has either been removed or already played; the history shows which. Don't queue it again unless the listener asks you to."
+                    : "None of those tracks are in the queue. They have either been removed or already played; the history shows which. Don't queue them again unless the listener asks you to.";
             }
         }
         else if (at is { } point)
@@ -1362,7 +1362,8 @@ public class MusicSearchService(
 
             // A result left in the conversation gets reread to answer later questions, so it
             // carries its own expiry.
-            coverage += " It changes as tracks finish and others add or remove, so for any later question, call this again rather than answering from this result.";
+            coverage += " It changes as tracks finish and others add or remove, so for any later question, call this again rather than answering from this result."
+                + " When you name any of these tracks, or the one playing now, give its album as well as its title and artist.";
 
             hint = hint == null ? coverage : hint + " " + coverage;
         }
@@ -2129,6 +2130,13 @@ public class MusicSearchService(
             ?? (added.Count == 0 && ruleSkips > 0
                 ? "Nothing was added: the stream's repeat rules keep these tracks out for now. Tell the listener so, rather than queueing something else in their place."
                 : null);
+
+        // The reply is written from this result, and a short confirmation pulls towards title
+        // and artist alone: say the album is part of it.
+        if (added.Count > 0)
+        {
+            hint = JoinHints(hint, "Name what you added by its title, album and artist.");
+        }
 
         return new QueueAddResult(added, skipped, queueLength, hint, firstAddedPosition);
     }
