@@ -114,6 +114,12 @@ public class MusicSearchService(
     private const string DescriptionToWeb =
         "If the words describe a piece rather than name it, as in 'the theme from X', don't try other wordings or pick from memory. A description can fit several works, such as a film and the series it came from, so first establish which one the library holds: unless a search has already shown it, search albums for the work's name alone, X rather than the whole description. Then search the web, with a tool for searching if you have one, using that album's title and release year in the query — 'Transformers 2007 score theme' rather than 'Transformers theme' — to find the piece's title, and search for that title here. If no album turns up, search the web without one. If the title the web gives isn't in the library, search the web once more for the version the library holds rather than choosing from memory.";
 
+    // Lists and passing mentions pull a reply towards title and artist alone, and the
+    // neighbours sit in fields of their own, so they are named outright. Shared by the queue
+    // and history results so the wording can't drift between them.
+    private const string NameTheAlbum =
+        "When you name any track in this result — precededBy, followedBy and the one playing now included — give its album as well as its title and artist.";
+
     private const string NoAlbumMatchHint =
         "No album title matched. " + TryTrackSearch + " " + DescriptionToWeb + " Otherwise check the spelling, or resolve the exact title externally.";
 
@@ -1362,8 +1368,7 @@ public class MusicSearchService(
 
             // A result left in the conversation gets reread to answer later questions, so it
             // carries its own expiry.
-            coverage += " It changes as tracks finish and others add or remove, so for any later question, call this again rather than answering from this result."
-                + " When you name any of these tracks, or the one playing now, give its album as well as its title and artist.";
+            coverage += " It changes as tracks finish and others add or remove, so for any later question, call this again rather than answering from this result.";
 
             hint = hint == null ? coverage : hint + " " + coverage;
         }
@@ -1389,6 +1394,13 @@ public class MusicSearchService(
                       + ". Say what plays next as well as what is playing, so the answer is still true when it arrives.");
 
             hint = hint == null ? soon : hint + " " + soon;
+        }
+
+        // Every result that names a track, not only those with upcoming entries: when the answer
+        // is the track playing now, upcoming is empty.
+        if (upcoming.Count > 0 || nowPlaying != null)
+        {
+            hint = JoinHints(hint, NameTheAlbum);
         }
 
         return new QueueView(now, nowPlaying, upcoming, timeline.Count, at, hint, precededBy, followedBy);
@@ -1639,6 +1651,11 @@ public class MusicSearchService(
         // The earlier play can't be playing now — the flagged one is later — and it answers
         // "when before that", not a question about a moment, so neither flag applies.
         HistoryEntry earlierPlay = earlierRow == null ? null : ToEntry(earlierRow, false, false, false);
+
+        if (entries.Count > 0 || nowPlaying != null)
+        {
+            hint = JoinHints(hint, NameTheAlbum);
+        }
 
         return new HistoryView(now, nowPlaying, entries, at, hint, precededBy, followedBy, earlierPlay);
 
