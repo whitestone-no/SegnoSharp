@@ -1265,8 +1265,8 @@ public class MusicSearchService(
                 // Gone is not the same as removed: a track queued a while ago may simply have
                 // played. Say both, so the caller doesn't assert the wrong one.
                 hint = single
-                    ? "That track isn't in the queue. It has either been removed or already played; the history shows which. Don't queue it again unless the listener asks you to."
-                    : "None of those tracks are in the queue. They have either been removed or already played; the history shows which. Don't queue them again unless the listener asks you to.";
+                    ? "That track isn't in the queue. It has either been removed or already played; the history shows which. Don't queue it again unless the listener asks you to; if you offer to, ask the listener, with a tool for asking if you have one."
+                    : "None of those tracks are in the queue. They have either been removed or already played; the history shows which. Don't queue them again unless the listener asks you to; if you offer to, ask the listener, with a tool for asking if you have one.";
             }
         }
         else if (at is { } point)
@@ -2125,11 +2125,10 @@ public class MusicSearchService(
 
         // When the rules kept everything out, say so in the hint as well as per track: the
         // tempting next move is to queue something else in its place.
-        string hint = JoinHints(
-            BuildQueueHint(firstAddedPosition, queueLength, playNow, added.Count)
-                ?? (added.Count == 0 && ruleSkips > 0
-                    ? "Nothing was added: the stream's repeat rules keep these tracks out for now. Tell the listener so, rather than queueing something else in their place."
-                    : null));
+        string hint = BuildQueueHint(firstAddedPosition, queueLength, playNow, added.Count)
+            ?? (added.Count == 0 && ruleSkips > 0
+                ? "Nothing was added: the stream's repeat rules keep these tracks out for now. Tell the listener so, rather than queueing something else in their place."
+                : null);
 
         return new QueueAddResult(added, skipped, queueLength, hint, firstAddedPosition);
     }
