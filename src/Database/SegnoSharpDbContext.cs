@@ -84,8 +84,8 @@ namespace Whitestone.SegnoSharp.Database
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 3, Type = PersonGroupType.Album, Name = "Composer", SortOrder = 2 });
             modelBuilder.Entity<PersonGroup>().HasData(new PersonGroup { Id = 4, Type = PersonGroupType.Track, Name = "Composer", SortOrder = 2 });
 
-            modelBuilder.Entity<PersonGroupStreamInfo>().HasData(new PersonGroupStreamInfo { Id = 1, IncludeInAutoPlaylist = true, PersonGroupId = 1 });
-            modelBuilder.Entity<PersonGroupStreamInfo>().HasData(new PersonGroupStreamInfo { Id = 2, IncludeInAutoPlaylist = true, PersonGroupId = 2 });
+            modelBuilder.Entity<PersonGroupStreamInfo>().HasData(new PersonGroupStreamInfo { Id = 1, IsArtistCredit = true, PersonGroupId = 1 });
+            modelBuilder.Entity<PersonGroupStreamInfo>().HasData(new PersonGroupStreamInfo { Id = 2, IsArtistCredit = true, PersonGroupId = 2 });
 
             modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 1, Name = "CD", SortOrder = 1 });
             modelBuilder.Entity<MediaType>().HasData(new MediaType { Id = 2, Name = "DVD-Audio", SortOrder = 2 });

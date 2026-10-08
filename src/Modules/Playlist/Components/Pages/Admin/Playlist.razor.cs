@@ -73,7 +73,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                                 // Search in track artists
                                 (tsi.Track.TrackPersonGroupPersonRelations.Any(r =>
                                     r.PersonGroup.PersonGroupStreamInfo != null &&
-                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit &&
                                     r.Persons.Any(p =>
                                         EF.Functions.Like(p.FirstName, "%" + SearchModel.SearchTerm + "%") ||
                                         EF.Functions.Like(p.LastName, "%" + SearchModel.SearchTerm + "%")
@@ -82,7 +82,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                                 // Search in album artists
                                 (tsi.Track.Disc.Album.AlbumPersonGroupPersonRelations.Any(r =>
                                     r.PersonGroup.PersonGroupStreamInfo != null &&
-                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit &&
                                     r.Persons.Any(p =>
                                         EF.Functions.Like(p.FirstName, "%" + SearchModel.SearchTerm + "%") ||
                                         EF.Functions.Like(p.LastName, "%" + SearchModel.SearchTerm + "%")
@@ -126,7 +126,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                                 // Search in track artists
                                 (tsi.Track.TrackPersonGroupPersonRelations.Any(r =>
                                     r.PersonGroup.PersonGroupStreamInfo != null &&
-                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit &&
                                     r.Persons.Any(p =>
                                         EF.Functions.Like(p.FirstName, "%" + SearchModel.SearchTerm + "%") ||
                                         EF.Functions.Like(p.LastName, "%" + SearchModel.SearchTerm + "%")
@@ -135,7 +135,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                                 // Search in album artists
                                 (tsi.Track.Disc.Album.AlbumPersonGroupPersonRelations.Any(r =>
                                     r.PersonGroup.PersonGroupStreamInfo != null &&
-                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist &&
+                                    r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit &&
                                     r.Persons.Any(p =>
                                         EF.Functions.Like(p.FirstName, "%" + SearchModel.SearchTerm + "%") ||
                                         EF.Functions.Like(p.LastName, "%" + SearchModel.SearchTerm + "%")
@@ -157,7 +157,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                         tsi.Track.TrackPersonGroupPersonRelations
                             .Where(r =>
                                 r.PersonGroup.PersonGroupStreamInfo != null &&
-                                r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit)
                             .SelectMany(r =>
                                 r.Persons.Select(p =>
                                     p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName))),
@@ -165,7 +165,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                         tsi.Track.Disc.Album.AlbumPersonGroupPersonRelations
                             .Where(r =>
                                 r.PersonGroup.PersonGroupStreamInfo != null &&
-                                r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit)
                             .SelectMany(r =>
                                 r.Persons.Select(p =>
                                     p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName)))
@@ -195,7 +195,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                             q.TrackStreamInfo.Track.TrackPersonGroupPersonRelations
                                 .Where(r =>
                                     r.PersonGroup.PersonGroupStreamInfo != null &&
-                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                    r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit)
                                 .SelectMany(r =>
                                     r.Persons.Select(p =>
                                         p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName))),
@@ -203,7 +203,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist.Components.Pages.Admin
                             q.TrackStreamInfo.Track.Disc.Album.AlbumPersonGroupPersonRelations
                                 .Where(r =>
                                     r.PersonGroup.PersonGroupStreamInfo != null &&
-                                    r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                    r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit)
                                 .SelectMany(r =>
                                     r.Persons.Select(p =>
                                         p.FirstName == null ? p.LastName : p.FirstName + " " + p.LastName)))

@@ -113,14 +113,14 @@ namespace Whitestone.SegnoSharp.Modules.MainPlaylistProcessor
                 {
                     HasTrackArtists = tsi.Track.TrackPersonGroupPersonRelations.Any(r => 
                         r.PersonGroup.PersonGroupStreamInfo != null &&
-                        r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist),
+                        r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit),
                     TrackArtistIds = tsi.Track.TrackPersonGroupPersonRelations
                         .Where(r => r.PersonGroup.PersonGroupStreamInfo != null &&
-                                   r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                   r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit)
                         .SelectMany(r => r.Persons.Select(p => p.Id)),
                     AlbumArtistIds = tsi.Track.Disc.Album.AlbumPersonGroupPersonRelations
                         .Where(r => r.PersonGroup.PersonGroupStreamInfo != null &&
-                                   r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                                   r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit)
                         .SelectMany(r => r.Persons.Select(p => p.Id))
                 })
                 .ToListAsync(cancellationToken);
@@ -138,10 +138,10 @@ namespace Whitestone.SegnoSharp.Modules.MainPlaylistProcessor
                     !trackExclusions.Contains(tsi.TrackId) &&
                     !albumExclusions.Contains(tsi.Track.Disc.AlbumId) &&
                     !tsi.Track.TrackPersonGroupPersonRelations.Any(r =>
-                        r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist &&
+                        r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit &&
                         r.Persons.Any(p => excludedArtistIds.Contains(p.Id))) &&
                     (tsi.Track.TrackPersonGroupPersonRelations.Any() || !tsi.Track.Disc.Album.AlbumPersonGroupPersonRelations.Any(r =>
-                            r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist &&
+                            r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit &&
                             r.Persons.Any(p => excludedArtistIds.Contains(p.Id))))
                 )
                 .Select(tsi => new { tsi.TrackId, tsi.Weight })

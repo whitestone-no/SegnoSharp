@@ -118,7 +118,7 @@ public class MusicSearchService(
     // neighbours sit in fields of their own, so they are named outright. Shared by the queue
     // and history results so the wording can't drift between them.
     private const string NameTheAlbum =
-        "When you name any track in this result — precededBy, followedBy and the one playing now included — give its album as well as its title and artist.";
+        "When you name any track in this result — precededBy, followedBy and the one playing now included — give its album as well as its title and its artist: the people in its credits marked isArtistCredit, the track's own if it has any, otherwise the album's.";
 
     private const string NoAlbumMatchHint =
         "No album title matched. " + TryTrackSearch + " " + DescriptionToWeb + " Otherwise check the spelling, or resolve the exact title externally.";
@@ -464,7 +464,7 @@ public class MusicSearchService(
             {
                 List<CreditDto> credits = a.Credits
                     .Where(c => c.Persons.Count > 0)
-                    .Select(c => new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditLevel.Album))
+                    .Select(c => new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditLevel.Album, c.IsArtistCredit))
                     .ToList();
 
                 return new AlbumResult(
@@ -757,7 +757,7 @@ public class MusicSearchService(
 
         return string.Format(
             CultureInfo.InvariantCulture,
-            "\"{0}\" is on {1} albums: {2}, with {3} credited on all of them. If these are one piece, say which album you used and name the others. If they may be different pieces, ask the listener which is meant when playing, with a tool for asking if you have one, and answer for each when asked about one. When unsure, treat them as different.",
+            "\"{0}\" is on {1} albums: {2}, with {3} credited as artist on all of them. If these are one piece, say which album you used and name the others. If they may be different pieces, ask the listener which is meant when playing, with a tool for asking if you have one, and answer for each when asked about one. When unsure, treat them as different.",
             title,
             perAlbum.Count,
             albums,
@@ -792,7 +792,7 @@ public class MusicSearchService(
 
         return common is { Count: > 0 }
             ? null
-            : "These tracks have nobody credited in common, so they may be different songs that share a title. One lookup returns only the most recent play of any of them: look each song up separately, and answer for each.";
+            : "These tracks have no artist in common, so they may be different songs that share a title. One lookup returns only the most recent play of any of them: look each song up separately, and answer for each.";
     }
 
     /// <summary>
@@ -804,7 +804,14 @@ public class MusicSearchService(
     /// </summary>
     private static IEnumerable<string> MostSpecificPeople(IReadOnlyList<CreditDto> trackCredits)
     {
-        IReadOnlyList<CreditDto> credits = trackCredits ?? [];
+        // Only the people a track is by: an orchestra performing on many scores would
+        // otherwise make unrelated pieces look like they share a creator. The level rule below
+        // is the playlist page's too: a track's own artists, or its album's when it has none. A track with no
+        // artist credits at all, as before any role is marked, falls back to every credit.
+        IReadOnlyList<CreditDto> all = trackCredits ?? [];
+        IReadOnlyList<CreditDto> credits = all.Any(c => c.IsArtistCredit)
+            ? all.Where(c => c.IsArtistCredit).ToList()
+            : all;
         List<CreditDto> own = credits.Where(c => c.AppliesTo == CreditLevel.Track).ToList();
 
         return (own.Count > 0 ? own : credits.Where(c => c.AppliesTo == CreditLevel.Album))
@@ -954,6 +961,7 @@ public class MusicSearchService(
                 Credits = t.TrackPersonGroupPersonRelations.Select(r => new CreditRow
                 {
                     Role = r.PersonGroup.Name,
+                    IsArtistCredit = r.PersonGroup.PersonGroupStreamInfo != null && r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit,
                     Persons = r.Persons.Select(p => new PersonRow
                     {
                         First = p.FirstName,
@@ -1949,7 +1957,7 @@ public class MusicSearchService(
     private static List<CreditDto> ToCredits(IEnumerable<CreditRow> rows, CreditLevel appliesTo) =>
         rows
             .Where(c => c.Persons.Count > 0)
-            .Select(c => new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), appliesTo))
+            .Select(c => new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), appliesTo, c.IsArtistCredit))
             .ToList();
 
     private static List<CreditDto> BuildCredits(TrackRow r)
@@ -1958,12 +1966,12 @@ public class MusicSearchService(
 
         foreach (CreditRow c in r.TrackCredits)
         {
-            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditLevel.Track));
+            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditLevel.Track, c.IsArtistCredit));
         }
 
         foreach (CreditRow c in r.AlbumCredits)
         {
-            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditLevel.Album));
+            credits.Add(new CreditDto(c.Role, c.Persons.Select(FormatName).ToList(), CreditLevel.Album, c.IsArtistCredit));
         }
 
         return credits;
@@ -2152,7 +2160,7 @@ public class MusicSearchService(
         // and artist alone: say the album is part of it.
         if (added.Count > 0)
         {
-            hint = JoinHints(hint, "Name what you added by its title, album and artist.");
+            hint = JoinHints(hint, "Name what you added by its title, album and artist, the artist being the people in its credits marked isArtistCredit, the track's own if it has any, otherwise the album's.");
         }
 
         return new QueueAddResult(added, skipped, queueLength, hint, firstAddedPosition);
@@ -2243,6 +2251,7 @@ public class MusicSearchService(
         Credits = a.AlbumPersonGroupPersonRelations.Select(r => new CreditRow
         {
             Role = r.PersonGroup.Name,
+            IsArtistCredit = r.PersonGroup.PersonGroupStreamInfo != null && r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit,
             Persons = r.Persons.Select(p => new PersonRow
             {
                 First = p.FirstName,
@@ -2267,6 +2276,7 @@ public class MusicSearchService(
         TrackCredits = t.TrackPersonGroupPersonRelations.Select(r => new CreditRow
         {
             Role = r.PersonGroup.Name,
+            IsArtistCredit = r.PersonGroup.PersonGroupStreamInfo != null && r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit,
             Persons = r.Persons.Select(p => new PersonRow
             {
                 First = p.FirstName,
@@ -2277,6 +2287,7 @@ public class MusicSearchService(
         AlbumCredits = t.Disc.Album.AlbumPersonGroupPersonRelations.Select(r => new CreditRow
         {
             Role = r.PersonGroup.Name,
+            IsArtistCredit = r.PersonGroup.PersonGroupStreamInfo != null && r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit,
             Persons = r.Persons.Select(p => new PersonRow
             {
                 First = p.FirstName,

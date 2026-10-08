@@ -297,7 +297,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                         var artists = string.Empty;
 
                         string[] trackPeople = queuetrack.TrackStreamInfo.Track.TrackPersonGroupPersonRelations
-                            .Where(g => g.PersonGroup.PersonGroupStreamInfo is { IncludeInAutoPlaylist: true })
+                            .Where(g => g.PersonGroup.PersonGroupStreamInfo is { IsArtistCredit: true })
                             .SelectMany(g => g.Persons)
                             .Distinct()
                             .Select(p => (p.FirstName + " " + p.LastName).Trim())
@@ -310,7 +310,7 @@ namespace Whitestone.SegnoSharp.Modules.Playlist
                         else
                         {
                             string[] albumPeople = queuetrack.TrackStreamInfo.Track.Disc.Album.AlbumPersonGroupPersonRelations
-                                .Where(g => g.PersonGroup.PersonGroupStreamInfo is { IncludeInAutoPlaylist: true })
+                                .Where(g => g.PersonGroup.PersonGroupStreamInfo is { IsArtistCredit: true })
                                 .SelectMany(g => g.Persons)
                                 .Distinct()
                                 .Select(p => (p.FirstName + " " + p.LastName).Trim())

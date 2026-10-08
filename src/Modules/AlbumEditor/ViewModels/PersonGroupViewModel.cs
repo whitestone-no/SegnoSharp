@@ -14,7 +14,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.ViewModels
 
         public bool IncludeInAutoPlaylist
         {
-            get => PersonGroupStreamInfo is { IncludeInAutoPlaylist: true };
+            get => PersonGroupStreamInfo is { IsArtistCredit: true };
             set
             {
                 if (PersonGroupStreamInfo == null)
@@ -26,7 +26,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.ViewModels
                     _dbContext.PersonGroupsStreamInfos.Add(PersonGroupStreamInfo);
                 }
 
-                PersonGroupStreamInfo.IncludeInAutoPlaylist = value;
+                PersonGroupStreamInfo.IsArtistCredit = value;
             }
         }
     }

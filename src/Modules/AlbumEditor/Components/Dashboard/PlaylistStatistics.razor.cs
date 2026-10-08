@@ -39,14 +39,14 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.Components.Dashboard
                     .SelectMany(tsi => tsi.Track.TrackPersonGroupPersonRelations
                         .Where(r =>
                             r.PersonGroup.PersonGroupStreamInfo != null &&
-                            r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                            r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit)
                         .SelectMany(r => r.Persons.Select(p => p.Id)));
 
                 IQueryable<int> albumArtistIdsQuery = baseQuery
                     .SelectMany(tsi => tsi.Track.Disc.Album.AlbumPersonGroupPersonRelations
                         .Where(r =>
                             r.PersonGroup.PersonGroupStreamInfo != null &&
-                            r.PersonGroup.PersonGroupStreamInfo.IncludeInAutoPlaylist)
+                            r.PersonGroup.PersonGroupStreamInfo.IsArtistCredit)
                         .SelectMany(r => r.Persons.Select(p => p.Id)));
                 
                 int albumsResult = await baseQuery
