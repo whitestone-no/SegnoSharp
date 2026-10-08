@@ -40,8 +40,8 @@
                     </div>
                     <input type="text" class="grid-span-7" @bind="@group.Name" />
                     <div class="grid-span-3 text-center">
-                        <input type="checkbox" @bind="@group.IncludeInAutoPlaylist" title="Include in auto playlist" />
-                        <label>Auto playlist</label>
+                        <input type="checkbox" @bind="@group.IsArtistCredit" title="Is artist credit" />
+                        <label>Is artist credit</label>
                     </div>
                     <div class="grid-span-1 text-center">
                         <button class="tertiary" @onclick="() => RemoveGroup(group)"><span class="fa-regular fa-circle-xmark"></span></button>
@@ -71,8 +71,8 @@
                     </div>
                     <input type="text" class="grid-span-7" @bind="@group.Name" />
                     <div class="grid-span-3 text-center">
-                        <input type="checkbox" @bind="@group.IncludeInAutoPlaylist" title="Include in auto playlist" />
-                        <label>Auto playlist</label>
+                        <input type="checkbox" @bind="@group.IsArtistCredit" title="Is artist credit" />
+                        <label>Is artist credit</label>
                     </div>
                     <div class="grid-span-1 text-center">
                         <button class="tertiary" @onclick="() => RemoveGroup(group)"><span class="fa-regular fa-circle-xmark"></span></button>

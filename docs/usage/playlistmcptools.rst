@@ -1,3 +1,6 @@
+
+.. _refUsagePlaylistMcpTools:
+
 ######
 Playlist MCP Tools
 ######

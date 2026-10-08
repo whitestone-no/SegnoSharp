@@ -12,7 +12,7 @@ namespace Whitestone.SegnoSharp.Modules.AlbumEditor.ViewModels
             _dbContext = dbContext;
         }
 
-        public bool IncludeInAutoPlaylist
+        public bool IsArtistCredit
         {
             get => PersonGroupStreamInfo is { IsArtistCredit: true };
             set

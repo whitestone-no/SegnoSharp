@@ -238,8 +238,8 @@ Create a new group by clicking the ``Add`` button in the correct section.
 
 Delete a group by clicking the ``(X)`` button to the right of the name.
 
-``Include in auto playlist`` is used by the :ref:`playlist module <refUsagePlaylist>` to determine
-if this credit group is eligible for inclusion in the automatically generated playlist.
+``Is artist credit`` The :ref:`playlist module <refUsagePlaylist>` uses this for the automatic playlist and its rule against repeating an artist too soon;
+the :ref:`agent tools <refUsagePlaylistMcpTools>` use them to tell whether two tracks with the same title are by the same artist.
 
 .. _refAlbumEditorMediaTypes:
 
