@@ -11,5 +11,5 @@ public sealed class CorePermissions
     public const string PlaylistAdmin = "core:playlist:admin";
     public const string SecurityEdit = "core:security:edit";
     public const string StreamAdmin = "core:stream:admin";
-    public const string DebugView = "core:debug:view";
+    public const string System = "core:system";
 }

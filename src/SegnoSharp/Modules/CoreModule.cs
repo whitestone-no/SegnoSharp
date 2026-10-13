@@ -31,6 +31,6 @@ public class CoreModule : IPermissionProvider
         new() { Name = CorePermissions.PlaylistRulesIgnore, DisplayName = "Ignore playlist rules", Description = "Ignore the playlist rules when editing the playlist." },
         new() { Name = CorePermissions.SecurityEdit, DisplayName = "Edit security settings", Description = "Edit roles, permissions, and API keys, in security settings.", AllowForApiClients = false},
         new() { Name = CorePermissions.StreamAdmin, DisplayName = "Administer streaming settings", Description = "Administer the settings for Icecast/Shoutcast stream."},
-        new() { Name = CorePermissions.DebugView, DisplayName = "Debugging", Description = "View various debug and system information."}
+        new() { Name = CorePermissions.System, DisplayName = "System", Description = "View various system information."}
     ];
 }

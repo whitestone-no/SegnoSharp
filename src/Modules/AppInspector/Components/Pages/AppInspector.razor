@@ -1,14 +1,15 @@
 ﻿@page "/admin/appinspector"
 @using System.Collections
-@using Microsoft.AspNetCore.Authorization
 @using System.Runtime.InteropServices
 @using System.Reflection
 @using Microsoft.Extensions.Primitives
 @using Whitestone.SegnoSharp.Database
 @using Whitestone.SegnoSharp.Shared.Attributes
 @using Whitestone.SegnoSharp.Modules.AppInspector.ViewModels
+@using Whitestone.SegnoSharp.Shared.Attributes.Security
 @using Whitestone.SegnoSharp.Shared.Interfaces
-@attribute [Authorize]
+@using Whitestone.SegnoSharp.Shared.Permissions
+@attribute [RequirePermission(CorePermissions.System)]
 @attribute [ModuleMenu("AppInspector", 200, "fa-code", true)]
 
 <div class="header-container">
